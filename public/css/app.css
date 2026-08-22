@@ -332,3 +332,152 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
     border: 1px solid var(--gris-300); border-radius: var(--rayon); box-shadow: var(--ombre); }
 .login__title { font-size: 1.5rem; }
 .login__subtitle { margin: .2rem 0 1.25rem; color: var(--gris-700); }
+
+/* =========================================================================
+   Addendum v2 / v3 — episodes, cloture, caisse, audit, planning
+   ========================================================================= */
+
+/* ---------- Barre de marque ---------- */
+
+.app-header__brand { display: flex; align-items: center; gap: .6rem; }
+.app-header__logo { flex: 0 0 auto; }
+.app-header__hospital {
+    width: 100%; text-align: right; font-size: .85rem; opacity: .85;
+}
+
+@media (min-width: 700px) {
+    .app-header__hospital { width: auto; text-align: right; }
+}
+
+/* ---------- Page de connexion ---------- */
+
+.login-screen {
+    min-height: 100vh; margin: 0;
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+    background-color: var(--bleu-fonce);
+}
+
+.login-screen__inner {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+}
+
+.login-screen .login { margin: 0; width: 100%; max-width: 420px; }
+.login__brand { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; color: var(--bleu-fonce); }
+.login__logo { flex: 0 0 auto; }
+.login__product { margin: 0; font-weight: 700; font-size: 1.1rem; }
+
+/* ---------- Indications et alertes ---------- */
+
+.hint { margin: .25rem 0 .75rem; font-size: .9rem; color: var(--gris-700); }
+.hint--blocking { color: var(--ambre); font-weight: 600; }
+
+.alert--warning { background: var(--ambre-clair); border-color: var(--ambre); color: var(--ambre); margin: .75rem 0; }
+
+.card--accent { border-left: 6px solid var(--bleu); }
+
+/* ---------- Boutons de cloture ---------- */
+
+.btn--close { background: var(--vert); color: var(--blanc); }
+
+/* ---------- Recherche de dossier existant ---------- */
+
+.lookup { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+
+.lookup__item {
+    display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between;
+    padding: .7rem; border: 1px solid var(--gris-300); border-radius: var(--rayon);
+}
+
+.lookup__identity { display: flex; flex-direction: column; font-size: .9rem; color: var(--gris-700); }
+.lookup__identity strong { font-size: 1.05rem; color: var(--gris-900); }
+
+.lookup__confirm { margin-top: 1rem; padding: 1rem; background: var(--bleu-clair); border-radius: var(--rayon); }
+
+/* ---------- Accompagnateurs ---------- */
+
+.companions-fieldset { border: 1px solid var(--gris-300); border-radius: var(--rayon); padding: .85rem; }
+.companions-fieldset legend { font-weight: 600; padding: 0 .4rem; }
+.companions-fieldset__row { align-items: flex-end; margin-bottom: .6rem; }
+
+.companions { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-direction: column; gap: .3rem; }
+.companions li { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; font-size: .95rem; }
+.companions .mono { color: var(--gris-500); }
+
+/* ---------- Episodes ---------- */
+
+.episode { margin-bottom: 1.25rem; border: 1px solid var(--gris-300); border-radius: var(--rayon); padding: .75rem; }
+
+.episode__head {
+    display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+    margin-bottom: .6rem; padding-bottom: .5rem; border-bottom: 1px solid var(--gris-300);
+}
+
+.episode__service { font-weight: 700; }
+.episode__head time { margin-left: auto; color: var(--gris-500); font-size: .9rem; }
+
+.badge--closed { background: var(--gris-100); color: var(--gris-700); }
+.badge--scheduled { background: var(--bleu-clair); color: var(--bleu-fonce); }
+.badge--checked_in { background: var(--vert-clair); color: var(--vert); }
+.badge--no_show { background: var(--ambre-clair); color: var(--ambre); }
+.badge--cancelled { background: var(--rouge-clair); color: var(--rouge); }
+.badge--paid { background: var(--vert-clair); color: var(--vert); }
+.badge--pending { background: var(--ambre-clair); color: var(--ambre); }
+
+.timeline__item--referral_closed::before { background: var(--bleu-fonce); }
+.timeline__item--dossier_closed::before { background: var(--gris-700); }
+.timeline__item--prescription::before { background: var(--bleu); }
+
+/* ---------- Pieces jointes ---------- */
+
+.attachments { list-style: none; margin: .5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+
+.attachments__link {
+    display: inline-flex; align-items: center; gap: .4rem;
+    min-height: 40px; padding: .3rem .7rem;
+    background: var(--bleu-clair); color: var(--bleu-fonce);
+    border-radius: var(--rayon); text-decoration: none; font-size: .9rem; font-weight: 600;
+}
+
+.attachments__size { font-weight: 400; opacity: .8; }
+
+/* ---------- Mes patients ---------- */
+
+.my-patients { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+
+.my-patients__item { padding: .7rem; border: 1px solid var(--gris-300); border-radius: var(--rayon); }
+
+.my-patients__identity {
+    display: flex; flex-wrap: wrap; gap: .6rem; align-items: baseline;
+    min-height: var(--touch); padding: .2rem 0;
+    background: none; border: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; width: 100%;
+}
+
+.my-patients__identity .mono { color: var(--gris-500); font-size: .9rem; }
+
+.my-patients__visits { list-style: none; margin: .4rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .25rem; }
+.my-patients__visits li { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; font-size: .9rem; color: var(--gris-700); }
+
+/* ---------- Onglets internes ---------- */
+
+.tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin: .75rem 0; border-bottom: 2px solid var(--gris-300); }
+
+.tabs__tab {
+    min-height: var(--touch); padding: .5rem 1rem;
+    background: none; border: 0; border-bottom: 3px solid transparent;
+    font: inherit; font-weight: 600; color: var(--gris-700); cursor: pointer;
+}
+
+.tabs__tab--active { color: var(--bleu-fonce); border-bottom-color: var(--bleu); }
+
+/* ---------- Caisse ---------- */
+
+.cash-total { font-size: .95rem; color: var(--gris-700); }
+.cash-total strong { color: var(--vert); }
+
+.payments { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+.payments li { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; padding: .35rem 0; border-bottom: 1px solid var(--gris-300); }
+.payments time { margin-left: auto; color: var(--gris-500); font-size: .9rem; }
+
+/* ---------- Planning ---------- */
+
+.schedule--today { background: var(--bleu-clair); }

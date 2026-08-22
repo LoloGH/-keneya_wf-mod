@@ -119,8 +119,9 @@ class AdminInterfaceTest extends TestCase
     public function test_l_admin_ouvre_le_dossier_de_n_importe_quel_patient(): void
     {
         $service = Service::factory()->create();
-        $patient = Patient::factory()->for($service)->create(['name' => 'Sekou Diarra']);
-        Patient::factory()->for(Service::factory()->create())->create(['name' => 'Autre Patient']);
+        $patient = Patient::factory()->create(['name' => 'Sekou Diarra']);
+        $this->makeVisit($service, [], $patient);
+        $this->makeVisit(Service::factory()->create(), [], Patient::factory()->create(['name' => 'Autre Patient']));
 
         Livewire::actingAs($this->makeAdmin())
             ->test(PatientDirectory::class)

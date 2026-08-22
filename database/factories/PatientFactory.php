@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Patient;
-use App\Models\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,9 +22,6 @@ class PatientFactory extends Factory
             'gender' => $this->faker->randomElement(['Homme', 'Femme']),
             'mobile' => '76'.$this->faker->numerify('######'),
             'crno' => null,
-            'service_id' => Service::factory(),
-            'token' => $this->faker->numberBetween(1, 50),
-            'status' => Patient::STATUS_WAITING,
         ];
     }
 }

@@ -6,10 +6,10 @@ use App\Actions\CompleteReferral;
 use App\Actions\RegisterPatient;
 use App\Actions\SendReferral;
 use App\Models\Doctor;
-use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Referral;
 use App\Models\Service;
+use App\Models\Visit;
 use App\Services\SmsGateway;
 use ArrayObject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,7 +36,7 @@ class ReferralFlowTest extends TestCase
         $prescriber = $this->makeDoctor($medecineGenerale, '76000001');
         $radiologue = $this->makeDoctor($echographie);
 
-        $patient = app(RegisterPatient::class)->execute([
+        $visit = app(RegisterPatient::class)->execute([
             'name' => 'Sekou Diarra',
             'age' => 41,
             'gender' => 'Homme',
@@ -44,29 +44,33 @@ class ReferralFlowTest extends TestCase
             'service_id' => $medecineGenerale->getKey(),
         ]);
 
-        // Un patient deja en file dans le service destinataire, pour verifier
+        $patient = $visit->patient;
+
+        // Un passage deja en file dans le service destinataire, pour verifier
         // que le nouveau ticket suit bien la file d'Echographie.
-        Patient::factory()->for($echographie)->create(['token' => 7]);
+        $this->makeVisit($echographie, ['token' => 7]);
 
         $referral = app(SendReferral::class)->execute(
-            patient: $patient,
+            visit: $visit,
             fromDoctor: $prescriber,
             toService: $echographie,
             instructions: 'Echographie abdominale a jeun.',
         );
 
-        $patient->refresh();
+        $visit->refresh();
 
         $this->assertSame(Referral::STATUS_PENDING, $referral->status);
         $this->assertSame($medecineGenerale->getKey(), $referral->from_service_id);
         $this->assertSame($echographie->getKey(), $referral->to_service_id);
         $this->assertSame($prescriber->getKey(), $referral->from_doctor_id);
 
-        // Le dossier suit le patient : meme id, nouveau service, nouveau ticket.
-        $this->assertSame($echographie->getKey(), $patient->service_id);
-        $this->assertSame(8, $patient->token);
-        $this->assertSame(Patient::STATUS_WAITING, $patient->status);
-        $this->assertSame(1, Patient::where('patient_code', $patient->patient_code)->count());
+        // C'est la visite qui se deplace : meme episode, nouveau service,
+        // nouveau ticket, et toujours un seul dossier.
+        $this->assertSame($echographie->getKey(), $visit->service_id);
+        $this->assertSame(8, $visit->token);
+        $this->assertSame(Visit::STATUS_WAITING, $visit->status);
+        $this->assertSame($visit->getKey(), $referral->visit_id);
+        $this->assertSame(1, $visit->patient->visits()->count());
 
         $this->assertDatabaseHas('patient_history', [
             'patient_id' => $patient->getKey(),
@@ -112,7 +116,7 @@ class ReferralFlowTest extends TestCase
         $source = Service::factory()->create();
         $echographie = Service::factory()->plateauTechnique()->create(['name' => 'Echographie']);
 
-        $patient = app(RegisterPatient::class)->execute([
+        $visit = app(RegisterPatient::class)->execute([
             'name' => 'Sekou Diarra',
             'age' => 41,
             'gender' => 'Homme',
@@ -121,7 +125,7 @@ class ReferralFlowTest extends TestCase
         ]);
 
         app(SendReferral::class)->execute(
-            patient: $patient,
+            visit: $visit,
             fromDoctor: $this->makeDoctor($source),
             toService: $echographie,
             instructions: 'Echographie abdominale.',
@@ -169,12 +173,12 @@ class ReferralFlowTest extends TestCase
         $this->mockSms()->shouldReceive('send')->andReturnTrue();
 
         $service = Service::factory()->create();
-        $patient = Patient::factory()->for($service)->create();
+        $visit = $this->makeVisit($service);
 
         $this->expectException(InvalidArgumentException::class);
 
         app(SendReferral::class)->execute(
-            patient: $patient,
+            visit: $visit,
             fromDoctor: $this->makeDoctor($service),
             toService: $service,
             instructions: 'Instructions.',
@@ -234,10 +238,10 @@ class ReferralFlowTest extends TestCase
         $source = Service::factory()->create();
         $destination = Service::factory()->plateauTechnique()->create();
 
-        $patient = Patient::factory()->for($source)->create();
+        $visit = $this->makeVisit($source);
 
         $referral = app(SendReferral::class)->execute(
-            patient: $patient,
+            visit: $visit,
             fromDoctor: $this->makeDoctor($source, $prescriberPhone),
             toService: $destination,
             instructions: 'Analyse demandee.',

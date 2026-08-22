@@ -5,13 +5,14 @@ namespace App\Livewire\Admin;
 use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Service;
+use App\Models\Visit;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
  * Vue globale des patients : l'admin peut ouvrir n'importe quel dossier, sans
- * quitter l'interface /admin.
+ * quitter l'interface /admin. Les passages sont regroupes par visite.
  */
 class PatientDirectory extends Component
 {
@@ -48,19 +49,22 @@ class PatientDirectory extends Component
         $search = trim($this->search);
 
         $patients = Patient::query()
-            ->with('service')
+            ->with(['latestVisit.service'])
             ->when($search !== '', fn ($query) => $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('patient_code', 'like', "%{$search}%")
                     ->orWhere('crno', 'like', "%{$search}%")
                     ->orWhere('mobile', 'like', "%{$search}%");
             }))
-            ->when($this->serviceFilter, fn ($query) => $query->where('service_id', $this->serviceFilter))
+            ->when($this->serviceFilter, fn ($query) => $query->whereHas(
+                'visits',
+                fn ($q) => $q->where('service_id', $this->serviceFilter),
+            ))
             ->orderByDesc('id')
             ->paginate(15);
 
         $openPatient = $this->openPatientId
-            ? Patient::with('service')->find($this->openPatientId)
+            ? Patient::with(['visits.service', 'companions'])->find($this->openPatientId)
             : null;
 
         $history = $openPatient
@@ -70,11 +74,19 @@ class PatientDirectory extends Component
                 ->get()
             : collect();
 
+        $episodes = $openPatient
+            ? $openPatient->visits->sortByDesc('opened_at')->values()->map(fn (Visit $visit) => [
+                'visit' => $visit,
+                'entries' => $history->where('visit_id', $visit->getKey())->values(),
+            ])
+            : collect();
+
         return view('livewire.admin.patient-directory', [
             'patients' => $patients,
             'services' => Service::orderBy('name')->get(),
             'openPatient' => $openPatient,
-            'history' => $history,
+            'episodes' => $episodes,
+            'orphans' => $history->whereNull('visit_id')->values(),
         ]);
     }
 }

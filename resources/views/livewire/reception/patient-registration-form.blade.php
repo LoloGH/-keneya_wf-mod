@@ -1,5 +1,6 @@
 <section class="card">
     <h2 class="card__title">Enregistrer un patient</h2>
+    <p class="hint">Uniquement pour un patient qui n'est jamais venu — un nouveau dossier sera cree.</p>
 
     <form wire:submit="save" class="form">
         <div class="field">
@@ -47,6 +48,43 @@
             </select>
             @error('service_id') <p class="field__error">{{ $message }}</p> @enderror
         </div>
+
+        <div class="field">
+            <label for="patient-reason">Motif <span class="field__hint">(facultatif)</span></label>
+            <input id="patient-reason" type="text" wire:model="reason">
+            @error('reason') <p class="field__error">{{ $message }}</p> @enderror
+        </div>
+
+        {{-- Accompagnateurs : information non medicale, sans ticket propre. --}}
+        <fieldset class="companions-fieldset">
+            <legend>Accompagnateurs <span class="field__hint">(facultatif)</span></legend>
+
+            @foreach ($companions as $index => $companion)
+                <div class="field-row companions-fieldset__row" wire:key="companion-{{ $index }}">
+                    <div class="field">
+                        <label for="companion-name-{{ $index }}">Nom</label>
+                        <input id="companion-name-{{ $index }}" type="text" wire:model="companions.{{ $index }}.name">
+                        @error("companions.$index.name") <p class="field__error">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="field">
+                        <label for="companion-relation-{{ $index }}">Lien</label>
+                        <input id="companion-relation-{{ $index }}" type="text"
+                               wire:model="companions.{{ $index }}.relation" placeholder="epoux, mere…">
+                    </div>
+                    <div class="field">
+                        <label for="companion-phone-{{ $index }}">Telephone</label>
+                        <input id="companion-phone-{{ $index }}" type="tel" wire:model="companions.{{ $index }}.phone">
+                    </div>
+                    <button type="button" class="btn btn--ghost" wire:click="removeCompanion({{ $index }})">Retirer</button>
+                </div>
+            @endforeach
+
+            @if (count($companions) < 5)
+                <button type="button" class="btn btn--secondary" wire:click="addCompanion">
+                    Ajouter un accompagnateur
+                </button>
+            @endif
+        </fieldset>
 
         <button type="submit" class="btn btn--primary btn--block" wire:loading.attr="disabled">
             <span wire:loading.remove wire:target="save">Enregistrer le patient</span>

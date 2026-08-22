@@ -10,7 +10,7 @@
             @foreach ($pending as $referral)
                 <li class="referrals__item">
                     <button type="button" class="referrals__patient"
-                            wire:click="showHistory({{ $referral->patient_id }})">
+                            wire:click="showRecord({{ $referral->patient_id }})">
                         <strong>{{ $referral->patient->name }}</strong>
                         <span class="mono">{{ $referral->patient->patient_code }}</span>
                     </button>
@@ -24,16 +24,17 @@
         </ul>
     @endif
 
+    {{-- Une fois clos, un renvoi quitte ce panneau mais reste dans l'historique. --}}
     <h3 class="card__subtitle">Resultats recus ({{ $results->count() }})</h3>
 
     @if ($results->isEmpty())
-        <p class="empty">Aucun resultat recu.</p>
+        <p class="empty">Aucun resultat en attente de lecture.</p>
     @else
         <ul class="referrals">
             @foreach ($results as $referral)
                 <li class="referrals__item referrals__item--done">
                     <button type="button" class="referrals__patient"
-                            wire:click="showHistory({{ $referral->patient_id }})">
+                            wire:click="showRecord({{ $referral->patient_id }})">
                         <strong>{{ $referral->patient->name }}</strong>
                         <span class="mono">{{ $referral->patient->patient_code }}</span>
                     </button>
@@ -47,6 +48,24 @@
                         @endif
                     </p>
                     <p class="referrals__result">{{ $referral->result_text }}</p>
+
+                    @if ($referral->attachments->isNotEmpty())
+                        <ul class="attachments">
+                            @foreach ($referral->attachments as $attachment)
+                                <li>
+                                    <a href="{{ route('service.attachment', $attachment) }}" class="attachments__link">
+                                        {{ $attachment->original_name }}
+                                        <span class="attachments__size">{{ $attachment->humanSize() }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+
+                    <button type="button" class="btn btn--close"
+                            wire:click="closeReferral({{ $referral->id }})">
+                        Terminer
+                    </button>
                 </li>
             @endforeach
         </ul>

@@ -3,22 +3,23 @@
 namespace App\Actions;
 
 use App\Models\Doctor;
-use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Referral;
 use App\Models\Service;
+use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
+use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 /**
  * Renvoi d'un patient vers un autre service.
  *
- * Le patient_id ne change jamais : c'est le meme dossier qui traverse les
- * services, il n'est jamais duplique. Seul son service courant et son ticket
- * changent.
+ * C'est la visite qui se deplace : un episode unique traverse les services,
+ * change de service_id et recoit un nouveau ticket. Ni le patient_id ni le
+ * patient_code ne changent, et l'episode ne se cloture qu'une fois, a la fin.
  */
 class SendReferral
 {
@@ -28,17 +29,22 @@ class SendReferral
         private readonly SmsGateway $sms,
     ) {}
 
-    public function execute(Patient $patient, Doctor $fromDoctor, Service $toService, string $instructions): Referral
+    public function execute(Visit $visit, Doctor $fromDoctor, Service $toService, string $instructions): Referral
     {
-        $fromService = $patient->service()->firstOrFail();
+        if ($visit->isClosed()) {
+            throw new InvalidArgumentException('Ce dossier est cloture : il ne peut plus etre renvoye vers un autre service.');
+        }
+
+        $fromService = $visit->service()->firstOrFail();
 
         if ($toService->is($fromService)) {
             throw new InvalidArgumentException('Le service destinataire doit etre different du service actuel du patient.');
         }
 
-        $referral = DB::transaction(function () use ($patient, $fromDoctor, $fromService, $toService, $instructions): Referral {
+        $referral = DB::transaction(function () use ($visit, $fromDoctor, $fromService, $toService, $instructions): Referral {
             $referral = Referral::create([
-                'patient_id' => $patient->getKey(),
+                'patient_id' => $visit->patient_id,
+                'visit_id' => $visit->getKey(),
                 'from_service_id' => $fromService->getKey(),
                 'to_service_id' => $toService->getKey(),
                 'from_doctor_id' => $fromDoctor->getKey(),
@@ -46,14 +52,14 @@ class SendReferral
                 'status' => Referral::STATUS_PENDING,
             ]);
 
-            $patient->update([
+            $visit->update([
                 'service_id' => $toService->getKey(),
                 'token' => $this->tokens->next($toService),
-                'status' => Patient::STATUS_WAITING,
+                'status' => Visit::STATUS_WAITING,
             ]);
 
             $this->history->record(
-                patient: $patient,
+                visit: $visit,
                 type: PatientHistory::TYPE_REFERRAL_SENT,
                 description: sprintf(
                     'Renvoye de %s vers %s par %s. Instructions : %s',
@@ -70,11 +76,19 @@ class SendReferral
             return $referral;
         });
 
+        Audit::log(
+            Audit::EVENT_REFERRAL_SENT,
+            sprintf('Renvoi de %s vers %s.', $fromService->name, $toService->name),
+            $referral,
+        );
+
+        $patient = $visit->patient()->firstOrFail();
+
         $this->sms->send($patient->mobile, sprintf(
             '%s : vous etes oriente(e) vers le service %s, ticket n° %d. Dossier %s.',
             config('keneya.name'),
             $toService->name,
-            $patient->fresh()->token,
+            $visit->fresh()->token,
             $patient->patient_code,
         ));
 

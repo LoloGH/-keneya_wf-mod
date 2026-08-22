@@ -79,4 +79,49 @@ class RoleScopeTest extends TestCase
         // /board est un affichage public, pas une interface de role.
         $this->get('/board')->assertOk();
     }
+
+    /**
+     * Contrainte centrale de l'addendum v2 : aucune des nouvelles
+     * fonctionnalites ne cree de route accessible par plusieurs roles.
+     */
+    public function test_les_routes_de_l_addendum_restent_cloisonnees(): void
+    {
+        $receptionist = $this->makeReceptionist();
+        $doctor = $this->makeDoctor(Service::factory()->create());
+        $admin = $this->makeAdmin();
+
+        $serviceRoutes = ['/service/pieces-jointes/1', '/service/ordonnances/1/pdf'];
+        $adminRoutes = ['/admin/pieces-jointes/1'];
+
+        // La receptionniste n'atteint aucune des deux familles de routes.
+        foreach (array_merge($serviceRoutes, $adminRoutes) as $url) {
+            $this->actingAs($receptionist)->get($url)->assertRedirect(route('reception.home'));
+        }
+
+        // Le medecin est refoule des routes admin, et l'admin des routes service.
+        foreach ($adminRoutes as $url) {
+            $this->actingAs($doctor->user)->get($url)->assertRedirect(route('service.home'));
+        }
+
+        foreach ($serviceRoutes as $url) {
+            $this->actingAs($admin)->get($url)->assertRedirect(route('admin.home'));
+        }
+    }
+
+    /**
+     * Le nombre de routes est volontairement verrouille : chacune appartient a
+     * un seul role, et aucune n'expose de tableau de bord commun.
+     */
+    public function test_aucune_route_generique_n_a_ete_introduite(): void
+    {
+        $shared = collect(app('router')->getRoutes())
+            ->filter(function ($route) {
+                $middleware = collect($route->gatherMiddleware());
+
+                return $middleware->filter(fn ($m) => is_string($m) && str_starts_with($m, 'role.scope:'))
+                    ->count() > 1;
+            });
+
+        $this->assertCount(0, $shared, 'Aucune route ne doit etre ouverte a plusieurs roles.');
+    }
 }

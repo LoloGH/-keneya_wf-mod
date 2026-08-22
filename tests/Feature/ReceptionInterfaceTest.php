@@ -9,6 +9,7 @@ use App\Livewire\Reception\VisitorRegistrationForm;
 use App\Livewire\Service\ServiceQueue;
 use App\Models\Patient;
 use App\Models\Service;
+use App\Models\Visit;
 use App\Models\Visitor;
 use App\Services\SmsGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,6 +35,7 @@ class ReceptionInterfaceTest extends TestCase
             ->assertHasErrors(['name', 'age', 'mobile', 'service_id']);
 
         $this->assertSame(0, Patient::count());
+        $this->assertSame(0, Visit::count());
     }
 
     public function test_les_tickets_se_suivent_dans_la_file_de_chaque_service(): void
@@ -53,11 +55,11 @@ class ReceptionInterfaceTest extends TestCase
                 ->assertHasNoErrors();
         }
 
-        $this->assertSame([1, 2], Patient::where('service_id', $urgences->getKey())->orderBy('token')->pluck('token')->all());
-        $this->assertSame([1], Patient::where('service_id', $maternite->getKey())->pluck('token')->all());
+        $this->assertSame([1, 2], Visit::where('service_id', $urgences->getKey())->orderBy('token')->pluck('token')->all());
+        $this->assertSame([1], Visit::where('service_id', $maternite->getKey())->pluck('token')->all());
     }
 
-    public function test_le_formulaire_visiteur_cree_une_fiche_sans_ticket(): void
+    public function test_le_formulaire_visiteur_cree_une_fiche_avec_ticket(): void
     {
         $service = Service::factory()->create();
 
@@ -72,13 +74,44 @@ class ReceptionInterfaceTest extends TestCase
 
         $this->assertSame(1, Visitor::count());
         $this->assertSame(0, Patient::count());
+
+        // Le visiteur tire dans la meme sequence que les patients du service.
+        $this->assertSame(1, Visitor::first()->token);
+    }
+
+    public function test_patients_et_visiteurs_ne_recoivent_jamais_le_meme_numero(): void
+    {
+        $service = Service::factory()->create();
+        $receptionist = $this->makeReceptionist();
+
+        Livewire::actingAs($receptionist)
+            ->test(PatientRegistrationForm::class)
+            ->set('name', 'Patient A')->set('age', 30)->set('gender', 'Homme')
+            ->set('mobile', '76000000')->set('service_id', $service->getKey())
+            ->call('save')->assertHasNoErrors();
+
+        Livewire::actingAs($receptionist)
+            ->test(VisitorRegistrationForm::class)
+            ->set('name', 'Visiteur B')->set('service_id', $service->getKey())
+            ->call('save')->assertHasNoErrors();
+
+        Livewire::actingAs($receptionist)
+            ->test(PatientRegistrationForm::class)
+            ->set('name', 'Patient C')->set('age', 40)->set('gender', 'Femme')
+            ->set('mobile', '76000001')->set('service_id', $service->getKey())
+            ->call('save')->assertHasNoErrors();
+
+        $tokens = Visit::pluck('token')->concat(Visitor::pluck('token'))->sort()->values();
+
+        $this->assertSame([1, 2, 3], $tokens->all());
+        $this->assertCount(3, $tokens->unique());
     }
 
     public function test_la_liste_du_jour_filtre_sur_la_recherche(): void
     {
         $service = Service::factory()->create();
-        Patient::factory()->for($service)->create(['name' => 'Aissata Toure']);
-        Patient::factory()->for($service)->create(['name' => 'Boubacar Sangare']);
+        $this->makeVisit($service, [], Patient::factory()->create(['name' => 'Aissata Toure']));
+        $this->makeVisit($service, [], Patient::factory()->create(['name' => 'Boubacar Sangare']));
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(TodayVisits::class)
@@ -98,7 +131,11 @@ class ReceptionInterfaceTest extends TestCase
     {
         $service = Service::factory()->create();
 
-        $veille = Patient::factory()->for($service)->create(['token' => 9, 'name' => 'Patient de la veille']);
+        $veille = $this->makeVisit(
+            $service,
+            ['token' => 9],
+            Patient::factory()->create(['name' => 'Patient de la veille']),
+        );
         $veille->forceFill(['updated_at' => now()->subDay()])->saveQuietly();
 
         Livewire::actingAs($this->makeReceptionist())
@@ -112,12 +149,12 @@ class ReceptionInterfaceTest extends TestCase
             ->assertHasNoErrors();
 
         // Le ticket repart a 1 et la file du jour ne contient que le nouveau venu.
-        $dujour = Patient::where('name', 'Patient du jour')->firstOrFail();
+        $dujour = Visit::whereRelation('patient', 'name', 'Patient du jour')->firstOrFail();
         $this->assertSame(1, $dujour->token);
 
         $this->assertSame(
             [$dujour->getKey()],
-            Patient::query()->inTodaysQueue($service->getKey())->pluck('id')->all(),
+            Visit::query()->inTodaysQueue($service->getKey())->pluck('id')->all(),
         );
 
         // La file affichee au medecin suit la meme regle.
@@ -130,8 +167,8 @@ class ReceptionInterfaceTest extends TestCase
     public function test_l_ecran_de_salle_d_attente_montre_le_ticket_en_cours(): void
     {
         $service = Service::factory()->create(['name' => 'Urgences']);
-        Patient::factory()->for($service)->create(['token' => 12, 'status' => Patient::STATUS_CALLED]);
-        Patient::factory()->for($service)->create(['token' => 13]);
+        $this->makeVisit($service, ['token' => 12, 'status' => Visit::STATUS_CALLED]);
+        $this->makeVisit($service, ['token' => 13]);
 
         // Accessible sans authentification : c'est un affichage public.
         Livewire::test(WaitingBoard::class)

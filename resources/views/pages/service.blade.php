@@ -20,12 +20,18 @@
         @if (session('service.status'))
             <div class="alert alert--success" role="status">{{ session('service.status') }}</div>
         @endif
+        @if (session('service.error'))
+            <div class="alert alert--error" role="alert">{{ session('service.error') }}</div>
+        @endif
 
         <div class="grid grid--main">
             <div class="stack">
                 @livewire('service.service-queue', ['serviceId' => $serviceId])
                 @livewire('service.incoming-referrals', ['serviceId' => $serviceId])
                 @livewire('service.outgoing-referrals', ['serviceId' => $serviceId])
+                @livewire('service.consultation-actions', ['serviceId' => $serviceId])
+                @livewire('service.my-patients')
+                @livewire('shared.my-schedule')
             </div>
 
             {{-- Le dossier patient s'ouvre ici meme, jamais sur une autre page. --}}

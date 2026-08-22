@@ -3,9 +3,11 @@
 namespace Tests;
 
 use App\Models\Doctor;
+use App\Models\Patient;
 use App\Models\Receptionist;
 use App\Models\Service;
 use App\Models\User;
+use App\Models\Visit;
 use App\Support\Roles;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Spatie\Permission\Models\Role;
@@ -45,6 +47,17 @@ abstract class TestCase extends BaseTestCase
             'service_id' => $service->getKey(),
             'phone' => $phone,
         ]);
+    }
+
+    /**
+     * Ouvre un passage pour un patient (nouveau par defaut) dans un service.
+     */
+    protected function makeVisit(Service $service, array $attributes = [], ?Patient $patient = null): Visit
+    {
+        return Visit::factory()->create(array_merge([
+            'patient_id' => ($patient ?? Patient::factory()->create())->getKey(),
+            'service_id' => $service->getKey(),
+        ], $attributes));
     }
 
     private function makeUserWithRole(string $role): User

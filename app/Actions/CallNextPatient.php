@@ -3,15 +3,18 @@
 namespace App\Actions;
 
 use App\Models\Doctor;
-use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Service;
+use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Appel du patient suivant dans la file d'un service.
+ *
+ * Une visite cloturee est sortie de la file : « Appeler le suivant » ne la
+ * proposera plus, meme si son dossier reste consultable.
  */
 class CallNextPatient
 {
@@ -20,46 +23,47 @@ class CallNextPatient
         private readonly SmsGateway $sms,
     ) {}
 
-    public function execute(Service $service, Doctor $doctor): ?Patient
+    public function execute(Service $service, Doctor $doctor): ?Visit
     {
-        $patient = DB::transaction(function () use ($service, $doctor): ?Patient {
-            $patient = Patient::query()
-                ->where('service_id', $service->getKey())
-                ->where('status', Patient::STATUS_WAITING)
+        $visit = DB::transaction(function () use ($service, $doctor): ?Visit {
+            $visit = Visit::query()
+                ->with('patient')
+                ->inTodaysQueue($service->getKey())
+                ->where('status', Visit::STATUS_WAITING)
                 ->orderBy('token')
                 ->first();
 
-            if (! $patient) {
+            if (! $visit) {
                 return null;
             }
 
-            $patient->update(['status' => Patient::STATUS_CALLED]);
+            $visit->update(['status' => Visit::STATUS_CALLED]);
 
             $this->history->record(
-                patient: $patient,
+                visit: $visit,
                 type: PatientHistory::TYPE_CONSULTATION,
                 description: sprintf(
                     'Appele en consultation au service %s par %s (ticket n° %d).',
                     $service->name,
                     $doctor->name(),
-                    $patient->token,
+                    $visit->token,
                 ),
                 serviceId: $service->getKey(),
                 doctor: $doctor,
             );
 
-            return $patient;
+            return $visit;
         });
 
-        if ($patient) {
-            $this->sms->send($patient->mobile, sprintf(
+        if ($visit) {
+            $this->sms->send($visit->patient->mobile, sprintf(
                 '%s : c\'est votre tour au service %s (ticket n° %d). Merci de vous presenter.',
                 config('keneya.name'),
                 $service->name,
-                $patient->token,
+                $visit->token,
             ));
         }
 
-        return $patient;
+        return $visit;
     }
 }

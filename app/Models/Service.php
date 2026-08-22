@@ -31,9 +31,9 @@ class Service extends Model
         return $this->hasMany(Doctor::class);
     }
 
-    public function patients(): HasMany
+    public function visits(): HasMany
     {
-        return $this->hasMany(Patient::class);
+        return $this->hasMany(Visit::class);
     }
 
     public function visitors(): HasMany

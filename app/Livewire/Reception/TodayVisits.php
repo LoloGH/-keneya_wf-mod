@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Reception;
 
-use App\Models\Patient;
+use App\Models\Visit;
 use App\Models\Visitor;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
@@ -26,10 +26,10 @@ class TodayVisits extends Component
     {
         $search = trim($this->search);
 
-        $patients = Patient::query()
-            ->with('service')
-            ->whereDate('created_at', today())
-            ->when($search !== '', fn ($query) => $query->where(function ($q) use ($search) {
+        $visits = Visit::query()
+            ->with(['patient', 'service'])
+            ->whereDate('opened_at', today())
+            ->when($search !== '', fn ($query) => $query->whereHas('patient', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('patient_code', 'like', "%{$search}%")
                     ->orWhere('mobile', 'like', "%{$search}%");
@@ -48,7 +48,7 @@ class TodayVisits extends Component
             ->get();
 
         return view('livewire.reception.today-visits', [
-            'patients' => $patients,
+            'visits' => $visits,
             'visitors' => $visitors,
         ]);
     }

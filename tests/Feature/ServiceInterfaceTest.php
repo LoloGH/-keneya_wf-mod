@@ -7,11 +7,11 @@ use App\Livewire\Service\IncomingReferrals;
 use App\Livewire\Service\PatientRecordPanel;
 use App\Livewire\Service\ServiceQueue;
 use App\Models\Doctor;
-use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Referral;
 use App\Models\Service;
 use App\Models\User;
+use App\Models\Visit;
 use App\Services\SmsGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -36,19 +36,19 @@ class ServiceInterfaceTest extends TestCase
         $service = Service::factory()->create();
         $doctor = $this->makeDoctor($service);
 
-        $premier = Patient::factory()->for($service)->create(['token' => 1]);
-        $second = Patient::factory()->for($service)->create(['token' => 2]);
+        $premier = $this->makeVisit($service, ['token' => 1]);
+        $second = $this->makeVisit($service, ['token' => 2]);
 
         Livewire::actingAs($doctor->user)
             ->test(ServiceQueue::class, ['serviceId' => $service->getKey()])
             ->call('callNext')
             ->assertHasNoErrors();
 
-        $this->assertSame(Patient::STATUS_CALLED, $premier->refresh()->status);
-        $this->assertSame(Patient::STATUS_WAITING, $second->refresh()->status);
+        $this->assertSame(Visit::STATUS_CALLED, $premier->refresh()->status);
+        $this->assertSame(Visit::STATUS_WAITING, $second->refresh()->status);
 
         $this->assertDatabaseHas('patient_history', [
-            'patient_id' => $premier->getKey(),
+            'visit_id' => $premier->getKey(),
             'type' => PatientHistory::TYPE_CONSULTATION,
         ]);
     }
@@ -58,19 +58,19 @@ class ServiceInterfaceTest extends TestCase
         $source = Service::factory()->create();
         $destination = Service::factory()->plateauTechnique()->create();
         $doctor = $this->makeDoctor($source);
-        $patient = Patient::factory()->for($source)->create(['token' => 3]);
+        $visit = $this->makeVisit($source, ['token' => 3]);
 
         Livewire::actingAs($doctor->user)
             ->test(ServiceQueue::class, ['serviceId' => $source->getKey()])
-            ->call('startReferral', $patient->getKey())
+            ->call('startReferral', $visit->getKey())
             ->set('toServiceId', $destination->getKey())
             ->set('instructions', 'Numeration formule sanguine.')
             ->call('sendReferral')
             ->assertHasNoErrors();
 
-        $this->assertSame($destination->getKey(), $patient->refresh()->service_id);
+        $this->assertSame($destination->getKey(), $visit->refresh()->service_id);
         $this->assertDatabaseHas('referrals', [
-            'patient_id' => $patient->getKey(),
+            'visit_id' => $visit->getKey(),
             'to_service_id' => $destination->getKey(),
             'status' => Referral::STATUS_PENDING,
         ]);
@@ -80,11 +80,11 @@ class ServiceInterfaceTest extends TestCase
     {
         $service = Service::factory()->create();
         $doctor = $this->makeDoctor($service);
-        $patient = Patient::factory()->for($service)->create();
+        $visit = $this->makeVisit($service);
 
         Livewire::actingAs($doctor->user)
             ->test(ServiceQueue::class, ['serviceId' => $service->getKey()])
-            ->call('startReferral', $patient->getKey())
+            ->call('startReferral', $visit->getKey())
             ->set('toServiceId', $service->getKey())
             ->set('instructions', 'Instructions valides.')
             ->call('sendReferral')
@@ -97,10 +97,10 @@ class ServiceInterfaceTest extends TestCase
         $destination = Service::factory()->plateauTechnique()->create();
         $prescriber = $this->makeDoctor($source, '76000009');
         $technicien = $this->makeDoctor($destination);
-        $patient = Patient::factory()->for($source)->create();
+        $visit = $this->makeVisit($source);
 
         $referral = app(SendReferral::class)->execute(
-            patient: $patient,
+            visit: $visit,
             fromDoctor: $prescriber,
             toService: $destination,
             instructions: 'Radiographie du thorax.',
@@ -134,12 +134,13 @@ class ServiceInterfaceTest extends TestCase
     {
         $service = Service::factory()->create();
         $doctor = $this->makeDoctor($service);
-        $patient = Patient::factory()->for($service)->create();
+        $visit = $this->makeVisit($service);
+        $patient = $visit->patient;
 
         // La file demande l'ouverture du dossier...
         Livewire::actingAs($doctor->user)
             ->test(ServiceQueue::class, ['serviceId' => $service->getKey()])
-            ->call('showHistory', $patient->getKey())
+            ->call('showRecord', $patient->getKey())
             ->assertDispatched('afficher-dossier');
 
         // ...et le panneau lateral l'affiche, sans changer de page.

@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Receptionist;
 use App\Models\User;
+use App\Support\Audit;
 use App\Support\Roles;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,9 @@ class ReceptionistManager extends Component
 
             $user->syncRoles([Roles::RECEPTIONIST]);
 
-            Receptionist::create(['user_id' => $user->getKey()]);
+            $receptionist = Receptionist::create(['user_id' => $user->getKey()]);
+
+            Audit::log(Audit::EVENT_RECEPTIONIST_CREATED, sprintf('Receptionniste %s creee.', $user->name), $receptionist);
         });
 
         session()->flash('admin.status', $this->editingId ? 'Receptionniste mise a jour.' : 'Receptionniste creee.');

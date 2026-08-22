@@ -30,6 +30,15 @@ return [
 
     'disks' => [
 
+        'attachments' => [
+            'driver' => 'local',
+            'root' => storage_path('app/attachments'),
+            'serve' => false,
+            'throw' => false,
+            // Volume Docker `keneya_storage` : les pieces jointes survivent a
+            // un redeploiement de l'image `app`.
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
