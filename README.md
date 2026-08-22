@@ -24,8 +24,9 @@ patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kay
 9. [Identité, passages et flux de renvoi](#9-identité-passages-et-flux-de-renvoi)
 10. [Pièces jointes, caisse, ordonnances et rendez-vous](#10-pièces-jointes-caisse-ordonnances-et-rendez-vous)
 11. [Journal d'audit et plannings](#11-journal-daudit-et-plannings)
-12. [Tests](#12-tests)
-13. [Organisation du code](#13-organisation-du-code)
+12. [Vérification d'un déploiement](#12-vérification-dun-déploiement)
+13. [Tests](#13-tests)
+14. [Organisation du code](#14-organisation-du-code)
 
 ---
 
@@ -142,6 +143,26 @@ Sous Windows, les mêmes commandes fonctionnent telles quelles dans PowerShell.
 Prérequis communs : PHP 8.3 avec les extensions `pdo_mysql`, `mbstring`,
 `intl`, `zip`, `bcmath`, `openssl`, `fileinfo` ; Composer 2 ; MySQL 8 ou
 MariaDB 10.6+.
+
+> **Plafonds d'envoi à ajuster.** Un PHP fraîchement installé plafonne les
+> envois à 2 Mo, alors que les pièces jointes sont acceptées jusqu'à 10 Mo :
+> sans ce réglage, un dépôt de fichier échoue sans message clair. Dans le
+> `php.ini` du serveur, et dans la configuration du serveur web :
+>
+> ```ini
+> upload_max_filesize = 12M
+> post_max_size = 16M
+> ```
+>
+> ```nginx
+> client_max_body_size 16M;   # Nginx
+> ```
+>
+> Sous IIS, relever `maxAllowedContentLength` ; sous Apache,
+> `LimitRequestBody`. La règle est la même partout : serveur web ≥
+> `post_max_size` ≥ `upload_max_filesize` > plafond applicatif (10 Mo,
+> `App\Models\Attachment::MAX_SIZE_KB`). L'image Docker applique déjà ces
+> valeurs.
 
 ### Linux — Nginx + PHP-FPM
 
@@ -528,7 +549,25 @@ d'un autre.
   l'établissement à droite, lu depuis la table `settings`** et modifiable par
   l'admin sans redéploiement. Aucun lien de navigation croisée n'y figure.
 
-## 12. Tests
+## 12. Vérification d'un déploiement
+
+Avant de remplacer une version en service, un script enchaîne les contrôles et
+rend un verdict :
+
+```bash
+./scripts/verify-deploy.sh                      # ou : ./scripts/verify-deploy.sh https://demo.exemple.ml
+```
+
+Il vérifie, dans cet ordre : la pile est démarrée, les migrations passent dans
+les deux sens contre le moteur réel, `patients` ne porte plus de colonnes de
+passage et aucune visite n'est orpheline, la suite de tests est au vert, une
+réceptionniste connectée est bien redirigée depuis `/admin`, `/service` et les
+routes de téléchargement, et les plafonds d'envoi sont ordonnés correctement.
+
+Il sort en code 1 dès qu'un contrôle est rouge — utilisable tel quel dans une
+procédure de mise à jour.
+
+## 13. Tests
 
 ```bash
 php artisan test                          # sans Docker
@@ -555,7 +594,7 @@ docker compose exec app php artisan test  # avec Docker
 
 Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS.
 
-## 13. Organisation du code
+## 14. Organisation du code
 
 Aucune logique métier ne vit dans les vues Blade ou Livewire : les composants
 valident puis délèguent à une action ou à un service.
