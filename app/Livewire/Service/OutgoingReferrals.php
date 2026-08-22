@@ -2,17 +2,22 @@
 
 namespace App\Livewire\Service;
 
+use App\Actions\CloseReferral;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
 use App\Models\Referral;
 use Illuminate\Contracts\View\View;
+use InvalidArgumentException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
- * Panneau « Renvois envoyes / Resultats recus » du medecin prescripteur.
+ * Panneau « Mes renvois » du medecin prescripteur.
  *
- * Rafraichi par wire:poll : pas de WebSocket dans cette phase, le resultat
- * apparait au prochain cycle de polling.
+ * « Resultats recus » ne montre que les renvois dont le resultat est arrive et
+ * que le prescripteur n'a pas encore clotures : une fois la boucle fermee, le
+ * renvoi disparait de ce panneau mais reste dans l'historique du patient.
+ *
+ * Rafraichi par wire:poll — pas de WebSocket dans cette phase.
  */
 class OutgoingReferrals extends Component
 {
@@ -24,7 +29,31 @@ class OutgoingReferrals extends Component
         $this->onServiceChanged($serviceId);
     }
 
-    public function showHistory(int $patientId): void
+    #[On('file-mise-a-jour')]
+    public function refreshPanel(): void
+    {
+        // Un nouveau rendu suffit.
+    }
+
+    public function closeReferral(int $referralId, CloseReferral $action): void
+    {
+        $doctor = $this->currentDoctor();
+
+        $referral = Referral::where('from_doctor_id', $doctor->getKey())->findOrFail($referralId);
+
+        try {
+            $action->execute($referral, $doctor);
+        } catch (InvalidArgumentException $e) {
+            session()->flash('service.error', $e->getMessage());
+
+            return;
+        }
+
+        session()->flash('service.status', 'Renvoi cloture.');
+        $this->dispatch('file-mise-a-jour');
+    }
+
+    public function showRecord(int $patientId): void
     {
         $this->dispatch('afficher-dossier', patientId: $patientId);
     }
@@ -32,7 +61,7 @@ class OutgoingReferrals extends Component
     public function render(): View
     {
         $base = Referral::query()
-            ->with(['patient', 'toService', 'completedByDoctor.user'])
+            ->with(['patient', 'toService', 'completedByDoctor.user', 'attachments'])
             ->where('from_doctor_id', $this->currentDoctor()->getKey());
 
         return view('livewire.service.outgoing-referrals', [
@@ -43,7 +72,6 @@ class OutgoingReferrals extends Component
             'results' => (clone $base)
                 ->where('status', Referral::STATUS_DONE)
                 ->orderByDesc('completed_at')
-                ->limit(20)
                 ->get(),
         ]);
     }

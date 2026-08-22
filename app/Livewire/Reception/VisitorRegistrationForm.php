@@ -55,6 +55,7 @@ class VisitorRegistrationForm extends Component
             'visitor_code' => $visitor->visitor_code,
             'name' => $visitor->name,
             'service' => $visitor->service->name,
+            'token' => $visitor->token,
         ];
 
         $this->reset(['name', 'mobile', 'reason']);

@@ -7,6 +7,13 @@ use App\Models\Service;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
+/**
+ * Enregistrement d'un patient inconnu : cree son identite permanente et son
+ * premier passage.
+ *
+ * Pour un patient deja venu, c'est PatientLookup qu'il faut utiliser — cet
+ * ecran cree toujours un nouveau `patient_code`.
+ */
 class PatientRegistrationForm extends Component
 {
     public string $name = '';
@@ -21,7 +28,17 @@ class PatientRegistrationForm extends Component
 
     public ?int $service_id = null;
 
-    /** Dernier patient enregistre, affiche a la receptionniste pour lecture du code. */
+    public string $reason = '';
+
+    /**
+     * Accompagnateurs saisis avec le patient. Facultatif : un patient peut en
+     * avoir zero, un ou plusieurs.
+     *
+     * @var array<int, array{name: string, phone: string, relation: string}>
+     */
+    public array $companions = [];
+
+    /** Dernier passage ouvert, affiche pour lecture du code et du ticket. */
     public ?array $lastRegistered = null;
 
     /**
@@ -36,6 +53,11 @@ class PatientRegistrationForm extends Component
             'mobile' => ['required', 'string', 'max:30'],
             'crno' => ['nullable', 'string', 'max:20'],
             'service_id' => ['required', 'integer', 'exists:services,id'],
+            'reason' => ['nullable', 'string', 'max:500'],
+            'companions' => ['array', 'max:5'],
+            'companions.*.name' => ['nullable', 'string', 'max:255'],
+            'companions.*.phone' => ['nullable', 'string', 'max:30'],
+            'companions.*.relation' => ['nullable', 'string', 'max:60'],
         ];
     }
 
@@ -51,33 +73,49 @@ class PatientRegistrationForm extends Component
             'mobile' => 'telephone',
             'crno' => 'numero de dossier papier',
             'service_id' => 'service',
+            'reason' => 'motif',
         ];
+    }
+
+    public function addCompanion(): void
+    {
+        if (count($this->companions) >= 5) {
+            return;
+        }
+
+        $this->companions[] = ['name' => '', 'phone' => '', 'relation' => ''];
+    }
+
+    public function removeCompanion(int $index): void
+    {
+        unset($this->companions[$index]);
+        $this->companions = array_values($this->companions);
     }
 
     public function save(RegisterPatient $register): void
     {
         $data = $this->validate();
 
-        $patient = $register->execute($data);
+        $visit = $register->execute($data, $data['companions'] ?? []);
 
         $this->lastRegistered = [
-            'patient_code' => $patient->patient_code,
-            'name' => $patient->name,
-            'service' => $patient->service->name,
-            'token' => $patient->token,
+            'patient_code' => $visit->patient->patient_code,
+            'name' => $visit->patient->name,
+            'service' => $visit->service->name,
+            'token' => $visit->token,
         ];
 
-        $this->reset(['name', 'age', 'mobile', 'crno']);
+        $this->reset(['name', 'age', 'mobile', 'crno', 'reason', 'companions']);
         $this->gender = 'Homme';
 
         $this->dispatch('patient-enregistre');
 
         session()->flash('reception.success', sprintf(
             'Patient %s enregistre — dossier %s, ticket n° %d au service %s.',
-            $patient->name,
-            $patient->patient_code,
-            $patient->token,
-            $patient->service->name,
+            $visit->patient->name,
+            $visit->patient->patient_code,
+            $visit->token,
+            $visit->service->name,
         ));
     }
 

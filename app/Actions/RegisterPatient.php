@@ -2,17 +2,22 @@
 
 namespace App\Actions;
 
+use App\Models\Companion;
 use App\Models\Patient;
 use App\Models\PatientHistory;
+use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
+use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Enregistrement d'un patient a l'accueil : cree le dossier, lui attribue un
- * ticket dans la file du service demande, ouvre son historique et l'informe
- * par SMS.
+ * Premiere venue d'un patient : cree son identite permanente, ouvre son
+ * premier passage et l'informe par SMS.
+ *
+ * Pour un patient deja connu qui revient, c'est OpenNewEpisode qui prend le
+ * relais : on ne cree jamais deux identites pour la meme personne.
  */
 class RegisterPatient
 {
@@ -23,46 +28,72 @@ class RegisterPatient
     ) {}
 
     /**
-     * @param  array{name: string, age: int, gender: string, mobile: string, crno?: ?string, service_id: int}  $data
+     * @param  array{name: string, age: int, gender: string, mobile: string, crno?: ?string, service_id: int, reason?: ?string}  $data
+     * @param  array<int, array{name: string, phone?: ?string, relation?: ?string}>  $companions
      */
-    public function execute(array $data): Patient
+    public function execute(array $data, array $companions = []): Visit
     {
-        $patient = DB::transaction(function () use ($data): Patient {
+        $visit = DB::transaction(function () use ($data, $companions): Visit {
             $patient = Patient::create([
                 'name' => $data['name'],
                 'age' => $data['age'],
                 'gender' => $data['gender'],
                 'mobile' => $data['mobile'],
                 'crno' => $data['crno'] ?? null,
-                'service_id' => $data['service_id'],
-                'token' => $this->tokens->next($data['service_id']),
-                'status' => Patient::STATUS_WAITING,
             ]);
 
-            $patient->load('service');
+            foreach ($companions as $companion) {
+                if (blank($companion['name'] ?? null)) {
+                    continue;
+                }
+
+                Companion::create([
+                    'patient_id' => $patient->getKey(),
+                    'name' => $companion['name'],
+                    'phone' => $companion['phone'] ?? null,
+                    'relation' => $companion['relation'] ?? null,
+                ]);
+            }
+
+            $visit = Visit::create([
+                'patient_id' => $patient->getKey(),
+                'service_id' => $data['service_id'],
+                'token' => $this->tokens->next($data['service_id']),
+                'status' => Visit::STATUS_WAITING,
+                'opened_at' => now(),
+            ]);
+
+            $visit->load(['service', 'patient']);
 
             $this->history->record(
-                patient: $patient,
+                visit: $visit,
                 type: PatientHistory::TYPE_REGISTRATION,
-                description: sprintf(
-                    'Enregistrement a l\'accueil, oriente vers %s (ticket n° %d).',
-                    $patient->service->name,
-                    $patient->token,
-                ),
+                description: trim(sprintf(
+                    'Enregistrement a l\'accueil, oriente vers %s (ticket n° %d).%s',
+                    $visit->service->name,
+                    $visit->token,
+                    filled($data['reason'] ?? null) ? ' Motif : '.$data['reason'] : '',
+                )),
             );
 
-            return $patient;
+            return $visit;
         });
 
-        $this->sms->send($patient->mobile, sprintf(
+        Audit::log(
+            Audit::EVENT_PATIENT_CREATED,
+            sprintf('Patient %s (%s) enregistre au service %s.', $visit->patient->name, $visit->patient->patient_code, $visit->service->name),
+            $visit->patient,
+        );
+
+        $this->sms->send($visit->patient->mobile, sprintf(
             '%s : bonjour %s. Votre dossier est le %s. Vous etes attendu(e) au service %s, ticket n° %d.',
             config('keneya.name'),
-            $patient->name,
-            $patient->patient_code,
-            $patient->service->name,
-            $patient->token,
+            $visit->patient->name,
+            $visit->patient->patient_code,
+            $visit->service->name,
+            $visit->token,
         ));
 
-        return $patient;
+        return $visit;
     }
 }

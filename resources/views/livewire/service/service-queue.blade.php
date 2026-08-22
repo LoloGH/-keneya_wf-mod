@@ -12,32 +12,53 @@
         <p class="empty">Aucun patient dans cette file.</p>
     @else
         <ul class="queue">
-            @foreach ($queue as $patient)
-                <li class="queue__item queue__item--{{ $patient->status }}">
-                    <button type="button" class="queue__patient" wire:click="showHistory({{ $patient->id }})">
-                        <span class="queue__token">{{ $patient->token }}</span>
+            @foreach ($queue as $visit)
+                @php $pendingReferral = $visit->referrals->firstWhere('status', \App\Models\Referral::STATUS_PENDING); @endphp
+
+                <li class="queue__item queue__item--{{ $visit->status }}">
+                    <button type="button" class="queue__patient" wire:click="showRecord({{ $visit->patient_id }})">
+                        <span class="queue__token">{{ $visit->token }}</span>
                         <span class="queue__identity">
-                            <strong>{{ $patient->name }}</strong>
-                            <span class="mono">{{ $patient->patient_code }}</span>
-                            <span>{{ $patient->age }} ans — {{ $patient->gender }}</span>
+                            <strong>{{ $visit->patient->name }}</strong>
+                            <span class="mono">{{ $visit->patient->patient_code }}</span>
+                            <span>{{ $visit->patient->age }} ans — {{ $visit->patient->gender }}</span>
                         </span>
-                        <span class="badge badge--{{ $patient->status }}">{{ $patient->statusLabel() }}</span>
+                        <span class="badge badge--{{ $visit->status }}">{{ $visit->statusLabel() }}</span>
                     </button>
 
-                    <button type="button" class="btn btn--secondary"
-                            wire:click="startReferral({{ $patient->id }})">
-                        Envoyer vers un service
-                    </button>
+                    <div class="btn-row">
+                        @unless ($visit->isClosed())
+                            <button type="button" class="btn btn--secondary"
+                                    wire:click="startReferral({{ $visit->id }})">
+                                Envoyer vers un service
+                            </button>
+
+                            @if ($visit->status === \App\Models\Visit::STATUS_CALLED)
+                                @if ($pendingReferral)
+                                    <span class="hint hint--blocking">
+                                        En attente du resultat de {{ $pendingReferral->toService->name ?? 'un renvoi' }}
+                                        — cloture impossible.
+                                    </span>
+                                @else
+                                    <button type="button" class="btn btn--close"
+                                            wire:click="closeVisit({{ $visit->id }})"
+                                            wire:confirm="Cloturer definitivement le dossier de {{ $visit->patient->name }} ?">
+                                        Cloturer le dossier
+                                    </button>
+                                @endif
+                            @endif
+                        @endunless
+                    </div>
                 </li>
 
-                @if ($referringPatientId === $patient->id)
+                @if ($referringVisitId === $visit->id)
                     <li class="referral-form">
                         <form wire:submit="sendReferral" class="form">
-                            <p class="referral-form__title">Renvoyer {{ $patient->name }}</p>
+                            <p class="referral-form__title">Renvoyer {{ $visit->patient->name }}</p>
 
                             <div class="field">
-                                <label for="to-service-{{ $patient->id }}">Service destinataire</label>
-                                <select id="to-service-{{ $patient->id }}" wire:model="toServiceId">
+                                <label for="to-service-{{ $visit->id }}">Service destinataire</label>
+                                <select id="to-service-{{ $visit->id }}" wire:model="toServiceId">
                                     <option value="">— Choisir un service —</option>
                                     @foreach ($otherServices as $other)
                                         <option value="{{ $other->id }}">
@@ -52,19 +73,15 @@
                             </div>
 
                             <div class="field">
-                                <label for="instructions-{{ $patient->id }}">Instructions</label>
-                                <textarea id="instructions-{{ $patient->id }}" rows="3" wire:model="instructions"
+                                <label for="instructions-{{ $visit->id }}">Instructions</label>
+                                <textarea id="instructions-{{ $visit->id }}" rows="3" wire:model="instructions"
                                           placeholder="Examen demande, precisions cliniques…"></textarea>
                                 @error('instructions') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
 
                             <div class="btn-row">
-                                <button type="submit" class="btn btn--primary" wire:loading.attr="disabled">
-                                    Envoyer
-                                </button>
-                                <button type="button" class="btn btn--ghost" wire:click="cancelReferral">
-                                    Annuler
-                                </button>
+                                <button type="submit" class="btn btn--primary" wire:loading.attr="disabled">Envoyer</button>
+                                <button type="button" class="btn btn--ghost" wire:click="cancelReferral">Annuler</button>
                             </div>
                         </form>
                     </li>

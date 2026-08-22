@@ -9,14 +9,15 @@
     @livewireStyles
 </head>
 <body class="app-body">
+    {{-- Barre de marque, presente sur les trois interfaces. Volontairement
+         depourvue de tout lien de navigation : un role, une interface. --}}
     <header class="app-header">
-        <div class="app-header__identity">
+        <div class="app-header__brand">
+            <x-brand-logo class="app-header__logo" />
             <span class="app-header__product">{{ config('keneya.name') }}</span>
-            <span class="app-header__hospital">{{ config('keneya.hospital') }}</span>
         </div>
 
         <div class="app-header__context">
-            {{-- Aucun menu de navigation : chaque role n'a qu'une seule interface. --}}
             <span class="app-header__space">{{ $space ?? '' }}</span>
 
             @auth
@@ -29,6 +30,8 @@
                     <button type="submit" class="btn btn--ghost">Se deconnecter</button>
                 </form>
             @endauth
+
+            <span class="app-header__hospital">{{ $hospitalName ?? hospital_name() }}</span>
         </div>
     </header>
 

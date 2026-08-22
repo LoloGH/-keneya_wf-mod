@@ -66,6 +66,11 @@ class User extends Authenticatable
         return $this->hasOne(Receptionist::class);
     }
 
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class);
+    }
+
     /**
      * Le role applicatif de l'utilisateur, parmi les trois roles cloisonnes.
      * Un utilisateur n'est cense en porter qu'un seul ; le premier reconnu fait foi.

@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\AttachmentDownloadController as AdminAttachmentDownloadController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\Service\AttachmentDownloadController as ServiceAttachmentDownloadController;
+use App\Http\Controllers\Service\PrescriptionPdfController;
 use App\Http\Controllers\ServiceController;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +43,10 @@ Route::get('/espace', HomeController::class)->middleware('auth')->name('home');
 
 Route::middleware(['auth', 'role.scope:'.Roles::ADMIN])->group(function () {
     Route::get('/admin', AdminController::class)->name('admin.home');
+
+    // Telechargement propre au role : aucune URL n'est partagee entre roles.
+    Route::get('/admin/pieces-jointes/{attachment}', AdminAttachmentDownloadController::class)
+        ->name('admin.attachment');
 });
 
 Route::middleware(['auth', 'role.scope:'.Roles::RECEPTIONIST])->group(function () {
@@ -48,6 +55,12 @@ Route::middleware(['auth', 'role.scope:'.Roles::RECEPTIONIST])->group(function (
 
 Route::middleware(['auth', 'role.scope:'.Roles::DOCTOR])->group(function () {
     Route::get('/service', ServiceController::class)->name('service.home');
+
+    Route::get('/service/pieces-jointes/{attachment}', ServiceAttachmentDownloadController::class)
+        ->name('service.attachment');
+
+    Route::get('/service/ordonnances/{prescription}/pdf', PrescriptionPdfController::class)
+        ->name('service.prescription.pdf');
 });
 
 // Affichage public en salle d'attente (moniteur mural, sans connexion).

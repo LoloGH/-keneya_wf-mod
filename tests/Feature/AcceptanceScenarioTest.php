@@ -14,6 +14,7 @@ use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Referral;
 use App\Models\Service;
+use App\Models\Visit;
 use App\Services\SmsGateway;
 use App\Support\Roles;
 use ArrayObject;
@@ -106,7 +107,8 @@ class AcceptanceScenarioTest extends TestCase
             ->assertSee('HFD-00001');
 
         $patient = Patient::where('patient_code', 'HFD-00001')->firstOrFail();
-        $this->assertSame($medecineGenerale->getKey(), $patient->service_id);
+        $visit = $patient->visits()->firstOrFail();
+        $this->assertSame($medecineGenerale->getKey(), $visit->service_id);
 
         // 3. Le medecin de Medecine Generale appelle le patient puis l'envoie
         //    vers Echographie avec des instructions.
@@ -114,16 +116,16 @@ class AcceptanceScenarioTest extends TestCase
             ->test(ServiceQueue::class, ['serviceId' => $medecineGenerale->getKey()]);
 
         $queue->call('callNext')->assertHasNoErrors();
-        $this->assertSame(Patient::STATUS_CALLED, $patient->refresh()->status);
+        $this->assertSame(Visit::STATUS_CALLED, $visit->refresh()->status);
 
-        $queue->call('startReferral', $patient->getKey())
+        $queue->call('startReferral', $visit->getKey())
             ->set('toServiceId', $echographie->getKey())
             ->set('instructions', 'Echographie abdominale a jeun.')
             ->call('sendReferral')
             ->assertHasNoErrors();
 
         $referral = Referral::firstOrFail();
-        $patient->refresh();
+        $visit->refresh();
 
         // 4. Le patient recoit un SMS l'orientant vers Echographie avec un
         //    nouveau ticket.
@@ -132,8 +134,8 @@ class AcceptanceScenarioTest extends TestCase
                 && str_contains($message['text'], 'Echographie'));
 
         $this->assertNotNull($orientation);
-        $this->assertStringContainsString((string) $patient->token, $orientation['text']);
-        $this->assertSame($echographie->getKey(), $patient->service_id);
+        $this->assertStringContainsString((string) $visit->token, $orientation['text']);
+        $this->assertSame($echographie->getKey(), $visit->service_id);
 
         // 5. Le praticien d'Echographie, sur son propre poste, voit le renvoi
         //    et saisit un resultat.
@@ -172,8 +174,10 @@ class AcceptanceScenarioTest extends TestCase
             PatientHistory::where('patient_id', $patient->getKey())->orderBy('id')->pluck('type')->all(),
         );
 
-        // Le dossier n'a jamais ete duplique.
+        // Le dossier n'a jamais ete duplique : une identite, un episode.
         $this->assertSame(1, Patient::count());
+        $this->assertSame(1, Visit::count());
+        $this->assertSame($visit->getKey(), $referral->visit_id);
 
         // 8. Cloisonnement : la receptionniste ne peut atteindre ni /admin ni /service.
         $this->actingAs($receptionist)->get('/admin')->assertRedirect(route('reception.home'));

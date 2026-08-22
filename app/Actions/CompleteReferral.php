@@ -7,6 +7,7 @@ use App\Models\PatientHistory;
 use App\Models\Referral;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
+use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -26,7 +27,7 @@ class CompleteReferral
 
     public function execute(Referral $referral, Doctor $completedBy, string $resultText): Referral
     {
-        if ($referral->status === Referral::STATUS_DONE) {
+        if ($referral->status !== Referral::STATUS_PENDING) {
             throw new InvalidArgumentException('Ce renvoi a deja recu un resultat.');
         }
 
@@ -42,10 +43,10 @@ class CompleteReferral
                 'completed_at' => now(),
             ]);
 
-            $referral->load(['patient', 'toService']);
+            $referral->load(['patient', 'toService', 'visit']);
 
             $this->history->record(
-                patient: $referral->patient,
+                visit: $referral->visit,
                 type: PatientHistory::TYPE_REFERRAL_RESULT,
                 description: sprintf(
                     'Resultat de %s saisi par %s : %s',
@@ -60,6 +61,12 @@ class CompleteReferral
 
             return $referral;
         });
+
+        Audit::log(
+            Audit::EVENT_REFERRAL_COMPLETED,
+            sprintf('Resultat saisi pour le patient %s par %s.', $referral->patient->patient_code, $completedBy->name()),
+            $referral,
+        );
 
         $prescriber = $referral->fromDoctor()->first();
 

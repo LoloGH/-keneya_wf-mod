@@ -21,9 +21,12 @@ patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kay
 6. [Passerelle SMS](#6-passerelle-sms)
 7. [Sauvegardes](#7-sauvegardes)
 8. [Modèle de données](#8-modèle-de-données)
-9. [Flux de renvoi](#9-flux-de-renvoi)
-10. [Tests](#10-tests)
-11. [Organisation du code](#11-organisation-du-code)
+9. [Identité, passages et flux de renvoi](#9-identité-passages-et-flux-de-renvoi)
+10. [Pièces jointes, caisse, ordonnances et rendez-vous](#10-pièces-jointes-caisse-ordonnances-et-rendez-vous)
+11. [Journal d'audit et plannings](#11-journal-daudit-et-plannings)
+12. [Vérification d'un déploiement](#12-vérification-dun-déploiement)
+13. [Tests](#13-tests)
+14. [Organisation du code](#14-organisation-du-code)
 
 ---
 
@@ -36,9 +39,9 @@ lien vers un autre module, pas de tableau de bord générique. Chaque poste
 
 | Rôle | Interface unique | Contenu |
 |---|---|---|
-| `admin` | `/admin` | Services, réceptionnistes, médecins (avec réaffectation de service), vue globale des patients avec accès à tout dossier. |
-| `receptionist` | `/reception` | Enregistrement patient, enregistrement visiteur, passages du jour, et l'écran de salle d'attente surveillé depuis le poste d'accueil. |
-| `doctor` | `/service` | File d'attente du service, renvois entrants et sortants, « appeler le suivant », « envoyer vers un service », « renvoyer un résultat », et le dossier patient dans un panneau de la même page. |
+| `admin` | `/admin` | Établissement, services, réceptionnistes, médecins (avec réaffectation), plannings du personnel, vue globale des patients avec accès à tout dossier, journal d'audit. |
+| `receptionist` | `/reception` | Recherche de dossier existant, enregistrement patient et visiteur, rendez-vous du jour, Caisse Ticket, passages du jour, écran de salle d'attente, son propre planning. |
+| `doctor` | `/service` | File d'attente, renvois entrants et sortants, clôture de renvoi et de dossier, Caisse Services, ordonnances, rendez-vous, « Mes patients », son propre planning, et le dossier patient dans un panneau de la même page. |
 
 Mise en œuvre :
 
@@ -56,6 +59,17 @@ Mise en œuvre :
 - `/board` est l'affichage public de la salle d'attente, sans authentification.
   Ce n'est pas une interface « de rôle » : c'est un écran mural, également
   visible depuis le poste d'accueil.
+- **Chaque fonctionnalité ajoutée est une section d'une interface existante,
+  jamais une nouvelle route partagée.** Même les téléchargements sont
+  dédoublés : `/service/pieces-jointes/{id}` pour le médecin,
+  `/admin/pieces-jointes/{id}` pour l'admin. Deux tests verrouillent la règle —
+  l'un vérifie les redirections, l'autre qu'aucune route ne porte deux
+  `role.scope` différents.
+- `EnsureRoleScope` est évalué **avant** la résolution des modèles de route
+  (priorité de middleware explicite dans `bootstrap/app.php`) : sans cela, un
+  utilisateur du mauvais rôle recevrait un 404 quand l'identifiant n'existe pas
+  et une redirection quand il existe, ce qui lui permettrait de deviner les
+  identifiants d'un autre service.
 
 ## 2. Pile technique
 
@@ -65,6 +79,8 @@ Mise en œuvre :
 | Frontend | Livewire 3 + Alpine (embarqué par Livewire) |
 | Base de données | MySQL / MariaDB |
 | Rôles et permissions | `spatie/laravel-permission` |
+| Journal d'audit | `spatie/laravel-activitylog` |
+| Export PDF | `barryvdh/laravel-dompdf` |
 | SMS | `App\Services\SmsGateway` → API HTTP de SMSGate |
 
 **Aucune pipeline de build JS.** Pas de React, pas de Vue, pas de Vite : toute
@@ -127,6 +143,26 @@ Sous Windows, les mêmes commandes fonctionnent telles quelles dans PowerShell.
 Prérequis communs : PHP 8.3 avec les extensions `pdo_mysql`, `mbstring`,
 `intl`, `zip`, `bcmath`, `openssl`, `fileinfo` ; Composer 2 ; MySQL 8 ou
 MariaDB 10.6+.
+
+> **Plafonds d'envoi à ajuster.** Un PHP fraîchement installé plafonne les
+> envois à 2 Mo, alors que les pièces jointes sont acceptées jusqu'à 10 Mo :
+> sans ce réglage, un dépôt de fichier échoue sans message clair. Dans le
+> `php.ini` du serveur, et dans la configuration du serveur web :
+>
+> ```ini
+> upload_max_filesize = 12M
+> post_max_size = 16M
+> ```
+>
+> ```nginx
+> client_max_body_size 16M;   # Nginx
+> ```
+>
+> Sous IIS, relever `maxAllowedContentLength` ; sous Apache,
+> `LimitRequestBody`. La règle est la même partout : serveur web ≥
+> `post_max_size` ≥ `upload_max_filesize` > plafond applicatif (10 Mo,
+> `App\Models\Attachment::MAX_SIZE_KB`). L'image Docker applique déjà ces
+> valeurs.
 
 ### Linux — Nginx + PHP-FPM
 
@@ -295,6 +331,15 @@ SMSGATE_COUNTRY_CODE=223
 Les données vivent dans le volume Docker dédié **`keneya_db`**, distinct du
 code : `docker compose down` ne l'efface pas (`docker compose down -v`, si).
 
+Depuis la v2, **les pièces jointes vivent dans le volume `keneya_storage`**
+(`storage/app/attachments`). Une sauvegarde complète comprend donc les deux :
+l'export SQL ci-dessous **et** une copie de ce volume, par exemple
+
+```bash
+docker run --rm -v keneya_storage:/data -v "$PWD/backups:/out" alpine \
+    tar czf /out/keneya_storage-$(date +%Y%m%d).tar.gz -C /data .
+```
+
 Export `.sql` — la même commande des deux côtés :
 
 ```bash
@@ -340,12 +385,21 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 | `services` | Services de l'établissement, `kind` ∈ {`clinique`, `plateau_technique`}. |
 | `doctors` | Rattachement d'un compte à un service, réaffectable à tout moment. Un médecin multi-services a plusieurs lignes. |
 | `receptionists` | Rattachement d'un compte au rôle d'accueil. |
-| `patients` | Dossier unique et permanent : `patient_code` (`HFD-00001`), plus `crno`, le numéro de dossier papier saisi à la main. |
-| `visitors` | Fiche visiteur (`HFD-V-00001`), sans dossier médical ni ticket. |
-| `referrals` | Renvoi d'un service à un autre, avec instructions puis résultat. |
-| `patient_history` | Journal **append-only** du parcours du patient. |
+| **`patients`** | **Identité permanente et rien d'autre** : `patient_code` (`HFD-00001`) à vie, plus `crno`, le numéro de dossier papier. |
+| **`visits`** | **Un passage / épisode de soins** : service courant, ticket, statut (`waiting`, `called`, `closed`), ouverture et clôture. |
+| `companions` | Accompagnateurs d'un patient. Information non médicale, sans ticket propre. |
+| `visitors` | Fiche visiteur (`HFD-V-00001`), avec ticket dans la file du service visité. |
+| `referrals` | Renvoi d'un service à un autre : instructions, résultat, puis clôture par le prescripteur. |
+| `patient_history` | Journal **append-only** du parcours, ancré sur la visite. |
+| `attachments` | Pièces jointes (PDF, JPG, PNG) rattachées à un résultat de renvoi ou à une entrée d'historique. |
+| `payments` | Encaissements, en FCFA sans décimales : `ticket` (consultation) ou `service` (acte). |
+| `prescriptions` | Ordonnances en texte libre, exportables en PDF. |
+| `appointments` | Rendez-vous : `scheduled`, `checked_in`, `no_show`, `cancelled`. |
+| `schedules` | Créneaux de travail du personnel. |
+| `settings` | Réglages modifiables sans redéploiement (nom de l'établissement). |
+| `activity_log` | Journal d'audit (`spatie/laravel-activitylog`). |
 
-Deux garanties structurelles :
+Trois garanties structurelles :
 
 - **`patient_code` est attribué dans `PatientObserver::creating`**, jamais dans
   un contrôleur. Quel que soit le point d'entrée — formulaire, seeder, import,
@@ -353,83 +407,234 @@ Deux garanties structurelles :
 - **`patient_history` est append-only** : `PatientHistoryObserver` lève une
   exception sur toute tentative de mise à jour ou de suppression. Le seul point
   d'écriture est `PatientHistoryRecorder`.
+- **L'identité ne porte aucun état de passage.** Un patient qui revient six mois
+  plus tard ouvre une nouvelle `visits` sous le même `patient_code` : l'épisode
+  précédent reste intact et consultable, distinct du nouveau.
 
-## 9. Flux de renvoi
+### Migration depuis la v1
 
-Le `patient_id` **ne change jamais** : c'est le même dossier qui traverse les
-services, jamais dupliqué.
+Les migrations `2025_02_01_*` font la bascule. Elles **reprennent les données
+existantes** plutôt que de simplement supprimer des colonnes : chaque patient
+déjà enregistré reçoit une `visits` portant son service, son ticket et son
+statut d'origine, et les lignes `referrals` / `patient_history` sont rattachées
+à cette visite. Le `down()` fait le chemin inverse et restaure fidèlement
+l'ancien schéma — vérifié dans les deux sens.
 
-1. Le médecin du service source choisit un patient de sa file, un service
-   destinataire et saisit des instructions.
-2. `App\Actions\SendReferral`, en une transaction :
-   - crée la ligne `referrals` (`status = pending`) ;
-   - met à jour `patients.service_id` et génère un nouveau `token` dans la file
-     du service destinataire ;
-   - insère une ligne `patient_history` (`type = referral_sent`) ;
-   - puis, hors transaction, envoie un SMS au patient.
-3. Le praticien du service destinataire voit le renvoi dans son panneau
-   « Renvois en attente » de sa propre interface `/service`, filtré sur son
-   `service_id`, et saisit le résultat.
-4. `App\Actions\CompleteReferral`, en une transaction :
-   - met à jour `referrals` (`status = done`, `result_text`,
-     `completed_by_doctor_id`, `completed_at`) ;
-   - insère une ligne `patient_history` (`type = referral_result`) ;
-   - puis notifie le prescripteur par SMS si `doctors.phone` est renseigné.
+> Les données de démonstration du VPS sont jetables, comme confirmé. La reprise
+> a quand même été écrite : elle coûte une dizaine de lignes et rend la
+> migration réversible sans perte, ce qui vaut mieux qu'un `dropColumn` sec.
 
-Le résultat apparaît dans le panneau « Résultats reçus » du prescripteur au
-prochain cycle de `wire:poll` — **pas de WebSocket dans cette phase**.
+## 9. Identité, passages et flux de renvoi
 
-## 10. Tests
+Le `patient_id` **ne change jamais**, et le `patient_code` non plus. C'est la
+**visite** qui se déplace : un épisode unique traverse les services, change de
+`service_id` et reçoit un nouveau ticket à chaque renvoi, puis se clôture une
+seule fois, à la fin.
+
+### Reprendre un dossier existant
+
+Dans `/reception`, la recherche précède toujours l'enregistrement :
+
+1. Recherche par `patient_code`, nom ou téléphone.
+2. Si un patient est trouvé, son identité s'affiche pour **confirmation visuelle
+   par la réceptionniste** — deux homonymes ne doivent jamais être confondus.
+3. « Nouvel épisode » crée une ligne `visits` rattachée au `patient_id`
+   existant, avec un motif en texte libre. **Aucune ligne `patients`, aucun
+   nouveau `patient_code`.**
+4. Si aucun patient n'est trouvé, le formulaire d'enregistrement classique crée
+   une nouvelle identité.
+
+### Renvoi et clôture
+
+1. Le médecin choisit une visite de sa file, un service destinataire et saisit
+   des instructions.
+2. `SendReferral`, en une transaction : crée `referrals` (`pending`), déplace la
+   visite (`service_id`, nouveau `token`, `waiting`), insère
+   `patient_history` (`referral_sent`), puis envoie un SMS au patient.
+3. Le praticien destinataire voit le renvoi dans son panneau « Renvois en
+   attente », saisit le résultat et **peut y joindre des fichiers**.
+   `CompleteReferral` passe le renvoi en `done` et notifie le prescripteur.
+4. Le prescripteur lit le résultat dans « Résultats reçus » et clôt la boucle
+   avec **« Terminer »** (`CloseReferral` → `closed`). Le renvoi quitte alors ce
+   panneau mais **reste dans l'historique du patient**.
+5. En fin de prise en charge, **« Clôturer le dossier »** (`CloseVisit`) ferme
+   l'épisode. L'action est **bloquée tant qu'un renvoi attend son résultat**, et
+   le message le dit explicitement plutôt que de griser un bouton sans
+   expliquer pourquoi.
+
+Une visite `closed` sort de la file active — « Appeler le suivant » ne la
+propose plus — mais **son dossier reste intégralement lisible** : la clôture ne
+filtre jamais la lecture, seulement la file d'attente.
+
+### Files et tickets
+
+Les files repartent à 1 chaque matin, par service. **Patients et visiteurs
+tirent dans la même séquence** : deux personnes ne voient jamais le même numéro
+affiché sur `/board`. La règle « file du jour » est définie une seule fois
+(`Visit::scopeInTodaysQueue`) et partagée par l'attribution des tickets, la file
+du médecin et l'écran de salle d'attente.
+
+## 10. Pièces jointes, caisse, ordonnances et rendez-vous
+
+### Pièces jointes
+
+PDF, JPG et PNG, 10 Mo maximum, 5 fichiers par résultat. **Le type et la taille
+sont revérifiés côté serveur dans `StoreAttachment`** — le type MIME réel du
+fichier reçu, pas l'extension annoncée : un formulaire se contourne, pas une
+action.
+
+Stockage sur le disque `attachments` (`storage/app/attachments`), donc sur le
+volume Docker **`keneya_storage`**, persistant entre redéploiements. Aucun
+stockage cloud : la connectivité du site ne le permet pas.
+
+### Caisse
+
+Montants en **FCFA sans décimales**. La caisse n'est volontairement **pas** un
+service de la table `services` — un paiement n'a ni file d'attente ni renvoi :
+
+- **« Caisse Ticket »** dans `/reception` : le ticket de consultation, à
+  l'enregistrement ou plus tard dans la journée, avec le total encaissé du jour.
+- **« Caisse Services »** dans `/service` : l'acte réalisé, saisi par le
+  praticien qui vient de traiter le patient.
+
+Le montant est saisi librement à chaque encaissement : aucune grille tarifaire
+n'existe dans le schéma. Une table `service_prices` pourra venir plus tard si
+HFD veut figer des tarifs.
+
+### Ordonnances
+
+Texte libre pour cette version, comme convenu. Chaque ordonnance laisse une
+ligne `patient_history` (`prescription`) et s'exporte en PDF via
+`barryvdh/laravel-dompdf`. Un médecin ne peut télécharger que **ses propres**
+ordonnances.
+
+### Rendez-vous
+
+Fixés depuis `/service` en fin de consultation. La section « Rendez-vous du
+jour » de `/reception` liste les rendez-vous, avec **« Orienter le patient »** :
+à l'arrivée, une nouvelle `visits` s'ouvre directement dans la file du service
+prévu, sous l'identité existante — pas de réenregistrement pour quelqu'un que
+l'hôpital connaît déjà. `no_show` distingue le patient qui ne s'est pas
+présenté d'une annulation volontaire.
+
+## 11. Journal d'audit et plannings
+
+### Journal d'audit
+
+`spatie/laravel-activitylog`, exposé dans une section de `/admin` uniquement.
+Sont tracés : connexions et déconnexions, création et modification de patients,
+ouverture d'épisode, envoi / saisie / clôture de renvoi, clôture de dossier,
+encaissements, ordonnances, rendez-vous, et les actions admin (services,
+médecins, réaffectations, réceptionnistes, plannings).
+
+Le tableau est filtrable par utilisateur, par type d'action et par date. Il est
+**en lecture seule sans exception** : le composant n'expose aucune méthode de
+modification ni de suppression, y compris pour l'admin — un journal que l'on
+peut retoucher ne prouve rien. Un test vérifie l'absence de ces méthodes.
+
+### Plannings
+
+La gestion complète — créer, modifier, supprimer — est **exclusivement dans
+`/admin`**. Chaque médecin et chaque réceptionniste consulte **le sien**, en
+lecture seule, dans sa propre interface, via un composant partagé qui filtre
+systématiquement sur l'utilisateur connecté. Aucun rôle ne voit le planning
+d'un autre.
+
+### Identité visuelle
+
+- Page de connexion : formulaire centré sur une image de fond institutionnelle.
+  Le placeholder livré est `public/images/login-background.jpg` — le remplacer
+  par une photo de l'hôpital suffit, aucun code à toucher.
+- Barre de marque sur les trois interfaces : logo à gauche, **nom de
+  l'établissement à droite, lu depuis la table `settings`** et modifiable par
+  l'admin sans redéploiement. Aucun lien de navigation croisée n'y figure.
+
+## 12. Vérification d'un déploiement
+
+Avant de remplacer une version en service, un script enchaîne les contrôles et
+rend un verdict :
 
 ```bash
-php artisan test                        # sans Docker
+./scripts/verify-deploy.sh                      # ou : ./scripts/verify-deploy.sh https://demo.exemple.ml
+```
+
+Il vérifie, dans cet ordre : la pile est démarrée, les migrations passent dans
+les deux sens contre le moteur réel, `patients` ne porte plus de colonnes de
+passage et aucune visite n'est orpheline, la suite de tests est au vert, une
+réceptionniste connectée est bien redirigée depuis `/admin`, `/service` et les
+routes de téléchargement, et les plafonds d'envoi sont ordonnés correctement.
+
+Il sort en code 1 dès qu'un contrôle est rouge — utilisable tel quel dans une
+procédure de mise à jour.
+
+## 13. Tests
+
+```bash
+php artisan test                          # sans Docker
 docker compose exec app php artisan test  # avec Docker
 ```
 
-La suite couvre notamment :
+**95 tests, 334 assertions.** La suite couvre :
 
 | Fichier | Objet |
 |---|---|
-| `RoleScopeTest` | Cloisonnement des interfaces, redirections, `/board` public. |
-| `PatientCodeTest` | Génération du `patient_code`, unicité, préfixe configurable. |
+| `RoleScopeTest` | Cloisonnement des interfaces, redirections, `/board` public, **et le fait qu'aucune route de l'addendum n'est ouverte à deux rôles**. |
+| `PatientCodeTest` | Génération du `patient_code`, unicité, préfixe configurable, **et qu'un second passage ne crée ni patient ni code supplémentaire**. |
+| `EpisodeFlowTest` | Recherche de dossier, ouverture d'un nouvel épisode, regroupement chronologique des visites, « Mes patients ». |
+| `ClosureFlowTest` | Clôture d'un renvoi et clôture d'un dossier, avec tous leurs garde-fous. |
 | `ReferralFlowTest` | Transaction de renvoi complète, notifications, historique append-only. |
+| `AttachmentTest` | Dépôt de pièce jointe, refus serveur d'un type ou d'une taille invalide, cloisonnement du téléchargement. |
+| `CashPrescriptionAppointmentTest` | Caisse Ticket et Services, ordonnance + export PDF, rendez-vous et « Orienter le patient ». |
+| `AuditSettingsScheduleTest` | Nom de l'établissement en base, journal d'audit filtrable et en lecture seule, plannings cloisonnés. |
 | `ServiceInterfaceTest` | Appel du suivant, renvoi, saisie du résultat, refus d'un service qui n'est pas le sien. |
-| `ReceptionInterfaceTest` | Enregistrement patient et visiteur, files par service, salle d'attente. |
+| `ReceptionInterfaceTest` | Enregistrement, files par service, **séquence de tickets partagée patients / visiteurs**. |
 | `AdminInterfaceTest` | Services, médecins, réaffectation, réceptionnistes, dossiers. |
 | `AcceptanceScenarioTest` | Le scénario d'acceptation de bout en bout, dans l'ordre. |
 | `SmsGatewayTest` | Format international, passerelle désactivée ou injoignable. |
 
 Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS.
 
-## 11. Organisation du code
+## 14. Organisation du code
 
 Aucune logique métier ne vit dans les vues Blade ou Livewire : les composants
 valident puis délèguent à une action ou à un service.
 
 ```
 app/
-├── Actions/            RegisterPatient, RegisterVisitor, CallNextPatient,
-│                       SendReferral, CompleteReferral  (transactions métier)
+├── Actions/            RegisterPatient, OpenNewEpisode, CallNextPatient,
+│                       SendReferral, CompleteReferral, CloseReferral,
+│                       CloseVisit, RegisterVisitor, StoreAttachment,
+│                       RecordPayment, CreatePrescription,
+│                       ScheduleAppointment, CheckInAppointment
 ├── Http/
-│   ├── Controllers/    Contrôleurs minces, une interface par rôle
+│   ├── Controllers/    Contrôleurs minces, une interface par rôle,
+│   │                   + Admin/ et Service/ pour les téléchargements cloisonnés
 │   ├── Middleware/     EnsureRoleScope (cloisonnement), RedirectIfAuthenticated
 │   └── Requests/       LoginRequest
+├── Listeners/          LogAuthenticationActivity (connexions au journal)
 ├── Livewire/
-│   ├── Admin/          ServiceManager, DoctorManager, ReceptionistManager,
-│   │                   PatientDirectory
+│   ├── Admin/          HospitalSettings, ServiceManager, DoctorManager,
+│   │                   ReceptionistManager, ScheduleManager,
+│   │                   PatientDirectory, ActivityLogViewer
 │   ├── Board/          WaitingBoard (public et poste d'accueil)
-│   ├── Reception/      PatientRegistrationForm, VisitorRegistrationForm,
-│   │                   TodayVisits
-│   └── Service/        ServiceQueue, IncomingReferrals, OutgoingReferrals,
-│                       PatientRecordPanel, ServiceSelector
-│                       + Concerns/ScopedToOwnService
-├── Models/             Service, Doctor, Receptionist, Patient, Visitor,
-│                       Referral, PatientHistory, User
+│   ├── Reception/      PatientLookup, PatientRegistrationForm,
+│   │                   VisitorRegistrationForm, TicketCashier,
+│   │                   TodayAppointments, TodayVisits
+│   ├── Service/        ServiceQueue, IncomingReferrals, OutgoingReferrals,
+│   │                   ConsultationActions, MyPatients, PatientRecordPanel,
+│   │                   ServiceSelector + Concerns/ScopedToOwnService
+│   └── Shared/         MySchedule (même composant dans /service et /reception,
+│                       toujours filtré sur l'utilisateur connecté)
+├── Models/             Patient (identité), Visit (passage), Service, Doctor,
+│                       Receptionist, Visitor, Companion, Referral,
+│                       PatientHistory, Attachment, Payment, Prescription,
+│                       Appointment, Schedule, Setting, User
 ├── Observers/          PatientObserver (patient_code), VisitorObserver,
 │                       PatientHistoryObserver (append-only)
 ├── Services/           SmsGateway, TokenAllocator, PatientCodeGenerator,
 │                       PatientHistoryRecorder
-└── Support/            Roles (rôles ↔ interfaces)
+└── Support/            Roles (rôles ↔ interfaces), Audit (journal),
+                        helpers.php (hospital_name)
 ```
 
 L'interface est intégralement en français, y compris les messages de

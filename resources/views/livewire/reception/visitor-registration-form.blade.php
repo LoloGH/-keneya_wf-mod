@@ -41,7 +41,10 @@
         <div class="ticket ticket--muted" role="status">
             <p class="ticket__label">Fiche visiteur</p>
             <p class="ticket__code">{{ $lastRegistered['visitor_code'] }}</p>
-            <p class="ticket__meta">{{ $lastRegistered['name'] }} — {{ $lastRegistered['service'] }}</p>
+            <p class="ticket__meta">
+                {{ $lastRegistered['name'] }} — {{ $lastRegistered['service'] }},
+                ticket n° {{ $lastRegistered['token'] }}
+            </p>
         </div>
     @endif
 </section>

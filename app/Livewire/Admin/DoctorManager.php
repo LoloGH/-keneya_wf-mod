@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Doctor;
 use App\Models\Service;
 use App\Models\User;
+use App\Support\Audit;
 use App\Support\Roles;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
@@ -101,11 +102,21 @@ class DoctorManager extends Component
                     'password' => $data['password'] ?: null,
                 ], fn ($value) => $value !== null));
 
+                $previousServiceId = $doctor->service_id;
+
                 // Reaffectation de service : un simple changement de service_id.
                 $doctor->update([
                     'service_id' => $data['service_id'],
                     'phone' => $data['phone'] ?: null,
                 ]);
+
+                if ((int) $previousServiceId !== (int) $data['service_id']) {
+                    Audit::log(
+                        Audit::EVENT_DOCTOR_REASSIGNED,
+                        sprintf('%s reaffecte vers %s.', $doctor->user->name, $doctor->service()->first()?->name),
+                        $doctor,
+                    );
+                }
 
                 return;
             }
@@ -118,11 +129,13 @@ class DoctorManager extends Component
 
             $user->syncRoles([Roles::DOCTOR]);
 
-            Doctor::create([
+            $doctor = Doctor::create([
                 'user_id' => $user->getKey(),
                 'service_id' => $data['service_id'],
                 'phone' => $data['phone'] ?: null,
             ]);
+
+            Audit::log(Audit::EVENT_DOCTOR_CREATED, sprintf('Medecin %s cree.', $user->name), $doctor);
         });
 
         session()->flash('admin.status', $this->editingId ? 'Medecin mis a jour.' : 'Medecin cree.');

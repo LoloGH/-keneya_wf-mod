@@ -2,27 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * L'identite permanente d'un patient.
+ *
+ * Depuis l'addendum v3, cette table ne porte plus ni service, ni ticket, ni
+ * statut : tout cela appartient a un passage (App\Models\Visit). Le
+ * `patient_code` est attribue une seule fois, a la toute premiere venue, et
+ * ne change jamais.
+ */
 class Patient extends Model
 {
     use HasFactory;
-
-    public const STATUS_WAITING = 'waiting';
-
-    public const STATUS_CALLED = 'called';
-
-    /**
-     * @var array<string, string>
-     */
-    public const STATUS_LABELS = [
-        self::STATUS_WAITING => 'En attente',
-        self::STATUS_CALLED => 'Appele',
-    ];
 
     protected $fillable = [
         'patient_code',
@@ -31,41 +26,26 @@ class Patient extends Model
         'gender',
         'mobile',
         'crno',
-        'service_id',
-        'token',
-        'status',
     ];
 
     protected function casts(): array
     {
         return [
             'age' => 'integer',
-            'token' => 'integer',
         ];
     }
 
-    /**
-     * La file du jour d'un service.
-     *
-     * Un patient rejoint une file au moment ou son `service_id` et son `token`
-     * sont ecrits — a l'enregistrement, puis a chaque renvoi. `updated_at`
-     * marque donc son entree dans la file courante.
-     *
-     * Les files repartent a 1 chaque matin : ce scope est le seul endroit qui
-     * definit « la file d'aujourd'hui », et il est partage par l'attribution
-     * des tickets (TokenAllocator), la file du medecin et l'ecran de salle
-     * d'attente — sinon un patient de la veille resterait affiche avec un
-     * numero que le ticket du jour reattribuerait.
-     */
-    public function scopeInTodaysQueue(Builder $query, int $serviceId): Builder
+    public function visits(): HasMany
     {
-        return $query->where('service_id', $serviceId)
-            ->whereDate('updated_at', today());
+        return $this->hasMany(Visit::class);
     }
 
-    public function service(): BelongsTo
+    /**
+     * Le passage le plus recent, quel que soit son statut.
+     */
+    public function latestVisit(): HasOne
     {
-        return $this->belongsTo(Service::class);
+        return $this->hasOne(Visit::class)->latestOfMany('opened_at');
     }
 
     public function referrals(): HasMany
@@ -78,8 +58,28 @@ class Patient extends Model
         return $this->hasMany(PatientHistory::class);
     }
 
-    public function statusLabel(): string
+    public function companions(): HasMany
     {
-        return self::STATUS_LABELS[$this->status] ?? $this->status;
+        return $this->hasMany(Companion::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(Prescription::class);
+    }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
     }
 }

@@ -2,33 +2,37 @@
 
 namespace App\Services;
 
-use App\Models\Patient;
 use App\Models\Service;
+use App\Models\Visit;
+use App\Models\Visitor;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Attribution des numeros de ticket (tokens) par service et par journee.
+ * Attribution des numeros de ticket, par service et par journee.
  *
- * La file repart a 1 chaque matin : le token affiche en salle d'attente doit
- * rester court et lisible.
+ * Patients et visiteurs tirent dans la meme sequence : sur l'ecran de salle
+ * d'attente, deux personnes ne doivent jamais voir le meme numero pour le
+ * meme service.
+ *
+ * Les files repartent a 1 chaque matin — le numero affiche doit rester court
+ * et lisible de loin.
  */
 class TokenAllocator
 {
-    /**
-     * Prochain token disponible dans la file du service, pour la journee en cours.
-     * Verrouille les lignes du jour pour eviter deux tickets identiques quand
-     * deux postes enregistrent en meme temps.
-     */
     public function next(Service|int $service): int
     {
         $serviceId = $service instanceof Service ? $service->getKey() : $service;
 
-        $query = Patient::query()->inTodaysQueue($serviceId);
+        $visits = Visit::query()->inTodaysQueue($serviceId);
+        $visitors = Visitor::query()
+            ->where('service_id', $serviceId)
+            ->whereDate('created_at', today());
 
         if (DB::connection()->getDriverName() !== 'sqlite') {
-            $query->lockForUpdate();
+            $visits->lockForUpdate();
+            $visitors->lockForUpdate();
         }
 
-        return (int) $query->max('token') + 1;
+        return max((int) $visits->max('token'), (int) $visitors->max('token')) + 1;
     }
 }

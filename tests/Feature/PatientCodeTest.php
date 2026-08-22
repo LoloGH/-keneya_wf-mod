@@ -11,7 +11,8 @@ use Tests\TestCase;
 
 /**
  * Le patient_code est attribue par l'Observer : quel que soit le point
- * d'entree, un patient ne peut pas exister sans identifiant unique.
+ * d'entree, un patient ne peut pas exister sans identifiant unique. Il est
+ * genere une seule fois, a la premiere venue, et ne change plus jamais.
  */
 class PatientCodeTest extends TestCase
 {
@@ -19,17 +20,12 @@ class PatientCodeTest extends TestCase
 
     public function test_le_code_est_genere_a_la_creation_directe_du_modele(): void
     {
-        $patient = Patient::factory()->create();
-
-        $this->assertSame('HFD-00001', $patient->patient_code);
+        $this->assertSame('HFD-00001', Patient::factory()->create()->patient_code);
     }
 
     public function test_les_codes_se_suivent_et_restent_uniques(): void
     {
-        $service = Service::factory()->create();
-
-        $codes = collect(range(1, 5))
-            ->map(fn () => Patient::factory()->for($service)->create()->patient_code);
+        $codes = collect(range(1, 5))->map(fn () => Patient::factory()->create()->patient_code);
 
         $this->assertSame(
             ['HFD-00001', 'HFD-00002', 'HFD-00003', 'HFD-00004', 'HFD-00005'],
@@ -42,7 +38,7 @@ class PatientCodeTest extends TestCase
     {
         $service = Service::factory()->create();
 
-        $patient = app(RegisterPatient::class)->execute([
+        $visit = app(RegisterPatient::class)->execute([
             'name' => 'Fatoumata Coulibaly',
             'age' => 34,
             'gender' => 'Femme',
@@ -51,20 +47,17 @@ class PatientCodeTest extends TestCase
             'service_id' => $service->getKey(),
         ]);
 
-        $this->assertSame('HFD-00001', $patient->patient_code);
-        $this->assertSame(1, $patient->token);
-        $this->assertSame(Patient::STATUS_WAITING, $patient->status);
-        $this->assertSame('CR-8891', $patient->crno);
+        $this->assertSame('HFD-00001', $visit->patient->patient_code);
+        $this->assertSame(1, $visit->token);
+        $this->assertSame('CR-8891', $visit->patient->crno);
 
         // Le dossier papier est distinct de l'identifiant genere.
-        $this->assertNotSame($patient->crno, $patient->patient_code);
+        $this->assertNotSame($visit->patient->crno, $visit->patient->patient_code);
     }
 
     public function test_un_code_fourni_explicitement_est_conserve(): void
     {
-        $patient = Patient::factory()->create(['patient_code' => 'HFD-09999']);
-
-        $this->assertSame('HFD-09999', $patient->patient_code);
+        $this->assertSame('HFD-09999', Patient::factory()->create(['patient_code' => 'HFD-09999'])->patient_code);
     }
 
     public function test_le_prefixe_de_l_etablissement_est_configurable(): void
@@ -78,8 +71,22 @@ class PatientCodeTest extends TestCase
     {
         Patient::factory()->create();
 
-        $visitor = Visitor::factory()->create();
+        $this->assertSame('HFD-V-00001', Visitor::factory()->create()->visitor_code);
+    }
 
-        $this->assertSame('HFD-V-00001', $visitor->visitor_code);
+    /**
+     * Le coeur de l'addendum v3 : un patient qui revient garde son identite.
+     */
+    public function test_un_second_passage_ne_cree_ni_patient_ni_code_supplementaire(): void
+    {
+        $service = Service::factory()->create();
+        $patient = Patient::factory()->create();
+
+        $this->makeVisit($service, [], $patient);
+        $this->makeVisit($service, [], $patient);
+
+        $this->assertSame(1, Patient::count());
+        $this->assertSame(2, $patient->visits()->count());
+        $this->assertSame('HFD-00001', $patient->refresh()->patient_code);
     }
 }

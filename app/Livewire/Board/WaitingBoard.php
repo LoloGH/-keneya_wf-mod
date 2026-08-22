@@ -2,13 +2,17 @@
 
 namespace App\Livewire\Board;
 
-use App\Models\Patient;
 use App\Models\Service;
+use App\Models\Visit;
+use App\Models\Visitor;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 /**
  * Ecran de salle d'attente : tokens en cours et a venir, par service.
+ *
+ * Patients et visiteurs partagent la meme sequence de numeros par service :
+ * deux personnes ne voient jamais le meme numero affiche.
  *
  * Utilise a deux endroits — sur le moniteur public (/board, sans connexion) et
  * dans l'interface de la receptionniste, qui doit pouvoir le surveiller depuis
@@ -22,32 +26,43 @@ class WaitingBoard extends Component
 
     public function render(): View
     {
-        $services = Service::query()
+        $rows = Service::query()
             ->orderBy('name')
             ->get()
             ->map(function (Service $service) {
-                $called = Patient::query()
+                $called = Visit::query()
                     ->inTodaysQueue($service->getKey())
-                    ->where('status', Patient::STATUS_CALLED)
+                    ->where('status', Visit::STATUS_CALLED)
                     ->orderByDesc('updated_at')
                     ->first();
 
-                $waiting = Patient::query()
+                $waiting = Visit::query()
                     ->inTodaysQueue($service->getKey())
-                    ->where('status', Patient::STATUS_WAITING)
+                    ->where('status', Visit::STATUS_WAITING)
                     ->orderBy('token')
-                    ->get();
+                    ->pluck('token');
+
+                $visitorTokens = Visitor::query()
+                    ->where('service_id', $service->getKey())
+                    ->whereDate('created_at', today())
+                    ->whereNotNull('token')
+                    ->orderBy('token')
+                    ->pluck('token');
+
+                // Les deux files partagent la meme sequence : on les fusionne
+                // pour afficher un ordre d'appel unique et lisible.
+                $upcoming = $waiting->concat($visitorTokens)->sort()->values();
 
                 return [
                     'service' => $service,
-                    'current' => $called,
-                    'next' => $waiting->take(3),
-                    'waiting_count' => $waiting->count(),
+                    'current' => $called?->token,
+                    'next' => $upcoming->take(3),
+                    'waiting_count' => $upcoming->count(),
                 ];
             });
 
         return view('livewire.board.waiting-board', [
-            'rows' => $services,
+            'rows' => $rows,
         ]);
     }
 }

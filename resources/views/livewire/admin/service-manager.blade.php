@@ -35,7 +35,7 @@
                     <th>Service</th>
                     <th>Type</th>
                     <th>Medecins</th>
-                    <th>Patients</th>
+                    <th>Passages</th>
                     <th></th>
                 </tr>
             </thead>
@@ -45,11 +45,17 @@
                         <td>{{ $service->name }}</td>
                         <td>{{ $service->kindLabel() }}</td>
                         <td class="mono">{{ $service->doctors_count }}</td>
-                        <td class="mono">{{ $service->patients_count }}</td>
+                        <td class="mono">{{ $service->visits_count }}</td>
                         <td>
-                            <button type="button" class="btn btn--ghost" wire:click="edit({{ $service->id }})">
-                                Modifier
-                            </button>
+                            <div class="btn-row">
+                                <button type="button" class="btn btn--ghost" wire:click="edit({{ $service->id }})">
+                                    Modifier
+                                </button>
+                                <button type="button" class="btn btn--ghost" wire:click="delete({{ $service->id }})"
+                                        wire:confirm="Supprimer le service « {{ $service->name }} » ?">
+                                    Supprimer
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 @empty

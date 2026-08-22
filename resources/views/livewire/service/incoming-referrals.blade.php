@@ -8,7 +8,7 @@
             @foreach ($pending as $referral)
                 <li class="referrals__item">
                     <button type="button" class="referrals__patient"
-                            wire:click="showHistory({{ $referral->patient_id }})">
+                            wire:click="showRecord({{ $referral->patient_id }})">
                         <strong>{{ $referral->patient->name }}</strong>
                         <span class="mono">{{ $referral->patient->patient_code }}</span>
                     </button>
@@ -30,8 +30,19 @@
                                 @error('resultText') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
 
+                            <div class="field">
+                                <label for="files-{{ $referral->id }}">
+                                    Pieces jointes
+                                    <span class="field__hint">PDF, JPG ou PNG — 10 Mo maximum, 5 fichiers</span>
+                                </label>
+                                <input id="files-{{ $referral->id }}" type="file" multiple
+                                       accept=".pdf,.jpg,.jpeg,.png" wire:model="files">
+                                @error('files.*') <p class="field__error">{{ $message }}</p> @enderror
+                                <p class="hint" wire:loading wire:target="files">Televersement en cours…</p>
+                            </div>
+
                             <div class="btn-row">
-                                <button type="submit" class="btn btn--primary" wire:loading.attr="disabled">
+                                <button type="submit" class="btn btn--primary" wire:loading.attr="disabled" wire:target="submitResult">
                                     Renvoyer le resultat
                                 </button>
                                 <button type="button" class="btn btn--ghost" wire:click="cancel">Annuler</button>

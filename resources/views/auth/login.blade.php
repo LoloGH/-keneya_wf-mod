@@ -1,7 +1,12 @@
-<x-layouts.app :title="'Connexion — '.config('keneya.name')">
+<x-layouts.auth :title="'Connexion — '.config('keneya.name')">
     <div class="login">
+        <div class="login__brand">
+            <x-brand-logo class="login__logo" />
+            <p class="login__product">{{ config('keneya.name') }}</p>
+        </div>
+
         <h1 class="login__title">Connexion</h1>
-        <p class="login__subtitle">{{ config('keneya.hospital') }}</p>
+        <p class="login__subtitle">{{ hospital_name() }}</p>
 
         <form method="POST" action="{{ route('login.store') }}" class="form">
             @csrf
@@ -27,4 +32,4 @@
             <button type="submit" class="btn btn--primary btn--block">Se connecter</button>
         </form>
     </div>
-</x-layouts.app>
+</x-layouts.auth>

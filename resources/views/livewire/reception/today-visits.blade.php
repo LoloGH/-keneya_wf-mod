@@ -7,34 +7,28 @@
                placeholder="Rechercher un nom, un code, un telephone…">
     </div>
 
-    <h3 class="card__subtitle">Patients ({{ $patients->count() }})</h3>
+    <h3 class="card__subtitle">Patients ({{ $visits->count() }})</h3>
 
-    @if ($patients->isEmpty())
-        <p class="empty">Aucun patient enregistre aujourd'hui.</p>
+    @if ($visits->isEmpty())
+        <p class="empty">Aucun passage enregistre aujourd'hui.</p>
     @else
         <div class="table-wrap">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Dossier</th>
-                        <th>Nom</th>
-                        <th>Service</th>
-                        <th>Ticket</th>
-                        <th>Statut</th>
-                        <th>Heure</th>
+                        <th>Dossier</th><th>Nom</th><th>Service</th>
+                        <th>Ticket</th><th>Statut</th><th>Heure</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($patients as $patient)
+                    @foreach ($visits as $visit)
                         <tr>
-                            <td class="mono">{{ $patient->patient_code }}</td>
-                            <td>{{ $patient->name }}</td>
-                            <td>{{ $patient->service->name }}</td>
-                            <td class="mono">{{ $patient->token }}</td>
-                            <td>
-                                <span class="badge badge--{{ $patient->status }}">{{ $patient->statusLabel() }}</span>
-                            </td>
-                            <td>{{ $patient->created_at->format('H:i') }}</td>
+                            <td class="mono">{{ $visit->patient->patient_code }}</td>
+                            <td>{{ $visit->patient->name }}</td>
+                            <td>{{ $visit->service->name }}</td>
+                            <td class="mono">{{ $visit->token }}</td>
+                            <td><span class="badge badge--{{ $visit->status }}">{{ $visit->statusLabel() }}</span></td>
+                            <td>{{ $visit->opened_at?->format('H:i') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -50,13 +44,7 @@
         <div class="table-wrap">
             <table class="table">
                 <thead>
-                    <tr>
-                        <th>Fiche</th>
-                        <th>Nom</th>
-                        <th>Service</th>
-                        <th>Motif</th>
-                        <th>Heure</th>
-                    </tr>
+                    <tr><th>Fiche</th><th>Nom</th><th>Service</th><th>Ticket</th><th>Motif</th><th>Heure</th></tr>
                 </thead>
                 <tbody>
                     @foreach ($visitors as $visitor)
@@ -64,6 +52,7 @@
                             <td class="mono">{{ $visitor->visitor_code }}</td>
                             <td>{{ $visitor->name }}</td>
                             <td>{{ $visitor->service->name }}</td>
+                            <td class="mono">{{ $visitor->token ?? '—' }}</td>
                             <td>{{ $visitor->reason ?: '—' }}</td>
                             <td>{{ $visitor->created_at->format('H:i') }}</td>
                         </tr>

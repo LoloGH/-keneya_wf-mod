@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Service;
+use App\Support\Audit;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -57,10 +58,15 @@ class ServiceManager extends Component
         $data = $this->validate();
 
         if ($this->editingId) {
-            Service::findOrFail($this->editingId)->update($data);
+            $service = Service::findOrFail($this->editingId);
+            $service->update($data);
+
+            Audit::log(Audit::EVENT_SERVICE_UPDATED, sprintf('Service « %s » modifie.', $service->name), $service);
             session()->flash('admin.status', 'Service mis a jour.');
         } else {
-            Service::create($data);
+            $service = Service::create($data);
+
+            Audit::log(Audit::EVENT_SERVICE_CREATED, sprintf('Service « %s » cree.', $service->name), $service);
             session()->flash('admin.status', 'Service cree.');
         }
 
@@ -68,10 +74,38 @@ class ServiceManager extends Component
         $this->dispatch('services-mis-a-jour');
     }
 
+    /**
+     * Un service encore rattache a un medecin ou a une visite n'est pas
+     * supprimable : on romprait des references du dossier patient.
+     */
+    public function delete(int $serviceId): void
+    {
+        $service = Service::withCount(['doctors', 'visits'])->findOrFail($serviceId);
+
+        if ($service->doctors_count > 0 || $service->visits_count > 0) {
+            session()->flash('admin.error', sprintf(
+                'Le service « %s » ne peut pas etre supprime : il compte %d medecin(s) et %d passage(s).',
+                $service->name,
+                $service->doctors_count,
+                $service->visits_count,
+            ));
+
+            return;
+        }
+
+        $name = $service->name;
+        $service->delete();
+
+        Audit::log(Audit::EVENT_SERVICE_DELETED, sprintf('Service « %s » supprime.', $name));
+
+        session()->flash('admin.status', 'Service supprime.');
+        $this->dispatch('services-mis-a-jour');
+    }
+
     public function render(): View
     {
         return view('livewire.admin.service-manager', [
-            'services' => Service::withCount(['doctors', 'patients'])->orderBy('name')->get(),
+            'services' => Service::withCount(['doctors', 'visits'])->orderBy('name')->get(),
         ]);
     }
 }

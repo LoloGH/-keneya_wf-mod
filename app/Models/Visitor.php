@@ -15,8 +15,16 @@ class Visitor extends Model
         'name',
         'mobile',
         'service_id',
+        'token',
         'reason',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'token' => 'integer',
+        ];
+    }
 
     public function service(): BelongsTo
     {

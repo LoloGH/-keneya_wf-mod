@@ -3,10 +3,11 @@
 namespace App\Livewire\Service;
 
 use App\Actions\CallNextPatient;
+use App\Actions\CloseVisit;
 use App\Actions\SendReferral;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
-use App\Models\Patient;
 use App\Models\Service;
+use App\Models\Visit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
@@ -14,8 +15,8 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
- * File d'attente du service courant, avec l'action « appeler le suivant » et
- * l'envoi d'un patient vers un autre service.
+ * File d'attente du service courant : appeler le suivant, renvoyer vers un
+ * autre service, cloturer le dossier.
  *
  * Tout se passe dans l'interface /service : le medecin ne quitte jamais son
  * ecran unique.
@@ -24,8 +25,8 @@ class ServiceQueue extends Component
 {
     use ScopedToOwnService;
 
-    /** Patient selectionne pour un renvoi. */
-    public ?int $referringPatientId = null;
+    /** Visite selectionnee pour un renvoi. */
+    public ?int $referringVisitId = null;
 
     public ?int $toServiceId = null;
 
@@ -37,6 +38,12 @@ class ServiceQueue extends Component
         $this->onServiceChanged($serviceId);
     }
 
+    #[On('file-mise-a-jour')]
+    public function refreshQueue(): void
+    {
+        // Un nouveau rendu suffit.
+    }
+
     protected function resetServiceState(): void
     {
         $this->cancelReferral();
@@ -44,21 +51,21 @@ class ServiceQueue extends Component
 
     public function callNext(CallNextPatient $action): void
     {
-        $patient = $action->execute($this->service(), $this->currentDoctor());
+        $visit = $action->execute($this->service(), $this->currentDoctor());
 
         session()->flash(
             'service.status',
-            $patient
-                ? sprintf('Ticket n° %d appele : %s (%s).', $patient->token, $patient->name, $patient->patient_code)
+            $visit
+                ? sprintf('Ticket n° %d appele : %s (%s).', $visit->token, $visit->patient->name, $visit->patient->patient_code)
                 : 'Aucun patient en attente dans cette file.'
         );
 
         $this->dispatch('file-mise-a-jour');
     }
 
-    public function startReferral(int $patientId): void
+    public function startReferral(int $visitId): void
     {
-        $this->referringPatientId = $patientId;
+        $this->referringVisitId = $visitId;
         $this->toServiceId = null;
         $this->instructions = '';
         $this->resetValidation();
@@ -66,14 +73,14 @@ class ServiceQueue extends Component
 
     public function cancelReferral(): void
     {
-        $this->reset(['referringPatientId', 'toServiceId', 'instructions']);
+        $this->reset(['referringVisitId', 'toServiceId', 'instructions']);
         $this->resetValidation();
     }
 
     public function sendReferral(SendReferral $action): void
     {
         $this->validate([
-            'referringPatientId' => ['required', 'integer', 'exists:patients,id'],
+            'referringVisitId' => ['required', 'integer', 'exists:visits,id'],
             'toServiceId' => ['required', 'integer', 'exists:services,id', 'different:serviceId'],
             'instructions' => ['required', 'string', 'min:3', 'max:2000'],
         ], attributes: [
@@ -81,16 +88,14 @@ class ServiceQueue extends Component
             'instructions' => 'instructions',
         ]);
 
-        // Le patient doit se trouver dans la file de ce service : on ne renvoie
+        // La visite doit se trouver dans la file de ce service : on ne renvoie
         // pas un patient dont on n'a pas la charge.
-        $patient = Patient::where('service_id', $this->serviceId)
-            ->findOrFail($this->referringPatientId);
-
+        $visit = Visit::where('service_id', $this->serviceId)->findOrFail($this->referringVisitId);
         $toService = Service::findOrFail($this->toServiceId);
 
         try {
             $action->execute(
-                patient: $patient,
+                visit: $visit,
                 fromDoctor: $this->currentDoctor(),
                 toService: $toService,
                 instructions: $this->instructions,
@@ -101,7 +106,7 @@ class ServiceQueue extends Component
 
         session()->flash('service.status', sprintf(
             '%s a ete envoye(e) vers %s.',
-            $patient->name,
+            $visit->patient->name,
             $toService->name,
         ));
 
@@ -109,7 +114,33 @@ class ServiceQueue extends Component
         $this->dispatch('file-mise-a-jour');
     }
 
-    public function showHistory(int $patientId): void
+    /**
+     * Cloture de l'episode de soins. Bloquee tant qu'un renvoi attend son
+     * resultat — le message le dit explicitement plutot que de griser un
+     * bouton sans expliquer pourquoi.
+     */
+    public function closeVisit(int $visitId, CloseVisit $action): void
+    {
+        $visit = Visit::where('service_id', $this->serviceId)->findOrFail($visitId);
+
+        try {
+            $action->execute($visit, $this->currentDoctor());
+        } catch (InvalidArgumentException $e) {
+            session()->flash('service.error', $e->getMessage());
+            $this->dispatch('file-mise-a-jour');
+
+            return;
+        }
+
+        session()->flash('service.status', sprintf(
+            'Dossier de %s cloture.',
+            $visit->patient->name,
+        ));
+
+        $this->dispatch('file-mise-a-jour');
+    }
+
+    public function showRecord(int $patientId): void
     {
         // Le dossier s'ouvre dans un panneau de cette meme interface.
         $this->dispatch('afficher-dossier', patientId: $patientId);
@@ -122,9 +153,10 @@ class ServiceQueue extends Component
 
     public function render(): View
     {
-        $queue = Patient::query()
+        $queue = Visit::query()
+            ->with(['patient', 'referrals'])
             ->inTodaysQueue($this->serviceId)
-            ->orderByRaw("CASE WHEN status = 'waiting' THEN 0 ELSE 1 END")
+            ->orderByRaw("CASE status WHEN 'waiting' THEN 0 WHEN 'called' THEN 1 ELSE 2 END")
             ->orderBy('token')
             ->get();
 
