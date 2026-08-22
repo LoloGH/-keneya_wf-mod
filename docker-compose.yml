@@ -1,0 +1,72 @@
+# KEneYa WorkFlow — pile applicative complete.
+#
+# Ce fichier tourne a l'identique sous Docker Engine (Linux) et sous
+# Docker Desktop / WSL2 (Windows) : aucun chemin absolu, aucun montage
+# specifique a un systeme, aucune option reservee a Linux.
+#
+#   docker compose up -d --build
+#
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: keneya-workflow-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - keneya_storage:/var/www/html/storage
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - keneya
+
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${APP_HTTP_PORT:-8080}:80"
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - keneya
+
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    ports:
+      # Publie pour les sauvegardes et les outils d'administration.
+      - "${DB_PUBLISHED_PORT:-3307}:3306"
+    environment:
+      MARIADB_DATABASE: "${DB_DATABASE:-keneya_workflow}"
+      MARIADB_USER: "${DB_USERNAME:-keneya}"
+      MARIADB_PASSWORD: "${DB_PASSWORD:-keneya}"
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-root}"
+    volumes:
+      # Volume dedie : c'est lui que l'on sauvegarde (voir README).
+      - keneya_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - keneya
+
+volumes:
+  keneya_db:
+    name: keneya_db
+  keneya_storage:
+    name: keneya_storage
+
+networks:
+  keneya:
+    driver: bridge
