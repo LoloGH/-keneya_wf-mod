@@ -61,14 +61,15 @@ h1, h2, h3 { margin: 0; line-height: 1.25; }
     background: var(--bleu-fonce); color: var(--blanc);
 }
 
-.app-header__identity { display: flex; flex-direction: column; }
-.app-header__product { font-size: 1.15rem; font-weight: 700; }
-.app-header__hospital { font-size: .85rem; opacity: .85; }
+.app-header__context { display: flex; align-items: center; gap: .85rem; }
 
-.app-header__context { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
-.app-header__space { font-weight: 600; }
-.app-header__user { display: flex; flex-direction: column; font-size: .9rem; }
-.app-header__user em { font-style: normal; opacity: .8; font-size: .8rem; }
+/* Nom du role, ou du service pour un medecin : la seule information de
+   contexte a droite de la barre. */
+.app-header__role {
+    font-weight: 600; font-size: .95rem;
+    padding: .3rem .75rem; border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+}
 
 .app-main { max-width: 1400px; margin: 0 auto; padding: 1rem; }
 
@@ -339,15 +340,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 /* ---------- Barre de marque ---------- */
 
-.app-header__brand { display: flex; align-items: center; gap: .6rem; }
+/* Logo et nom de l'etablissement cote a cote, a gauche de la barre. */
+.app-header__brand { display: flex; align-items: center; gap: .65rem; min-width: 0; }
 .app-header__logo { flex: 0 0 auto; }
+.app-header__names { display: flex; flex-direction: column; min-width: 0; }
 .app-header__hospital {
-    width: 100%; text-align: right; font-size: .85rem; opacity: .85;
+    font-size: 1.05rem; font-weight: 700; line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-
-@media (min-width: 700px) {
-    .app-header__hospital { width: auto; text-align: right; }
-}
+.app-header__product { font-size: .8rem; opacity: .8; line-height: 1.2; }
 
 /* ---------- Page de connexion ---------- */
 
@@ -481,3 +482,90 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 /* ---------- Planning ---------- */
 
 .schedule--today { background: var(--bleu-clair); }
+
+/* =========================================================================
+   Refonte navigation — bouton icone et barre laterale en onglets
+   ========================================================================= */
+
+/* ---------- Bouton icone (deconnexion) ---------- */
+
+.icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: var(--touch); height: var(--touch);
+    padding: 0; color: inherit;
+    background: transparent; border: 1px solid currentColor; border-radius: 50%;
+    cursor: pointer;
+}
+
+.icon-btn:hover { background: rgba(255, 255, 255, .14); }
+
+/* ---------- Espace de travail : barre laterale + panneau ---------- */
+
+.workspace { display: grid; gap: 1rem; align-items: start; }
+
+/* Bouton d'ouverture du tiroir : uniquement sur petit format. */
+.workspace__toggle {
+    display: flex; align-items: center; gap: .6rem;
+    width: 100%; min-height: var(--touch); padding: .6rem .9rem;
+    font: inherit; font-weight: 600; text-align: left;
+    color: var(--bleu-fonce); background: var(--blanc);
+    border: 1px solid var(--gris-300); border-radius: var(--rayon);
+    box-shadow: var(--ombre); cursor: pointer;
+}
+
+.workspace__toggle-current {
+    margin-left: auto; font-weight: 400; color: var(--gris-700); font-size: .9rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* La barre laterale est un tiroir replie par defaut sur tablette et mobile :
+   sur un petit ecran, une colonne fixe mangerait trop de largeur. */
+.tabnav {
+    display: none;
+    background: var(--blanc); border: 1px solid var(--gris-300);
+    border-radius: var(--rayon); box-shadow: var(--ombre); padding: .5rem;
+}
+
+.tabnav--open { display: block; }
+
+.tabnav__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .15rem; }
+.tabnav__list--nested { margin: .15rem 0 .35rem .85rem; padding-left: .6rem; border-left: 2px solid var(--gris-300); }
+
+.tabnav__item { display: flex; flex-direction: column; }
+
+.tabnav__link,
+.tabnav__group {
+    display: flex; align-items: center; gap: .5rem;
+    width: 100%; min-height: var(--touch); padding: .55rem .75rem;
+    font: inherit; text-align: left; color: var(--gris-900);
+    background: transparent; border: 0; border-radius: var(--rayon); cursor: pointer;
+}
+
+.tabnav__group { font-weight: 700; color: var(--gris-700); }
+.tabnav__link:hover, .tabnav__group:hover { background: var(--gris-100); }
+
+.tabnav__link--active {
+    background: var(--bleu-clair); color: var(--bleu-fonce); font-weight: 700;
+    box-shadow: inset 3px 0 0 var(--bleu);
+}
+
+.tabnav__chevron { flex: 0 0 auto; transition: transform .15s ease; }
+.tabnav__chevron--open { transform: rotate(90deg); }
+
+/* Le panneau actif : une seule section a la fois, plus de defilement a
+   travers toutes les sections empilees. */
+.workspace__panel { min-width: 0; display: flex; flex-direction: column; gap: 1rem; }
+.workspace__panel .page-title { margin-bottom: 0; }
+
+/* A partir de la tablette en paysage, la barre laterale devient une colonne
+   permanente et le bouton de tiroir disparait. */
+@media (min-width: 900px) {
+    .workspace { grid-template-columns: minmax(210px, 240px) minmax(0, 1fr); }
+    .workspace__toggle { display: none; }
+    .tabnav { display: block; position: sticky; top: 1rem; }
+}
+
+/* Dans /service, le dossier patient occupe une troisieme colonne. */
+@media (min-width: 1100px) {
+    .grid--main > .workspace { grid-column: 1; }
+}

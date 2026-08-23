@@ -9,29 +9,39 @@
     @livewireStyles
 </head>
 <body class="app-body">
-    {{-- Barre de marque, presente sur les trois interfaces. Volontairement
-         depourvue de tout lien de navigation : un role, une interface. --}}
+    {{-- Barre de marque, identique sur les trois interfaces. Volontairement
+         depourvue de tout lien de navigation vers un autre espace : un role,
+         une interface. --}}
     <header class="app-header">
         <div class="app-header__brand">
             <x-brand-logo class="app-header__logo" />
-            <span class="app-header__product">{{ config('keneya.name') }}</span>
+            <span class="app-header__names">
+                <span class="app-header__hospital">{{ $hospitalName ?? hospital_name() }}</span>
+                <span class="app-header__product">{{ config('keneya.name') }}</span>
+            </span>
         </div>
 
         <div class="app-header__context">
-            <span class="app-header__space">{{ $space ?? '' }}</span>
-
             @auth
-                <span class="app-header__user">
-                    {{ auth()->user()->name }}
-                    <em>{{ \App\Support\Roles::label(auth()->user()->scopedRole()) }}</em>
+                {{-- Le rôle, ou le service pour un medecin : les pages
+                     surchargent `context` quand il y a plus precis a dire. --}}
+                <span class="app-header__role">
+                    {{ $context ?? \App\Support\Roles::label(auth()->user()->scopedRole()) }}
                 </span>
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="btn btn--ghost">Se deconnecter</button>
+                    <button type="submit" class="icon-btn" data-testid="logout"
+                            aria-label="Se deconnecter" title="Se deconnecter">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M15 17l5-5-5-5" />
+                            <path d="M20 12H9" />
+                            <path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" />
+                        </svg>
+                    </button>
                 </form>
             @endauth
-
-            <span class="app-header__hospital">{{ $hospitalName ?? hospital_name() }}</span>
         </div>
     </header>
 
