@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,12 +13,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Companion extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     protected $fillable = ['patient_id', 'name', 'phone', 'relation'];
 
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Accompagnateur';
     }
 }

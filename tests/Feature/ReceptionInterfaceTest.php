@@ -62,18 +62,24 @@ class ReceptionInterfaceTest extends TestCase
     public function test_le_formulaire_visiteur_cree_une_fiche_avec_ticket(): void
     {
         $service = Service::factory()->create();
+        $patient = Patient::factory()->create(['name' => 'Sekou Diarra']);
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(VisitorRegistrationForm::class)
             ->set('name', 'Mariam Kone')
             ->set('service_id', $service->getKey())
+            ->call('selectPatient', $patient->getKey())
             ->set('reason', 'Visite a un proche')
             ->call('save')
             ->assertHasNoErrors()
             ->assertSee('HFD-V-00001');
 
         $this->assertSame(1, Visitor::count());
-        $this->assertSame(0, Patient::count());
+
+        // Enregistrer un visiteur ne cree aucun patient supplementaire : seul
+        // le patient visite, cree pour ce test, existe.
+        $this->assertSame(1, Patient::count());
+        $this->assertSame($patient->getKey(), Visitor::first()->patient_id);
 
         // Le visiteur tire dans la meme sequence que les patients du service.
         $this->assertSame(1, Visitor::first()->token);
@@ -93,6 +99,7 @@ class ReceptionInterfaceTest extends TestCase
         Livewire::actingAs($receptionist)
             ->test(VisitorRegistrationForm::class)
             ->set('name', 'Visiteur B')->set('service_id', $service->getKey())
+            ->call('selectPatient', Patient::factory()->create()->getKey())
             ->call('save')->assertHasNoErrors();
 
         Livewire::actingAs($receptionist)

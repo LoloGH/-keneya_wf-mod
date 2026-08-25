@@ -100,6 +100,22 @@
                 {{ $lastRegistered['name'] }} — {{ $lastRegistered['service'] }},
                 ticket n° {{ $lastRegistered['token'] }}
             </p>
+            @if ($lastRegistered['pending'])
+                <p class="ticket__meta">Puis : {{ $lastRegistered['pending'] }}, apres paiement.</p>
+            @endif
+
+            {{-- Le code a communiquer au patient pour qu'il consulte ses
+                 documents en ligne. Il figure aussi sur le ticket imprime. --}}
+            <p class="ticket__label">Code personnel</p>
+            <p class="ticket__code">{{ $lastRegistered['access_code'] }}</p>
+
+            <div class="btn-row btn-row--centered">
+                <a href="{{ route('reception.ticket.patient', $lastRegistered['visit_id']) }}"
+                   target="_blank" class="btn btn--primary">Imprimer le ticket</a>
+                <button type="button" class="btn btn--secondary" wire:click="sendPortalLink">
+                    Envoyer le lien de mes documents
+                </button>
+            </div>
         </div>
     @endif
 </section>

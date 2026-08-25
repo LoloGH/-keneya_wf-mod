@@ -17,6 +17,8 @@ final class Roles
 
     public const DOCTOR = 'doctor';
 
+    public const CASHIER = 'cashier';
+
     /**
      * @var array<string, string> role => route nommee de son interface unique
      */
@@ -24,6 +26,7 @@ final class Roles
         self::ADMIN => 'admin.home',
         self::RECEPTIONIST => 'reception.home',
         self::DOCTOR => 'service.home',
+        self::CASHIER => 'caisse.home',
     ];
 
     /**
@@ -33,6 +36,7 @@ final class Roles
         self::ADMIN => 'Administrateur',
         self::RECEPTIONIST => 'Receptionniste',
         self::DOCTOR => 'Medecin',
+        self::CASHIER => 'Caissier',
     ];
 
     /**
@@ -40,7 +44,7 @@ final class Roles
      */
     public static function all(): array
     {
-        return [self::ADMIN, self::RECEPTIONIST, self::DOCTOR];
+        return [self::ADMIN, self::RECEPTIONIST, self::DOCTOR, self::CASHIER];
     }
 
     public static function homeRoute(?string $role): ?string

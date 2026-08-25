@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Attachment extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     /** Taille maximale acceptee, en kilo-octets (10 Mo). */
     public const MAX_SIZE_KB = 10240;
@@ -86,5 +87,10 @@ class Attachment extends Model
         }
 
         return round($this->size / (1024 * 1024), 1).' Mo';
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Piece jointe';
     }
 }

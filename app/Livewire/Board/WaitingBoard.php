@@ -42,12 +42,17 @@ class WaitingBoard extends Component
                     ->orderBy('token')
                     ->pluck('token');
 
-                $visitorTokens = Visitor::query()
+                // Le personnel doit savoir qui orienter vers qui : le ticket
+                // d'un visiteur porte le nom du patient visite.
+                $visitors = Visitor::query()
+                    ->with('patient')
                     ->where('service_id', $service->getKey())
                     ->whereDate('created_at', today())
                     ->whereNotNull('token')
                     ->orderBy('token')
-                    ->pluck('token');
+                    ->get();
+
+                $visitorTokens = $visitors->pluck('token');
 
                 // Les deux files partagent la meme sequence : on les fusionne
                 // pour afficher un ordre d'appel unique et lisible.
@@ -58,6 +63,7 @@ class WaitingBoard extends Component
                     'current' => $called?->token,
                     'next' => $upcoming->take(3),
                     'waiting_count' => $upcoming->count(),
+                    'visitors' => $visitors->take(3),
                 ];
             });
 

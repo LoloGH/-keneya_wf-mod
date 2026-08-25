@@ -3,9 +3,8 @@
 namespace App\Livewire\Service;
 
 use App\Models\Patient;
-use App\Models\PatientHistory;
+use App\Services\PatientTimeline;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -35,36 +34,22 @@ class PatientRecordPanel extends Component
         $this->patientId = null;
     }
 
-    public function render(): View
+    public function render(PatientTimeline $timeline): View
     {
         $patient = $this->patientId
             ? Patient::with(['companions', 'visits.service'])->find($this->patientId)
             : null;
 
-        /** @var Collection<int, PatientHistory> $history */
-        $history = $patient
-            ? PatientHistory::query()
-                ->with(['service', 'doctor.user', 'referral', 'attachments'])
-                ->where('patient_id', $patient->getKey())
-                ->orderBy('id')
-                ->get()
-            : collect();
-
-        // Un groupe par visite, du passage le plus recent au plus ancien.
-        $episodes = $patient
-            ? $patient->visits->sortByDesc('opened_at')->values()->map(fn ($visit) => [
-                'visit' => $visit,
-                'entries' => $history->where('visit_id', $visit->getKey())->values(),
-            ])
-            : collect();
-
-        // Les lignes anterieures a l'introduction des visites, le cas echeant.
-        $orphans = $history->whereNull('visit_id')->values();
+        // Une seule frise par passage : consultations, renvois, ordonnances,
+        // conclusions, paiements et pieces jointes melanges par ordre de date.
+        $frise = $patient
+            ? $timeline->for($patient)
+            : ['episodes' => collect(), 'orphans' => collect()];
 
         return view('livewire.service.patient-record-panel', [
             'patient' => $patient,
-            'episodes' => $episodes,
-            'orphans' => $orphans,
+            'episodes' => $frise['episodes'],
+            'orphans' => $frise['orphans'],
         ]);
     }
 }

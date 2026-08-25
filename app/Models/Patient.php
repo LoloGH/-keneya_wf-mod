@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Patient extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     protected $fillable = [
         'patient_code',
@@ -26,7 +27,16 @@ class Patient extends Model
         'gender',
         'mobile',
         'crno',
+        'access_code',
+        'portal_token',
     ];
+
+    /**
+     * Le code d'acces ne doit pas partir dans une serialisation par megarde.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = ['access_code'];
 
     protected function casts(): array
     {
@@ -81,5 +91,39 @@ class Patient extends Model
     public function appointments(): HasMany
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    public function visitors(): HasMany
+    {
+        return $this->hasMany(Visitor::class);
+    }
+
+    public function portalAccessAttempt(): HasOne
+    {
+        return $this->hasOne(PortalAccessAttempt::class);
+    }
+
+    /**
+     * Identifiant du patient tel qu'on le prononce a l'accueil.
+     */
+    public function label(): string
+    {
+        return sprintf('%s (%s)', $this->name, $this->patient_code);
+    }
+
+    /**
+     * Le code d'acces et le jeton du portail n'ont rien a faire dans un
+     * journal consultable par l'administration.
+     *
+     * @return array<int, string>
+     */
+    protected function auditedAttributes(): array
+    {
+        return ['patient_code', 'name', 'age', 'gender', 'mobile', 'crno'];
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Patient';
     }
 }

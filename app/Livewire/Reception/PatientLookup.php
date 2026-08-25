@@ -93,7 +93,7 @@ class PatientLookup extends Component
         return view('livewire.reception.patient-lookup', [
             'matches' => $matches,
             'selected' => $this->selectedPatientId ? Patient::with('visits.service')->find($this->selectedPatientId) : null,
-            'services' => Service::orderBy('name')->get(),
+            'services' => Service::careServices()->orderBy('name')->get(),
             'openStatuses' => [Visit::STATUS_WAITING, Visit::STATUS_CALLED],
         ]);
     }

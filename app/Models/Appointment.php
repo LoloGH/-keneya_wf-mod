@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Appointment extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     public const STATUS_SCHEDULED = 'scheduled';
 
@@ -67,5 +68,10 @@ class Appointment extends Model
     public function statusLabel(): string
     {
         return self::STATUS_LABELS[$this->status] ?? $this->status;
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Rendez-vous';
     }
 }

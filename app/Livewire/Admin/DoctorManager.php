@@ -45,7 +45,15 @@ class DoctorManager extends Component
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => [$this->editingId ? 'nullable' : 'required', 'string', 'min:8'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'service_id' => ['required', 'integer', 'exists:services,id'],
+            // Un medecin ne tient jamais une caisse : la regle exclut ce type
+            // de service cote serveur, pas seulement dans la liste deroulante.
+            'service_id' => [
+                'required',
+                'integer',
+                Rule::exists('services', 'id')->where(
+                    fn ($query) => $query->where('kind', '!=', Service::KIND_CAISSE),
+                ),
+            ],
         ];
     }
 
@@ -150,7 +158,7 @@ class DoctorManager extends Component
                 ->get()
                 ->sortBy(fn (Doctor $doctor) => $doctor->user->name)
                 ->values(),
-            'services' => Service::orderBy('name')->get(),
+            'services' => Service::careServices()->orderBy('name')->get(),
         ]);
     }
 }

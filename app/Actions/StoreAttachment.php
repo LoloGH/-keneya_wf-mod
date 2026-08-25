@@ -3,10 +3,12 @@
 namespace App\Actions;
 
 use App\Models\Attachment;
+use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Referral;
 use App\Models\User;
 use App\Models\Visit;
+use App\Support\Audit;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
@@ -50,6 +52,44 @@ class StoreAttachment
             'size' => $file->getSize() ?: 0,
             'uploaded_by_user_id' => $uploadedBy->getKey(),
         ]);
+    }
+
+    /**
+     * Depot depuis le dossier d'un patient, sans renvoi ni entree d'historique
+     * en contexte (v3.2, point 3). `patient_id` reste le point d'ancrage ; la
+     * visite n'est renseignee que si le patient en a une.
+     */
+    public function executeForPatient(
+        UploadedFile $file,
+        Patient $patient,
+        User $uploadedBy,
+        ?Visit $visit = null,
+    ): Attachment {
+        $this->assertAcceptable($file);
+
+        $path = $file->store((string) $patient->getKey(), 'attachments');
+
+        if ($path === false) {
+            throw new InvalidArgumentException("Le fichier n'a pas pu etre enregistre.");
+        }
+
+        $attachment = Attachment::create([
+            'patient_id' => $patient->getKey(),
+            'visit_id' => $visit?->getKey(),
+            'original_name' => $file->getClientOriginalName(),
+            'path' => $path,
+            'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
+            'size' => $file->getSize() ?: 0,
+            'uploaded_by_user_id' => $uploadedBy->getKey(),
+        ]);
+
+        Audit::log(
+            Audit::EVENT_ATTACHMENT_ADDED,
+            sprintf('Piece jointe « %s » ajoutee au dossier %s.', $attachment->original_name, $patient->patient_code),
+            $attachment,
+        );
+
+        return $attachment;
     }
 
     public function delete(Attachment $attachment): void

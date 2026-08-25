@@ -55,6 +55,31 @@ final class Audit
 
     public const EVENT_SCHEDULE_CHANGED = 'planning_modifie';
 
+    public const EVENT_SCHEDULE_BULK = 'planning_groupe';
+
+    public const EVENT_PATIENT_CALLED = 'patient_appele';
+
+    public const EVENT_PAYMENT_CONFIRMED = 'paiement_confirme';
+
+    public const EVENT_CONCLUSION_RECORDED = 'conclusion_redigee';
+
+    public const EVENT_ATTACHMENT_ADDED = 'piece_jointe_ajoutee';
+
+    public const EVENT_VISITOR_REGISTERED = 'visiteur_enregistre';
+
+    public const EVENT_PORTAL_LINK_SENT = 'lien_portail_envoye';
+
+    public const EVENT_PORTAL_ACCESS = 'consultation_portail';
+
+    public const EVENT_PATIENT_DELETED = 'patient_supprime';
+
+    /** Modifications d'attributs captees automatiquement par LogsActivity. */
+    public const EVENT_CREATED = 'created';
+
+    public const EVENT_UPDATED = 'updated';
+
+    public const EVENT_DELETED = 'deleted';
+
     /**
      * Libelles francais des evenements, pour l'affichage et le filtre.
      *
@@ -80,6 +105,18 @@ final class Audit
         self::EVENT_PRESCRIPTION_CREATED => 'Creation d\'une ordonnance',
         self::EVENT_APPOINTMENT_CREATED => 'Prise de rendez-vous',
         self::EVENT_SCHEDULE_CHANGED => 'Modification d\'un planning',
+        self::EVENT_SCHEDULE_BULK => 'Creation groupee de planning',
+        self::EVENT_PATIENT_CALLED => 'Appel du patient suivant',
+        self::EVENT_PAYMENT_CONFIRMED => 'Confirmation de paiement',
+        self::EVENT_CONCLUSION_RECORDED => 'Conclusion de consultation',
+        self::EVENT_ATTACHMENT_ADDED => 'Ajout d\'une piece jointe',
+        self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
+        self::EVENT_PORTAL_LINK_SENT => 'Envoi du lien de documents',
+        self::EVENT_PORTAL_ACCESS => 'Consultation du portail patient',
+        self::EVENT_PATIENT_DELETED => 'Suppression d\'un dossier patient',
+        self::EVENT_CREATED => 'Creation',
+        self::EVENT_UPDATED => 'Modification',
+        self::EVENT_DELETED => 'Suppression',
     ];
 
     /**

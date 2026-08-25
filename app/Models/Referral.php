@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Referral extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     public const STATUS_PENDING = 'pending';
 
@@ -93,5 +94,10 @@ class Referral extends Model
     public function statusLabel(): string
     {
         return self::STATUS_LABELS[$this->status] ?? $this->status;
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Renvoi';
     }
 }

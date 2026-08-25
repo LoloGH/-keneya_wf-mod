@@ -123,14 +123,16 @@ class NavigationLayoutTest extends TestCase
     {
         return [
             'admin' => ['admin', '/admin', [
-                'Etablissement', 'Services', 'Personnel', 'Patients', "Journal d'audit",
+                'Etablissement', 'Services', 'Personnel', 'Patients',
+                "Journal d'audit", 'Supprimer un dossier',
             ]],
             'accueil' => ['receptionist', '/reception', [
-                'Enregistrement', 'Rendez-vous du jour', 'Caisse Ticket',
+                'Enregistrement', 'Rendez-vous du jour',
                 "Salle d'attente", 'Passages du jour', 'Mon planning',
             ]],
             'service' => ['doctor', '/service', [
-                "File d'attente", 'Renvois', 'Fin de consultation', 'Mes patients', 'Mon planning',
+                "File d'attente", 'Renvois', 'Fin de consultation',
+                'Mes patients', 'Mes rendez-vous', 'Mon planning',
             ]],
         ];
     }

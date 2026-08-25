@@ -27,6 +27,18 @@
                         <span class="board__next-token board__next-token--empty">—</span>
                     @endforelse
                 </p>
+
+                @if ($row['visitors']->isNotEmpty())
+                    <ul class="board__visitors">
+                        @foreach ($row['visitors'] as $visiteur)
+                            <li>
+                                <span class="mono">{{ $visiteur->token }}</span>
+                                visiteur
+                                @if ($visiteur->patient) — {{ $visiteur->patient->name }} @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </article>
         @endforeach
     </div>

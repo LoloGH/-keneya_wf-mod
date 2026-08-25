@@ -9,7 +9,6 @@
             ['key' => 'visiteur', 'label' => 'Visiteur', 'view' => 'sections.reception.visitor'],
         ]],
         ['key' => 'rendez-vous', 'label' => 'Rendez-vous du jour', 'view' => 'sections.reception.appointments'],
-        ['key' => 'caisse', 'label' => 'Caisse Ticket', 'view' => 'sections.reception.cashier'],
         ['key' => 'salle-attente', 'label' => "Salle d'attente", 'view' => 'sections.reception.board'],
         ['key' => 'passages', 'label' => 'Passages du jour', 'view' => 'sections.reception.today'],
         ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.reception.schedule'],

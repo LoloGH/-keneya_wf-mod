@@ -31,6 +31,12 @@ class PatientHistory extends Model
 
     public const TYPE_PRESCRIPTION = 'prescription';
 
+    /** Conclusion redigee par le medecin en fin de prise en charge. */
+    public const TYPE_CONSULTATION_CONCLUSION = 'consultation_conclusion';
+
+    /** Paiement encaisse a la caisse, le patient est oriente vers son service. */
+    public const TYPE_PAYMENT_CONFIRMED = 'payment_confirmed';
+
     /**
      * @var array<string, string>
      */
@@ -42,6 +48,8 @@ class PatientHistory extends Model
         self::TYPE_REFERRAL_CLOSED => 'Renvoi cloture',
         self::TYPE_DOSSIER_CLOSED => 'Dossier cloture',
         self::TYPE_PRESCRIPTION => 'Ordonnance',
+        self::TYPE_CONSULTATION_CONCLUSION => 'Conclusion de consultation',
+        self::TYPE_PAYMENT_CONFIRMED => 'Paiement confirme',
     ];
 
     protected $table = 'patient_history';

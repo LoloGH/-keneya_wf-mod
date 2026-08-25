@@ -19,6 +19,11 @@ class ServiceSeeder extends Seeder
             ['name' => 'Administration', 'kind' => Service::KIND_CLINIQUE],
             ['name' => 'Echographie', 'kind' => Service::KIND_PLATEAU_TECHNIQUE],
             ['name' => 'Laboratoire', 'kind' => Service::KIND_PLATEAU_TECHNIQUE],
+
+            // Les deux caisses sont des services a part entiere : meme file,
+            // meme token, meme « Appeler le suivant ».
+            ['name' => Service::CAISSE_TICKET, 'kind' => Service::KIND_CAISSE],
+            ['name' => Service::CAISSE_SERVICES, 'kind' => Service::KIND_CAISSE],
         ];
 
         foreach ($services as $service) {

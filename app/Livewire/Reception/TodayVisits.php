@@ -38,7 +38,7 @@ class TodayVisits extends Component
             ->get();
 
         $visitors = Visitor::query()
-            ->with('service')
+            ->with(['service', 'patient'])
             ->whereDate('created_at', today())
             ->when($search !== '', fn ($query) => $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
