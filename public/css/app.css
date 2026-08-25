@@ -319,8 +319,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 .board--fullscreen { padding: 1.5rem; }
 .board--fullscreen .board__header { text-align: center; margin-bottom: 1.5rem; }
-.board--fullscreen .board__header h1 { font-size: 2rem; }
-.board--fullscreen .board__header p { margin: .2rem 0 0; opacity: .8; }
+.board__logo { display: block; width: min(420px, 70%); height: auto; margin: 0 auto; }
+.board--fullscreen .board__header p { margin: .5rem 0 0; opacity: .8; font-size: 1.1rem; }
 .board--fullscreen .board__grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
 .board--fullscreen .board__service { background: #262f35; border-color: #3b464e; }
 .board--fullscreen .board__service-name { color: #cfd8dd; font-size: 1.3rem; }
@@ -341,14 +341,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 /* ---------- Barre de marque ---------- */
 
 /* Logo et nom de l'etablissement cote a cote, a gauche de la barre. */
-.app-header__brand { display: flex; align-items: center; gap: .65rem; min-width: 0; }
-.app-header__logo { flex: 0 0 auto; }
-.app-header__names { display: flex; flex-direction: column; min-width: 0; }
+.app-header__brand { display: flex; align-items: center; gap: .7rem; min-width: 0; }
+.app-header__logo { flex: 0 0 auto; height: 40px; width: auto; }
 .app-header__hospital {
     font-size: 1.05rem; font-weight: 700; line-height: 1.2;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.app-header__product { font-size: .8rem; opacity: .8; line-height: 1.2; }
 
 /* ---------- Page de connexion ---------- */
 
@@ -363,9 +361,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 }
 
 .login-screen .login { margin: 0; width: 100%; max-width: 420px; }
-.login__brand { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; color: var(--bleu-fonce); }
-.login__logo { flex: 0 0 auto; }
-.login__product { margin: 0; font-weight: 700; font-size: 1.1rem; }
+.login__logo { display: block; width: 100%; height: auto; margin-bottom: 1.25rem; }
 
 /* ---------- Indications et alertes ---------- */
 

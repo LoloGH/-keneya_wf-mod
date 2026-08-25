@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Favicon KEneYa WorkFlow.
+
+  Version simplifiee du monogramme : le K et le W sur une tuile bleu nuit, avec
+  la croix medicale. L'arc et les trois points du logo complet sont volontairement
+  omis — a 16 pixels ils se reduisent a une bouillie et brouillent la lecture.
+  La tuile pleine, elle, reste identifiable dans un onglet.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
+  <title>KƐnƐya WorkFlow</title>
+
+  <rect width="512" height="512" rx="104" fill="#1D3A5C"/>
+
+  <path d="M372 122 h40 v28 h28 v40 h-28 v28 h-40 v-28 h-28 v-40 h28 Z" fill="#2FBF8F"/>
+
+  <path d="M292 252 L336 388 L378 302 L420 388 L464 252" stroke="#2FBF8F" stroke-width="48"
+        stroke-linejoin="miter" stroke-linecap="butt"/>
+
+  <rect x="92" y="150" width="56" height="240" rx="12" fill="#FFFFFF"/>
+  <path d="M268 195 L148 270 L268 385" stroke="#FFFFFF" stroke-width="56"
+        stroke-linejoin="miter" stroke-linecap="butt"/>
+</svg>
