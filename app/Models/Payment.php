@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Payment extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     public const TYPE_TICKET = 'ticket';
 
@@ -90,5 +91,10 @@ class Payment extends Model
     public function formattedAmount(): string
     {
         return number_format((float) $this->amount, 0, ',', ' ').' FCFA';
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Encaissement';
     }
 }

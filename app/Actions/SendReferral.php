@@ -27,6 +27,7 @@ class SendReferral
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
         private readonly SmsGateway $sms,
+        private readonly RouteThroughCaisse $routing,
     ) {}
 
     public function execute(Visit $visit, Doctor $fromDoctor, Service $toService, string $instructions): Referral
@@ -41,6 +42,12 @@ class SendReferral
             throw new InvalidArgumentException('Le service destinataire doit etre different du service actuel du patient.');
         }
 
+        // La caisse est une etape de routage, jamais une destination medicale :
+        // c'est RouteThroughCaisse qui l'intercale, personne ne l'y envoie.
+        if ($toService->isCaisse()) {
+            throw new InvalidArgumentException("La caisse n'est pas une destination de renvoi.");
+        }
+
         $referral = DB::transaction(function () use ($visit, $fromDoctor, $fromService, $toService, $instructions): Referral {
             $referral = Referral::create([
                 'patient_id' => $visit->patient_id,
@@ -52,9 +59,17 @@ class SendReferral
                 'status' => Referral::STATUS_PENDING,
             ]);
 
+            // Un plateau technique se regle avant d'etre realise : la visite est
+            // routee vers la Caisse Services, la vraie destination attend dans
+            // `pending_next_service_id`. La ligne `referrals` ci-dessus garde,
+            // elle, la destination metier reelle — la caisse n'est jamais la
+            // destination d'un renvoi au sens medical.
+            [$file, $enAttente] = $this->routing->resolve($toService);
+
             $visit->update([
-                'service_id' => $toService->getKey(),
-                'token' => $this->tokens->next($toService),
+                'service_id' => $file->getKey(),
+                'pending_next_service_id' => $enAttente?->getKey(),
+                'token' => $this->tokens->next($file),
                 'status' => Visit::STATUS_WAITING,
             ]);
 
@@ -62,10 +77,11 @@ class SendReferral
                 visit: $visit,
                 type: PatientHistory::TYPE_REFERRAL_SENT,
                 description: sprintf(
-                    'Renvoye de %s vers %s par %s. Instructions : %s',
+                    'Renvoye de %s vers %s par %s.%s Instructions : %s',
                     $fromService->name,
                     $toService->name,
                     $fromDoctor->name(),
+                    $enAttente ? ' Passage par '.$file->name.' avant realisation.' : '',
                     $instructions,
                 ),
                 serviceId: $toService->getKey(),
@@ -84,11 +100,13 @@ class SendReferral
 
         $patient = $visit->patient()->firstOrFail();
 
+        $courante = $visit->fresh()->load('service');
+
         $this->sms->send($patient->mobile, sprintf(
-            '%s : vous etes oriente(e) vers le service %s, ticket n° %d. Dossier %s.',
+            '%s : vous etes oriente(e) vers %s, ticket n° %d. Dossier %s.',
             config('keneya.name'),
-            $toService->name,
-            $visit->fresh()->token,
+            $courante->service->name,
+            $courante->token,
             $patient->patient_code,
         ));
 

@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\Companion;
 use App\Models\Patient;
 use App\Models\PatientHistory;
+use App\Models\Service;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
@@ -25,6 +26,7 @@ class RegisterPatient
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
         private readonly SmsGateway $sms,
+        private readonly RouteThroughCaisse $routing,
     ) {}
 
     /**
@@ -55,23 +57,29 @@ class RegisterPatient
                 ]);
             }
 
+            // La receptionniste choisit le service clinique, mais le patient
+            // patiente d'abord a la caisse : on regle avant d'etre pris en charge.
+            [$file, $enAttente] = $this->routing->resolve(Service::findOrFail($data['service_id']));
+
             $visit = Visit::create([
                 'patient_id' => $patient->getKey(),
-                'service_id' => $data['service_id'],
-                'token' => $this->tokens->next($data['service_id']),
+                'service_id' => $file->getKey(),
+                'pending_next_service_id' => $enAttente?->getKey(),
+                'token' => $this->tokens->next($file),
                 'status' => Visit::STATUS_WAITING,
                 'opened_at' => now(),
             ]);
 
-            $visit->load(['service', 'patient']);
+            $visit->load(['service', 'patient', 'pendingNextService']);
 
             $this->history->record(
                 visit: $visit,
                 type: PatientHistory::TYPE_REGISTRATION,
                 description: trim(sprintf(
-                    'Enregistrement a l\'accueil, oriente vers %s (ticket n° %d).%s',
+                    'Enregistrement a l\'accueil, oriente vers %s (ticket n° %d).%s%s',
                     $visit->service->name,
                     $visit->token,
+                    $enAttente ? ' Prise en charge prevue au service '.$enAttente->name.' apres paiement.' : '',
                     filled($data['reason'] ?? null) ? ' Motif : '.$data['reason'] : '',
                 )),
             );

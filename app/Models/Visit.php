@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Visit extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     public const STATUS_WAITING = 'waiting';
 
@@ -42,6 +43,7 @@ class Visit extends Model
     protected $fillable = [
         'patient_id',
         'service_id',
+        'pending_next_service_id',
         'token',
         'status',
         'opened_at',
@@ -92,6 +94,19 @@ class Visit extends Model
         return $this->belongsTo(Service::class);
     }
 
+    /**
+     * Le service ou la visite ira une fois le paiement confirme.
+     */
+    public function pendingNextService(): BelongsTo
+    {
+        return $this->belongsTo(Service::class, 'pending_next_service_id');
+    }
+
+    public function awaitsPayment(): bool
+    {
+        return $this->pending_next_service_id !== null;
+    }
+
     public function referrals(): HasMany
     {
         return $this->hasMany(Referral::class);
@@ -129,5 +144,10 @@ class Visit extends Model
     public function statusLabel(): string
     {
         return self::STATUS_LABELS[$this->status] ?? $this->status;
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Passage';
     }
 }

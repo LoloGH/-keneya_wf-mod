@@ -163,7 +163,7 @@ class ServiceQueue extends Component
         return view('livewire.service.service-queue', [
             'queue' => $queue,
             'service' => $this->service(),
-            'otherServices' => Service::where('id', '!=', $this->serviceId)
+            'otherServices' => Service::careServices()->where('id', '!=', $this->serviceId)
                 ->with('doctors.user')
                 ->orderBy('name')
                 ->get(),

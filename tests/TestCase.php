@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Models\Cashier;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Receptionist;
@@ -15,7 +16,7 @@ use Spatie\Permission\Models\Role;
 abstract class TestCase extends BaseTestCase
 {
     /**
-     * Cree les trois roles cloisonnes, comme le fait RoleSeeder au deploiement.
+     * Cree les quatre roles cloisonnes, comme le fait RoleSeeder au deploiement.
      * A appeler dans les tests ou c'est le code applicatif — et non le test —
      * qui attribue un role.
      */
@@ -38,6 +39,29 @@ abstract class TestCase extends BaseTestCase
         Receptionist::create(['user_id' => $user->getKey()]);
 
         return $user;
+    }
+
+    protected function makeCashier(): User
+    {
+        $user = $this->makeUserWithRole(Roles::CASHIER);
+
+        Cashier::create(['user_id' => $user->getKey()]);
+
+        return $user;
+    }
+
+    /**
+     * Les deux caisses du seeder, indispensables au routage sous condition de
+     * paiement : sans elles, RouteThroughCaisse laisse passer en direct.
+     *
+     * @return array{0: Service, 1: Service}
+     */
+    protected function makeCaisses(): array
+    {
+        return [
+            Service::factory()->caisse()->create(['name' => Service::CAISSE_TICKET]),
+            Service::factory()->caisse()->create(['name' => Service::CAISSE_SERVICES]),
+        ];
     }
 
     protected function makeDoctor(Service $service, ?string $phone = null): Doctor

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Cache;
  */
 class Setting extends Model
 {
+    use RecordsActivity;
+
     public const HOSPITAL_NAME = 'hospital_name';
 
     protected $fillable = ['key', 'value'];
@@ -39,5 +42,10 @@ class Setting extends Model
     private static function cacheKey(string $key): string
     {
         return 'settings:'.$key;
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Reglage';
     }
 }

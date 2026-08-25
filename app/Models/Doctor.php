@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Doctor extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     protected $fillable = ['user_id', 'service_id', 'phone'];
 
@@ -36,5 +37,10 @@ class Doctor extends Model
     public function name(): string
     {
         return $this->user?->name ?? '';
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Medecin';
     }
 }

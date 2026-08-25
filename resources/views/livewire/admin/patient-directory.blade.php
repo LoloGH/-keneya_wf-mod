@@ -63,8 +63,36 @@
         <div class="record">
             <div class="card__head">
                 <h3 class="card__subtitle">Dossier {{ $openPatient->patient_code }} — {{ $openPatient->name }}</h3>
-                <button type="button" class="btn btn--ghost" wire:click="closeRecord">Fermer</button>
+                <div class="btn-row">
+                    <button type="button" class="btn btn--ghost" wire:click="startAttachment">
+                        Ajouter une piece jointe
+                    </button>
+                    <button type="button" class="btn btn--ghost" wire:click="closeRecord">Fermer</button>
+                </div>
             </div>
+
+            @if ($addingAttachment)
+                <form wire:submit="saveAttachment" class="form my-patients__form">
+                    <div class="field">
+                        <label for="admin-pj">
+                            Fichiers
+                            <span class="field__hint">PDF, JPG ou PNG — 10 Mo maximum, 5 fichiers</span>
+                        </label>
+                        <input id="admin-pj" type="file" multiple wire:model="files"
+                               accept=".pdf,.jpg,.jpeg,.png">
+                        @error('files') <p class="field__error">{{ $message }}</p> @enderror
+                        @error('files.*') <p class="field__error">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="btn-row">
+                        <button type="submit" class="btn btn--primary" wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="files,saveAttachment">Enregistrer</span>
+                            <span wire:loading wire:target="files,saveAttachment">Televersement…</span>
+                        </button>
+                        <button type="button" class="btn btn--ghost" wire:click="cancelAttachment">Annuler</button>
+                    </div>
+                </form>
+            @endif
 
             @if ($openPatient->companions->isNotEmpty())
                 <ul class="companions">
@@ -94,22 +122,18 @@
                     </header>
 
                     <ol class="timeline">
-                        @forelse ($episode['entries'] as $entry)
-                            <li class="timeline__item timeline__item--{{ $entry->type }}">
-                                <p class="timeline__head">
-                                    <span class="timeline__type">{{ $entry->typeLabel() }}</span>
-                                    <time>{{ $entry->created_at->format('d/m/Y H:i') }}</time>
-                                </p>
-                                <p class="timeline__body">{{ $entry->description }}</p>
-                                <p class="timeline__meta">
-                                    {{ $entry->service?->name }}
-                                    @if ($entry->doctor) — {{ $entry->doctor->name() }} @endif
-                                </p>
-                            </li>
+                        @forelse ($episode['entries'] as $item)
+                            @include('partials.timeline-item', [
+                                'item' => $item,
+                                'attachmentRoute' => 'admin.attachment',
+                                'attachmentPrintRoute' => 'admin.attachment.print',
+                                'prescriptionPrintRoute' => 'admin.prescription.print',
+                            ])
                         @empty
                             <li class="empty">Aucun evenement pour ce passage.</li>
                         @endforelse
                     </ol>
+
                 </article>
             @empty
                 <p class="empty">Aucun passage enregistre.</p>
@@ -118,14 +142,13 @@
             @if ($orphans->isNotEmpty())
                 <h4 class="card__subtitle">Avant la mise en place des episodes</h4>
                 <ol class="timeline">
-                    @foreach ($orphans as $entry)
-                        <li class="timeline__item timeline__item--{{ $entry->type }}">
-                            <p class="timeline__head">
-                                <span class="timeline__type">{{ $entry->typeLabel() }}</span>
-                                <time>{{ $entry->created_at->format('d/m/Y H:i') }}</time>
-                            </p>
-                            <p class="timeline__body">{{ $entry->description }}</p>
-                        </li>
+                    @foreach ($orphans as $item)
+                        @include('partials.timeline-item', [
+                            'item' => $item,
+                            'attachmentRoute' => 'admin.attachment',
+                            'attachmentPrintRoute' => 'admin.attachment.print',
+                            'prescriptionPrintRoute' => 'admin.prescription.print',
+                        ])
                     @endforeach
                 </ol>
             @endif

@@ -2,12 +2,17 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\StoreAttachment;
+use App\Models\Attachment;
 use App\Models\Patient;
-use App\Models\PatientHistory;
 use App\Models\Service;
-use App\Models\Visit;
+use App\Services\PatientTimeline;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use InvalidArgumentException;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 /**
@@ -16,13 +21,19 @@ use Livewire\WithPagination;
  */
 class PatientDirectory extends Component
 {
-    use WithPagination;
+    use WithFileUploads, WithPagination;
 
     public string $search = '';
 
     public ?int $serviceFilter = null;
 
     public ?int $openPatientId = null;
+
+    /** Depot d'une piece jointe directement dans le dossier (v3.2, point 3). */
+    public bool $addingAttachment = false;
+
+    /** @var array<int, mixed> */
+    public array $files = [];
 
     public function updatedSearch(): void
     {
@@ -42,9 +53,61 @@ class PatientDirectory extends Component
     public function closeRecord(): void
     {
         $this->openPatientId = null;
+        $this->cancelAttachment();
     }
 
-    public function render(): View
+    public function startAttachment(): void
+    {
+        $this->addingAttachment = true;
+        $this->files = [];
+        $this->resetValidation();
+    }
+
+    public function cancelAttachment(): void
+    {
+        $this->addingAttachment = false;
+        $this->files = [];
+        $this->resetValidation();
+    }
+
+    /**
+     * L'admin depose une piece jointe depuis la vue globale du dossier, sans
+     * passer par un renvoi : `patient_id` reste le point d'ancrage, la visite
+     * la plus recente n'est renseignee que si elle existe.
+     */
+    public function saveAttachment(StoreAttachment $action): void
+    {
+        $this->validate([
+            'openPatientId' => ['required', 'integer', 'exists:patients,id'],
+            'files' => ['required', 'array', 'min:1', 'max:5'],
+            'files.*' => [
+                'file',
+                'max:'.Attachment::MAX_SIZE_KB,
+                'mimes:'.implode(',', Attachment::ALLOWED_EXTENSIONS),
+            ],
+        ], attributes: ['files' => 'pieces jointes']);
+
+        $patient = Patient::findOrFail($this->openPatientId);
+        $visit = $patient->visits()->orderByDesc('opened_at')->first();
+
+        try {
+            foreach ($this->files as $file) {
+                $action->executeForPatient($file, $patient, Auth::user(), $visit);
+            }
+        } catch (InvalidArgumentException $e) {
+            throw ValidationException::withMessages(['files' => $e->getMessage()]);
+        }
+
+        session()->flash('admin.status', sprintf(
+            '%d piece(s) jointe(s) ajoutee(s) au dossier de %s.',
+            count($this->files),
+            $patient->name,
+        ));
+
+        $this->cancelAttachment();
+    }
+
+    public function render(PatientTimeline $timeline): View
     {
         $search = trim($this->search);
 
@@ -67,26 +130,18 @@ class PatientDirectory extends Component
             ? Patient::with(['visits.service', 'companions'])->find($this->openPatientId)
             : null;
 
-        $history = $openPatient
-            ? PatientHistory::with(['service', 'doctor.user'])
-                ->where('patient_id', $openPatient->getKey())
-                ->orderBy('id')
-                ->get()
-            : collect();
-
-        $episodes = $openPatient
-            ? $openPatient->visits->sortByDesc('opened_at')->values()->map(fn (Visit $visit) => [
-                'visit' => $visit,
-                'entries' => $history->where('visit_id', $visit->getKey())->values(),
-            ])
-            : collect();
+        // Meme frise unifiee que cote medecin : les deux roles lisent la meme
+        // histoire, dans le meme ordre.
+        $frise = $openPatient
+            ? $timeline->for($openPatient)
+            : ['episodes' => collect(), 'orphans' => collect()];
 
         return view('livewire.admin.patient-directory', [
             'patients' => $patients,
             'services' => Service::orderBy('name')->get(),
             'openPatient' => $openPatient,
-            'episodes' => $episodes,
-            'orphans' => $history->whereNull('visit_id')->values(),
+            'episodes' => $frise['episodes'],
+            'orphans' => $frise['orphans'],
         ]);
     }
 }

@@ -17,7 +17,7 @@
                 <thead>
                     <tr>
                         <th>Dossier</th><th>Nom</th><th>Service</th>
-                        <th>Ticket</th><th>Statut</th><th>Heure</th>
+                        <th>Ticket</th><th>Statut</th><th>Heure</th><th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -29,6 +29,11 @@
                             <td class="mono">{{ $visit->token }}</td>
                             <td><span class="badge badge--{{ $visit->status }}">{{ $visit->statusLabel() }}</span></td>
                             <td>{{ $visit->opened_at?->format('H:i') }}</td>
+                            <td>
+                                {{-- Reimpression si le ticket papier s'est perdu. --}}
+                                <a href="{{ route('reception.ticket.patient', $visit) }}" target="_blank"
+                                   class="attachments__link">Imprimer</a>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -44,17 +49,21 @@
         <div class="table-wrap">
             <table class="table">
                 <thead>
-                    <tr><th>Fiche</th><th>Nom</th><th>Service</th><th>Ticket</th><th>Motif</th><th>Heure</th></tr>
+                    <tr><th>Fiche</th><th>Nom</th><th>Visite a</th><th>Service</th><th>Ticket</th><th>Heure</th><th></th></tr>
                 </thead>
                 <tbody>
                     @foreach ($visitors as $visitor)
                         <tr>
                             <td class="mono">{{ $visitor->visitor_code }}</td>
                             <td>{{ $visitor->name }}</td>
+                            <td>{{ $visitor->patient?->name ?? '—' }}</td>
                             <td>{{ $visitor->service->name }}</td>
                             <td class="mono">{{ $visitor->token ?? '—' }}</td>
-                            <td>{{ $visitor->reason ?: '—' }}</td>
                             <td>{{ $visitor->created_at->format('H:i') }}</td>
+                            <td>
+                                <a href="{{ route('reception.ticket.visitor', $visitor) }}" target="_blank"
+                                   class="attachments__link">Imprimer</a>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

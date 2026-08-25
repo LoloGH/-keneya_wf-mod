@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Schedule extends Model
 {
-    use HasFactory;
+    use HasFactory, RecordsActivity;
 
     protected $fillable = ['user_id', 'date', 'start_time', 'end_time', 'service_id'];
 
@@ -38,5 +39,10 @@ class Schedule extends Model
     public function range(): string
     {
         return sprintf('%s – %s', substr((string) $this->start_time, 0, 5), substr((string) $this->end_time, 0, 5));
+    }
+
+    public static function auditLabel(): string
+    {
+        return 'Creneau';
     }
 }

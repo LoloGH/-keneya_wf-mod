@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Cashier;
 use App\Models\Doctor;
 use App\Models\Receptionist;
 use App\Models\Service;
@@ -26,6 +27,10 @@ class DemoStaffSeeder extends Seeder
 
         $receptionist = $this->makeUser('Awa Traore', 'accueil@keneya.local', $password, Roles::RECEPTIONIST);
         Receptionist::firstOrCreate(['user_id' => $receptionist->getKey()]);
+
+        // Le caissier, quatrieme role cloisonne : les medecins n'encaissent pas.
+        $cashier = $this->makeUser('Salif Konate', 'caisse@keneya.local', $password, Roles::CASHIER);
+        Cashier::firstOrCreate(['user_id' => $cashier->getKey()]);
 
         $doctors = [
             ['Dr Modibo Keita', 'medecine@keneya.local', 'Medecine Generale', '76000001'],

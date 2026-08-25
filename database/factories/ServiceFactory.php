@@ -24,4 +24,9 @@ class ServiceFactory extends Factory
     {
         return $this->state(fn () => ['kind' => Service::KIND_PLATEAU_TECHNIQUE]);
     }
+
+    public function caisse(): static
+    {
+        return $this->state(fn () => ['kind' => Service::KIND_CAISSE]);
+    }
 }

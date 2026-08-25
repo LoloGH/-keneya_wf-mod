@@ -3,6 +3,8 @@
 namespace App\Livewire\Reception;
 
 use App\Actions\RegisterPatient;
+use App\Actions\SendPortalLink;
+use App\Models\Patient;
 use App\Models\Service;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -99,10 +101,15 @@ class PatientRegistrationForm extends Component
         $visit = $register->execute($data, $data['companions'] ?? []);
 
         $this->lastRegistered = [
+            'patient_id' => $visit->patient->getKey(),
+            'visit_id' => $visit->getKey(),
             'patient_code' => $visit->patient->patient_code,
             'name' => $visit->patient->name,
             'service' => $visit->service->name,
+            'pending' => $visit->pendingNextService?->name,
             'token' => $visit->token,
+            // Communique de vive voix ET imprime sur le ticket.
+            'access_code' => $visit->patient->access_code,
         ];
 
         $this->reset(['name', 'age', 'mobile', 'crno', 'reason', 'companions']);
@@ -119,10 +126,33 @@ class PatientRegistrationForm extends Component
         ));
     }
 
+    /**
+     * Envoi du lien « mes documents », sur demande explicite — jamais
+     * automatiquement a chaque evenement du dossier.
+     */
+    public function sendPortalLink(SendPortalLink $action): void
+    {
+        if (! $this->lastRegistered) {
+            return;
+        }
+
+        $patient = Patient::findOrFail($this->lastRegistered['patient_id']);
+
+        try {
+            $action->execute($patient);
+        } catch (\InvalidArgumentException $e) {
+            session()->flash('reception.error', $e->getMessage());
+
+            return;
+        }
+
+        session()->flash('reception.success', sprintf('Lien envoye a %s.', $patient->mobile));
+    }
+
     public function render(): View
     {
         return view('livewire.reception.patient-registration-form', [
-            'services' => Service::orderBy('name')->get(),
+            'services' => Service::careServices()->orderBy('name')->get(),
         ]);
     }
 }

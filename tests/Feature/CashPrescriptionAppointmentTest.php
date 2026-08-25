@@ -10,12 +10,10 @@ use App\Livewire\Service\ConsultationActions;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\PatientHistory;
-use App\Models\Payment;
 use App\Models\Prescription;
 use App\Models\Service;
 use App\Models\Visit;
 use App\Services\SmsGateway;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -36,84 +34,41 @@ class CashPrescriptionAppointmentTest extends TestCase
 
     // ----------------------------------------------------------------- Caisse
 
-    public function test_la_caisse_ticket_encaisse_a_l_accueil(): void
+    /**
+     * La caisse a quitte /reception et /service : elle a son role et son
+     * interface. Ces tests vivent desormais dans CaisseFlowTest ; on verifie
+     * seulement ici que les anciennes portes sont bien condamnees.
+     */
+    public function test_le_medecin_n_a_plus_aucune_fonction_de_caisse(): void
     {
         $service = Service::factory()->create();
-        $visit = $this->makeVisit($service);
-        $receptionist = $this->makeReceptionist();
-
-        Livewire::actingAs($receptionist)
-            ->test(TicketCashier::class)
-            ->set('visitId', $visit->getKey())
-            ->set('amount', 2500)
-            ->call('record')
-            ->assertHasNoErrors();
-
-        $payment = Payment::firstOrFail();
-
-        $this->assertSame(Payment::TYPE_TICKET, $payment->type);
-        $this->assertSame(Payment::STATUS_PAID, $payment->status);
-        $this->assertSame(2500, $payment->amount);
-        $this->assertSame($visit->getKey(), $payment->visit_id);
-        $this->assertSame($receptionist->getKey(), $payment->recorded_by_user_id);
-        $this->assertSame('2 500 FCFA', $payment->formattedAmount());
-    }
-
-    public function test_la_caisse_services_encaisse_un_acte_au_service(): void
-    {
-        $service = Service::factory()->plateauTechnique()->create();
         $doctor = $this->makeDoctor($service);
-        $visit = $this->makeVisit($service, ['status' => Visit::STATUS_CALLED]);
 
-        Livewire::actingAs($doctor->user)
-            ->test(ConsultationActions::class, ['serviceId' => $service->getKey()])
-            ->set('visitId', $visit->getKey())
-            ->set('amount', 15000)
-            ->call('recordPayment')
-            ->assertHasNoErrors();
+        $composant = Livewire::actingAs($doctor->user)
+            ->test(ConsultationActions::class, ['serviceId' => $service->getKey()]);
 
-        $payment = Payment::firstOrFail();
-
-        $this->assertSame(Payment::TYPE_SERVICE, $payment->type);
-        $this->assertSame($service->getKey(), $payment->service_id);
-        $this->assertSame(15000, $payment->amount);
-    }
-
-    public function test_un_montant_nul_ou_negatif_est_refuse(): void
-    {
-        $service = Service::factory()->create();
-        $visit = $this->makeVisit($service);
-
-        Livewire::actingAs($this->makeReceptionist())
-            ->test(TicketCashier::class)
-            ->set('visitId', $visit->getKey())
-            ->set('amount', 0)
-            ->call('record')
-            ->assertHasErrors('amount');
-
-        $this->assertSame(0, Payment::count());
-    }
-
-    public function test_un_praticien_ne_peut_pas_encaisser_pour_un_autre_service(): void
-    {
-        $mien = Service::factory()->create();
-        $autre = Service::factory()->create();
-        $doctor = $this->makeDoctor($mien);
-        $visitAilleurs = $this->makeVisit($autre, ['status' => Visit::STATUS_CALLED]);
-
-        // La visite d'un autre service est introuvable depuis cette interface :
-        // le composant ne cherche que dans son propre service.
-        $this->expectException(ModelNotFoundException::class);
-
-        try {
-            Livewire::actingAs($doctor->user)
-                ->test(ConsultationActions::class, ['serviceId' => $mien->getKey()])
-                ->set('visitId', $visitAilleurs->getKey())
-                ->set('amount', 5000)
-                ->call('recordPayment');
-        } finally {
-            $this->assertSame(0, Payment::count());
+        foreach (['recordPayment', 'amount'] as $vestige) {
+            $this->assertFalse(
+                method_exists($composant->instance(), $vestige)
+                    || property_exists($composant->instance(), $vestige),
+                "L'interface du medecin ne doit plus exposer « {$vestige} ».",
+            );
         }
+
+        $composant->assertDontSee('Caisse');
+    }
+
+    public function test_l_accueil_n_a_plus_de_section_caisse(): void
+    {
+        $this->assertFalse(
+            class_exists(TicketCashier::class),
+            'Le composant de caisse de l\'accueil doit avoir disparu.',
+        );
+
+        $this->actingAs($this->makeReceptionist())
+            ->get('/reception')
+            ->assertOk()
+            ->assertDontSee('Caisse Ticket');
     }
 
     // ------------------------------------------------------------ Ordonnance

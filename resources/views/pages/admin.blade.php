@@ -12,6 +12,7 @@
         ]],
         ['key' => 'patients', 'label' => 'Patients', 'view' => 'sections.admin.patients'],
         ['key' => 'audit', 'label' => "Journal d'audit", 'view' => 'sections.admin.audit'],
+        ['key' => 'suppression', 'label' => 'Supprimer un dossier', 'view' => 'sections.admin.deletion'],
     ];
 @endphp
 

@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Patient;
 use App\Models\PatientHistory;
+use App\Models\Service;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
@@ -26,15 +27,19 @@ class OpenNewEpisode
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
         private readonly SmsGateway $sms,
+        private readonly RouteThroughCaisse $routing,
     ) {}
 
     public function execute(Patient $patient, int $serviceId, ?string $reason = null): Visit
     {
         $visit = DB::transaction(function () use ($patient, $serviceId, $reason): Visit {
+            [$file, $enAttente] = $this->routing->resolve(Service::findOrFail($serviceId));
+
             $visit = Visit::create([
                 'patient_id' => $patient->getKey(),
-                'service_id' => $serviceId,
-                'token' => $this->tokens->next($serviceId),
+                'service_id' => $file->getKey(),
+                'pending_next_service_id' => $enAttente?->getKey(),
+                'token' => $this->tokens->next($file),
                 'status' => Visit::STATUS_WAITING,
                 'opened_at' => now(),
             ]);
@@ -45,9 +50,10 @@ class OpenNewEpisode
                 visit: $visit,
                 type: PatientHistory::TYPE_REGISTRATION,
                 description: trim(sprintf(
-                    'Nouvel episode ouvert a l\'accueil, oriente vers %s (ticket n° %d).%s',
+                    'Nouvel episode ouvert a l\'accueil, oriente vers %s (ticket n° %d).%s%s',
                     $visit->service->name,
                     $visit->token,
+                    $enAttente ? ' Prise en charge prevue au service '.$enAttente->name.' apres paiement.' : '',
                     filled($reason) ? ' Motif : '.$reason : '',
                 )),
             );

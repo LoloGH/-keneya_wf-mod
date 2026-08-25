@@ -50,35 +50,18 @@
                 </header>
 
                 <ol class="timeline">
-                    @forelse ($episode['entries'] as $entry)
-                        <li class="timeline__item timeline__item--{{ $entry->type }}">
-                            <p class="timeline__head">
-                                <span class="timeline__type">{{ $entry->typeLabel() }}</span>
-                                <time>{{ $entry->created_at->format('d/m/Y H:i') }}</time>
-                            </p>
-                            <p class="timeline__body">{{ $entry->description }}</p>
-                            <p class="timeline__meta">
-                                {{ $entry->service?->name }}
-                                @if ($entry->doctor) — {{ $entry->doctor->name() }} @endif
-                            </p>
-
-                            @if ($entry->attachments->isNotEmpty())
-                                <ul class="attachments">
-                                    @foreach ($entry->attachments as $attachment)
-                                        <li>
-                                            <a href="{{ route('service.attachment', $attachment) }}" class="attachments__link">
-                                                {{ $attachment->original_name }}
-                                                <span class="attachments__size">{{ $attachment->humanSize() }}</span>
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </li>
+                    @forelse ($episode['entries'] as $item)
+                        @include('partials.timeline-item', [
+                            'item' => $item,
+                            'attachmentRoute' => 'service.attachment',
+                            'attachmentPrintRoute' => 'service.attachment.print',
+                            'prescriptionPrintRoute' => 'service.prescription.print',
+                        ])
                     @empty
                         <li class="empty">Aucun evenement enregistre pour ce passage.</li>
                     @endforelse
                 </ol>
+
             </article>
         @empty
             <p class="empty">Aucun passage enregistre.</p>
@@ -87,14 +70,13 @@
         @if ($orphans->isNotEmpty())
             <h3 class="card__subtitle">Avant la mise en place des episodes</h3>
             <ol class="timeline">
-                @foreach ($orphans as $entry)
-                    <li class="timeline__item timeline__item--{{ $entry->type }}">
-                        <p class="timeline__head">
-                            <span class="timeline__type">{{ $entry->typeLabel() }}</span>
-                            <time>{{ $entry->created_at->format('d/m/Y H:i') }}</time>
-                        </p>
-                        <p class="timeline__body">{{ $entry->description }}</p>
-                    </li>
+                @foreach ($orphans as $item)
+                    @include('partials.timeline-item', [
+                        'item' => $item,
+                        'attachmentRoute' => 'service.attachment',
+                        'attachmentPrintRoute' => 'service.attachment.print',
+                        'prescriptionPrintRoute' => 'service.prescription.print',
+                    ])
                 @endforeach
             </ol>
         @endif

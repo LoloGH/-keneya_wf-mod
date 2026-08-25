@@ -66,6 +66,11 @@ class User extends Authenticatable
         return $this->hasOne(Receptionist::class);
     }
 
+    public function cashier(): HasOne
+    {
+        return $this->hasOne(Cashier::class);
+    }
+
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
