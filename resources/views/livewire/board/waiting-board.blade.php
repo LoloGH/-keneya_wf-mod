@@ -3,7 +3,8 @@
 
     @if ($fullscreen)
         <header class="board__header">
-            <h1>{{ config('keneya.name') }}</h1>
+            {{-- Fond sombre : variante claire. Le logo remplace le titre. --}}
+            <x-brand-logo lockup variant="light" class="board__logo" />
             <p>{{ hospital_name() }}</p>
         </header>
     @else

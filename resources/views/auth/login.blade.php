@@ -1,9 +1,8 @@
 <x-layouts.auth :title="'Connexion — '.config('keneya.name')">
     <div class="login">
-        <div class="login__brand">
-            <x-brand-logo class="login__logo" />
-            <p class="login__product">{{ config('keneya.name') }}</p>
-        </div>
+        {{-- Logo complet, pleine largeur de la carte : il porte deja le nom du
+             produit, inutile de le repeter a cote. --}}
+        <x-brand-logo lockup class="login__logo" />
 
         <h1 class="login__title">Connexion</h1>
         <p class="login__subtitle">{{ hospital_name() }}</p>

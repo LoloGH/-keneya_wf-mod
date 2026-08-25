@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('keneya.name') }}</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @livewireStyles
 </head>
@@ -14,11 +17,10 @@
          une interface. --}}
     <header class="app-header">
         <div class="app-header__brand">
-            <x-brand-logo class="app-header__logo" />
-            <span class="app-header__names">
-                <span class="app-header__hospital">{{ $hospitalName ?? hospital_name() }}</span>
-                <span class="app-header__product">{{ config('keneya.name') }}</span>
-            </span>
+            {{-- Variante claire : la barre est bleu nuit. Le nom du produit
+                 n'est pas repris a cote, le logo le porte deja. --}}
+            <x-brand-logo variant="light" class="app-header__logo" />
+            <span class="app-header__hospital">{{ $hospitalName ?? hospital_name() }}</span>
         </div>
 
         <div class="app-header__context">
