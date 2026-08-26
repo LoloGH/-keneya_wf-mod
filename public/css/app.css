@@ -1035,3 +1035,50 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
         transition-duration: .001ms !important;
     }
 }
+
+/* =========================================================================
+   v3.2.1 — catalogues administrables, interfaces generiques, hospitalisation
+   ========================================================================= */
+
+/* Case a cocher alignee sur la ligne de champs, sans casser le rythme du
+   formulaire en colonnes. */
+.field--check { justify-content: flex-end; }
+.field--check label {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: var(--touch);
+    font-weight: 500;
+    cursor: pointer;
+}
+.field--check input { width: 20px; height: 20px; accent-color: var(--bleu); }
+
+.badge--neutral { background: var(--gris-100); color: var(--gris-700); }
+
+/* Cases a cocher des capacites d'un type de personnel : meme pastille tactile
+   que les jours de la semaine, sur une grille qui tient sur tablette. */
+.capabilities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: .4rem;
+}
+
+/* Apercu des sections generees : l'admin voit ce qu'il vient de creer. */
+.preview {
+    padding: .85rem 1rem;
+    background: var(--bleu-clair);
+    border-radius: var(--rayon);
+}
+.preview .card__subtitle { margin-top: 0; }
+.preview__list { margin: 0; padding-left: 1.1rem; color: var(--bleu-fonce); }
+.preview__list li { margin: .2rem 0; }
+
+/* Empilement simple de cartes dans une meme section. */
+.stack { display: flex; flex-direction: column; gap: 1rem; }
+
+/* Soin en retard : l'heure est passee sans qu'il ait ete marque. C'est un
+   signal visuel, pas une bascule de statut — cette version ne depend d'aucun
+   scheduler. */
+.care--late { border-left: 4px solid var(--ambre); }
+.care--late .care__time { color: var(--ambre); font-weight: 600; }
+.care--assigned { border-left: 4px solid var(--bleu); }
