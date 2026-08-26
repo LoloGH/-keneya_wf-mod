@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\StoreAttachment;
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Attachment;
 use App\Models\Patient;
 use App\Models\Service;
@@ -21,7 +22,7 @@ use Livewire\WithPagination;
  */
 class PatientDirectory extends Component
 {
-    use WithFileUploads, WithPagination;
+    use NotifiesAdmin, WithFileUploads, WithPagination;
 
     public string $search = '';
 
@@ -98,7 +99,7 @@ class PatientDirectory extends Component
             throw ValidationException::withMessages(['files' => $e->getMessage()]);
         }
 
-        session()->flash('admin.status', sprintf(
+        $this->notifySuccess(sprintf(
             '%d piece(s) jointe(s) ajoutee(s) au dossier de %s.',
             count($this->files),
             $patient->name,

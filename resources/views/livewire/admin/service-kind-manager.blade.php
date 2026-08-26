@@ -51,12 +51,12 @@
                             <div class="btn-row">
                                 <button type="button" class="btn btn--ghost"
                                         wire:click="edit({{ $kind->id }})">Modifier</button>
-                                {{-- Un type d'origine ou encore utilise n'est pas supprimable. --}}
-                                @if (! $kind->isBuiltIn() && $kind->services_count === 0)
-                                    <button type="button" class="btn btn--ghost"
-                                            wire:click="delete({{ $kind->id }})"
-                                            wire:confirm="Supprimer ce type de service ?">Supprimer</button>
-                                @endif
+                                {{-- L'action reste offerte meme pour un type
+                                     d'origine ou encore utilise : c'est le
+                                     serveur qui refuse, en disant pourquoi. --}}
+                                <x-delete-action :click="'delete('.$kind->id.')'"
+                                                 label="Supprimer ce type de service"
+                                                 confirm="Supprimer ce type de service ?" />
                             </div>
                         </td>
                     </tr>

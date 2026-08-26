@@ -79,8 +79,13 @@
                         <td>{{ $member->service?->name ?? '—' }}</td>
                         <td><code>/staff/{{ $member->staffType->slug }}</code></td>
                         <td>
-                            <button type="button" class="btn btn--ghost"
-                                    wire:click="edit({{ $member->id }})">Modifier</button>
+                            <div class="btn-row">
+                                <button type="button" class="btn btn--ghost"
+                                        wire:click="edit({{ $member->id }})">Modifier</button>
+                                <x-delete-action :click="'delete('.$member->id.')'"
+                                                 label="Supprimer ce membre du personnel"
+                                                 confirm="Supprimer ce membre du personnel et son compte ?" />
+                            </div>
                         </td>
                     </tr>
                 @empty

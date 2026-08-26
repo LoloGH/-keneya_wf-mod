@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\ServiceKind;
 use App\Support\Audit;
 use Illuminate\Contracts\View\View;
@@ -19,6 +20,8 @@ use Livewire\Component;
  */
 class ServiceKindManager extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $editingId = null;
 
     public string $name = '';
@@ -84,7 +87,7 @@ class ServiceKindManager extends Component
                 $kind,
             );
 
-            session()->flash('admin.status', 'Type de service mis a jour.');
+            $this->notifySuccess('Type de service mis a jour.');
         } else {
             $kind = ServiceKind::create($data + ['slug' => ServiceKind::makeSlug($data['name'])]);
 
@@ -98,7 +101,7 @@ class ServiceKindManager extends Component
                 $kind,
             );
 
-            session()->flash('admin.status', 'Type de service cree.');
+            $this->notifySuccess('Type de service cree.');
         }
 
         $this->cancel();
@@ -114,7 +117,7 @@ class ServiceKindManager extends Component
         $kind = ServiceKind::withCount('services')->findOrFail($kindId);
 
         if ($kind->isBuiltIn()) {
-            session()->flash('admin.error', sprintf(
+            $this->notifyError(sprintf(
                 'Le type « %s » est pose a l\'installation et ne peut pas etre supprime.',
                 $kind->name,
             ));
@@ -123,7 +126,7 @@ class ServiceKindManager extends Component
         }
 
         if ($kind->services_count > 0) {
-            session()->flash('admin.error', sprintf(
+            $this->notifyError(sprintf(
                 'Le type « %s » ne peut pas etre supprime : %d service(s) l\'utilisent encore.',
                 $kind->name,
                 $kind->services_count,
@@ -137,7 +140,7 @@ class ServiceKindManager extends Component
 
         Audit::log(Audit::EVENT_SERVICE_KIND_DELETED, sprintf('Type de service « %s » supprime.', $nom));
 
-        session()->flash('admin.status', 'Type de service supprime.');
+        $this->notifySuccess('Type de service supprime.');
         $this->dispatch('types-de-service-mis-a-jour');
     }
 

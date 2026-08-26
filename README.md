@@ -846,6 +846,39 @@ scheduler dans cette version. La traçabilité réelle vient de
 `completed_by_user_id`, renseigné au moment du geste, et chaque soin réalisé
 écrit une ligne `patient_history` (`care_task_completed`) sur la frise du dossier.
 
+### Suppressions dans `/admin`
+
+Chaque table d'administration porte une **action de suppression sur chaque
+ligne**, rendue par une icône (`<x-delete-action>`). Elle n'est jamais masquée,
+même quand la suppression sera refusée : un bouton qui disparaît sans
+explication laisse l'administrateur devant une case vide, sans savoir si le
+droit lui manque ou si l'action n'a jamais existé. **C'est le serveur qui
+refuse, en disant pourquoi** — un message visible immédiatement, y compris sur
+tablette où aucune infobulle ne s'affiche au survol.
+
+Les refus en place :
+
+| Objet | Refusé quand |
+|---|---|
+| Type de service | Il est posé à l'installation, ou encore porté par un service |
+| Type de personnel | Une personne le porte encore |
+| Service | Il compte encore des médecins ou des passages |
+| Salle | Elle héberge une hospitalisation en cours |
+| Type de soin | Des soins programmés s'y rattachent |
+| Médecin, réceptionniste, caissier, personnel dédié | Le compte a laissé une trace au dossier d'un patient (entrée d'historique, renvoi, ordonnance, rendez-vous, encaissement, pièce jointe, soin) |
+
+Pour un compte du personnel, `DeleteStaffAccount` applique une règle simple :
+**ce qui a signé un acte n'est pas effaçable.** Les colonnes `*_doctor_id` et
+`*_staff_member_id` sont ce qui dit qui a fait quoi ; les vider rendrait
+anonymes des consultations et des ordonnances déjà signées. Reste donc
+supprimable ce qui doit l'être : le compte créé par erreur, ou jamais utilisé.
+Le planning personnel, lui, part avec le compte — il n'appartient pas au dossier
+patient. Un médecin rattaché à plusieurs services ne perd que le rattachement
+retiré ; son compte ne disparaît qu'avec le dernier.
+
+La suppression est journalisée **avant** l'opération, dans l'audit, qui lui
+survit — même principe que pour la suppression d'un dossier patient.
+
 ## 14. Journal d'audit et plannings
 
 ### Journal d'audit
@@ -921,7 +954,7 @@ php artisan test                          # sans Docker
 docker compose exec app php artisan test  # avec Docker
 ```
 
-**246 tests, 837 assertions.** La suite couvre :
+**266 tests, 903 assertions.** La suite couvre :
 
 | Fichier | Objet |
 |---|---|
@@ -947,11 +980,13 @@ docker compose exec app php artisan test  # avec Docker
 | `ServiceKindTest` | Types de service administrables, slug figé des trois types d'origine, garde-fous de suppression, type « Caisse » non proposable. |
 | `StaffTypeInterfaceTest` | Types de personnel, cloisonnement de `/staff/{slug}`, et **suite paramétrée par combinaison de capacités** : seules les sections cochées apparaissent, et une action hors capacité est refusée côté serveur. |
 | `HospitalizationTest` | Admission clôturant la visite, occupation calculée à la volée, salle pleine avertissant sans bloquer, génération groupée de soins, filtrage « de garde », marquage fait/manqué, sortie bloquée tant qu'un soin reste en attente. |
+| `AdminDeletionActionsTest` | Présence de l'action de suppression dans **toutes** les tables de `/admin`, et refus motivés : type d'origine, type encore utilisé, compte ayant laissé une trace au dossier. |
+| `LoginScreenTest` | Contrat du formulaire de connexion, scène et carte, erreurs et limitation de tentatives. |
 | `AcceptanceScenarioTest` | Le scénario d'acceptation de bout en bout, dans l'ordre. |
 | `SmsGatewayTest` | Format international, passerelle désactivée ou injoignable. |
 
 Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS. La suite
-a également été passée **contre MariaDB 10.11** — 246 tests au vert — et les
+a également été passée **contre MariaDB 10.11** — 266 tests au vert — et les
 36 migrations ont été vérifiées **dans les deux sens** sur les deux moteurs.
 
 ## 17. Organisation du code

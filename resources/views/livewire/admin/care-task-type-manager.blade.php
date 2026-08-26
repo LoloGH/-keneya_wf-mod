@@ -23,11 +23,9 @@
                         <td>{{ $type->name }}</td>
                         <td>{{ $type->tasks_count }}</td>
                         <td>
-                            @if ($type->tasks_count === 0)
-                                <button type="button" class="btn btn--ghost"
-                                        wire:click="delete({{ $type->id }})"
-                                        wire:confirm="Supprimer ce type de soin ?">Supprimer</button>
-                            @endif
+                            <x-delete-action :click="'delete('.$type->id.')'"
+                                             label="Supprimer ce type de soin"
+                                             confirm="Supprimer ce type de soin ?" />
                         </td>
                     </tr>
                 @empty

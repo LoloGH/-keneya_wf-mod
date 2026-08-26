@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\DeletePatientRecord;
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Patient;
 use App\Support\Roles;
 use Illuminate\Contracts\View\View;
@@ -22,6 +23,8 @@ use Livewire\Component;
  */
 class PatientDeletion extends Component
 {
+    use NotifiesAdmin;
+
     public string $search = '';
 
     public ?int $selectedPatientId = null;
@@ -77,7 +80,7 @@ class PatientDeletion extends Component
             throw ValidationException::withMessages(['confirmation' => $e->getMessage()]);
         }
 
-        session()->flash('admin.status', sprintf(
+        $this->notifySuccess(sprintf(
             'Dossier %s supprime definitivement. L\'operation est consignee dans le journal d\'audit.',
             $code,
         ));

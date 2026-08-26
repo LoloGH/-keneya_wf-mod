@@ -54,10 +54,9 @@
                                 <button type="button" class="btn btn--ghost" wire:click="edit({{ $service->id }})">
                                     Modifier
                                 </button>
-                                <button type="button" class="btn btn--ghost" wire:click="delete({{ $service->id }})"
-                                        wire:confirm="Supprimer le service « {{ $service->name }} » ?">
-                                    Supprimer
-                                </button>
+                                <x-delete-action :click="'delete('.$service->id.')'"
+                                                 label="Supprimer ce service"
+                                                 :confirm="'Supprimer le service « '.$service->name.' » ?'" />
                             </div>
                         </td>
                     </tr>

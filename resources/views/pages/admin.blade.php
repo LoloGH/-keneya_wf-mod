@@ -26,12 +26,9 @@
 @endphp
 
 <x-layouts.app :title="'Administration — '.config('keneya.name')">
-    @if (session('admin.status'))
-        <div class="alert alert--success" role="status">{{ session('admin.status') }}</div>
-    @endif
-    @if (session('admin.error'))
-        <div class="alert alert--error" role="alert">{{ session('admin.error') }}</div>
-    @endif
+    {{-- Bandeau pilote par Livewire : un message emis pendant une action
+         s'affiche immediatement, sans attendre un rechargement complet. --}}
+    @livewire('shared.flash-alert', [], key('admin-flash'))
 
     @livewire('shared.vertical-tab-nav', ['sections' => $sections], key('nav-admin'))
 </x-layouts.app>

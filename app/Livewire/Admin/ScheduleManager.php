@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Schedule;
 use App\Models\Service;
 use App\Models\User;
@@ -19,6 +20,8 @@ use Livewire\Component;
  */
 class ScheduleManager extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $editingId = null;
 
     public ?int $user_id = null;
@@ -90,10 +93,10 @@ class ScheduleManager extends Component
         if ($this->editingId) {
             $schedule = Schedule::findOrFail($this->editingId);
             $schedule->update($data);
-            session()->flash('admin.status', 'Creneau mis a jour.');
+            $this->notifySuccess('Creneau mis a jour.');
         } else {
             $schedule = Schedule::create($data);
-            session()->flash('admin.status', 'Creneau ajoute.');
+            $this->notifySuccess('Creneau ajoute.');
         }
 
         Audit::log(
@@ -114,7 +117,7 @@ class ScheduleManager extends Component
 
         Audit::log(Audit::EVENT_SCHEDULE_CHANGED, sprintf('Creneau supprime : %s.', $label));
 
-        session()->flash('admin.status', 'Creneau supprime.');
+        $this->notifySuccess('Creneau supprime.');
     }
 
     public function render(): View

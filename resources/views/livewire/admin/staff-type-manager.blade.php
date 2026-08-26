@@ -89,11 +89,9 @@
                             <div class="btn-row">
                                 <button type="button" class="btn btn--ghost"
                                         wire:click="edit({{ $type->id }})">Modifier</button>
-                                @if ($type->members_count === 0)
-                                    <button type="button" class="btn btn--ghost"
-                                            wire:click="delete({{ $type->id }})"
-                                            wire:confirm="Supprimer ce type de personnel ?">Supprimer</button>
-                                @endif
+                                <x-delete-action :click="'delete('.$type->id.')'"
+                                                 label="Supprimer ce type de personnel"
+                                                 confirm="Supprimer ce type de personnel ?" />
                             </div>
                         </td>
                     </tr>
