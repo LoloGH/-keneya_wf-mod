@@ -4,20 +4,35 @@
     $assignment = $assignments->first();
     $serviceId = $assignment?->service_id;
 
+    use App\Models\StaffType;
+
     // Arborescence propre a l'espace service. « Renvois » regroupe les deux
     // panneaux qui vont par paire — ce qu'on recoit et ce qu'on a envoye.
-    $sections = [
+    //
+    // Depuis le v3.2.2, les sections optionnelles dependent des capacites du
+    // type de personnel du medecin connecte : meme mecanique que pour
+    // /staff/{slug}, pas une seconde. Les sections sans capacite associee sont
+    // le squelette du role et ne se retirent pas.
+    $peut = fn (string $capacite) => auth()->user()->hasCapability($capacite);
+
+    $sections = array_values(array_filter([
         ['key' => 'file', 'label' => "File d'attente", 'view' => 'sections.service.queue'],
         ['key' => 'renvois', 'label' => 'Renvois', 'children' => [
             ['key' => 'renvois-entrants', 'label' => 'Renvois en attente', 'view' => 'sections.service.incoming'],
             ['key' => 'renvois-sortants', 'label' => 'Mes renvois', 'view' => 'sections.service.outgoing'],
         ]],
-        ['key' => 'consultation', 'label' => 'Fin de consultation', 'view' => 'sections.service.consultation'],
-        ['key' => 'hospitalisation', 'label' => 'Patients hospitalises', 'view' => 'sections.service.hospitalizations'],
+        $peut(StaffType::CAP_PRESCRIBE)
+            ? ['key' => 'consultation', 'label' => 'Fin de consultation', 'view' => 'sections.service.consultation']
+            : null,
+        $peut(StaffType::CAP_ADMIT_HOSPITALIZATION)
+            ? ['key' => 'hospitalisation', 'label' => 'Patients hospitalises', 'view' => 'sections.service.hospitalizations']
+            : null,
         ['key' => 'mes-patients', 'label' => 'Mes patients', 'view' => 'sections.service.my-patients'],
-        ['key' => 'mes-rendez-vous', 'label' => 'Mes rendez-vous', 'view' => 'sections.service.my-appointments'],
+        $peut(StaffType::CAP_SCHEDULE_APPOINTMENT)
+            ? ['key' => 'mes-rendez-vous', 'label' => 'Mes rendez-vous', 'view' => 'sections.service.my-appointments']
+            : null,
         ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.service.schedule'],
-    ];
+    ]));
 @endphp
 
 <x-layouts.app :title="'Service — '.config('keneya.name')">

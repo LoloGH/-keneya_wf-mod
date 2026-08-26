@@ -72,7 +72,11 @@
                     — {{ $payment->patient->name }}
                     @if ($payment->service) <span>({{ $payment->service->name }})</span> @endif
                     <time>{{ $payment->created_at->format('H:i') }}</time>
-                    <a href="{{ route('caisse.receipt', $payment) }}" target="_blank" class="attachments__link">Reçu</a>
+                    {{-- Le recu imprimable est une capacite optionnelle du
+                         type de caissier (v3.2.2). --}}
+                    @if (auth()->user()->hasCapability(\App\Models\StaffType::CAP_PRINT_TICKET))
+                        <a href="{{ route('caisse.receipt', $payment) }}" target="_blank" class="attachments__link">Reçu</a>
+                    @endif
                 </li>
             @endforeach
         </ul>

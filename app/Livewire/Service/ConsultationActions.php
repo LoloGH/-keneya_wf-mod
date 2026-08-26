@@ -5,7 +5,9 @@ namespace App\Livewire\Service;
 use App\Actions\CreatePrescription;
 use App\Actions\RecordConsultationConclusion;
 use App\Actions\ScheduleAppointment;
+use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
+use App\Models\StaffType;
 use App\Models\Visit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
@@ -27,7 +29,7 @@ use Livewire\Component;
  */
 class ConsultationActions extends Component
 {
-    use ScopedToOwnService;
+    use RequiresCapability, ScopedToOwnService;
 
     public ?int $visitId = null;
 
@@ -70,6 +72,8 @@ class ConsultationActions extends Component
      */
     public function recordConclusion(RecordConsultationConclusion $action): void
     {
+        $this->assertCapability(StaffType::CAP_PRESCRIBE);
+
         $this->validate([
             'visitId' => ['required', 'integer', 'exists:visits,id'],
             'conclusion' => ['required', 'string', 'min:3', 'max:5000'],
@@ -90,6 +94,8 @@ class ConsultationActions extends Component
 
     public function savePrescription(CreatePrescription $action): void
     {
+        $this->assertCapability(StaffType::CAP_PRESCRIBE);
+
         $this->validate([
             'visitId' => ['required', 'integer', 'exists:visits,id'],
             'prescription' => ['required', 'string', 'min:3', 'max:5000'],
@@ -111,6 +117,8 @@ class ConsultationActions extends Component
 
     public function saveAppointment(ScheduleAppointment $action): void
     {
+        $this->assertCapability(StaffType::CAP_SCHEDULE_APPOINTMENT);
+
         $this->validate([
             'visitId' => ['required', 'integer', 'exists:visits,id'],
             'appointmentAt' => ['required', 'date', 'after:now'],

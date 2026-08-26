@@ -5,6 +5,7 @@ namespace App\Livewire\Service;
 use App\Actions\AdmitPatient;
 use App\Actions\DischargePatient;
 use App\Actions\PrescribeCareTasks;
+use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
 use App\Models\CareTask;
 use App\Models\CareTaskType;
@@ -28,7 +29,7 @@ use Livewire\Component;
  */
 class Hospitalizations extends Component
 {
-    use ScopedToOwnService;
+    use RequiresCapability, ScopedToOwnService;
 
     /** Visite en cours d'admission. */
     public ?int $admittingVisitId = null;
@@ -57,6 +58,17 @@ class Hospitalizations extends Component
      * StaffCareTasks — mais une priorite d'affichage.
      */
     public ?int $careAssignedToUserId = null;
+
+    /**
+     * La section entiere est optionnelle : le composant refuse de se monter
+     * si le type du compte ne porte pas la capacite.
+     */
+    public function mount(int $serviceId): void
+    {
+        $this->assertCapability(StaffType::CAP_ADMIT_HOSPITALIZATION);
+
+        $this->serviceId = $this->assertOwnService($serviceId);
+    }
 
     #[On('service-change')]
     public function handleServiceChange(int $serviceId): void

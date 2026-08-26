@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\Roles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,6 +17,7 @@ class User extends Authenticatable
     use HasFactory, HasRoles, Notifiable;
 
     protected $fillable = [
+        'staff_type_id',
         'name',
         'email',
         'password',
@@ -82,9 +84,43 @@ class User extends Authenticatable
         return $this->hasOne(StaffMember::class);
     }
 
+    /**
+     * Le type de personnel qui decrit ce compte (v3.2.2).
+     *
+     * Trois sources, dans cet ordre :
+     *  1. le rattachement explicite (`users.staff_type_id`), choisi par l'admin
+     *     quand plusieurs types partagent le meme role ;
+     *  2. le type du personnel generique, porte par `staff_members` ;
+     *  3. a defaut, le type d'origine du role — de sorte qu'un compte cree
+     *     avant le v3.2.2, ou par un seeder, ait toujours un type.
+     */
     public function staffType(): ?StaffType
     {
-        return $this->staffMember?->staffType;
+        if ($this->staff_type_id) {
+            return $this->explicitStaffType()->first();
+        }
+
+        if ($type = $this->staffMember?->staffType) {
+            return $type;
+        }
+
+        return ($role = $this->scopedRole())
+            ? StaffType::where('matched_role', $role)->orderBy('id')->first()
+            : null;
+    }
+
+    public function explicitStaffType(): BelongsTo
+    {
+        return $this->belongsTo(StaffType::class, 'staff_type_id');
+    }
+
+    /**
+     * Raccourci de lecture des capacites, partage par les quatre interfaces
+     * fixes et l'interface generique : une seule mecanique, pas deux.
+     */
+    public function hasCapability(string $capability): bool
+    {
+        return (bool) $this->staffType()?->can($capability);
     }
 
     public function schedules(): HasMany

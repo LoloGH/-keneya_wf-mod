@@ -23,6 +23,22 @@
             @error('password') <p class="field__error">{{ $message }}</p> @enderror
         </div>
 
+
+        {{-- Plusieurs types peuvent partager le meme role, avec des fonctions
+             optionnelles differentes (v3.2.2). Laisser vide retombe sur le type
+             d'origine du role. --}}
+        <div class="field">
+            <label for="recep-staff-type">Type de personnel</label>
+            <select id="recep-staff-type" wire:model="staff_type_id">
+                <option value="">— Type d'origine du role —</option>
+                @foreach ($staffTypes as $type)
+                    <option value="{{ $type->id }}">
+                        {{ $type->name }} ({{ count($type->enabledOptionalCapabilities()) }} fonction(s) optionnelle(s))
+                    </option>
+                @endforeach
+            </select>
+            @error('staff_type_id') <p class="field__error">{{ $message }}</p> @enderror
+        </div>
         <div class="btn-row">
             <button type="submit" class="btn btn--primary">
                 {{ $editingId ? 'Enregistrer' : 'Ajouter la receptionniste' }}

@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Actions\DeleteStaffAccount;
 use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Receptionist;
+use App\Models\StaffType;
 use App\Models\User;
 use App\Support\Audit;
 use App\Support\Roles;
@@ -30,6 +31,9 @@ class ReceptionistManager extends Component
 
     public string $password = '';
 
+    /** Type de personnel : plusieurs types peuvent partager le meme role. */
+    public ?int $staff_type_id = null;
+
     /**
      * @return array<string, mixed>
      */
@@ -43,6 +47,7 @@ class ReceptionistManager extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => [$this->editingId ? 'nullable' : 'required', 'string', 'min:8'],
+            'staff_type_id' => ['nullable', 'integer', Rule::exists('staff_types', 'id')->where('matched_role', Roles::RECEPTIONIST)],
         ];
     }
 
@@ -66,12 +71,13 @@ class ReceptionistManager extends Component
         $this->name = $receptionist->user->name;
         $this->email = $receptionist->user->email;
         $this->password = '';
+        $this->staff_type_id = $receptionist->user->staff_type_id;
         $this->resetValidation();
     }
 
     public function cancel(): void
     {
-        $this->reset(['editingId', 'name', 'email', 'password']);
+        $this->reset(['editingId', 'name', 'email', 'password', 'staff_type_id']);
         $this->resetValidation();
     }
 
@@ -89,6 +95,10 @@ class ReceptionistManager extends Component
                     'password' => $data['password'] ?: null,
                 ], fn ($value) => $value !== null));
 
+                // Le type decide des fonctions optionnelles offertes a ce
+                // compte (v3.2.2) ; vide, on retombe sur le type du role.
+                $receptionist->user->update(['staff_type_id' => $data['staff_type_id'] ?? null]);
+
                 return;
             }
 
@@ -96,6 +106,7 @@ class ReceptionistManager extends Component
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => $data['password'],
+                'staff_type_id' => $data['staff_type_id'] ?? null,
             ]);
 
             $user->syncRoles([Roles::RECEPTIONIST]);
@@ -138,11 +149,16 @@ class ReceptionistManager extends Component
 
     public function render(): View
     {
+        $staffTypes = StaffType::where('matched_role', Roles::RECEPTIONIST)
+            ->orderBy('id')
+            ->get();
+
         return view('livewire.admin.receptionist-manager', [
             'receptionists' => Receptionist::with('user')
                 ->get()
                 ->sortBy(fn (Receptionist $r) => $r->user->name)
                 ->values(),
+            'staffTypes' => $staffTypes,
         ]);
     }
 }

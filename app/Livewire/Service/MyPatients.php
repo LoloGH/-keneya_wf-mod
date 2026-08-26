@@ -5,10 +5,12 @@ namespace App\Livewire\Service;
 use App\Actions\ScheduleAppointment;
 use App\Actions\SendPortalLink;
 use App\Actions\StoreAttachment;
+use App\Livewire\Concerns\RequiresCapability;
 use App\Models\Attachment;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\PatientHistory;
+use App\Models\StaffType;
 use App\Models\Visit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
@@ -30,7 +32,7 @@ use Livewire\WithPagination;
  */
 class MyPatients extends Component
 {
-    use WithFileUploads, WithPagination;
+    use RequiresCapability, WithFileUploads, WithPagination;
 
     public string $search = '';
 
@@ -85,6 +87,8 @@ class MyPatients extends Component
 
     public function saveAppointment(ScheduleAppointment $action): void
     {
+        $this->assertCapability(StaffType::CAP_SCHEDULE_APPOINTMENT);
+
         $this->validate([
             'appointmentPatientId' => ['required', 'integer', 'exists:patients,id'],
             'appointmentAt' => ['required', 'date', 'after:now'],

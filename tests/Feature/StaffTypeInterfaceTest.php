@@ -352,23 +352,31 @@ class StaffTypeInterfaceTest extends TestCase
         $this->assertFalse($type->can(StaffType::CAP_QUEUE));
     }
 
-    public function test_un_type_adosse_a_un_role_n_a_ni_slug_ni_capacites(): void
+    public function test_un_type_adosse_a_un_role_garde_son_interface_mais_porte_des_capacites(): void
     {
         Livewire::actingAs($this->makeAdmin())
             ->test(StaffTypeManager::class)
             ->set('name', 'Sage-femme')
             ->set('matched_role', Roles::DOCTOR)
-            ->set('capabilities', [StaffType::CAP_QUEUE])
+            ->set('capabilities', [StaffType::CAP_PRESCRIBE])
             ->call('save')
             ->assertHasNoErrors();
 
         $type = StaffType::where('name', 'Sage-femme')->firstOrFail();
 
-        // Son interface existe deja : rien a composer.
+        // Son interface reste celle du role : elle n'est pas composee.
         $this->assertSame(Roles::DOCTOR, $type->matched_role);
         $this->assertNull($type->slug);
-        $this->assertNull($type->capabilities);
         $this->assertSame(route('service.home'), $type->homeUrl());
+
+        // Mais depuis le v3.2.2 il porte bien des capacites : les obligatoires
+        // du role, plus l'optionnelle cochee.
+        foreach ($type->requiredCapabilities() as $obligatoire) {
+            $this->assertTrue($type->can($obligatoire));
+        }
+
+        $this->assertSame([StaffType::CAP_PRESCRIBE], $type->enabledOptionalCapabilities());
+        $this->assertFalse($type->can(StaffType::CAP_ADMIT_HOSPITALIZATION));
     }
 
     public function test_le_role_admin_n_est_jamais_reutilisable(): void
