@@ -36,7 +36,7 @@ trait ScopedToOwnService
         return $this->resolveDoctor($this->serviceId);
     }
 
-    private function assertOwnService(int $serviceId): int
+    protected function assertOwnService(int $serviceId): int
     {
         $this->resolveDoctor($serviceId);
 

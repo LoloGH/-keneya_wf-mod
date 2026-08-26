@@ -79,14 +79,11 @@ class StaffTypeManager extends Component
      */
     public function previewSections(): array
     {
-        if ($this->matched_role !== '') {
-            return [];
-        }
-
+        $modele = $this->draft();
         $sections = [];
 
         foreach (StaffType::CAPABILITIES as $capability => $meta) {
-            if (in_array($capability, $this->capabilities, true)) {
+            if ($modele->can($capability)) {
                 $sections[] = $meta['section'];
             }
         }
@@ -94,7 +91,42 @@ class StaffTypeManager extends Component
         // Le planning personnel est offert a tout le monde, sans capacite.
         $sections[] = 'Mon planning';
 
-        return $sections;
+        return array_values(array_unique($sections));
+    }
+
+    /**
+     * Le type tel qu'il serait si l'on enregistrait maintenant.
+     *
+     * Sert a l'apercu et au rendu des cases : plutot que de reimplementer les
+     * regles de capacite dans le composant, on interroge le modele, seul
+     * detenteur de ce qui est obligatoire et de ce qui ne l'est pas.
+     */
+    public function draft(): StaffType
+    {
+        $type = $this->editingId
+            ? StaffType::findOrFail($this->editingId)->replicate()
+            : new StaffType;
+
+        $type->matched_role = $this->matched_role !== '' ? $this->matched_role : null;
+        $type->capabilities = $this->capabilities;
+
+        return $type;
+    }
+
+    /**
+     * @return array<int, string> capacites imposees par le role choisi
+     */
+    public function requiredCapabilities(): array
+    {
+        return $this->draft()->requiredCapabilities();
+    }
+
+    /**
+     * @return array<int, string> capacites que l'admin peut cocher
+     */
+    public function optionalCapabilities(): array
+    {
+        return $this->draft()->optionalCapabilities();
     }
 
     public function edit(int $typeId): void
@@ -104,7 +136,9 @@ class StaffTypeManager extends Component
         $this->editingId = $type->getKey();
         $this->name = $type->name;
         $this->matched_role = (string) $type->matched_role;
-        $this->capabilities = $type->capabilities ?? [];
+        // Les obligatoires sont reintroduites : une base anterieure au v3.2.2
+        // les a a null, et le formulaire doit malgre tout les montrer cochees.
+        $this->capabilities = $type->normalizeCapabilities($type->capabilities ?? []);
         $this->resetValidation();
     }
 
@@ -120,12 +154,14 @@ class StaffTypeManager extends Component
 
         $adosse = ($data['matched_role'] ?? '') !== '';
 
+        // Le modele arbitre : il reintroduit les capacites obligatoires du role
+        // et ecarte tout ce qui sort de son perimetre. Decocher une obligatoire
+        // depuis le navigateur, ou en forger une par requete directe, ne change
+        // donc rien a ce qui est enregistre.
         $attributs = [
             'name' => $data['name'],
             'matched_role' => $adosse ? $data['matched_role'] : null,
-            // Un type adosse a un role n'a ni slug ni capacites : son interface
-            // existe deja et n'est pas composable.
-            'capabilities' => $adosse ? null : array_values($data['capabilities'] ?? []),
+            'capabilities' => $this->draft()->normalizeCapabilities($data['capabilities'] ?? []),
         ];
 
         if ($this->editingId) {
@@ -157,7 +193,7 @@ class StaffTypeManager extends Component
                         'Type de personnel « %s » cree avec son interface /staff/%s (%d fonction(s)).',
                         $type->name,
                         $type->slug,
-                        count($type->capabilities ?? []),
+                        count($type->enabledOptionalCapabilities()),
                     ),
                 $type,
             );

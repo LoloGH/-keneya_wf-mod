@@ -755,6 +755,41 @@ distincts**, et l'admin voit lequel il emprunte :
 | `can_print_ticket` | Impression du ticket depuis la file |
 | `has_care_tasks` | Soins programmés des patients hospitalisés |
 
+### Capacités obligatoires et optionnelles
+
+Depuis le v3.2.2, **tous** les types portent des capacités, y compris ceux
+adossés à un rôle. La distinction n'est plus « avec ou sans rôle » mais
+**obligatoire ou optionnelle** :
+
+- les capacités **obligatoires** font le rôle et vivent dans le code
+  (`StaffType::ROLE_CAPABILITIES`), jamais en base : un médecin sans file
+  d'attente ni dossier patient n'est plus un médecin. Elles apparaissent
+  cochées et verrouillées dans le formulaire, et `normalizeCapabilities()` les
+  réintroduit à l'enregistrement — les décocher depuis le navigateur, ou en
+  forger une par requête directe, ne change rien à ce qui est écrit ;
+- les capacités **optionnelles** sont de vrais choix d'organisation : cet
+  hôpital fait-il prescrire ses sages-femmes, hospitaliser ses urgentistes ?
+  L'admin tranche, type par type.
+
+| Rôle | Obligatoires | Optionnelles |
+|---|---|---|
+| `doctor` | file, envoi et réception de renvoi, dossier, clôture | ordonnance, rendez-vous, hospitalisation, soins |
+| `receptionist` | dossier, enregistrement d'un patient | visiteur, rendez-vous, impression du ticket |
+| `cashier` | file, encaissement | impression du reçu |
+
+Un type **sans rôle** n'impose rien : tout le catalogue y reste optionnel.
+
+Les sections de `/service`, `/reception` et `/caisse` se plient à ces capacités
+par le **même mécanisme** que `/staff/{slug}` — `User::hasCapability()` — et
+non par une seconde règle à tenir à jour. Masquer une section ne suffisant
+jamais, le trait `RequiresCapability` refuse aussi côté serveur : un composant
+Livewire s'appelle sans passer par le menu.
+
+`users.staff_type_id` rattache un compte à un type précis quand plusieurs
+partagent le même rôle (« Médecin » et « Sage-femme » adossés à `doctor`) ;
+laissé vide, la résolution retombe sur le type d'origine du rôle, de sorte
+qu'un compte antérieur au v3.2.2 en ait toujours un.
+
 **Une seule route pour tous ces types** — `Route::get('/staff/{slug}', StaffInterfaceController::class)`
 — jamais une route générée à la volée : `route:cache` ne verrait pas des routes
 déclarées depuis la base. Le `slug` n'est qu'une valeur lue en base par une route
@@ -954,7 +989,7 @@ php artisan test                          # sans Docker
 docker compose exec app php artisan test  # avec Docker
 ```
 
-**266 tests, 903 assertions.** La suite couvre :
+**281 tests, 972 assertions.** La suite couvre :
 
 | Fichier | Objet |
 |---|---|
@@ -980,14 +1015,15 @@ docker compose exec app php artisan test  # avec Docker
 | `ServiceKindTest` | Types de service administrables, slug figé des trois types d'origine, garde-fous de suppression, type « Caisse » non proposable. |
 | `StaffTypeInterfaceTest` | Types de personnel, cloisonnement de `/staff/{slug}`, et **suite paramétrée par combinaison de capacités** : seules les sections cochées apparaissent, et une action hors capacité est refusée côté serveur. |
 | `HospitalizationTest` | Admission clôturant la visite, occupation calculée à la volée, salle pleine avertissant sans bloquer, génération groupée de soins, filtrage « de garde », marquage fait/manqué, sortie bloquée tant qu'un soin reste en attente. |
+| `StaffTypeCapabilitiesTest` | Capacités obligatoires indécochables (UI **et** requête forgée), colonne « Fonctions » sans tiret, sections de `/service` et `/reception` pliées aux capacités, non-régression des comptes de démonstration après migration. |
 | `AdminDeletionActionsTest` | Présence de l'action de suppression dans **toutes** les tables de `/admin`, et refus motivés : type d'origine, type encore utilisé, compte ayant laissé une trace au dossier. |
 | `LoginScreenTest` | Contrat du formulaire de connexion, scène et carte, erreurs et limitation de tentatives. |
 | `AcceptanceScenarioTest` | Le scénario d'acceptation de bout en bout, dans l'ordre. |
 | `SmsGatewayTest` | Format international, passerelle désactivée ou injoignable. |
 
 Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS. La suite
-a également été passée **contre MariaDB 10.11** — 266 tests au vert — et les
-36 migrations ont été vérifiées **dans les deux sens** sur les deux moteurs.
+a également été passée **contre MariaDB 10.11** — 281 tests au vert — et les
+37 migrations ont été vérifiées **dans les deux sens** sur les deux moteurs.
 
 ## 17. Organisation du code
 

@@ -1121,3 +1121,25 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
     justify-content: flex-end;
 }
 .table td:last-child { white-space: nowrap; }
+
+/* Capacite imposee par un role : cochee, verrouillee, et visiblement pas au
+   meme titre que les autres — sans quoi l'admin croirait pouvoir la retirer. */
+.weekdays__day--locked {
+    background: var(--gris-100);
+    border-style: dashed;
+    color: var(--gris-700);
+    cursor: not-allowed;
+}
+.weekdays__day--locked input { cursor: not-allowed; }
+
+.capability__lock {
+    margin-left: auto;
+    padding: .1rem .4rem;
+    border-radius: var(--rayon);
+    background: var(--gris-300);
+    color: var(--gris-900);
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}

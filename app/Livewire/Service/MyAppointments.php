@@ -3,7 +3,9 @@
 namespace App\Livewire\Service;
 
 use App\Actions\CheckInAppointment;
+use App\Livewire\Concerns\RequiresCapability;
 use App\Models\Appointment;
+use App\Models\StaffType;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use InvalidArgumentException;
@@ -16,7 +18,14 @@ use Livewire\Component;
  */
 class MyAppointments extends Component
 {
+    use RequiresCapability;
+
     public bool $pastToo = false;
+
+    public function mount(): void
+    {
+        $this->assertCapability(StaffType::CAP_SCHEDULE_APPOINTMENT);
+    }
 
     #[On('rendez-vous-cree')]
     public function refreshList(): void

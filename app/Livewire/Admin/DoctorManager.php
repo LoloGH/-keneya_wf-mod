@@ -7,6 +7,7 @@ use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Doctor;
 use App\Models\Service;
 use App\Models\ServiceKind;
+use App\Models\StaffType;
 use App\Models\User;
 use App\Support\Audit;
 use App\Support\Roles;
@@ -34,6 +35,9 @@ class DoctorManager extends Component
 
     public string $password = '';
 
+    /** Type de personnel : plusieurs types peuvent partager le meme role. */
+    public ?int $staff_type_id = null;
+
     public string $phone = '';
 
     public ?int $service_id = null;
@@ -51,6 +55,7 @@ class DoctorManager extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => [$this->editingId ? 'nullable' : 'required', 'string', 'min:8'],
+            'staff_type_id' => ['nullable', 'integer', Rule::exists('staff_types', 'id')->where('matched_role', Roles::DOCTOR)],
             'phone' => ['nullable', 'string', 'max:30'],
             // Un medecin ne tient jamais une caisse : la regle exclut ce type
             // de service cote serveur, pas seulement dans la liste deroulante.
@@ -93,6 +98,7 @@ class DoctorManager extends Component
         $this->name = $doctor->user->name;
         $this->email = $doctor->user->email;
         $this->password = '';
+        $this->staff_type_id = $doctor->user->staff_type_id;
         $this->phone = (string) $doctor->phone;
         $this->service_id = $doctor->service_id;
         $this->resetValidation();
@@ -100,7 +106,7 @@ class DoctorManager extends Component
 
     public function cancel(): void
     {
-        $this->reset(['editingId', 'name', 'email', 'password', 'phone', 'service_id']);
+        $this->reset(['editingId', 'name', 'email', 'password', 'phone', 'service_id', 'staff_type_id']);
         $this->resetValidation();
     }
 
@@ -117,6 +123,10 @@ class DoctorManager extends Component
                     'email' => $data['email'],
                     'password' => $data['password'] ?: null,
                 ], fn ($value) => $value !== null));
+
+                // Le type decide des fonctions optionnelles offertes a ce
+                // compte (v3.2.2) ; vide, on retombe sur le type du role.
+                $doctor->user->update(['staff_type_id' => $data['staff_type_id'] ?? null]);
 
                 $previousServiceId = $doctor->service_id;
 
@@ -141,6 +151,7 @@ class DoctorManager extends Component
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => $data['password'],
+                'staff_type_id' => $data['staff_type_id'] ?? null,
             ]);
 
             $user->syncRoles([Roles::DOCTOR]);
@@ -189,12 +200,17 @@ class DoctorManager extends Component
 
     public function render(): View
     {
+        $staffTypes = StaffType::where('matched_role', Roles::DOCTOR)
+            ->orderBy('id')
+            ->get();
+
         return view('livewire.admin.doctor-manager', [
             'doctors' => Doctor::with(['user', 'service'])
                 ->get()
                 ->sortBy(fn (Doctor $doctor) => $doctor->user->name)
                 ->values(),
             'services' => Service::careServices()->orderBy('name')->get(),
+            'staffTypes' => $staffTypes,
         ]);
     }
 }

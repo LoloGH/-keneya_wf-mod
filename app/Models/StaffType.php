@@ -42,6 +42,16 @@ class StaffType extends Model
     /** Soins programmes des patients hospitalises (v3.2.1, point 11). */
     public const CAP_CARE_TASKS = 'has_care_tasks';
 
+    public const CAP_PRESCRIBE = 'can_prescribe';
+
+    public const CAP_SCHEDULE_APPOINTMENT = 'can_schedule_appointment';
+
+    public const CAP_ADMIT_HOSPITALIZATION = 'can_admit_hospitalization';
+
+    public const CAP_REGISTER_PATIENT = 'can_register_patient';
+
+    public const CAP_REGISTER_VISITOR = 'can_register_visitor';
+
     /**
      * Libelle de chaque capacite et section qu'elle fait apparaitre.
      *
@@ -84,6 +94,82 @@ class StaffType extends Model
             'label' => 'Executer les soins programmes',
             'section' => 'Soins programmes des patients hospitalises',
         ],
+        self::CAP_PRESCRIBE => [
+            'label' => 'Rediger une ordonnance et une conclusion',
+            'section' => 'Fin de consultation',
+        ],
+        self::CAP_SCHEDULE_APPOINTMENT => [
+            'label' => 'Donner un rendez-vous',
+            'section' => 'Rendez-vous',
+        ],
+        self::CAP_ADMIT_HOSPITALIZATION => [
+            'label' => 'Hospitaliser un patient',
+            'section' => 'Patients hospitalises',
+        ],
+        self::CAP_REGISTER_PATIENT => [
+            'label' => 'Enregistrer un patient',
+            'section' => 'Nouveau patient',
+        ],
+        self::CAP_REGISTER_VISITOR => [
+            'label' => 'Enregistrer un visiteur',
+            'section' => 'Visiteur',
+        ],
+    ];
+
+    /**
+     * Ce que chaque role code exige, et ce qu'il permet de moduler (v3.2.2).
+     *
+     * Les capacites **obligatoires** font le role : les decocher laisserait une
+     * interface amputee de ce qui la definit — un medecin sans file d'attente
+     * n'est plus un medecin. Elles vivent ici, dans le code, et non en base :
+     * une regle qui tient l'application debout ne se modifie pas depuis un
+     * formulaire.
+     *
+     * Les capacites **optionnelles** sont de vrais choix d'organisation : cet
+     * hopital fait-il prescrire ses sages-femmes, hospitaliser ses urgentistes ?
+     * L'admin tranche, type par type.
+     *
+     * Un type sans `matched_role` n'a aucune capacite obligatoire : tout y est
+     * optionnel, comme depuis le v3.2.1.
+     *
+     * @var array<string, array{required: array<int, string>, optional: array<int, string>}>
+     */
+    public const ROLE_CAPABILITIES = [
+        Roles::DOCTOR => [
+            'required' => [
+                self::CAP_QUEUE,
+                self::CAP_SEND_REFERRAL,
+                self::CAP_RECEIVE_REFERRAL,
+                self::CAP_VIEW_DOSSIER,
+                self::CAP_CLOSE_VISIT,
+            ],
+            'optional' => [
+                self::CAP_PRESCRIBE,
+                self::CAP_SCHEDULE_APPOINTMENT,
+                self::CAP_ADMIT_HOSPITALIZATION,
+                self::CAP_CARE_TASKS,
+            ],
+        ],
+        Roles::RECEPTIONIST => [
+            'required' => [
+                self::CAP_VIEW_DOSSIER,
+                self::CAP_REGISTER_PATIENT,
+            ],
+            'optional' => [
+                self::CAP_REGISTER_VISITOR,
+                self::CAP_SCHEDULE_APPOINTMENT,
+                self::CAP_PRINT_TICKET,
+            ],
+        ],
+        Roles::CASHIER => [
+            'required' => [
+                self::CAP_QUEUE,
+                self::CAP_ACCEPT_PAYMENT,
+            ],
+            'optional' => [
+                self::CAP_PRINT_TICKET,
+            ],
+        ],
     ];
 
     protected $fillable = ['name', 'matched_role', 'slug', 'capabilities'];
@@ -104,13 +190,79 @@ class StaffType extends Model
         return filled($this->matched_role);
     }
 
-    public function can(string $capability): bool
+    /**
+     * Les capacites que ce type ne peut pas perdre.
+     *
+     * @return array<int, string>
+     */
+    public function requiredCapabilities(): array
     {
-        return in_array($capability, $this->capabilities ?? [], true);
+        return self::ROLE_CAPABILITIES[$this->matched_role]['required'] ?? [];
     }
 
     /**
-     * Les sections qui apparaitront reellement sur /staff/{slug}, dans l'ordre.
+     * Les capacites que l'admin peut cocher ou decocher sur ce type.
+     *
+     * Pour un type sans role, c'est tout le catalogue — rien n'y est impose.
+     *
+     * @return array<int, string>
+     */
+    public function optionalCapabilities(): array
+    {
+        if (! $this->usesFixedRole()) {
+            return array_keys(self::CAPABILITIES);
+        }
+
+        return self::ROLE_CAPABILITIES[$this->matched_role]['optional'] ?? [];
+    }
+
+    /**
+     * Les capacites optionnelles effectivement activees sur ce type.
+     *
+     * C'est ce que compte la colonne « Fonctions » : un tiret ne disait rien,
+     * et compter les obligatoires n'apprendrait rien non plus puisqu'elles sont
+     * les memes pour tous les types d'un meme role.
+     *
+     * @return array<int, string>
+     */
+    public function enabledOptionalCapabilities(): array
+    {
+        return array_values(array_intersect($this->optionalCapabilities(), $this->capabilities ?? []));
+    }
+
+    /**
+     * Ce type sait-il faire ceci ?
+     *
+     * Une capacite obligatoire du role repond oui sans meme etre stockee : elle
+     * ne depend pas de ce que contient la colonne, et une base incomplete ne
+     * doit pas amputer une interface.
+     */
+    public function can(string $capability): bool
+    {
+        return in_array($capability, $this->requiredCapabilities(), true)
+            || in_array($capability, $this->capabilities ?? [], true);
+    }
+
+    /**
+     * Normalise une liste soumise par l'admin : les obligatoires sont
+     * reintroduites, l'inconnu et le hors-perimetre sont ecartes.
+     *
+     * C'est ici que se joue le refus serveur : decocher une capacite
+     * obligatoire depuis le navigateur, ou en forger une par requete directe,
+     * ne change rien a ce qui est enregistre.
+     *
+     * @param  array<int, string>  $soumises
+     * @return array<int, string>
+     */
+    public function normalizeCapabilities(array $soumises): array
+    {
+        $retenues = array_intersect($soumises, $this->optionalCapabilities());
+
+        return array_values(array_unique(array_merge($this->requiredCapabilities(), $retenues)));
+    }
+
+    /**
+     * Les sections qui apparaitront reellement, dans l'ordre.
      *
      * @return array<int, array{key: string, label: string}>
      */

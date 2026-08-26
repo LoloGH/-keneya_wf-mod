@@ -26,36 +26,62 @@
             </div>
         </div>
 
-        @if ($matched_role === '')
-            <fieldset class="weekdays">
-                <legend>Fonctions de ce type</legend>
-                <div class="capabilities">
-                    @foreach ($allCapabilities as $capability => $meta)
-                        <label class="weekdays__day">
-                            <input type="checkbox" value="{{ $capability }}" wire:model.live="capabilities">
-                            <span>{{ $meta['label'] }}</span>
-                        </label>
-                    @endforeach
-                </div>
-                @error('capabilities') <p class="field__error">{{ $message }}</p> @enderror
-            </fieldset>
+        {{-- Les cases sont proposees pour TOUS les types depuis le v3.2.2 :
+             un role code impose seulement les siennes, il n'interdit plus de
+             moduler le reste. --}}
+        @php
+            $obligatoires = $this->requiredCapabilities();
+            $optionnelles = $this->optionalCapabilities();
+        @endphp
 
-            {{-- L'admin doit voir ce qu'il vient de creer avant qu'un membre du
-                 personnel ne s'y connecte. --}}
-            <div class="preview">
-                <h3 class="card__subtitle">Ce que cette personne verra</h3>
-                <ul class="preview__list">
-                    @foreach ($this->previewSections() as $section)
-                        <li>{{ $section }}</li>
-                    @endforeach
-                </ul>
+        <fieldset class="weekdays">
+            <legend>Fonctions de ce type</legend>
+            <div class="capabilities">
+                @foreach ($allCapabilities as $capability => $meta)
+                    @php
+                        $impose = in_array($capability, $obligatoires, true);
+                        $offert = in_array($capability, $optionnelles, true);
+                    @endphp
+
+                    @if ($impose || $offert)
+                        <label class="weekdays__day @if ($impose) weekdays__day--locked @endif"
+                               @if ($impose) title="Indispensable au fonctionnement de ce role" @endif>
+                            {{-- Une case obligatoire est cochee et verrouillee.
+                                 Le refus ne tient pas a cet attribut : le
+                                 modele reintroduit la capacite a
+                                 l'enregistrement, quoi qu'envoie le client. --}}
+                            <input type="checkbox" value="{{ $capability }}"
+                                   @if ($impose) checked disabled aria-describedby="cap-lock-{{ $capability }}"
+                                   @else wire:model.live="capabilities" @endif>
+                            <span>{{ $meta['label'] }}</span>
+                            @if ($impose)
+                                <span class="capability__lock" id="cap-lock-{{ $capability }}">obligatoire</span>
+                            @endif
+                        </label>
+                    @endif
+                @endforeach
             </div>
-        @else
-            <p class="hint hint--blocking">
-                Ce type utilisera l'interface deja en place du role choisi. Aucune
-                fonction n'est a cocher : son fonctionnement ne change pas.
+            @error('capabilities') <p class="field__error">{{ $message }}</p> @enderror
+        </fieldset>
+
+        @if ($matched_role !== '')
+            <p class="hint">
+                Ce type reutilise l'interface deja en place du role choisi. Les
+                fonctions marquees « obligatoire » la definissent et ne peuvent
+                pas etre retirees ; les autres restent a votre main.
             </p>
         @endif
+
+        {{-- L'admin doit voir ce qu'il vient de creer avant qu'un membre du
+             personnel ne s'y connecte. --}}
+        <div class="preview">
+            <h3 class="card__subtitle">Ce que cette personne verra</h3>
+            <ul class="preview__list">
+                @foreach ($this->previewSections() as $section)
+                    <li>{{ $section }}</li>
+                @endforeach
+            </ul>
+        </div>
 
         <div class="btn-row">
             <button type="submit" class="btn btn--primary">
@@ -83,7 +109,10 @@
                                 <code>/staff/{{ $type->slug }}</code>
                             @endif
                         </td>
-                        <td>{{ $type->usesFixedRole() ? '—' : count($type->capabilities ?? []) }}</td>
+                        <td>
+                            {{ count($type->enabledOptionalCapabilities()) }}
+                            <span class="hint">/ {{ count($type->optionalCapabilities()) }}</span>
+                        </td>
                         <td>{{ $type->members_count }}</td>
                         <td>
                             <div class="btn-row">
