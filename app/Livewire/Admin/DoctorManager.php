@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\DeleteStaffAccount;
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Doctor;
 use App\Models\Service;
 use App\Models\ServiceKind;
@@ -9,8 +11,10 @@ use App\Models\User;
 use App\Support\Audit;
 use App\Support\Roles;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -20,6 +24,8 @@ use Livewire\Component;
  */
 class DoctorManager extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $editingId = null;
 
     public string $name = '';
@@ -148,9 +154,37 @@ class DoctorManager extends Component
             Audit::log(Audit::EVENT_DOCTOR_CREATED, sprintf('Medecin %s cree.', $user->name), $doctor);
         });
 
-        session()->flash('admin.status', $this->editingId ? 'Medecin mis a jour.' : 'Medecin cree.');
+        $this->notifySuccess($this->editingId ? 'Medecin mis a jour.' : 'Medecin cree.');
 
         $this->cancel();
+    }
+
+    /**
+     * Suppression du rattachement, et du compte si c'etait le dernier.
+     *
+     * Le refus est explicite plutot que silencieux : l'admin doit savoir ce qui
+     * bloque, pas seulement que ca ne marche pas.
+     */
+    public function delete(int $id, DeleteStaffAccount $action): void
+    {
+        $membership = Doctor::findOrFail($id);
+        $nom = $membership->user?->name;
+
+        try {
+            $action->execute($membership, Auth::user());
+        } catch (InvalidArgumentException $e) {
+            $this->notifyError($e->getMessage());
+
+            return;
+        }
+
+        $this->notifySuccess(sprintf('Medecin supprime : %s.', $nom));
+
+        if ($this->editingId === $id) {
+            $this->cancel();
+        }
+
+        $this->dispatch('medecins-mis-a-jour');
     }
 
     public function render(): View

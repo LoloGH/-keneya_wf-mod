@@ -55,6 +55,8 @@ final class Audit
 
     public const EVENT_STAFF_MEMBER_CREATED = 'personnel_cree';
 
+    public const EVENT_STAFF_DELETED = 'personnel_supprime';
+
     public const EVENT_PATIENT_ADMITTED = 'patient_hospitalise';
 
     public const EVENT_PATIENT_DISCHARGED = 'sortie_hospitalisation';
@@ -127,6 +129,7 @@ final class Audit
         self::EVENT_STAFF_TYPE_UPDATED => 'Modification d\'un type de personnel',
         self::EVENT_STAFF_TYPE_DELETED => 'Suppression d\'un type de personnel',
         self::EVENT_STAFF_MEMBER_CREATED => 'Creation d\'un membre du personnel',
+        self::EVENT_STAFF_DELETED => 'Suppression d\'un membre du personnel',
         self::EVENT_PATIENT_ADMITTED => 'Admission en hospitalisation',
         self::EVENT_PATIENT_DISCHARGED => 'Sortie d\'hospitalisation',
         self::EVENT_CARE_TASKS_PRESCRIBED => 'Prescription de soins',

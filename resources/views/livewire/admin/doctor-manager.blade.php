@@ -69,9 +69,14 @@
                         <td>{{ $doctor->phone ?: '—' }}</td>
                         <td>{{ $doctor->service->name }}</td>
                         <td>
-                            <button type="button" class="btn btn--ghost" wire:click="edit({{ $doctor->id }})">
-                                Modifier / reaffecter
-                            </button>
+                            <div class="btn-row">
+                                <button type="button" class="btn btn--ghost" wire:click="edit({{ $doctor->id }})">
+                                    Modifier / reaffecter
+                                </button>
+                                <x-delete-action :click="'delete('.$doctor->id.')'"
+                                                 label="Supprimer ce medecin"
+                                                 confirm="Supprimer ce medecin ? Le compte part avec son dernier rattachement." />
+                            </div>
                         </td>
                     </tr>
                 @empty

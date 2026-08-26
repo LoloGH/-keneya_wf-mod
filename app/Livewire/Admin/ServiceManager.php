@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Service;
 use App\Models\ServiceKind;
 use App\Support\Audit;
@@ -14,6 +15,8 @@ use Livewire\Component;
  */
 class ServiceManager extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $editingId = null;
 
     public string $name = '';
@@ -82,12 +85,12 @@ class ServiceManager extends Component
             $service->update($data);
 
             Audit::log(Audit::EVENT_SERVICE_UPDATED, sprintf('Service « %s » modifie.', $service->name), $service);
-            session()->flash('admin.status', 'Service mis a jour.');
+            $this->notifySuccess('Service mis a jour.');
         } else {
             $service = Service::create($data);
 
             Audit::log(Audit::EVENT_SERVICE_CREATED, sprintf('Service « %s » cree.', $service->name), $service);
-            session()->flash('admin.status', 'Service cree.');
+            $this->notifySuccess('Service cree.');
         }
 
         $this->cancel();
@@ -103,7 +106,7 @@ class ServiceManager extends Component
         $service = Service::withCount(['doctors', 'visits'])->findOrFail($serviceId);
 
         if ($service->doctors_count > 0 || $service->visits_count > 0) {
-            session()->flash('admin.error', sprintf(
+            $this->notifyError(sprintf(
                 'Le service « %s » ne peut pas etre supprime : il compte %d medecin(s) et %d passage(s).',
                 $service->name,
                 $service->doctors_count,
@@ -118,7 +121,7 @@ class ServiceManager extends Component
 
         Audit::log(Audit::EVENT_SERVICE_DELETED, sprintf('Service « %s » supprime.', $name));
 
-        session()->flash('admin.status', 'Service supprime.');
+        $this->notifySuccess('Service supprime.');
         $this->dispatch('services-mis-a-jour');
     }
 

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\BulkCreateSchedule;
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Service;
 use App\Models\User;
 use App\Support\Roles;
@@ -20,6 +21,8 @@ use Livewire\Component;
  */
 class BulkScheduleForm extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $user_id = null;
 
     public string $from = '';
@@ -83,7 +86,7 @@ class BulkScheduleForm extends Component
             throw ValidationException::withMessages(['weekdays' => $e->getMessage()]);
         }
 
-        session()->flash('admin.status', $crees > 0
+        $this->notifySuccess($crees > 0
             ? sprintf('%d creneau(x) genere(s).', $crees)
             : 'Aucun creneau a generer : ils existaient deja sur cette periode.');
 

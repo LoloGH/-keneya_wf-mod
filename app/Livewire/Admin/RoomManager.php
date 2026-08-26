@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Hospitalization;
 use App\Models\Room;
 use App\Models\Service;
@@ -17,6 +18,8 @@ use Livewire\Component;
  */
 class RoomManager extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $editingId = null;
 
     public string $name = '';
@@ -70,7 +73,7 @@ class RoomManager extends Component
             $room = Room::findOrFail($this->editingId);
             $room->update($data);
 
-            session()->flash('admin.status', 'Salle mise a jour.');
+            $this->notifySuccess('Salle mise a jour.');
         } else {
             $room = Room::create($data);
 
@@ -80,7 +83,7 @@ class RoomManager extends Component
                 $room,
             );
 
-            session()->flash('admin.status', 'Salle creee.');
+            $this->notifySuccess('Salle creee.');
         }
 
         $this->cancel();
@@ -97,7 +100,7 @@ class RoomManager extends Component
         $actives = $room->hospitalizations()->where('status', Hospitalization::STATUS_ACTIVE)->count();
 
         if ($actives > 0) {
-            session()->flash('admin.error', sprintf(
+            $this->notifyError(sprintf(
                 'La salle « %s » accueille %d patient(s) : elle ne peut pas etre supprimee.',
                 $room->name,
                 $actives,
@@ -111,7 +114,7 @@ class RoomManager extends Component
 
         Audit::log(Audit::EVENT_DELETED, sprintf('Salle « %s » supprimee.', $nom));
 
-        session()->flash('admin.status', 'Salle supprimee.');
+        $this->notifySuccess('Salle supprimee.');
     }
 
     public function render(): View

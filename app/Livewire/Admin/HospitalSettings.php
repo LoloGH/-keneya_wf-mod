@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -14,6 +15,8 @@ use Livewire\Component;
  */
 class HospitalSettings extends Component
 {
+    use NotifiesAdmin;
+
     public string $hospitalName = '';
 
     public function mount(): void
@@ -29,7 +32,7 @@ class HospitalSettings extends Component
 
         Setting::put(Setting::HOSPITAL_NAME, $this->hospitalName);
 
-        session()->flash('admin.status', "Nom de l'etablissement mis a jour.");
+        $this->notifySuccess("Nom de l'etablissement mis a jour.");
     }
 
     public function render(): View

@@ -2,13 +2,17 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\DeleteStaffAccount;
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Receptionist;
 use App\Models\User;
 use App\Support\Audit;
 use App\Support\Roles;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 use Livewire\Component;
 
 /**
@@ -16,6 +20,8 @@ use Livewire\Component;
  */
 class ReceptionistManager extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $editingId = null;
 
     public string $name = '';
@@ -99,9 +105,35 @@ class ReceptionistManager extends Component
             Audit::log(Audit::EVENT_RECEPTIONIST_CREATED, sprintf('Receptionniste %s creee.', $user->name), $receptionist);
         });
 
-        session()->flash('admin.status', $this->editingId ? 'Receptionniste mise a jour.' : 'Receptionniste creee.');
+        $this->notifySuccess($this->editingId ? 'Receptionniste mise a jour.' : 'Receptionniste creee.');
 
         $this->cancel();
+    }
+
+    /**
+     * Suppression du rattachement, et du compte si c'etait le dernier.
+     *
+     * Le refus est explicite plutot que silencieux : l'admin doit savoir ce qui
+     * bloque, pas seulement que ca ne marche pas.
+     */
+    public function delete(int $id, DeleteStaffAccount $action): void
+    {
+        $membership = Receptionist::findOrFail($id);
+        $nom = $membership->user?->name;
+
+        try {
+            $action->execute($membership, Auth::user());
+        } catch (InvalidArgumentException $e) {
+            $this->notifyError($e->getMessage());
+
+            return;
+        }
+
+        $this->notifySuccess(sprintf('Receptionniste supprime : %s.', $nom));
+
+        if ($this->editingId === $id) {
+            $this->cancel();
+        }
     }
 
     public function render(): View

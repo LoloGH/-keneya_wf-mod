@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\StaffType;
 use App\Support\Audit;
 use App\Support\Roles;
@@ -22,6 +23,8 @@ use Livewire\Component;
  */
 class StaffTypeManager extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $editingId = null;
 
     public string $name = '';
@@ -140,7 +143,7 @@ class StaffTypeManager extends Component
                 $type,
             );
 
-            session()->flash('admin.status', 'Type de personnel mis a jour.');
+            $this->notifySuccess('Type de personnel mis a jour.');
         } else {
             $attributs['slug'] = $adosse ? null : StaffType::makeSlug($data['name']);
 
@@ -159,7 +162,7 @@ class StaffTypeManager extends Component
                 $type,
             );
 
-            session()->flash('admin.status', 'Type de personnel cree.');
+            $this->notifySuccess('Type de personnel cree.');
         }
 
         $this->cancel();
@@ -175,7 +178,7 @@ class StaffTypeManager extends Component
         $type = StaffType::withCount('members')->findOrFail($typeId);
 
         if ($type->members_count > 0) {
-            session()->flash('admin.error', sprintf(
+            $this->notifyError(sprintf(
                 'Le type « %s » ne peut pas etre supprime : %d personne(s) le portent encore.',
                 $type->name,
                 $type->members_count,
@@ -189,7 +192,7 @@ class StaffTypeManager extends Component
 
         Audit::log(Audit::EVENT_STAFF_TYPE_DELETED, sprintf('Type de personnel « %s » supprime.', $nom));
 
-        session()->flash('admin.status', 'Type de personnel supprime.');
+        $this->notifySuccess('Type de personnel supprime.');
         $this->dispatch('types-de-personnel-mis-a-jour');
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\CareTaskType;
 use App\Support\Audit;
 use Illuminate\Contracts\View\View;
@@ -15,6 +16,8 @@ use Livewire\Component;
  */
 class CareTaskTypeManager extends Component
 {
+    use NotifiesAdmin;
+
     public string $name = '';
 
     public function save(): void
@@ -28,7 +31,7 @@ class CareTaskTypeManager extends Component
 
         Audit::log(Audit::EVENT_CREATED, sprintf('Type de soin « %s » cree.', $type->name), $type);
 
-        session()->flash('admin.status', 'Type de soin cree.');
+        $this->notifySuccess('Type de soin cree.');
 
         $this->reset('name');
     }
@@ -38,7 +41,7 @@ class CareTaskTypeManager extends Component
         $type = CareTaskType::withCount('tasks')->findOrFail($typeId);
 
         if ($type->tasks_count > 0) {
-            session()->flash('admin.error', sprintf(
+            $this->notifyError(sprintf(
                 'Le type « %s » ne peut pas etre supprime : %d soin(s) s\'y rattachent.',
                 $type->name,
                 $type->tasks_count,
@@ -52,7 +55,7 @@ class CareTaskTypeManager extends Component
 
         Audit::log(Audit::EVENT_DELETED, sprintf('Type de soin « %s » supprime.', $nom));
 
-        session()->flash('admin.status', 'Type de soin supprime.');
+        $this->notifySuccess('Type de soin supprime.');
     }
 
     public function render(): View

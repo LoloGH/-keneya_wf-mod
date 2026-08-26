@@ -2,14 +2,18 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\DeleteStaffAccount;
+use App\Livewire\Concerns\NotifiesAdmin;
 use App\Models\Service;
 use App\Models\StaffMember;
 use App\Models\StaffType;
 use App\Models\User;
 use App\Support\Audit;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -23,6 +27,8 @@ use Livewire\Component;
  */
 class StaffMemberManager extends Component
 {
+    use NotifiesAdmin;
+
     public ?int $editingId = null;
 
     public string $name = '';
@@ -146,9 +152,35 @@ class StaffMemberManager extends Component
             );
         });
 
-        session()->flash('admin.status', $this->editingId ? 'Membre du personnel mis a jour.' : 'Membre du personnel cree.');
+        $this->notifySuccess($this->editingId ? 'Membre du personnel mis a jour.' : 'Membre du personnel cree.');
 
         $this->cancel();
+    }
+
+    /**
+     * Suppression du rattachement, et du compte si c'etait le dernier.
+     *
+     * Le refus est explicite plutot que silencieux : l'admin doit savoir ce qui
+     * bloque, pas seulement que ca ne marche pas.
+     */
+    public function delete(int $id, DeleteStaffAccount $action): void
+    {
+        $membership = StaffMember::findOrFail($id);
+        $nom = $membership->user?->name;
+
+        try {
+            $action->execute($membership, Auth::user());
+        } catch (InvalidArgumentException $e) {
+            $this->notifyError($e->getMessage());
+
+            return;
+        }
+
+        $this->notifySuccess(sprintf('Membre du personnel supprime : %s.', $nom));
+
+        if ($this->editingId === $id) {
+            $this->cancel();
+        }
     }
 
     public function render(): View

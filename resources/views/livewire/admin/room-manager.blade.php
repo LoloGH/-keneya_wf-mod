@@ -58,11 +58,9 @@
                             <div class="btn-row">
                                 <button type="button" class="btn btn--ghost"
                                         wire:click="edit({{ $room->id }})">Modifier</button>
-                                @if ($room->occupancy_count === 0)
-                                    <button type="button" class="btn btn--ghost"
-                                            wire:click="delete({{ $room->id }})"
-                                            wire:confirm="Supprimer cette salle ?">Supprimer</button>
-                                @endif
+                                <x-delete-action :click="'delete('.$room->id.')'"
+                                                 label="Supprimer cette salle"
+                                                 confirm="Supprimer cette salle ?" />
                             </div>
                         </td>
                     </tr>

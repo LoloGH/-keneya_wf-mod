@@ -1082,3 +1082,42 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .care--late { border-left: 4px solid var(--ambre); }
 .care--late .care__time { color: var(--ambre); font-weight: 600; }
 .care--assigned { border-left: 4px solid var(--bleu); }
+
+/* Bouton d'action reduit a son icone : les tableaux d'administration sont
+   deja larges, et le libelle reste porte par aria-label / title. */
+.btn--icon {
+    min-width: var(--touch);
+    padding: 0 .6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn--icon-danger { color: var(--rouge); }
+.btn--icon-danger:hover { background: var(--rouge-clair); }
+
+/* Bandeau de message : le bouton de fermeture ne doit pas ecraser le texte. */
+.alert { display: flex; align-items: flex-start; gap: .75rem; }
+.alert__dismiss {
+    margin-left: auto;
+    flex: 0 0 auto;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 1.3rem;
+    line-height: 1;
+    border: 0;
+    border-radius: var(--rayon);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+.alert__dismiss:hover { background: rgba(0, 0, 0, .07); }
+
+/* Cellule d'actions d'un tableau : le bouton et son icone restent sur la meme
+   ligne, meme quand le libelle est long (« Modifier / reaffecter »). La
+   colonne peut s'elargir, la ligne ne doit pas se casser en deux. */
+.table .btn-row {
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+}
+.table td:last-child { white-space: nowrap; }

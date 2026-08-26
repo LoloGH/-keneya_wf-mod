@@ -44,9 +44,14 @@
                         <td>{{ $receptionist->user->name }}</td>
                         <td>{{ $receptionist->user->email }}</td>
                         <td>
-                            <button type="button" class="btn btn--ghost" wire:click="edit({{ $receptionist->id }})">
-                                Modifier
-                            </button>
+                            <div class="btn-row">
+                                <button type="button" class="btn btn--ghost" wire:click="edit({{ $receptionist->id }})">
+                                    Modifier
+                                </button>
+                                <x-delete-action :click="'delete('.$receptionist->id.')'"
+                                                 label="Supprimer cette receptionniste"
+                                                 confirm="Supprimer cette receptionniste et son compte ?" />
+                            </div>
                         </td>
                     </tr>
                 @empty
