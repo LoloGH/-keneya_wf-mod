@@ -314,8 +314,17 @@ avant toute mise en service réelle.**
 
 Aucun compte de démonstration n'est créé pour un type de personnel à interface
 dédiée : ces types n'existent que si l'administrateur en crée. La marche à suivre
-est « Personnel → Types de personnel », puis « Personnel → Interfaces dédiées »
-pour y rattacher quelqu'un.
+est « Personnel → Types de personnel », puis « Personnel → Personnels » pour y
+rattacher quelqu'un.
+
+Depuis la v3.2.3, « Personnel → Personnels » gère **tout** le personnel — les
+sections séparées « Médecins », « Réceptionnistes » et « Interfaces dédiées » ont
+fusionné. Le menu « Type de personnel » liste tous les `staff_types` et le menu
+« Service » tous les services, caisses comprises ; c'est le type choisi qui
+décide du rôle attribué et de la table de rattachement (`doctors`,
+`receptionists`, `cashiers` ou `staff_members`). Un compte ne change pas de rôle
+en changeant de type : le formulaire refuse explicitement, il faut supprimer le
+rattachement et en créer un autre.
 
 ## 6. Passerelle SMS
 

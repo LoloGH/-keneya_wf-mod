@@ -5,11 +5,9 @@ namespace Tests\Feature;
 use App\Actions\DeleteStaffAccount;
 use App\Actions\RecordPayment;
 use App\Livewire\Admin\CareTaskTypeManager;
-use App\Livewire\Admin\DoctorManager;
-use App\Livewire\Admin\ReceptionistManager;
 use App\Livewire\Admin\RoomManager;
 use App\Livewire\Admin\ServiceKindManager;
-use App\Livewire\Admin\StaffMemberManager;
+use App\Livewire\Admin\StaffManager;
 use App\Livewire\Admin\StaffTypeManager;
 use App\Models\CareTaskType;
 use App\Models\Doctor;
@@ -92,9 +90,7 @@ class AdminDeletionActionsTest extends TestCase
         ]);
 
         foreach ([
-            DoctorManager::class,
-            ReceptionistManager::class,
-            StaffMemberManager::class,
+            StaffManager::class,
             StaffTypeManager::class,
             RoomManager::class,
             CareTaskTypeManager::class,
@@ -153,8 +149,8 @@ class AdminDeletionActionsTest extends TestCase
         $rattachement = Receptionist::where('user_id', $userId)->firstOrFail();
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(ReceptionistManager::class)
-            ->call('delete', $rattachement->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'receptionist:'.$rattachement->getKey());
 
         $this->assertDatabaseMissing('receptionists', ['id' => $rattachement->getKey()]);
         $this->assertDatabaseMissing('users', ['id' => $userId]);
@@ -167,8 +163,8 @@ class AdminDeletionActionsTest extends TestCase
         $nom = $receptionist->name;
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(ReceptionistManager::class)
-            ->call('delete', $rattachement->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'receptionist:'.$rattachement->getKey());
 
         $trace = Activity::where('event', Audit::EVENT_STAFF_DELETED)->latest('id')->first();
 
@@ -193,8 +189,8 @@ class AdminDeletionActionsTest extends TestCase
         );
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(DoctorManager::class)
-            ->call('delete', $doctor->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'doctor:'.$doctor->getKey());
 
         // Effacer ce rattachement rendrait anonyme une consultation signee.
         $this->assertDatabaseHas('doctors', ['id' => $doctor->getKey()]);
@@ -216,8 +212,8 @@ class AdminDeletionActionsTest extends TestCase
         $userId = $doctor->user_id;
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(DoctorManager::class)
-            ->call('delete', $doctor->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'doctor:'.$doctor->getKey());
 
         $this->assertDatabaseMissing('doctors', ['id' => $doctor->getKey()]);
         $this->assertDatabaseMissing('users', ['id' => $userId]);
@@ -235,8 +231,8 @@ class AdminDeletionActionsTest extends TestCase
         ]);
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(DoctorManager::class)
-            ->call('delete', $doctor->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'doctor:'.$doctor->getKey());
 
         // Le compte survit tant qu'il exerce ailleurs.
         $this->assertDatabaseMissing('doctors', ['id' => $doctor->getKey()]);
@@ -260,8 +256,8 @@ class AdminDeletionActionsTest extends TestCase
         );
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(ReceptionistManager::class)
-            ->call('delete', $rattachement->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'receptionist:'.$rattachement->getKey());
 
         $this->assertDatabaseHas('users', ['id' => $receptionist->getKey()]);
 
@@ -288,8 +284,8 @@ class AdminDeletionActionsTest extends TestCase
         ]);
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(ReceptionistManager::class)
-            ->call('delete', $rattachement->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'receptionist:'.$rattachement->getKey());
 
         // Un planning est la propriete du compte, pas du dossier patient.
         $this->assertSame(0, Schedule::where('user_id', $receptionist->getKey())->count());
@@ -310,8 +306,8 @@ class AdminDeletionActionsTest extends TestCase
         ]);
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(StaffMemberManager::class)
-            ->call('delete', $member->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'staff:'.$member->getKey());
 
         $this->assertDatabaseMissing('staff_members', ['id' => $member->getKey()]);
         $this->assertDatabaseMissing('users', ['id' => $user->getKey()]);
@@ -341,8 +337,8 @@ class AdminDeletionActionsTest extends TestCase
         );
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(StaffMemberManager::class)
-            ->call('delete', $member->getKey());
+            ->test(StaffManager::class)
+            ->call('delete', 'staff:'.$member->getKey());
 
         $this->assertDatabaseHas('staff_members', ['id' => $member->getKey()]);
 

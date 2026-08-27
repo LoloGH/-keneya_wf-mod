@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Models\Receptionist;
 use App\Models\Service;
 use App\Models\ServiceKind;
+use App\Models\StaffType;
 use App\Models\User;
 use App\Models\Visit;
 use App\Support\Roles;
@@ -55,6 +56,16 @@ abstract class TestCase extends BaseTestCase
                 'requires_payment_gate' => $slug === ServiceKind::SLUG_PLATEAU_TECHNIQUE,
             ],
         );
+    }
+
+    /**
+     * Le type de personnel d'origine adosse a un role, pose par la migration
+     * des `staff_types`. La section « Personnels » exige un type : c'est lui
+     * qui designe le role et la table de rattachement.
+     */
+    protected function staffTypeFor(string $role): StaffType
+    {
+        return StaffType::where('matched_role', $role)->orderBy('id')->firstOrFail();
     }
 
     protected function makeCashier(): User

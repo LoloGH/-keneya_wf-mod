@@ -2,10 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Admin\DoctorManager;
 use App\Livewire\Admin\PatientDirectory;
-use App\Livewire\Admin\ReceptionistManager;
 use App\Livewire\Admin\ServiceManager;
+use App\Livewire\Admin\StaffManager;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Receptionist;
@@ -54,10 +53,11 @@ class AdminInterfaceTest extends TestCase
     public function test_l_admin_cree_un_medecin_avec_son_compte_et_son_role(): void
     {
         Livewire::actingAs($this->makeAdmin())
-            ->test(DoctorManager::class)
+            ->test(StaffManager::class)
             ->set('name', 'Dr Modibo Keita')
             ->set('email', 'modibo@keneya.test')
             ->set('password', 'motdepasse')
+            ->set('staff_type_id', $this->staffTypeFor(Roles::DOCTOR)->getKey())
             ->set('phone', '76000001')
             ->set('service_id', Service::factory()->create()->getKey())
             ->call('save')
@@ -76,8 +76,8 @@ class AdminInterfaceTest extends TestCase
         $nouveau = Service::factory()->create();
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(DoctorManager::class)
-            ->call('edit', $doctor->getKey())
+            ->test(StaffManager::class)
+            ->call('edit', 'doctor:'.$doctor->getKey())
             ->set('service_id', $nouveau->getKey())
             ->call('save')
             ->assertHasNoErrors();
@@ -91,8 +91,8 @@ class AdminInterfaceTest extends TestCase
         $hash = $doctor->user->password;
 
         Livewire::actingAs($this->makeAdmin())
-            ->test(DoctorManager::class)
-            ->call('edit', $doctor->getKey())
+            ->test(StaffManager::class)
+            ->call('edit', 'doctor:'.$doctor->getKey())
             ->set('name', 'Nom corrige')
             ->call('save')
             ->assertHasNoErrors();
@@ -104,10 +104,11 @@ class AdminInterfaceTest extends TestCase
     public function test_l_admin_cree_une_receptionniste(): void
     {
         Livewire::actingAs($this->makeAdmin())
-            ->test(ReceptionistManager::class)
+            ->test(StaffManager::class)
             ->set('name', 'Awa Traore')
             ->set('email', 'awa@keneya.test')
             ->set('password', 'motdepasse')
+            ->set('staff_type_id', $this->staffTypeFor(Roles::RECEPTIONIST)->getKey())
             ->call('save')
             ->assertHasNoErrors();
 
