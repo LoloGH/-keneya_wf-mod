@@ -65,6 +65,9 @@ class Hospitalizations extends Component
     /** Hospitalisation dont on deplie la liste des soins programmes. */
     public ?int $viewingCareTasksFor = null;
 
+    /** Hospitalisation dont on deplie les notes de releve. */
+    public ?int $viewingHandoffFor = null;
+
     /** Soin en cours de correction. */
     public ?int $revisingTaskId = null;
 
@@ -103,6 +106,7 @@ class Hospitalizations extends Component
         $this->cancelAdmission();
         $this->cancelPrescription();
         $this->hideCareTasks();
+        $this->reset(['viewingHandoffFor']);
     }
 
     // ------------------------------------------------------------ Admission
@@ -221,6 +225,17 @@ class Hospitalizations extends Component
     {
         $this->reset(['viewingCareTasksFor']);
         $this->closeCareTaskForms();
+    }
+
+    /**
+     * Les notes de releve d'un sejour. Volontairement separees des soins : on
+     * les consulte a la prise de poste, pas en marquant une administration.
+     */
+    public function showHandoff(int $hospitalizationId): void
+    {
+        $this->viewingHandoffFor = $this->viewingHandoffFor === $hospitalizationId
+            ? null
+            : $hospitalizationId;
     }
 
     public function startRevision(int $taskId): void

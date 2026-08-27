@@ -22,3 +22,27 @@ if (! function_exists('hospital_name')) {
         }
     }
 }
+
+if (! function_exists('notification_sound_url')) {
+    /**
+     * URL du son de notification, ou null si aucun fichier n'est fourni
+     * (v3.2.3, point 2).
+     *
+     * Le premier format present gagne. La cloche livree avec le depot est un
+     * WAV : deposer `public/sounds/notification.mp3` la remplace sans toucher
+     * une ligne de code, comme pour le logo. Aucun fichier du tout : la cloche
+     * reste muette, sans erreur.
+     */
+    function notification_sound_url(): ?string
+    {
+        foreach (['mp3', 'ogg', 'wav'] as $extension) {
+            $fichier = 'sounds/notification.'.$extension;
+
+            if (is_file(public_path($fichier))) {
+                return asset($fichier);
+            }
+        }
+
+        return null;
+    }
+}

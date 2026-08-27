@@ -7,6 +7,7 @@ use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Cashier;
 use App\Models\Doctor;
 use App\Models\Receptionist;
+use App\Models\Schedule;
 use App\Models\Service;
 use App\Models\StaffMember;
 use App\Models\StaffType;
@@ -380,6 +381,40 @@ class StaffManager extends Component
      *
      * @return Collection<int, array<string, mixed>>
      */
+    /**
+     * Ce qui empechera cette personne de voir les soins de son service, s'il y
+     * a lieu (v3.2.3, point 1).
+     *
+     * Les soins programmes sont les seules donnees filtrees par le planning :
+     * sans creneau couvrant l'heure, la liste est vide. L'ecran de l'agent le
+     * dit deja, mais l'administrateur qui cree le compte n'avait aucun signal
+     * — d'ou des « l'infirmier ne voit rien » dont la cause etait, en realite,
+     * un planning jamais publie ou une capacite jamais cochee.
+     */
+    private function alertePlanning(?User $user, ?int $serviceId): ?string
+    {
+        if (! $user) {
+            return null;
+        }
+
+        if (! $user->hasCapability(StaffType::CAP_CARE_TASKS)) {
+            return null;
+        }
+
+        if (! $serviceId) {
+            return 'Aucun service de rattachement : cette personne ne verra aucun soin.';
+        }
+
+        $creneaux = Schedule::where('user_id', $user->getKey())
+            ->where('service_id', $serviceId)
+            ->whereDate('date', '>=', today())
+            ->count();
+
+        return $creneaux === 0
+            ? "Aucun creneau de planning : cette personne ne verra aucun soin tant qu'elle n'est pas de garde."
+            : null;
+    }
+
     private function memberships(): Collection
     {
         $lignes = collect();
@@ -391,6 +426,7 @@ class StaffManager extends Component
                 'type' => $doctor->user->staffType()?->name ?? Roles::label(Roles::DOCTOR),
                 'service' => $doctor->service?->name,
                 'phone' => $doctor->phone,
+                'alerte' => $this->alertePlanning($doctor->user, $doctor->service_id),
             ]);
         }
 
@@ -401,6 +437,7 @@ class StaffManager extends Component
                 'type' => $receptionist->user->staffType()?->name ?? Roles::label(Roles::RECEPTIONIST),
                 'service' => null,
                 'phone' => null,
+                'alerte' => null,
             ]);
         }
 
@@ -411,6 +448,7 @@ class StaffManager extends Component
                 'type' => $cashier->user->staffType()?->name ?? Roles::label(Roles::CASHIER),
                 'service' => null,
                 'phone' => null,
+                'alerte' => null,
             ]);
         }
 
@@ -421,6 +459,7 @@ class StaffManager extends Component
                 'type' => $member->staffType?->name,
                 'service' => $member->service?->name,
                 'phone' => null,
+                'alerte' => $this->alertePlanning($member->user, $member->service_id),
             ]);
         }
 

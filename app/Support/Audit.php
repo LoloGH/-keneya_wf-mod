@@ -21,6 +21,12 @@ final class Audit
 
     public const EVENT_LOGOUT = 'deconnexion';
 
+    /**
+     * Changement de mot de passe (v3.2.3, point 3). L'evenement est journalise,
+     * jamais le mot de passe — ni l'ancien, ni le nouveau.
+     */
+    public const EVENT_PASSWORD_CHANGED = 'mot_de_passe_change';
+
     public const EVENT_PATIENT_CREATED = 'patient_cree';
 
     public const EVENT_PATIENT_UPDATED = 'patient_modifie';
@@ -71,6 +77,9 @@ final class Audit
     /** Annulation d'un soin : la ligne reste, elle ne compte plus. */
     public const EVENT_CARE_TASK_CANCELLED = 'soin_annule';
 
+    /** Note de releve entre equipes (v3.2.3, point 4). */
+    public const EVENT_HANDOFF_NOTE = 'note_de_releve';
+
     public const EVENT_DOCTOR_CREATED = 'medecin_cree';
 
     public const EVENT_DOCTOR_REASSIGNED = 'medecin_reaffecte';
@@ -118,6 +127,7 @@ final class Audit
     public const LABELS = [
         self::EVENT_LOGIN => 'Connexion',
         self::EVENT_LOGOUT => 'Deconnexion',
+        self::EVENT_PASSWORD_CHANGED => 'Changement de mot de passe',
         self::EVENT_PATIENT_CREATED => 'Creation d\'un patient',
         self::EVENT_PATIENT_UPDATED => 'Modification d\'un patient',
         self::EVENT_VISIT_OPENED => 'Ouverture d\'un episode',
@@ -142,6 +152,7 @@ final class Audit
         self::EVENT_CARE_TASK_COMPLETED => 'Soin realise',
         self::EVENT_CARE_TASK_REVISED => 'Soin corrige',
         self::EVENT_CARE_TASK_CANCELLED => 'Soin annule',
+        self::EVENT_HANDOFF_NOTE => 'Note de releve',
         self::EVENT_DOCTOR_CREATED => 'Creation d\'un medecin',
         self::EVENT_DOCTOR_REASSIGNED => 'Reaffectation d\'un medecin',
         self::EVENT_RECEPTIONIST_CREATED => 'Creation d\'une receptionniste',

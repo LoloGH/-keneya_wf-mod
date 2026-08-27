@@ -18,6 +18,16 @@ class Setting extends Model
 
     public const HOSPITAL_NAME = 'hospital_name';
 
+    /**
+     * Delai, en minutes, entre le rappel et l'heure du rendez-vous
+     * (v3.2.3, point 2). Reglable par l'etablissement plutot que code en dur :
+     * une consultation programmee ne se prepare pas comme un bloc.
+     */
+    public const APPOINTMENT_REMINDER_MINUTES = 'appointment_reminder_minutes';
+
+    /** Valeur retenue tant que l'administrateur n'a rien choisi. */
+    public const DEFAULT_APPOINTMENT_REMINDER_MINUTES = 60;
+
     protected $fillable = ['key', 'value'];
 
     protected static function booted(): void

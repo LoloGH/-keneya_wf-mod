@@ -79,6 +79,17 @@ return [
     ],
     'not_in' => 'La valeur selectionnee pour :attribute est invalide.',
     'numeric' => 'Le champ :attribute doit etre un nombre.',
+    // Regles de complexite du mot de passe (v3.2.3, point 3). Sans ces lignes,
+    // l'agent voit « validation.password.numbers » : une cle de traduction
+    // brute, qui ne lui dit pas ce qu'on attend de lui.
+    'password' => [
+        'letters' => 'Le :attribute doit contenir au moins une lettre.',
+        'mixed' => 'Le :attribute doit contenir au moins une majuscule et une minuscule.',
+        'numbers' => 'Le :attribute doit contenir au moins un chiffre.',
+        'symbols' => 'Le :attribute doit contenir au moins un caractere special.',
+        'uncompromised' => 'Ce :attribute a ete expose lors d\'une fuite de donnees. Choisissez-en un autre.',
+    ],
+
     'present' => 'Le champ :attribute doit etre present.',
     'regex' => 'Le format du champ :attribute est invalide.',
     'required' => 'Le champ :attribute est obligatoire.',

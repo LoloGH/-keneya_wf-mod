@@ -15,6 +15,9 @@
 
     if ($type->can(StaffType::CAP_CARE_TASKS)) {
         $sections[] = ['key' => 'soins', 'label' => 'Soins programmes', 'view' => 'sections.staff.care-tasks'];
+        // Les releves accompagnent les soins : qui administre a besoin de
+        // savoir ce que l'equipe precedente a laisse (v3.2.3, point 4).
+        $sections[] = ['key' => 'releves', 'label' => 'Releves', 'view' => 'sections.staff.handoffs'];
     }
 
     if ($type->can(StaffType::CAP_ACCEPT_PAYMENT)) {
@@ -33,12 +36,14 @@
         {{ auth()->user()->staffMember?->service?->name ?? $type->name }}
     </x-slot:context>
 
-    @if (session('staff.status'))
-        <div class="alert alert--success" role="status">{{ session('staff.status') }}</div>
-    @endif
-    @if (session('staff.error'))
-        <div class="alert alert--error" role="alert">{{ session('staff.error') }}</div>
-    @endif
+    {{-- Bandeau pilote par Livewire : un refus emis pendant une action
+         s'affiche immediatement, sans attendre un rechargement complet. Il lit
+         aussi la session au montage, donc les composants qui n'ecrivent qu'en
+         session s'affichent comme avant. --}}
+    @livewire('shared.flash-alert', [
+        'successKey' => 'staff.status',
+        'errorKey' => 'staff.error',
+    ], key('staff-flash'))
 
     @if ($sections === [])
         <p class="empty">Aucune fonction n'est activee pour ce type de personnel.</p>

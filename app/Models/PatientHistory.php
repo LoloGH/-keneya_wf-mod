@@ -52,6 +52,9 @@ class PatientHistory extends Model
     /** Soin annule : il reste au dossier, il ne compte plus. */
     public const TYPE_CARE_TASK_CANCELLED = 'care_task_cancelled';
 
+    /** Note de releve entre equipes (v3.2.3, point 4). */
+    public const TYPE_HANDOFF_NOTE = 'handoff_note';
+
     /**
      * @var array<string, string>
      */
@@ -70,6 +73,7 @@ class PatientHistory extends Model
         self::TYPE_CARE_TASK_COMPLETED => 'Soin realise',
         self::TYPE_CARE_TASK_REVISED => 'Soin corrige',
         self::TYPE_CARE_TASK_CANCELLED => 'Soin annule',
+        self::TYPE_HANDOFF_NOTE => 'Note de releve',
     ];
 
     protected $table = 'patient_history';

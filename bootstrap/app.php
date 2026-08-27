@@ -14,6 +14,7 @@ use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Routing\Middleware\ThrottleRequestsWithRedis;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
@@ -30,6 +31,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));
+
+        // Sans ce middleware, `Auth::logoutOtherDevices()` ne ferme rien : il
+        // se contente de reecrire le hash dans la session courante, et les
+        // sessions ouvertes ailleurs continuent de fonctionner. C'est lui qui
+        // les compare a chaque requete et les invalide (v3.2.3, point 3).
+        //
+        // Les sessions deja ouvertes au moment du deploiement ne sont pas
+        // coupees : sans marqueur en session, il le pose et laisse passer.
+        $middleware->web(append: [AuthenticateSession::class]);
 
         // Le cloisonnement doit etre tranche AVANT la resolution des modeles de
         // route : sinon un utilisateur du mauvais role recoit un 404 quand

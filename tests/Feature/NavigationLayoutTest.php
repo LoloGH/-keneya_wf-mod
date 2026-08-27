@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Shared\ProfileCard;
 use App\Livewire\Shared\VerticalTabNav;
 use App\Models\Doctor;
 use App\Models\Service;
@@ -200,19 +201,29 @@ class NavigationLayoutTest extends TestCase
     }
 
     /**
-     * La deconnexion est une icone seule : elle ne doit jamais etre ambigue.
+     * Depuis la v3.2.3, la deconnexion vit dans la carte de profil : c'est
+     * l'avatar qui occupe le coin de la barre, et lui qui doit rester
+     * identifiable sans ambiguite.
      */
-    public function test_la_deconnexion_est_une_icone_accessible(): void
+    public function test_la_carte_de_profil_remplace_l_icone_de_deconnexion(): void
     {
         $response = $this->actingAs($this->makeAdmin())->get('/admin');
 
         $response->assertOk()
-            ->assertSee('data-testid="logout"', escape: false)
-            ->assertSee('aria-label="Se deconnecter"', escape: false)
-            ->assertSee('title="Se deconnecter"', escape: false);
+            ->assertSee('data-testid="profile-card"', escape: false)
+            ->assertSee('title="Mon compte"', escape: false);
 
-        // Plus de bouton texte.
-        $this->assertStringNotContainsString('>Se deconnecter<', $response->getContent());
+        // L'ancienne icone isolee a bien disparu de la barre.
+        $this->assertStringNotContainsString('aria-label="Se deconnecter"', $response->getContent());
+    }
+
+    public function test_la_deconnexion_est_offerte_par_la_carte_de_profil(): void
+    {
+        Livewire::actingAs($this->makeAdmin())
+            ->test(ProfileCard::class)
+            ->call('toggle')
+            ->assertSee('Se deconnecter')
+            ->assertSee('data-testid="logout"', escape: false);
     }
 
     public function test_la_deconnexion_fonctionne_toujours(): void

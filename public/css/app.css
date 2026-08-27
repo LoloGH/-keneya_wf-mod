@@ -1150,3 +1150,145 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
    annule d'un soin simplement passe. */
 .table tr.is-cancelled td { color: var(--gris-700); }
 .table tr.is-cancelled td:nth-child(2) { text-decoration: line-through; }
+
+/* Cloche de notification (v3.2.3, point 2).
+   Le panneau est ancre sous la cloche, en position absolue : la barre de
+   marque est de hauteur fixe et ne doit pas s'etirer quand on l'ouvre. */
+.bell { position: relative; display: inline-flex; }
+.bell__button { position: relative; }
+
+/* Le badge chevauche l'icone plutot que de la pousser : la barre garde la
+   meme largeur, qu'il y ait des notifications ou non. */
+.bell__badge {
+    position: absolute;
+    top: -.15rem;
+    right: -.15rem;
+    min-width: 1.1rem;
+    padding: 0 .25rem;
+    border-radius: 999px;
+    background: var(--rouge, #c0392b);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1.1rem;
+    text-align: center;
+}
+
+.bell__panel {
+    position: absolute;
+    top: calc(100% + .5rem);
+    right: 0;
+    z-index: 40;
+    width: min(22rem, calc(100vw - 2rem));
+    max-height: 70vh;
+    overflow-y: auto;
+    background: #fff;
+    color: var(--gris-900);
+    border: 1px solid var(--gris-300);
+    border-radius: var(--rayon);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
+}
+
+.bell__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .6rem .8rem;
+    border-bottom: 1px solid var(--gris-300);
+}
+
+.bell__item {
+    display: grid;
+    gap: .1rem;
+    padding: .6rem .8rem;
+    border-bottom: 1px solid var(--gris-100);
+    color: inherit;
+    text-decoration: none;
+}
+.bell__item:hover { background: var(--gris-100); }
+.bell__item:last-child { border-bottom: 0; }
+
+/* Une notification non lue se distingue par un liseré, pas par une couleur de
+   fond : le panneau reste lisible quand tout est neuf. */
+.bell__item--unread { border-left: 3px solid var(--bleu, #1c3f95); }
+
+.bell__type {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--gris-700);
+}
+.bell__title { font-size: .92rem; }
+.bell__time { font-size: .75rem; color: var(--gris-700); }
+
+/* Carte de profil (v3.2.3, point 3). Meme ancrage que la cloche : le panneau
+   flotte sous l'avatar, la barre de marque garde sa hauteur. */
+.profil { position: relative; display: inline-flex; }
+
+/* Avatar generique : les initiales, pas de photo a stocker ni a redimensionner. */
+.profil__avatar {
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .18);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    cursor: pointer;
+}
+.profil__avatar:hover { background: rgba(255, 255, 255, .3); }
+
+.profil__panel {
+    position: absolute;
+    top: calc(100% + .5rem);
+    right: 0;
+    z-index: 40;
+    width: min(20rem, calc(100vw - 2rem));
+    background: #fff;
+    color: var(--gris-900);
+    border: 1px solid var(--gris-300);
+    border-radius: var(--rayon);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
+}
+
+.profil__identity { margin: 0; padding: .7rem .8rem; }
+.profil__identity dt {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--gris-700);
+}
+.profil__identity dd { margin: 0 0 .55rem; font-size: .92rem; }
+.profil__identity dd:last-child { margin-bottom: 0; }
+
+.profil__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .7rem .8rem;
+    border-top: 1px solid var(--gris-300);
+}
+.profil__form { padding: .7rem .8rem; border-top: 1px solid var(--gris-300); }
+
+/* Notes de releve (v3.2.3, point 4). Un liseré plutot qu'un cadre : la liste
+   se lit d'un coup d'oeil au moment de la releve, sans decoration. */
+.handoff__note {
+    margin-top: .6rem;
+    padding: .5rem .7rem;
+    border-left: 3px solid var(--bleu-clair);
+    background: var(--gris-100);
+    border-radius: 0 var(--rayon) var(--rayon) 0;
+}
+.handoff__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    font-size: .78rem;
+    color: var(--gris-700);
+}
+.handoff__note p { margin: .2rem 0 0; }

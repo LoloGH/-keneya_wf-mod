@@ -7,6 +7,7 @@ use App\Models\CareTaskType;
 use App\Models\Doctor;
 use App\Models\Hospitalization;
 use App\Models\User;
+use App\Services\StaffNotifier;
 use App\Support\Audit;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,8 @@ class PrescribeCareTasks
 {
     /** Garde-fou : une prescription ne genere jamais des milliers de lignes. */
     public const MAX_OCCURRENCES = 200;
+
+    public function __construct(private readonly StaffNotifier $notifier) {}
 
     /**
      * @return int nombre d'occurrences creees
@@ -90,6 +93,15 @@ class PrescribeCareTasks
                 $durationDays,
             ),
             $hospitalization,
+        );
+
+        // Le personnel de garde du service qui porte la capacite « soins », et
+        // lui seul : le ciblage passe par OnDutyRoster, comme la visibilite des
+        // soins elle-meme (v3.2.3, point 2).
+        $this->notifier->careTasksPrescribed(
+            $hospitalization->service_id,
+            $hospitalization->patient->name,
+            count($occurrences),
         );
 
         return count($occurrences);
