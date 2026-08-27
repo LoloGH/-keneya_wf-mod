@@ -1143,3 +1143,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
     text-transform: uppercase;
     letter-spacing: .03em;
 }
+
+/* Soin annule (v3.2.3, point 4) : la ligne reste lisible mais visiblement
+   hors jeu. Elle n'est ni masquee ni supprimee — le dossier d'un patient ne
+   se reecrit pas — et le gris seul ne suffirait pas a distinguer un soin
+   annule d'un soin simplement passe. */
+.table tr.is-cancelled td { color: var(--gris-700); }
+.table tr.is-cancelled td:nth-child(2) { text-decoration: line-through; }

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\StaffType;
 use App\Support\Audit;
 use App\Support\Roles;
@@ -23,7 +23,7 @@ use Livewire\Component;
  */
 class StaffTypeManager extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public ?int $editingId = null;
 

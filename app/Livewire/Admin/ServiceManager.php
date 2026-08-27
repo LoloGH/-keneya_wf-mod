@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Service;
 use App\Models\ServiceKind;
 use App\Support\Audit;
@@ -15,7 +15,7 @@ use Livewire\Component;
  */
 class ServiceManager extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public ?int $editingId = null;
 
@@ -37,18 +37,10 @@ class ServiceManager extends Component
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            // Une caisse ne se cree pas a la main : les deux caisses sont
-            // posees par le seeder et leur mecanique est cablee au routage.
-            'service_kind_id' => [
-                'required',
-                'integer',
-                'exists:service_kinds,id',
-                function (string $attribut, $valeur, callable $refuser) {
-                    if (ServiceKind::whereKey($valeur)->value('slug') === ServiceKind::SLUG_CAISSE) {
-                        $refuser('Le type « Caisse » est reserve aux deux caisses de l\'etablissement.');
-                    }
-                },
-            ],
+            // Tous les types sont ouverts, Caisse comprise : l'etablissement
+            // peut avoir besoin d'un troisieme guichet, et le masquer ne
+            // faisait qu'empecher de le declarer.
+            'service_kind_id' => ['required', 'integer', 'exists:service_kinds,id'],
         ];
     }
 
@@ -132,10 +124,8 @@ class ServiceManager extends Component
                 ->withCount(['doctors', 'visits'])
                 ->orderBy('name')
                 ->get(),
-            // Les caisses ne sont pas proposees : elles ne se creent pas a la main.
-            'kinds' => ServiceKind::where('slug', '!=', ServiceKind::SLUG_CAISSE)
-                ->orderBy('name')
-                ->get(),
+            // Tous les types, sans exception : le menu doit refleter la table.
+            'kinds' => ServiceKind::orderBy('name')->get(),
         ]);
     }
 }

@@ -44,12 +44,14 @@
             Votre compte n'est rattache a aucun service. Contactez l'administrateur.
         </div>
     @else
-        @if (session('service.status'))
-            <div class="alert alert--success" role="status">{{ session('service.status') }}</div>
-        @endif
-        @if (session('service.error'))
-            <div class="alert alert--error" role="alert">{{ session('service.error') }}</div>
-        @endif
+        {{-- Bandeau pilote par Livewire : un refus emis pendant une action
+             s'affiche immediatement, sans attendre un rechargement complet.
+             Il lit aussi la session au montage, donc les composants qui
+             continuent de n'ecrire qu'en session s'affichent comme avant. --}}
+        @livewire('shared.flash-alert', [
+            'successKey' => 'service.status',
+            'errorKey' => 'service.error',
+        ], key('service-flash'))
 
         {{-- Le selecteur reste hors des onglets : il change le contexte de
              toutes les sections a la fois. Il n'apparait que pour un medecin

@@ -5,6 +5,8 @@ namespace App\Livewire\Service;
 use App\Actions\AdmitPatient;
 use App\Actions\DischargePatient;
 use App\Actions\PrescribeCareTasks;
+use App\Actions\ReviseCareTask;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
 use App\Models\CareTask;
@@ -16,6 +18,7 @@ use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Livewire\Attributes\On;
@@ -29,7 +32,7 @@ use Livewire\Component;
  */
 class Hospitalizations extends Component
 {
-    use RequiresCapability, ScopedToOwnService;
+    use NotifiesUser, RequiresCapability, ScopedToOwnService;
 
     /** Visite en cours d'admission. */
     public ?int $admittingVisitId = null;
@@ -59,6 +62,25 @@ class Hospitalizations extends Component
      */
     public ?int $careAssignedToUserId = null;
 
+    /** Hospitalisation dont on deplie la liste des soins programmes. */
+    public ?int $viewingCareTasksFor = null;
+
+    /** Soin en cours de correction. */
+    public ?int $revisingTaskId = null;
+
+    public ?int $reviseTypeId = null;
+
+    public string $reviseInstructions = '';
+
+    public string $reviseScheduledAt = '';
+
+    public ?int $reviseAssignedToUserId = null;
+
+    /** Soin en cours d'annulation, et son motif — jamais facultatif. */
+    public ?int $cancellingTaskId = null;
+
+    public string $cancellationReason = '';
+
     /**
      * La section entiere est optionnelle : le composant refuse de se monter
      * si le type du compte ne porte pas la capacite.
@@ -80,6 +102,7 @@ class Hospitalizations extends Component
     {
         $this->cancelAdmission();
         $this->cancelPrescription();
+        $this->hideCareTasks();
     }
 
     // ------------------------------------------------------------ Admission
@@ -115,7 +138,7 @@ class Hospitalizations extends Component
             throw ValidationException::withMessages(['roomId' => $e->getMessage()]);
         }
 
-        session()->flash('service.status', sprintf('%s hospitalise.', $visit->patient->name));
+        $this->notifySuccess(sprintf('%s hospitalise.', $visit->patient->name), 'service.status');
 
         $this->cancelAdmission();
         $this->dispatch('file-mise-a-jour');
@@ -178,9 +201,123 @@ class Hospitalizations extends Component
             throw ValidationException::withMessages(['careIntervalHours' => $e->getMessage()]);
         }
 
-        session()->flash('service.status', sprintf('%d administration(s) programmee(s).', $crees));
+        $this->notifySuccess(sprintf('%d administration(s) programmee(s).', $crees), 'service.status');
 
         $this->cancelPrescription();
+    }
+
+    // ------------------------------------- Correction et annulation d'un soin
+
+    public function showCareTasks(int $hospitalizationId): void
+    {
+        $this->viewingCareTasksFor = $this->viewingCareTasksFor === $hospitalizationId
+            ? null
+            : $hospitalizationId;
+
+        $this->closeCareTaskForms();
+    }
+
+    public function hideCareTasks(): void
+    {
+        $this->reset(['viewingCareTasksFor']);
+        $this->closeCareTaskForms();
+    }
+
+    public function startRevision(int $taskId): void
+    {
+        $task = $this->careTaskInMyService($taskId);
+
+        $this->cancellingTaskId = null;
+        $this->revisingTaskId = $task->getKey();
+        $this->reviseTypeId = $task->care_task_type_id;
+        $this->reviseInstructions = (string) $task->instructions;
+        $this->reviseScheduledAt = $task->scheduled_at->format('Y-m-d\TH:i');
+        $this->reviseAssignedToUserId = $task->assigned_to_user_id;
+        $this->resetValidation();
+    }
+
+    public function saveRevision(ReviseCareTask $action): void
+    {
+        $this->validate([
+            'revisingTaskId' => ['required', 'integer', 'exists:care_tasks,id'],
+            'reviseTypeId' => ['required', 'integer', 'exists:care_task_types,id'],
+            'reviseInstructions' => ['nullable', 'string', 'max:2000'],
+            'reviseScheduledAt' => ['required', 'date'],
+            'reviseAssignedToUserId' => ['nullable', 'integer', 'exists:users,id'],
+        ], attributes: [
+            'reviseTypeId' => 'type de soin',
+            'reviseScheduledAt' => 'heure',
+        ]);
+
+        $task = $this->careTaskInMyService($this->revisingTaskId);
+
+        try {
+            $action->revise($task, Auth::user(), [
+                'care_task_type_id' => $this->reviseTypeId,
+                'instructions' => $this->reviseInstructions ?: null,
+                'scheduled_at' => $this->reviseScheduledAt,
+                'assigned_to_user_id' => $this->reviseAssignedToUserId,
+            ]);
+        } catch (InvalidArgumentException $e) {
+            $this->notifyError($e->getMessage(), 'service.error');
+
+            return;
+        }
+
+        $this->notifySuccess('Soin corrige.', 'service.status');
+
+        $this->closeCareTaskForms();
+    }
+
+    public function startCancellation(int $taskId): void
+    {
+        $this->revisingTaskId = null;
+        $this->cancellingTaskId = $this->careTaskInMyService($taskId)->getKey();
+        $this->cancellationReason = '';
+        $this->resetValidation();
+    }
+
+    public function confirmCancellation(ReviseCareTask $action): void
+    {
+        $this->validate([
+            'cancellingTaskId' => ['required', 'integer', 'exists:care_tasks,id'],
+            'cancellationReason' => ['required', 'string', 'max:255'],
+        ], attributes: ['cancellationReason' => "motif de l'annulation"]);
+
+        $task = $this->careTaskInMyService($this->cancellingTaskId);
+
+        try {
+            $action->cancel($task, Auth::user(), $this->cancellationReason);
+        } catch (InvalidArgumentException $e) {
+            $this->notifyError($e->getMessage(), 'service.error');
+
+            return;
+        }
+
+        $this->notifySuccess('Soin annule : il reste au dossier, il ne compte plus.', 'service.status');
+
+        $this->closeCareTaskForms();
+    }
+
+    public function closeCareTaskForms(): void
+    {
+        $this->reset([
+            'revisingTaskId', 'reviseTypeId', 'reviseInstructions',
+            'reviseScheduledAt', 'reviseAssignedToUserId',
+            'cancellingTaskId', 'cancellationReason',
+        ]);
+        $this->resetValidation();
+    }
+
+    /**
+     * Un soin d'un autre service n'existe pas de mon point de vue : le
+     * cloisonnement precede le controle d'acces porte par l'action.
+     */
+    private function careTaskInMyService(int $taskId): CareTask
+    {
+        return CareTask::with(['type', 'hospitalization'])
+            ->whereHas('hospitalization', fn ($q) => $q->where('service_id', $this->serviceId))
+            ->findOrFail($taskId);
     }
 
     // ---------------------------------------------------------------- Sortie
@@ -193,12 +330,12 @@ class Hospitalizations extends Component
         try {
             $action->execute($hospitalization, $this->currentDoctor());
         } catch (InvalidArgumentException $e) {
-            session()->flash('service.error', $e->getMessage());
+            $this->notifyError($e->getMessage(), 'service.error');
 
             return;
         }
 
-        session()->flash('service.status', 'Sortie d\'hospitalisation enregistree.');
+        $this->notifySuccess('Sortie d\'hospitalisation enregistree.', 'service.status');
     }
 
     public function render(): View
@@ -225,6 +362,15 @@ class Hospitalizations extends Component
                 ->orderBy('name')
                 ->get(),
             'careTaskTypes' => CareTaskType::orderBy('name')->get(),
+            // Les soins du sejour deplie : la liste complete, annules compris,
+            // parce que le dossier garde tout — c'est le decompte qui les
+            // ignore, pas l'affichage.
+            'careTasks' => $this->viewingCareTasksFor
+                ? CareTask::with(['type', 'assignedTo', 'completedBy', 'cancelledBy'])
+                    ->where('hospitalization_id', $this->viewingCareTasksFor)
+                    ->orderBy('scheduled_at')
+                    ->get()
+                : collect(),
             // Le personnel du service capable d'executer un soin : de quoi
             // designer quelqu'un nommement, sans y etre oblige.
             'carers' => User::query()

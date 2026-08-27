@@ -75,7 +75,7 @@
         <h1 class="page-title sr-only">{{ $this->activeLabel() }}</h1>
 
         @if ($view = $this->activeView())
-            @include($view, $context)
+            @include($view, $this->activeContext())
         @else
             <p class="empty">Aucune section a afficher.</p>
         @endif

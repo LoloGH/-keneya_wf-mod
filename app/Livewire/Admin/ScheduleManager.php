@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Schedule;
 use App\Models\Service;
 use App\Models\User;
@@ -20,7 +20,7 @@ use Livewire\Component;
  */
 class ScheduleManager extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public ?int $editingId = null;
 

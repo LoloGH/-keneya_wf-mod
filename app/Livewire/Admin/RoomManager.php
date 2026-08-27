@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Hospitalization;
 use App\Models\Room;
 use App\Models\Service;
@@ -18,7 +18,7 @@ use Livewire\Component;
  */
 class RoomManager extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public ?int $editingId = null;
 

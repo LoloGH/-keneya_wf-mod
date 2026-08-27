@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\StoreAttachment;
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Attachment;
 use App\Models\Patient;
 use App\Models\Service;
@@ -22,7 +22,7 @@ use Livewire\WithPagination;
  */
 class PatientDirectory extends Component
 {
-    use NotifiesAdmin, WithFileUploads, WithPagination;
+    use NotifiesUser, WithFileUploads, WithPagination;
 
     public string $search = '';
 

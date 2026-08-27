@@ -23,9 +23,7 @@ class CompleteCareTask
 
     public function execute(CareTask $task, User $user): CareTask
     {
-        if ($task->status !== CareTask::STATUS_PENDING) {
-            throw new InvalidArgumentException('Ce soin a deja ete traite.');
-        }
+        $this->assertPending($task);
 
         $hospitalization = $task->hospitalization()->with(['patient', 'visit'])->firstOrFail();
 
@@ -83,9 +81,7 @@ class CompleteCareTask
      */
     public function markMissed(CareTask $task, User $user): CareTask
     {
-        if ($task->status !== CareTask::STATUS_PENDING) {
-            throw new InvalidArgumentException('Ce soin a deja ete traite.');
-        }
+        $this->assertPending($task);
 
         $task->update([
             'status' => CareTask::STATUS_MISSED,
@@ -100,5 +96,20 @@ class CompleteCareTask
         );
 
         return $task->refresh();
+    }
+
+    /**
+     * Un soin annule dit pourquoi il ne peut plus etre marque : « deja
+     * traite » laisserait croire a une erreur de manipulation.
+     */
+    private function assertPending(CareTask $task): void
+    {
+        if ($task->isCancelled()) {
+            throw new InvalidArgumentException('Ce soin a ete annule : il ne peut plus etre marque.');
+        }
+
+        if ($task->status !== CareTask::STATUS_PENDING) {
+            throw new InvalidArgumentException('Ce soin a deja ete traite.');
+        }
     }
 }

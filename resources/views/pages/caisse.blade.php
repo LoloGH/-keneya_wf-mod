@@ -1,16 +1,22 @@
 @php
     use App\Models\Service;
+    use App\Models\ServiceKind;
 
-    // Les deux caisses sont deux sections d'une meme interface : un seul role
-    // les voit toutes les deux.
-    $ticket = Service::caisseTicket();
-    $services = Service::caisseServices();
+    // Toutes les caisses declarees, pas seulement les deux caisses d'origine :
+    // l'administrateur peut en creer une troisieme, elle doit alors etre tenue
+    // depuis cette interface comme les autres. Une caisse par section, un seul
+    // role les voit toutes.
+    $caisses = Service::ofKindSlug(ServiceKind::SLUG_CAISSE)->orderBy('name')->get();
 
-    $sections = array_values(array_filter([
-        $ticket ? ['key' => 'caisse-ticket', 'label' => 'Caisse Ticket', 'view' => 'sections.caisse.ticket'] : null,
-        $services ? ['key' => 'caisse-services', 'label' => 'Caisse Services', 'view' => 'sections.caisse.services'] : null,
-        ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.caisse.schedule'],
-    ]));
+    $sections = $caisses
+        ->map(fn (Service $caisse) => [
+            'key' => 'caisse-'.$caisse->getKey(),
+            'label' => $caisse->name,
+            'view' => 'sections.caisse.queue',
+            'context' => ['caisseServiceId' => $caisse->getKey()],
+        ])
+        ->push(['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.caisse.schedule'])
+        ->all();
 @endphp
 
 <x-layouts.app :title="'Caisse — '.config('keneya.name')">
@@ -21,18 +27,12 @@
         <div class="alert alert--error" role="alert">{{ session('caisse.error') }}</div>
     @endif
 
-    @if (! $ticket && ! $services)
+    @if ($caisses->isEmpty())
         <div class="alert alert--error" role="alert">
             Aucune caisse n'est configuree. Demandez a l'administrateur de creer
             les services « {{ Service::CAISSE_TICKET }} » et « {{ Service::CAISSE_SERVICES }} ».
         </div>
     @else
-        @livewire('shared.vertical-tab-nav', [
-            'sections' => $sections,
-            'context' => [
-                'caisseTicketId' => $ticket?->getKey(),
-                'caisseServicesId' => $services?->getKey(),
-            ],
-        ], key('nav-caisse'))
+        @livewire('shared.vertical-tab-nav', ['sections' => $sections], key('nav-caisse'))
     @endif
 </x-layouts.app>

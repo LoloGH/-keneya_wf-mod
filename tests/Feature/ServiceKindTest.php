@@ -137,25 +137,52 @@ class ServiceKindTest extends TestCase
             ->assertSee('Imagerie');
     }
 
-    public function test_le_type_caisse_n_est_pas_proposable_a_la_creation_d_un_service(): void
+    public function test_le_menu_type_liste_tous_les_types_y_compris_la_caisse(): void
     {
-        $caisse = $this->serviceKind(ServiceKind::SLUG_CAISSE);
+        ServiceKind::create(['name' => 'Imagerie', 'slug' => 'imagerie']);
 
-        // Ni dans la liste…
         $proposes = Livewire::actingAs($this->makeAdmin())
             ->test(ServiceManager::class)
             ->viewData('kinds')
-            ->pluck('slug');
+            ->pluck('slug')
+            ->sort()
+            ->values();
 
-        $this->assertFalse($proposes->contains(ServiceKind::SLUG_CAISSE));
+        // Le menu reflete la table, sans exception : masquer un type
+        // n'empechait pas d'en avoir besoin, cela empechait de le declarer.
+        $this->assertEquals(
+            ServiceKind::orderBy('slug')->pluck('slug')->values()->all(),
+            $proposes->all(),
+        );
 
-        // …ni en forçant la valeur : les deux caisses sont posees par le seeder.
+        $this->assertTrue($proposes->contains(ServiceKind::SLUG_CAISSE));
+    }
+
+    public function test_l_admin_peut_creer_une_troisieme_caisse_et_la_tenir(): void
+    {
+        $this->makeCaisses();
+        $caisse = $this->serviceKind(ServiceKind::SLUG_CAISSE);
+
         Livewire::actingAs($this->makeAdmin())
             ->test(ServiceManager::class)
-            ->set('name', 'Fausse caisse')
+            ->set('name', 'Caisse Urgences')
             ->set('service_kind_id', $caisse->getKey())
             ->call('save')
-            ->assertHasErrors('service_kind_id');
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('services', [
+            'name' => 'Caisse Urgences',
+            'service_kind_id' => $caisse->getKey(),
+        ]);
+
+        // Une caisse declaree doit etre tenable : sinon le menu n'aurait fait
+        // que permettre de creer un service mort.
+        $this->actingAs($this->makeCashier())
+            ->get('/caisse')
+            ->assertOk()
+            ->assertSee('Caisse Urgences')
+            ->assertSee(Service::CAISSE_TICKET)
+            ->assertSee(Service::CAISSE_SERVICES);
     }
 
     public function test_la_section_types_de_service_est_dans_l_interface_admin(): void

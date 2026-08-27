@@ -46,6 +46,12 @@ class PatientHistory extends Model
     /** Soin programme execute — sur la meme frise que le reste du dossier. */
     public const TYPE_CARE_TASK_COMPLETED = 'care_task_completed';
 
+    /** Soin corrige apres coup (v3.2.3, point 4). */
+    public const TYPE_CARE_TASK_REVISED = 'care_task_revised';
+
+    /** Soin annule : il reste au dossier, il ne compte plus. */
+    public const TYPE_CARE_TASK_CANCELLED = 'care_task_cancelled';
+
     /**
      * @var array<string, string>
      */
@@ -62,6 +68,8 @@ class PatientHistory extends Model
         self::TYPE_HOSPITALIZATION_ADMITTED => 'Admission en hospitalisation',
         self::TYPE_HOSPITALIZATION_DISCHARGED => 'Sortie d\'hospitalisation',
         self::TYPE_CARE_TASK_COMPLETED => 'Soin realise',
+        self::TYPE_CARE_TASK_REVISED => 'Soin corrige',
+        self::TYPE_CARE_TASK_CANCELLED => 'Soin annule',
     ];
 
     protected $table = 'patient_history';

@@ -1,7 +1,11 @@
 @php
     // Arborescence propre a l'espace administration. « Personnel » regroupe les
-    // trois sections qui concernent les agents ; les autres restent a plat,
-    // une hierarchie n'y apporterait rien.
+    // sections qui concernent les agents ; les autres restent a plat, une
+    // hierarchie n'y apporterait rien.
+    //
+    // « Personnels » remplace depuis la v3.2.3 les trois formulaires separes
+    // Medecins / Receptionnistes / Interfaces dediees : un seul formulaire ou
+    // le type de personnel choisi decide du role et du rattachement.
     $sections = [
         ['key' => 'etablissement', 'label' => 'Etablissement', 'view' => 'sections.admin.establishment'],
         ['key' => 'services', 'label' => 'Services', 'children' => [
@@ -10,9 +14,7 @@
         ]],
         ['key' => 'personnel', 'label' => 'Personnel', 'children' => [
             ['key' => 'types-de-personnel', 'label' => 'Types de personnel', 'view' => 'sections.admin.staff-types'],
-            ['key' => 'medecins', 'label' => 'Medecins', 'view' => 'sections.admin.doctors'],
-            ['key' => 'receptionnistes', 'label' => 'Receptionnistes', 'view' => 'sections.admin.receptionists'],
-            ['key' => 'personnel-dedie', 'label' => 'Interfaces dediees', 'view' => 'sections.admin.staff-members'],
+            ['key' => 'personnels', 'label' => 'Personnels', 'view' => 'sections.admin.staff'],
             ['key' => 'plannings', 'label' => 'Plannings', 'view' => 'sections.admin.schedules'],
         ]],
         ['key' => 'hospitalisation', 'label' => 'Hospitalisation', 'children' => [

@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\BulkCreateSchedule;
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Service;
 use App\Models\User;
 use App\Support\Roles;
@@ -21,7 +21,7 @@ use Livewire\Component;
  */
 class BulkScheduleForm extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public ?int $user_id = null;
 

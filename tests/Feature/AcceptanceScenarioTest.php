@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Admin\DoctorManager;
 use App\Livewire\Admin\ServiceManager;
+use App\Livewire\Admin\StaffManager;
 use App\Livewire\Reception\PatientRegistrationForm;
 use App\Livewire\Service\IncomingReferrals;
 use App\Livewire\Service\OutgoingReferrals;
@@ -71,10 +71,11 @@ class AcceptanceScenarioTest extends TestCase
         $this->assertTrue($radiologie->requiresPaymentGate());
 
         Livewire::actingAs($admin)
-            ->test(DoctorManager::class)
+            ->test(StaffManager::class)
             ->set('name', 'Dr Amadou Cisse')
             ->set('email', 'radiologie@keneya.test')
             ->set('password', 'motdepasse')
+            ->set('staff_type_id', $this->staffTypeFor(Roles::DOCTOR)->getKey())
             ->set('phone', '76000004')
             ->set('service_id', $radiologie->getKey())
             ->call('save')

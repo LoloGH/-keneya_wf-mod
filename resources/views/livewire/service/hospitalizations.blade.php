@@ -72,9 +72,21 @@
                     <button type="button" class="btn btn--secondary"
                             wire:click="startPrescription({{ $sejour->id }})">Prescrire des soins</button>
                     <button type="button" class="btn btn--ghost"
+                            wire:click="showCareTasks({{ $sejour->id }})">
+                        {{ $viewingCareTasksFor === $sejour->id ? 'Masquer les soins' : 'Voir et corriger les soins' }}
+                    </button>
+                    <button type="button" class="btn btn--ghost"
                             wire:click="discharge({{ $sejour->id }})"
                             wire:confirm="Cloturer cette hospitalisation ?">Cloturer l'hospitalisation</button>
                 </div>
+
+                @if ($viewingCareTasksFor === $sejour->id)
+                    @include('livewire.service.partials.care-tasks-revision', [
+                        'careTasks' => $careTasks,
+                        'careTaskTypes' => $careTaskTypes,
+                        'carers' => $carers,
+                    ])
+                @endif
 
                 @if ($prescribingId === $sejour->id)
                     <form wire:submit="prescribe" class="form my-patients__form">

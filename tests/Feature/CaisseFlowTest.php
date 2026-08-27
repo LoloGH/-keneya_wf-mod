@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Actions\ConfirmCaissePayment;
 use App\Actions\RegisterPatient;
 use App\Actions\SendReferral;
-use App\Livewire\Admin\DoctorManager;
+use App\Livewire\Admin\StaffManager;
 use App\Livewire\Caisse\CaisseQueue;
 use App\Livewire\Reception\PatientRegistrationForm;
 use App\Livewire\Service\ServiceQueue;
@@ -358,21 +358,30 @@ class CaisseFlowTest extends TestCase
         app(SendReferral::class)->execute($visit, $doctor, $ticket, 'Paiement');
     }
 
-    public function test_un_medecin_ne_peut_pas_etre_affecte_a_une_caisse(): void
+    public function test_le_menu_service_des_personnels_propose_aussi_les_caisses(): void
     {
         [$ticket] = $this->makeCaisses();
         $this->seedRoles();
 
-        // Sinon il verrait la file de la caisse depuis /service : les medecins
-        // n'encaissent jamais.
-        Livewire::actingAs($this->makeAdmin())
-            ->test(DoctorManager::class)
+        // Les caisses etaient exclues du menu et refusees par la validation.
+        // L'etablissement doit pouvoir y affecter quelqu'un : le menu reflete
+        // desormais la table des services, sans exception (v3.2.3, point 2).
+        $composant = Livewire::actingAs($this->makeAdmin())
+            ->test(StaffManager::class)
+            ->set('staff_type_id', $this->staffTypeFor(Roles::DOCTOR)->getKey());
+
+        $this->assertTrue(
+            $composant->viewData('services')->pluck('id')->contains($ticket->getKey()),
+            'Le menu « Service » doit lister les caisses comme les autres services.',
+        );
+
+        $composant
             ->set('name', 'Dr Test')
             ->set('email', 'test@keneya.local')
             ->set('password', 'motdepasse')
             ->set('service_id', $ticket->getKey())
             ->call('save')
-            ->assertHasErrors('service_id');
+            ->assertHasNoErrors();
     }
 
     // ----------------------------------------------- Journal d'audit metier
