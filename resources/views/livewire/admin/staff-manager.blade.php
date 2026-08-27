@@ -95,7 +95,15 @@
                     <tr wire:key="personnel-{{ $ligne['ref'] }}">
                         <td>{{ $ligne['user']->name }}</td>
                         <td>{{ $ligne['user']->email }}</td>
-                        <td>{{ $ligne['type'] ?: '—' }}</td>
+                        <td>
+                            {{ $ligne['type'] ?: '—' }}
+                            @if ($ligne['alerte'])
+                                {{-- Le compte est valide, mais il ne montrera
+                                     rien : l'admin doit l'apprendre ici, pas
+                                     par un agent qui signale un ecran vide. --}}
+                                <p class="field__error">{{ $ligne['alerte'] }}</p>
+                            @endif
+                        </td>
                         <td>{{ $ligne['service'] ?: '—' }}</td>
                         <td>{{ $ligne['phone'] ?: '—' }}</td>
                         <td>
