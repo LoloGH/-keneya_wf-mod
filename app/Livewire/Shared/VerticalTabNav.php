@@ -26,6 +26,9 @@ use Livewire\Component;
  *             ['key' => 'doctors', 'label' => 'Medecins', 'view' => '...'],
  *         ]],
  *     ]
+ *
+ * Une feuille peut porter une cle `context` : ses valeurs s'ajoutent au
+ * contexte commun quand cette section est affichee.
  */
 class VerticalTabNav extends Component
 {
@@ -100,6 +103,21 @@ class VerticalTabNav extends Component
     public function activeLabel(): string
     {
         return $this->findLeaf($this->active)['label'] ?? '';
+    }
+
+    /**
+     * Donnees passees a la vue de la section active : le contexte commun a
+     * l'interface, complete par celui que la section porte elle-meme.
+     *
+     * Une interface peut ainsi repeter la meme vue pour plusieurs entites —
+     * une section par caisse, par exemple — sans avoir besoin d'une vue
+     * partielle par entite.
+     *
+     * @return array<string, mixed>
+     */
+    public function activeContext(): array
+    {
+        return array_merge($this->context, $this->findLeaf($this->active)['context'] ?? []);
     }
 
     /**
