@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Schedule;
 use App\Models\User;
+use App\Services\StaffNotifier;
 use App\Support\Audit;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,8 @@ use InvalidArgumentException;
  */
 class BulkCreateSchedule
 {
+    public function __construct(private readonly StaffNotifier $notifier) {}
+
     /**
      * @param  array<int, int>  $weekdays  1 = lundi … 7 = dimanche (ISO-8601)
      * @return int nombre de creneaux crees
@@ -55,7 +58,9 @@ class BulkCreateSchedule
         $debut = $this->normalizeTime($startTime);
         $fin = $this->normalizeTime($endTime);
 
-        DB::transaction(function () use ($user, $from, $to, $jours, $debut, $fin, $serviceId, &$crees): void {
+        $nouvelles = [];
+
+        DB::transaction(function () use ($user, $from, $to, $jours, $debut, $fin, $serviceId, &$crees, &$nouvelles): void {
             for ($date = $from->copy()->startOfDay(); $date->lte($to); $date->addDay()) {
                 if (! in_array($date->dayOfWeekIso, $jours, true)) {
                     continue;
@@ -73,7 +78,7 @@ class BulkCreateSchedule
                     continue;
                 }
 
-                Schedule::create([
+                $nouvelles[] = Schedule::create([
                     'user_id' => $user->getKey(),
                     'date' => $date->toDateString(),
                     'start_time' => $debut,
@@ -98,6 +103,10 @@ class BulkCreateSchedule
             ),
             $user,
         );
+
+        // La personne concernee est prevenue de ses nouvelles heures, qu'elle
+        // soit de garde a cet instant ou non (v3.2.3, point 2).
+        $this->notifier->schedulePublished($nouvelles);
 
         return $crees;
     }

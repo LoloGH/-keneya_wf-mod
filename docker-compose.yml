@@ -39,6 +39,33 @@ services:
     networks:
       - keneya
 
+  # Premiere tache planifiee reelle de l'application (v3.2.3, point 2) : sans
+  # ce service, les rappels de rendez-vous ne partiraient jamais et rien ne le
+  # signalerait. Meme image et meme code que `app` — il ne sert pas de requetes
+  # HTTP, il reveille le planificateur Laravel chaque minute.
+  #
+  # `schedule:work` plutot qu'un cron dans l'image : rien a installer ni a
+  # superviser en plus, le conteneur redemarre avec la pile, et ses executions
+  # se lisent dans `docker compose logs scheduler`.
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: keneya-workflow-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan schedule:work
+    volumes:
+      - ./:/var/www/html
+      - keneya_storage:/var/www/html/storage
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - keneya
+
   db:
     image: mariadb:11.4
     restart: unless-stopped

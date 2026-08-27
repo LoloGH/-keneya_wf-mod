@@ -6,6 +6,7 @@ use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Schedule;
 use App\Models\Service;
 use App\Models\User;
+use App\Services\StaffNotifier;
 use App\Support\Audit;
 use App\Support\Roles;
 use Illuminate\Contracts\View\View;
@@ -97,6 +98,10 @@ class ScheduleManager extends Component
         } else {
             $schedule = Schedule::create($data);
             $this->notifySuccess('Creneau ajoute.');
+
+            // Un creneau ajoute a la main vaut publication de planning, comme
+            // une generation groupee (v3.2.3, point 2).
+            app(StaffNotifier::class)->schedulePublished([$schedule]);
         }
 
         Audit::log(

@@ -76,9 +76,20 @@
                         {{ $viewingCareTasksFor === $sejour->id ? 'Masquer les soins' : 'Voir et corriger les soins' }}
                     </button>
                     <button type="button" class="btn btn--ghost"
+                            wire:click="showHandoff({{ $sejour->id }})">
+                        {{ $viewingHandoffFor === $sejour->id ? 'Masquer les releves' : 'Notes de releve' }}
+                    </button>
+                    <button type="button" class="btn btn--ghost"
                             wire:click="discharge({{ $sejour->id }})"
                             wire:confirm="Cloturer cette hospitalisation ?">Cloturer l'hospitalisation</button>
                 </div>
+
+                @if ($viewingHandoffFor === $sejour->id)
+                    @livewire('shared.handoff-notes', [
+                        'hospitalizationId' => $sejour->id,
+                        'flashKey' => 'service',
+                    ], key('handoff-'.$sejour->id))
+                @endif
 
                 @if ($viewingCareTasksFor === $sejour->id)
                     @include('livewire.service.partials.care-tasks-revision', [

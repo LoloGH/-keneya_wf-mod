@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Listeners\LogAuthenticationActivity;
 use App\Models\Patient;
 use App\Models\PatientHistory;
+use App\Models\Visit;
 use App\Models\Visitor;
 use App\Observers\PatientHistoryObserver;
 use App\Observers\PatientObserver;
+use App\Observers\VisitObserver;
 use App\Observers\VisitorObserver;
 use App\Services\SmsGateway;
 use Illuminate\Auth\Events\Login;
@@ -40,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Patient::observe(PatientObserver::class);
         Visitor::observe(VisitorObserver::class);
+        Visit::observe(VisitObserver::class);
         PatientHistory::observe(PatientHistoryObserver::class);
 
         Event::listen(Login::class, [LogAuthenticationActivity::class, 'handleLogin']);

@@ -31,18 +31,12 @@
                     {{ $context ?? auth()->user()->roleLabel() }}
                 </span>
 
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="icon-btn" data-testid="logout"
-                            aria-label="Se deconnecter" title="Se deconnecter">
-                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
-                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M15 17l5-5-5-5" />
-                            <path d="M20 12H9" />
-                            <path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" />
-                        </svg>
-                    </button>
-                </form>
+                @livewire('shared.notification-bell', [], key('notification-bell'))
+
+                {{-- La deconnexion n'est plus une icone isolee : elle vit
+                     dans la carte de profil, a cote du changement de mot de
+                     passe (v3.2.3, point 3). --}}
+                @livewire('shared.profile-card', [], key('profile-card'))
             @endauth
         </div>
     </header>

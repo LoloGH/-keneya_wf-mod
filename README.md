@@ -26,10 +26,11 @@ patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kay
 11. [Portail patient, impression et suppression de dossier](#11-portail-patient-impression-et-suppression-de-dossier)
 12. [Catalogues administrables et interfaces générées](#12-catalogues-administrables-et-interfaces-générées)
 13. [Hospitalisation et planning de soins](#13-hospitalisation-et-planning-de-soins)
-14. [Journal d'audit et plannings](#14-journal-daudit-et-plannings)
-15. [Vérification d'un déploiement](#15-vérification-dun-déploiement)
-16. [Tests](#16-tests)
-17. [Organisation du code](#17-organisation-du-code)
+14. [Notifications, profil et relèves](#14-notifications-profil-et-relèves)
+15. [Journal d'audit et plannings](#15-journal-daudit-et-plannings)
+16. [Vérification d'un déploiement](#16-vérification-dun-déploiement)
+17. [Tests](#17-tests)
+18. [Organisation du code](#18-organisation-du-code)
 
 ---
 
@@ -100,9 +101,16 @@ souris.
 
 ## 3. Installation avec Docker (recommandé)
 
-Trois services : `app` (PHP-FPM 8.3 + Laravel), `web` (Nginx), `db`
-(MariaDB). Le `docker-compose.yml` tourne **à l'identique** sous Docker Engine
-(Linux) et Docker Desktop / WSL2 (Windows), sans modification.
+Quatre services : `app` (PHP-FPM 8.3 + Laravel), `web` (Nginx), `db`
+(MariaDB) et `scheduler`. Le `docker-compose.yml` tourne **à l'identique** sous
+Docker Engine (Linux) et Docker Desktop / WSL2 (Windows), sans modification.
+
+Le service **`scheduler`** est apparu en v3.2.3 : même image et même code que
+`app`, mais il ne sert aucune requête HTTP — il lance `php artisan
+schedule:work`, qui réveille le planificateur Laravel chaque minute. C'est lui
+qui envoie les rappels de rendez-vous ; **sans ce conteneur, ils ne partiront
+jamais et rien ne le signalera.** `docker compose logs scheduler` montre ses
+exécutions.
 
 ### Linux
 
@@ -411,6 +419,8 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 | `rooms` | Salles d'hospitalisation : service responsable et nombre de lits. L'occupation n'est pas stockée. |
 | `hospitalizations` | Séjour d'un patient : salle, service, admission, sortie. |
 | `care_task_types` | Catalogue des types de soins (sérum, injection, pansement…). |
+| `handoff_notes` | Notes de relève entre équipes sur un séjour : texte libre, daté et signé. |
+| `staff_notifications` | Une ligne **par destinataire** — c'est ce qui permet de dire « lue » pour l'un et pas pour l'autre. |
 | `care_tasks` | Une administration, individuellement marquable `pending` / `done` / `missed` / `cancelled`. Un soin annulé garde son motif, son auteur et son heure d'annulation. |
 | `doctors` | Rattachement d'un compte à un service, réaffectable à tout moment. Un médecin multi-services a plusieurs lignes. |
 | `receptionists` | Rattachement d'un compte au rôle d'accueil. |
@@ -969,7 +979,119 @@ retiré ; son compte ne disparaît qu'avec le dernier.
 La suppression est journalisée **avant** l'opération, dans l'audit, qui lui
 survit — même principe que pour la suppression d'un dossier patient.
 
-## 14. Journal d'audit et plannings
+## 14. Notifications, profil et relèves
+
+### Cloche de notification
+
+Une cloche dans la barre de marque, sur les cinq interfaces, avec le nombre de
+non-lues en badge et `wire:poll` à dix secondes — même intervalle que le reste
+de l'application, **pas de WebSocket** dans cette version, pour la même raison
+qu'ailleurs : une dépendance de plus à faire tourner sur le VPS pour un gain que
+l'usage n'a pas encore réclamé. Si le délai s'avère trop long en service réel,
+Laravel Reverb est la suite logique.
+
+**Cinq déclencheurs**, tous ciblés sur le personnel *effectivement de garde* :
+
+| Événement | Qui est prévenu |
+|---|---|
+| Patient ou visiteur entre dans une file | Le personnel de garde sur ce service |
+| Résultat de renvoi reçu | Le **médecin prescripteur** seul (`referrals.from_doctor_id`), pas son service |
+| Soins prescrits | Le personnel de garde du service porteur de `has_care_tasks` |
+| Rendez-vous qui approche | Le médecin concerné |
+| Planning publié | Chaque personne concernée par les lignes créées |
+
+Le ciblage passe par **`App\Services\OnDutyRoster`**, unique règle de garde de
+l'application. `User::isOnDutyFor()` répondait déjà à « moi, maintenant ? » ; il
+manquait la question inverse — « eux, maintenant ? ». Les deux lisent la même
+table et la même fenêtre horaire. `schedules` est le bon support et le seul : il
+porte à la fois la personne et le service, quelle que soit sa table de
+rattachement — médecin, réceptionniste, caissier ou personnel générique y
+entrent de la même façon.
+
+L'entrée en file est captée par un **observateur sur `Visit`**, pas par un appel
+dans chaque action : un patient entre dans une file par six chemins
+(enregistrement, nouvel épisode, arrivée sur rendez-vous, sortie de caisse,
+renvoi envoyé, retour d'un renvoi complété). Les énumérer un à un aurait garanti
+d'en oublier un au prochain chemin ajouté. L'observateur écoute **après le
+commit** : une transaction annulée ne laisse pas derrière elle la notification
+d'un patient qui n'est jamais entré.
+
+**Le son** ne part qu'à l'arrivée d'une notification, jamais à chaque sondage :
+le composant garde le dernier total connu et n'émet l'événement
+`notification-nouvelle` que si le nombre augmente. La comparaison est faite dans
+le composant plutôt que dans le navigateur — c'est la même règle, mais celle-ci
+se teste.
+
+Le fichier livré est `public/sounds/notification.wav`, une cloche courte générée
+avec le dépôt. `notification_sound_url()` retient le **premier format présent**
+parmi `.mp3`, `.ogg`, `.wav` : déposer `public/sounds/notification.mp3` la
+remplace sans toucher une ligne de code, comme pour le logo. Aucun fichier du
+tout, et la cloche reste muette sans erreur.
+
+Les navigateurs refusent de jouer un son tant que la page n'a reçu aucune
+interaction. Le personnel s'étant déjà connecté, la condition est remplie en
+pratique — mais `play()` est quand même enveloppé dans un `catch` : une cloche
+muette vaut mieux qu'une erreur JavaScript dans la console d'un poste de soins.
+
+### Rappel de rendez-vous
+
+Seul déclencheur qui ne répond à aucun geste humain, donc le seul qui exige une
+tâche périodique : `keneya:rappels-rendez-vous`, toutes les quinze minutes.
+`appointments.reminder_sent_at` garantit **un rappel et un seul** — la commande
+repasse sur une fenêtre qui se recouvre largement.
+
+Le délai est réglable via la table `settings`
+(clé `appointment_reminder_minutes`, 60 minutes par défaut), comme
+`hospital_name` — pas codé en dur : une consultation programmée ne se prépare
+pas comme un bloc.
+
+### Carte de profil
+
+L'icône de déconnexion isolée était la seule action du coin supérieur droit, ce
+qui n'y laissait aucune place pour la seule chose qu'un agent ait besoin de faire
+sur son propre compte. Elle cède la place à un **avatar aux initiales** — pas de
+photo à stocker ni à redimensionner — qui ouvre une carte : nom, fonction,
+service s'il y en a un, adresse e-mail, puis « Changer le mot de passe » et
+« Se déconnecter ».
+
+Le changement de mot de passe vérifie l'actuel **côté serveur** (`Hash::check`),
+impose huit caractères avec lettres et chiffres — rien de plus sévère, un mot de
+passe impossible à retenir finit écrit sur un papier collé à l'écran — puis
+ferme les autres sessions (`Auth::logoutOtherDevices()`) en gardant la courante.
+L'événement `mot_de_passe_change` est journalisé ; **ni l'ancien mot de passe ni
+le nouveau n'y figurent**, sous aucune forme.
+
+> **Correctif d'infrastructure au passage.** `AuthenticatesSessions` figurait
+> dans la liste de priorité des middlewares mais n'était jamais ajouté au groupe
+> `web`. Sans lui, `logoutOtherDevices()` ne ferme rien : il réécrit un marqueur
+> que personne ne lit, et les sessions ouvertes ailleurs continuent de
+> fonctionner. Il est désormais appliqué. Les sessions déjà ouvertes au moment du
+> déploiement ne sont pas coupées : sans marqueur, le middleware le pose et
+> laisse passer.
+
+### Notes de relève entre équipes
+
+La rotation du personnel sur un patient hospitalisé est **déjà réglée
+structurellement**, et c'est vérifié par un test plutôt que supposé :
+« Patients hospitalisés » n'est filtré que par service, jamais par médecin
+admettant, et les soins sont ouverts à tout le personnel de garde —
+l'assignation nommée reste une priorité d'affichage. Aucun mécanisme de
+transfert explicite n'est donc nécessaire.
+
+Ce qui manquait est d'un autre ordre : ce qu'une équipe a besoin de dire à la
+suivante et qu'aucune colonne ne capture. `handoff_notes` porte du texte libre,
+daté et signé, accessible depuis la fiche d'un patient hospitalisé dans
+`/service` et depuis la section « Relèves » de `/staff/{slug}` pour les types
+porteurs de `has_care_tasks`. Chaque note écrit une ligne `patient_history`
+(`handoff_note`) : elle fait partie du parcours du patient, pas d'un carnet
+parallèle.
+
+Hors garde, une note **se lit mais ne s'écrit pas** — même règle que les soins,
+et dite à l'écran plutôt que subie. Pas de champ « lu par », pas d'accusé de
+réception : une note visible suffit, et exiger une lecture confirmée ajouterait
+une file de plus à traiter pour un besoin que l'usage n'a pas montré.
+
+## 15. Journal d'audit et plannings
 
 ### Journal d'audit
 
@@ -1019,7 +1141,7 @@ d'un autre.
   l'établissement à droite, lu depuis la table `settings`** et modifiable par
   l'admin sans redéploiement. Aucun lien de navigation croisée n'y figure.
 
-## 15. Vérification d'un déploiement
+## 16. Vérification d'un déploiement
 
 Avant de remplacer une version en service, un script enchaîne les contrôles et
 rend un verdict :
@@ -1037,7 +1159,7 @@ routes de téléchargement, et les plafonds d'envoi sont ordonnés correctement.
 Il sort en code 1 dès qu'un contrôle est rouge — utilisable tel quel dans une
 procédure de mise à jour.
 
-## 16. Tests
+## 17. Tests
 
 ```bash
 php artisan test                          # sans Docker
@@ -1071,6 +1193,10 @@ docker compose exec app php artisan test  # avec Docker
 | `StaffTypeInterfaceTest` | Types de personnel, cloisonnement de `/staff/{slug}`, et **suite paramétrée par combinaison de capacités** : seules les sections cochées apparaissent, et une action hors capacité est refusée côté serveur. |
 | `HospitalizationTest` | Admission clôturant la visite, occupation calculée à la volée, salle pleine avertissant sans bloquer, génération groupée de soins, filtrage « de garde », marquage fait/manqué, sortie bloquée tant qu'un soin reste en attente. |
 | `CareTaskRevisionTest` | Correction d'un soin avec son avant/après au journal, annulation motivée d'un soin même déjà administré, exclusion de tous les décomptes, et contrôle d'accès : prescripteur ou médecin du service, jamais l'infirmier de garde. |
+| `StaffCareTasksVisibilityTest` | De la prescription à l'écran réel, par la route `/staff/{slug}` : le soin apparaît, le rattachement au service est ce qui le relie à l'infirmier, et les deux configurations qui font disparaître les soins sont couvertes — capacité non cochée, planning absent, avec l'avertissement côté `/admin`. |
+| `StaffNotificationTest` | Les cinq déclencheurs, chacun vérifié aussi par la négative : hors garde, autre service, autre rôle. Rappel de rendez-vous dans la fenêtre configurée et une seule fois, son émis au seul incrément du compteur, cloison entre les cloches de deux comptes. |
+| `ProfileCardTest` | Mot de passe actuel incorrect refusé, confirmation et complexité, hash remplacé, journal sans aucune trace du mot de passe, middleware `AuthenticateSession` en place et session concurrente réellement rejetée. |
+| `HandoffNoteTest` | La visibilité par service n'est pas restreinte au médecin admettant (vérifié avant de rien construire), note lue par l'équipe suivante, ligne `patient_history`, refus hors garde et sur séjour clôturé. |
 | `StaffManagerTest` | Section « Personnels » : les deux menus reflètent les tables, le type choisi décide du rôle et de la table de rattachement, refus du changement de rôle, liste réunissant tout le personnel. |
 | `StaffTypeCapabilitiesTest` | Capacités obligatoires indécochables (UI **et** requête forgée), colonne « Fonctions » sans tiret, sections de `/service` et `/reception` pliées aux capacités, non-régression des comptes de démonstration après migration. |
 | `AdminDeletionActionsTest` | Présence de l'action de suppression dans **toutes** les tables de `/admin`, et refus motivés : type d'origine, type encore utilisé, compte ayant laissé une trace au dossier. |
@@ -1082,7 +1208,7 @@ Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS. La suite
 a également été passée **contre MariaDB 10.11** — 281 tests au vert — et les
 37 migrations ont été vérifiées **dans les deux sens** sur les deux moteurs.
 
-## 17. Organisation du code
+## 18. Organisation du code
 
 Aucune logique métier ne vit dans les vues Blade ou Livewire : les composants
 valident puis délèguent à une action ou à un service.

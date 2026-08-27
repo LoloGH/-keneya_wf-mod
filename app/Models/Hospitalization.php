@@ -69,6 +69,11 @@ class Hospitalization extends Model
         return $this->hasMany(CareTask::class);
     }
 
+    public function handoffNotes(): HasMany
+    {
+        return $this->hasMany(HandoffNote::class);
+    }
+
     /** @param  Builder<self>  $query */
     public function scopeActive(Builder $query): void
     {

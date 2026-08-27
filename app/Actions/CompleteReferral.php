@@ -10,6 +10,7 @@ use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
+use App\Services\StaffNotifier;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
 use App\Support\Caregiver;
@@ -42,6 +43,7 @@ class CompleteReferral
         private readonly PatientHistoryRecorder $history,
         private readonly SmsGateway $sms,
         private readonly TokenAllocator $tokens,
+        private readonly StaffNotifier $notifier,
     ) {}
 
     public function execute(Referral $referral, Doctor|StaffMember $completedBy, string $resultText): Referral
@@ -107,6 +109,10 @@ class CompleteReferral
                 $referral->toService->name,
             ));
         }
+
+        // Le prescripteur nommement, pas tout le service : c'est lui qui
+        // attend cette reponse (v3.2.3, point 2).
+        $this->notifier->referralResult($referral);
 
         return $referral;
     }
