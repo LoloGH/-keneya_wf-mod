@@ -6,7 +6,6 @@ use App\Actions\BulkCreateSchedule;
 use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Service;
 use App\Models\User;
-use App\Support\Roles;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -90,16 +89,21 @@ class BulkScheduleForm extends Component
             ? sprintf('%d creneau(x) genere(s).', $crees)
             : 'Aucun creneau a generer : ils existaient deja sur cette periode.');
 
+        // La liste des creneaux vit dans un composant voisin : sans cet
+        // evenement, l'admin generait vingt-deux creneaux et voyait un tableau
+        // vide jusqu'au rechargement suivant.
+        $this->dispatch('plannings-mis-a-jour');
+
         $this->dispatch('plannings-mis-a-jour');
     }
 
     public function render(): View
     {
         return view('livewire.admin.bulk-schedule-form', [
-            'staff' => User::query()
-                ->whereHas('roles', fn ($q) => $q->whereIn('name', [Roles::DOCTOR, Roles::RECEPTIONIST, Roles::CASHIER]))
-                ->orderBy('name')
-                ->get(),
+            // Tout le personnel rattache, sans exception : filtrer sur les
+            // roles laissait dehors les types sans role, alors que ce sont
+            // eux dont la garde conditionne la visibilite des soins.
+            'staff' => User::staff()->orderBy('name')->get(),
             'services' => Service::orderBy('name')->get(),
             'weekdayLabels' => self::WEEKDAY_LABELS,
         ]);

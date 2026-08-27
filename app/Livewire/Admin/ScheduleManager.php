@@ -8,8 +8,9 @@ use App\Models\Service;
 use App\Models\User;
 use App\Services\StaffNotifier;
 use App\Support\Audit;
-use App\Support\Roles;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
@@ -113,6 +114,81 @@ class ScheduleManager extends Component
         $this->cancel();
     }
 
+    #[On('plannings-mis-a-jour')]
+    public function refreshSchedules(): void
+    {
+        // Un nouveau rendu suffit : la liste est relue a chaque rendu. La
+        // selection est videe, elle porterait sur un ensemble qui a change.
+        $this->selected = [];
+    }
+
+    /**
+     * Creneaux coches pour une suppression groupee.
+     *
+     * @var array<int, string>
+     */
+    public array $selected = [];
+
+    /**
+     * Coche ou decoche tout ce qui est affiche.
+     *
+     * Volontairement limite a la page visible : « tout selectionner » qui
+     * emporterait aussi des creneaux hors ecran est un piege, pas un raccourci.
+     */
+    public function toggleAll(): void
+    {
+        $affiches = $this->visibleSchedules()->pluck('id')->map(fn ($id) => (string) $id)->all();
+
+        $this->selected = count($this->selected) === count($affiches) ? [] : $affiches;
+    }
+
+    /**
+     * Suppression groupee : une generation produit des dizaines de creneaux,
+     * les retirer un par un n'est pas une option praticable.
+     */
+    public function deleteSelected(): void
+    {
+        $ids = array_map('intval', $this->selected);
+
+        if ($ids === []) {
+            $this->notifyError('Aucun creneau selectionne.');
+
+            return;
+        }
+
+        // On ne supprime que ce qui est reellement affiche : une selection
+        // gardee en memoire apres un changement de filtre ne doit pas emporter
+        // des creneaux que l'admin ne voit plus.
+        $creneaux = $this->visibleSchedules()->whereIn('id', $ids);
+
+        if ($creneaux->isEmpty()) {
+            $this->notifyError('Aucun creneau selectionne.');
+
+            return;
+        }
+
+        $resume = $creneaux
+            ->groupBy(fn (Schedule $creneau) => $creneau->user?->name ?? 'Compte supprime')
+            ->map(fn ($lignes, $nom) => sprintf('%s (%d)', $nom, $lignes->count()))
+            ->implode(', ');
+
+        $supprimes = Schedule::whereIn('id', $creneaux->pluck('id'))->delete();
+
+        Audit::log(
+            Audit::EVENT_SCHEDULE_CHANGED,
+            sprintf('%d creneau(x) supprimes en une fois : %s.', $supprimes, $resume),
+        );
+
+        // Le formulaire en cours d'edition pourrait porter un creneau efface.
+        if ($this->editingId && in_array((int) $this->editingId, $ids, true)) {
+            $this->cancel();
+        }
+
+        $this->selected = [];
+
+        $this->notifySuccess(sprintf('%d creneau(x) supprime(s).', $supprimes));
+    }
+
     public function delete(int $scheduleId): void
     {
         $schedule = Schedule::findOrFail($scheduleId);
@@ -125,24 +201,36 @@ class ScheduleManager extends Component
         $this->notifySuccess('Creneau supprime.');
     }
 
+    /**
+     * Les creneaux affiches — une seule definition, partagee par le rendu et
+     * par la suppression groupee : elles doivent porter exactement sur le meme
+     * ensemble.
+     *
+     * @return Collection<int, Schedule>
+     */
+    private function visibleSchedules(): Collection
+    {
+        return Schedule::query()
+            ->with(['user', 'service'])
+            ->when($this->filterUserId, fn ($query) => $query->where('user_id', $this->filterUserId))
+            ->where('date', '>=', today()->subWeek())
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->limit(100)
+            ->get();
+    }
+
     public function render(): View
     {
-        $staff = User::query()
-            ->whereHas('roles', fn ($query) => $query->whereIn('name', [Roles::DOCTOR, Roles::RECEPTIONIST]))
-            ->orderBy('name')
-            ->get();
+        // Meme source que la generation groupee : deux listes differentes sur
+        // le meme ecran finissaient forcement par diverger — celle-ci oubliait
+        // en plus les caissiers.
+        $staff = User::staff()->orderBy('name')->get();
 
         return view('livewire.admin.schedule-manager', [
             'staff' => $staff,
             'services' => Service::orderBy('name')->get(),
-            'schedules' => Schedule::query()
-                ->with(['user', 'service'])
-                ->when($this->filterUserId, fn ($query) => $query->where('user_id', $this->filterUserId))
-                ->where('date', '>=', today()->subWeek())
-                ->orderBy('date')
-                ->orderBy('start_time')
-                ->limit(100)
-                ->get(),
+            'schedules' => $this->visibleSchedules(),
         ]);
     }
 }

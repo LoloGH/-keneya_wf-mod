@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\Roles;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -150,6 +151,29 @@ class User extends Authenticatable
      * Le role applicatif de l'utilisateur, parmi les trois roles cloisonnes.
      * Un utilisateur n'est cense en porter qu'un seul ; le premier reconnu fait foi.
      */
+    /**
+     * Tout compte reellement rattache a l'etablissement, quelle que soit sa
+     * table de rattachement (v3.2.4).
+     *
+     * Les plannings interrogeaient les roles Spatie : un type de personnel sans
+     * role — un infirmier, un brancardier — n'en porte aucun, il etait donc
+     * introuvable dans les menus, et personne ne pouvait lui poser de creneau.
+     * Or c'est le planning qui decide de sa garde, donc de tout ce qu'il voit.
+     *
+     * Le rattachement est le bon critere : il existe pour les quatre chemins,
+     * la ou le role n'existe que pour trois.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeStaff(Builder $query): void
+    {
+        $query->where(fn (Builder $q) => $q
+            ->whereHas('doctors')
+            ->orWhereHas('receptionist')
+            ->orWhereHas('cashier')
+            ->orWhereHas('staffMember'));
+    }
+
     public function scopedRole(): ?string
     {
         $names = $this->getRoleNames();

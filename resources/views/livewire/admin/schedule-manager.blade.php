@@ -12,7 +12,7 @@
                 <option value="">— Choisir —</option>
                 @foreach ($staff as $member)
                     <option value="{{ $member->id }}">
-                        {{ $member->name }} ({{ \App\Support\Roles::label($member->scopedRole()) }})
+                        {{ $member->name }} ({{ $member->roleLabel() }})
                     </option>
                 @endforeach
             </select>
@@ -68,14 +68,42 @@
         </select>
     </div>
 
+    {{-- Suppression groupee : une generation produit des dizaines de creneaux,
+         les retirer un par un n'est pas praticable. La barre n'apparait que
+         lorsqu'une case est cochee — elle ne pese pas sur l'ecran le reste du
+         temps. --}}
+    @if (count($selected) > 0)
+        <div class="bulkbar" role="status">
+            <span>{{ count($selected) }} creneau(x) selectionne(s).</span>
+            <button type="button" class="btn btn--ghost" wire:click="deleteSelected"
+                    wire:confirm="Supprimer les {{ count($selected) }} creneaux selectionnes ?">
+                Supprimer la selection
+            </button>
+            <button type="button" class="btn btn--ghost" wire:click="$set('selected', [])">
+                Tout decocher
+            </button>
+        </div>
+    @endif
+
     <div class="table-wrap">
         <table class="table">
             <thead>
-                <tr><th>Personne</th><th>Date</th><th>Horaire</th><th>Service</th><th></th></tr>
+                <tr>
+                    <th class="table__check">
+                        <input type="checkbox" wire:click="toggleAll"
+                               @checked(count($selected) > 0 && count($selected) === $schedules->count())
+                               aria-label="Tout selectionner">
+                    </th>
+                    <th>Personne</th><th>Date</th><th>Horaire</th><th>Service</th><th></th>
+                </tr>
             </thead>
             <tbody>
                 @forelse ($schedules as $schedule)
-                    <tr>
+                    <tr wire:key="creneau-{{ $schedule->id }}">
+                        <td class="table__check">
+                            <input type="checkbox" value="{{ $schedule->id }}" wire:model.live="selected"
+                                   aria-label="Selectionner ce creneau">
+                        </td>
                         <td>{{ $schedule->user->name }}</td>
                         <td>{{ $schedule->date->translatedFormat('D d/m/Y') }}</td>
                         <td class="mono">{{ $schedule->range() }}</td>
@@ -93,7 +121,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="empty">Aucun creneau enregistre.</td></tr>
+                    <tr><td colspan="6" class="empty">Aucun creneau enregistre.</td></tr>
                 @endforelse
             </tbody>
         </table>
