@@ -15,7 +15,7 @@ use Livewire\Component;
  * cliquait, et rien ne se passait.
  *
  * Ce composant ecoute un evenement et se re-rend seul. Les composants
- * continuent d'ecrire en session comme avant : le trait NotifiesAdmin emet
+ * continuent d'ecrire en session comme avant : le trait NotifiesUser emet
  * simplement l'evenement en plus, ce qui evite de reecrire les dizaines
  * d'appels existants.
  */

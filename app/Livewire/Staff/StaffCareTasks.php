@@ -105,6 +105,9 @@ class StaffCareTasks extends Component
                     fn ($q) => $q->where('service_id', $member->service_id)
                         ->where('status', Hospitalization::STATUS_ACTIVE),
                 )
+                // Un soin annule ne figure jamais a la feuille de garde, meme
+                // en relisant la journee : il ne compte plus (v3.2.3, point 4).
+                ->countable()
                 ->when(! $this->showDone, fn ($q) => $q->where('status', CareTask::STATUS_PENDING))
                 ->orderBy('scheduled_at')
                 ->limit(100)

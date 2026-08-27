@@ -26,6 +26,12 @@ class CareTask extends Model
 
     public const STATUS_MISSED = 'missed';
 
+    /**
+     * Soin annule (v3.2.3, point 4) : il reste au dossier, mais ne compte plus
+     * — ni comme reste a faire, ni comme soin administre.
+     */
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = [
         'hospitalization_id',
         'care_task_type_id',
@@ -36,6 +42,9 @@ class CareTask extends Model
         'status',
         'completed_by_user_id',
         'completed_at',
+        'cancelled_at',
+        'cancelled_by_user_id',
+        'cancellation_reason',
     ];
 
     protected function casts(): array
@@ -43,6 +52,7 @@ class CareTask extends Model
         return [
             'scheduled_at' => 'datetime',
             'completed_at' => 'datetime',
+            'cancelled_at' => 'datetime',
         ];
     }
 
@@ -71,10 +81,29 @@ class CareTask extends Model
         return $this->belongsTo(User::class, 'completed_by_user_id');
     }
 
+    public function cancelledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_user_id');
+    }
+
     /** @param  Builder<self>  $query */
     public function scopePending(Builder $query): void
     {
         $query->where('status', self::STATUS_PENDING);
+    }
+
+    /**
+     * Les soins qui comptent : tout sauf les annules.
+     *
+     * Un soin annule reste lisible au dossier, mais il ne doit apparaitre dans
+     * aucun total — sinon annuler reviendrait a maquiller les chiffres sans
+     * les corriger.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeCountable(Builder $query): void
+    {
+        $query->where('status', '!=', self::STATUS_CANCELLED);
     }
 
     /**
@@ -93,11 +122,17 @@ class CareTask extends Model
         return $this->status === self::STATUS_DONE;
     }
 
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
+    }
+
     public function statusLabel(): string
     {
         return match ($this->status) {
             self::STATUS_DONE => 'Fait',
             self::STATUS_MISSED => 'Manque',
+            self::STATUS_CANCELLED => 'Annule',
             default => $this->isLate() ? 'En retard' : 'A faire',
         };
     }

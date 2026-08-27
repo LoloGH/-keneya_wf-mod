@@ -30,8 +30,16 @@
             <select id="staff-type" wire:model.live="staff_type_id">
                 <option value="">— Choisir un type —</option>
                 @foreach ($staffTypes as $type)
+                    {{-- Le role n'est rappele que s'il n'est pas deja le nom du
+                         type : « Caissier — Caissier » n'apprend rien. --}}
+                    @php $role = \App\Support\Roles::label($type->matched_role); @endphp
+                    @php
+                        $suffixe = $type->matched_role
+                            ? ($role === $type->name ? '' : ' — '.$role)
+                            : ' — interface dediee';
+                    @endphp
                     <option value="{{ $type->id }}">
-                        {{ $type->name }}@if ($type->matched_role) — {{ \App\Support\Roles::label($type->matched_role) }}@endif
+                        {{ $type->name }}{{ $suffixe }}
                         ({{ count($type->enabledOptionalCapabilities()) }} fonction(s) optionnelle(s))
                     </option>
                 @endforeach

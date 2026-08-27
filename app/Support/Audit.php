@@ -65,6 +65,12 @@ final class Audit
 
     public const EVENT_CARE_TASK_COMPLETED = 'soin_realise';
 
+    /** Correction d'un soin deja programme (v3.2.3, point 4). */
+    public const EVENT_CARE_TASK_REVISED = 'soin_modifie';
+
+    /** Annulation d'un soin : la ligne reste, elle ne compte plus. */
+    public const EVENT_CARE_TASK_CANCELLED = 'soin_annule';
+
     public const EVENT_DOCTOR_CREATED = 'medecin_cree';
 
     public const EVENT_DOCTOR_REASSIGNED = 'medecin_reaffecte';
@@ -134,6 +140,8 @@ final class Audit
         self::EVENT_PATIENT_DISCHARGED => 'Sortie d\'hospitalisation',
         self::EVENT_CARE_TASKS_PRESCRIBED => 'Prescription de soins',
         self::EVENT_CARE_TASK_COMPLETED => 'Soin realise',
+        self::EVENT_CARE_TASK_REVISED => 'Soin corrige',
+        self::EVENT_CARE_TASK_CANCELLED => 'Soin annule',
         self::EVENT_DOCTOR_CREATED => 'Creation d\'un medecin',
         self::EVENT_DOCTOR_REASSIGNED => 'Reaffectation d\'un medecin',
         self::EVENT_RECEPTIONIST_CREATED => 'Creation d\'une receptionniste',

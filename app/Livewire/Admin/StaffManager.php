@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\DeleteStaffAccount;
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Cashier;
 use App\Models\Doctor;
 use App\Models\Receptionist;
@@ -47,7 +47,7 @@ use Livewire\Component;
  */
 class StaffManager extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     /**
      * Rattachement en cours de modification, sous la forme « doctor:12 ».

@@ -3,7 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Actions\DeletePatientRecord;
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Patient;
 use App\Support\Roles;
 use Illuminate\Contracts\View\View;
@@ -23,7 +23,7 @@ use Livewire\Component;
  */
 class PatientDeletion extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public string $search = '';
 

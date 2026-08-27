@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\CareTaskType;
 use App\Support\Audit;
 use Illuminate\Contracts\View\View;
@@ -16,7 +16,7 @@ use Livewire\Component;
  */
 class CareTaskTypeManager extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public string $name = '';
 

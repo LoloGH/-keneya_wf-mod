@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Setting;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -15,7 +15,7 @@ use Livewire\Component;
  */
 class HospitalSettings extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public string $hospitalName = '';
 

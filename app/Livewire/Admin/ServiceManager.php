@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Livewire\Concerns\NotifiesAdmin;
+use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Service;
 use App\Models\ServiceKind;
 use App\Support\Audit;
@@ -15,7 +15,7 @@ use Livewire\Component;
  */
 class ServiceManager extends Component
 {
-    use NotifiesAdmin;
+    use NotifiesUser;
 
     public ?int $editingId = null;
 

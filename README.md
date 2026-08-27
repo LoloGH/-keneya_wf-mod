@@ -45,7 +45,7 @@ lien vers un autre module, pas de tableau de bord générique. Chaque poste
 | `admin` | `/admin` | Établissement, services, réceptionnistes, médecins (avec réaffectation), plannings du personnel (jour par jour et génération groupée), vue globale des patients avec accès à tout dossier, suppression définitive d'un dossier, journal d'audit. |
 | `receptionist` | `/reception` | Recherche de dossier existant, enregistrement patient et visiteur, rendez-vous du jour, passages du jour (avec réimpression du ticket), écran de salle d'attente, son propre planning. |
 | `doctor` | `/service` | File d'attente, renvois entrants et sortants, clôture de renvoi et de dossier, conclusion de consultation, ordonnances, « Mes patients » et « Mes rendez-vous », son propre planning, et le dossier patient dans un panneau de la même page. **Aucune fonction de caisse.** |
-| `cashier` | `/caisse` | Les deux files de caisse (« Caisse Ticket » et « Caisse Services »), encaissement et orientation vers le service qui attend, son propre planning. |
+| `cashier` | `/caisse` | Les files de caisse — « Caisse Ticket », « Caisse Services », et toute caisse ajoutée ensuite — encaissement et orientation vers le service qui attend, son propre planning. |
 | *(type de personnel sans rôle)* | `/staff/{slug}` | Interface **composée** des seules fonctions cochées par l'administrateur — voir §12. Cloisonnée exactement comme les quatre autres. |
 
 Mise en œuvre :
@@ -411,8 +411,8 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 | `rooms` | Salles d'hospitalisation : service responsable et nombre de lits. L'occupation n'est pas stockée. |
 | `hospitalizations` | Séjour d'un patient : salle, service, admission, sortie. |
 | `care_task_types` | Catalogue des types de soins (sérum, injection, pansement…). |
-| `care_tasks` | Une administration, individuellement marquable `pending` / `done` / `missed`. |
-| `doctors` | Rattachement d'un compte à un service, réaffectable à tout moment. Un médecin multi-services a plusieurs lignes. Jamais à une caisse. |
+| `care_tasks` | Une administration, individuellement marquable `pending` / `done` / `missed` / `cancelled`. Un soin annulé garde son motif, son auteur et son heure d'annulation. |
+| `doctors` | Rattachement d'un compte à un service, réaffectable à tout moment. Un médecin multi-services a plusieurs lignes. |
 | `receptionists` | Rattachement d'un compte au rôle d'accueil. |
 | `cashiers` | Rattachement d'un compte au rôle de caissier, sur le modèle de `receptionists`. |
 | **`patients`** | **Identité permanente et rien d'autre** : `patient_code` (`HFD-00001`) à vie, `crno` (dossier papier), plus `access_code` (4 chiffres) et `portal_token` (UUID) pour le portail. |
@@ -573,7 +573,7 @@ caisse coordonne financièrement l'ensemble des services : elle a donc son propr
 rôle (`cashier`) et sa propre interface (`/caisse`), cloisonnée comme les trois
 autres.
 
-Les deux caisses sont des **services à part entière** (`services.kind = caisse`,
+Les caisses sont des **services à part entière** (`services.kind = caisse`,
 créés par le seeder) : même file, même token, même « Appeler le suivant » que
 partout ailleurs — aucune mécanique parallèle à maintenir.
 
@@ -581,6 +581,14 @@ partout ailleurs — aucune mécanique parallèle à maintenir.
 |---|---|
 | **Caisse Ticket** | Le ticket de consultation, avant de voir un praticien. |
 | **Caisse Services** | Un acte de plateau technique (échographie, laboratoire…). |
+
+Depuis la v3.2.3, l'administrateur peut en **déclarer d'autres** : le menu
+« Type » de « Services → Liste des services » liste tous les `service_kinds`,
+caisse comprise, et `/caisse` construit **une section par service de type
+caisse**. Une caisse créée à la main est donc réellement tenable, et non un
+service mort dans la base. Le routage sous condition de paiement, lui, continue
+de désigner les deux caisses nommées : quelle caisse encaisse quoi est une règle
+métier, pas une conséquence du nombre de guichets.
 
 Le routage sous condition de paiement s'appuie sur une seule colonne,
 `visits.pending_next_service_id` :
@@ -597,11 +605,13 @@ Le routage sous condition de paiement s'appuie sur une seule colonne,
   `visits.service_id` sur `pending_next_service_id`, vide la colonne et
   **régénère un token dans la file cible**.
 
-La caisse n'est jamais proposée comme destination : ni dans la liste des
-services de l'accueil, ni dans celle des renvois, ni comme service d'affectation
-d'un médecin — la règle est appliquée côté serveur (`Service::careServices()`,
-`SendReferral`, validation de `DoctorManager`), pas seulement dans les listes
-déroulantes.
+La caisse n'est jamais proposée comme **destination de soins** : ni dans la
+liste des services de l'accueil, ni dans celle des renvois — la règle est
+appliquée côté serveur (`Service::careServices()`, `SendReferral`), pas
+seulement dans les listes déroulantes. En revanche, depuis la v3.2.3, elle est
+proposée comme **service d'affectation** dans « Personnel → Personnels » :
+affecter quelqu'un à un guichet est une décision d'organisation, que l'outil
+n'a pas à trancher à la place de l'établissement.
 
 Une installation qui **n'utilise pas** la caisse continue de fonctionner : sans
 service `kind = caisse` en base, `RouteThroughCaisse` laisse le patient aller
@@ -750,6 +760,16 @@ distincts**, et l'admin voit lequel il emprunte :
    dans leur fonctionnement, et les personnes continuent d'être créées dans les
    tables `doctors` / `receptionists` / `cashiers` comme avant.
 
+   Depuis la v3.2.3, c'est le type choisi dans « Personnel → Personnels » qui
+   décide de tout cela : son `matched_role` désigne à la fois le rôle Spatie
+   synchronisé et la table de rattachement (`doctors`, `receptionists`,
+   `cashiers`, ou `staff_members` s'il est vide). Sans cette correspondance,
+   élargir le menu aurait créé des comptes portant le rôle « médecin » avec un
+   type « Caissier ». **Un compte ne change pas de rôle en changeant de type** :
+   le formulaire refuse explicitement — changer de rôle change de table, donc
+   d'interface et d'historique — et il faut passer par la suppression du
+   rattachement, avec ses garde-fous.
+
 2. **`matched_role` vide** : le type reçoit une interface **composée de briques
    existantes** sur `/staff/{slug}`, pilotée par ses `capabilities` :
 
@@ -890,6 +910,32 @@ scheduler dans cette version. La traçabilité réelle vient de
 `completed_by_user_id`, renseigné au moment du geste, et chaque soin réalisé
 écrit une ligne `patient_history` (`care_task_completed`) sur la frise du dossier.
 
+### Corriger ou annuler un soin
+
+Une prescription se corrige : mauvais dosage saisi, mauvaise heure, soin arrêté
+parce que l'état du patient a changé, administration notée par erreur. Depuis la
+v3.2.3, « Voir et corriger les soins » ouvre la liste des soins d'un séjour dans
+`/service`, chacun **corrigeable** (type, heure, instructions, assignation) et
+**annulable**.
+
+**Rien n'est effacé.** Une correction est journalisée avec son avant et son
+après ; une annulation pose le statut `cancelled` avec son motif — obligatoire —
+son auteur et son heure. Les deux écrivent aussi une ligne `patient_history`
+(`care_task_revised`, `care_task_cancelled`) : le dossier d'un patient ne se
+réécrit pas, il s'augmente.
+
+**Qui peut le faire** : le médecin prescripteur, ou un médecin du même service
+porteur de `has_hospitalization` — celui qui tient le service quand le
+prescripteur n'est pas de garde. L'infirmier exécute un soin et peut le marquer
+« manqué » ; décider de son arrêt ne relève pas de lui. Le refus est explicite,
+et le cloisonnement par service précède le contrôle d'accès : un soin d'un autre
+service n'existe pas.
+
+**Un soin annulé ne compte plus nulle part** — ni dans « n soin(s) en attente »,
+ni dans les soins qui bloquent une sortie d'hospitalisation, ni sur la feuille de
+garde du personnel (scope `CareTask::countable()`). Il reste lisible au dossier,
+barré, avec son motif. Annuler corrige le compte ; ça ne le maquille pas.
+
 ### Suppressions dans `/admin`
 
 Chaque table d'administration porte une **action de suppression sur chaque
@@ -1017,13 +1063,15 @@ docker compose exec app php artisan test  # avec Docker
 | `AuditSettingsScheduleTest` | Nom de l'établissement en base, journal d'audit filtrable et en lecture seule, plannings cloisonnés. |
 | `ServiceInterfaceTest` | Appel du suivant, renvoi, saisie du résultat, refus d'un service qui n'est pas le sien. |
 | `ReceptionInterfaceTest` | Enregistrement, files par service, **séquence de tickets partagée patients / visiteurs**. |
-| `AdminInterfaceTest` | Services, médecins, réaffectation, réceptionnistes, dossiers. |
+| `AdminInterfaceTest` | Services, personnels, réaffectation, dossiers. |
 | `NavigationLayoutTest` | Barre de marque, navigation verticale en arbre, présence de toutes les sections dans chaque interface. |
 | `BrandLogoTest` | Logo aux deux variantes, favicon, absence de dépendance externe. |
 | `ReferralReturnTest` | Retour d'un renvoi complété : le patient réapparaît dans la file du prescripteur, avec un nouveau ticket, **sans repasser par la caisse** ; un dossier clôturé entre-temps ne ressuscite pas. |
-| `ServiceKindTest` | Types de service administrables, slug figé des trois types d'origine, garde-fous de suppression, type « Caisse » non proposable. |
+| `ServiceKindTest` | Types de service administrables, slug figé des trois types d'origine, garde-fous de suppression, menu « Type » listant **tous** les types, caisse comprise, et caisse supplémentaire réellement tenable depuis `/caisse`. |
 | `StaffTypeInterfaceTest` | Types de personnel, cloisonnement de `/staff/{slug}`, et **suite paramétrée par combinaison de capacités** : seules les sections cochées apparaissent, et une action hors capacité est refusée côté serveur. |
 | `HospitalizationTest` | Admission clôturant la visite, occupation calculée à la volée, salle pleine avertissant sans bloquer, génération groupée de soins, filtrage « de garde », marquage fait/manqué, sortie bloquée tant qu'un soin reste en attente. |
+| `CareTaskRevisionTest` | Correction d'un soin avec son avant/après au journal, annulation motivée d'un soin même déjà administré, exclusion de tous les décomptes, et contrôle d'accès : prescripteur ou médecin du service, jamais l'infirmier de garde. |
+| `StaffManagerTest` | Section « Personnels » : les deux menus reflètent les tables, le type choisi décide du rôle et de la table de rattachement, refus du changement de rôle, liste réunissant tout le personnel. |
 | `StaffTypeCapabilitiesTest` | Capacités obligatoires indécochables (UI **et** requête forgée), colonne « Fonctions » sans tiret, sections de `/service` et `/reception` pliées aux capacités, non-régression des comptes de démonstration après migration. |
 | `AdminDeletionActionsTest` | Présence de l'action de suppression dans **toutes** les tables de `/admin`, et refus motivés : type d'origine, type encore utilisé, compte ayant laissé une trace au dossier. |
 | `LoginScreenTest` | Contrat du formulaire de connexion, scène et carte, erreurs et limitation de tentatives. |
