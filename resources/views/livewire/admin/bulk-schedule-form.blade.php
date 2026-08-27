@@ -14,7 +14,7 @@
                     <option value="">— Choisir —</option>
                     @foreach ($staff as $membre)
                         <option value="{{ $membre->id }}">
-                            {{ $membre->name }} ({{ \App\Support\Roles::label($membre->scopedRole()) }})
+                            {{ $membre->name }} ({{ $membre->roleLabel() }})
                         </option>
                     @endforeach
                 </select>

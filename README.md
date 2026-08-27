@@ -1069,6 +1069,48 @@ le nouveau n'y figurent**, sous aucune forme.
 > déploiement ne sont pas coupées : sans marqueur, le middleware le pose et
 > laisse passer.
 
+### Qui apparaît dans les plannings
+
+Les deux formulaires de « Personnel → Plannings » interrogeaient les **rôles
+Spatie**. Un type de personnel sans rôle — un infirmier, un brancardier — n'en
+porte aucun : il était donc introuvable dans les menus, et **personne ne pouvait
+lui poser un créneau**. Or c'est le planning qui décide de sa garde, donc de
+tout ce qu'il voit. C'était la cause réelle des « soins programmés invisibles
+côté infirmier ». Le formulaire jour par jour oubliait en plus les caissiers.
+
+Les deux formulaires et le filtre partagent désormais **une seule source**,
+`User::staff()` : tout compte porteur d'un rattachement, quelle que soit sa
+table (`doctors`, `receptionists`, `cashiers`, `staff_members`). Le rattachement
+est le bon critère — il existe pour les quatre chemins, là où le rôle n'existe
+que pour trois. Un administrateur, qui n'exerce dans aucun service, reste
+naturellement hors de ces menus.
+
+Le libellé retombe sur le nom du type quand il n'y a pas de rôle : « Bakary
+Coulibaly (Infirmier) » plutôt qu'une parenthèse vide.
+
+### Suppression en masse des créneaux
+
+Une génération groupée produit facilement vingt-deux créneaux ; les retirer un
+par un n'est pas praticable. Une case par ligne, une case « tout sélectionner »
+en tête, et une barre d'actions qui **n'apparaît que lorsqu'une ligne est
+cochée** — une barre toujours présente mais inactive n'apprend rien et vole de
+la place sur tablette.
+
+Deux garde-fous, tous deux couverts par un test :
+
+- « tout sélectionner » ne porte que sur **ce qui est affiché** : une case qui
+  emporterait aussi des créneaux hors écran est un piège, pas un raccourci ;
+- une sélection devenue invisible après un changement de filtre **n'est pas
+  supprimée** — on n'efface pas ce que l'administrateur ne voit plus.
+
+La suppression est journalisée en une ligne récapitulative (« 4 créneau(x)
+supprimés en une fois : Dr Modibo Keita (4) »), pas en quatre lignes séparées.
+
+La liste se rafraîchit désormais après une génération groupée : les deux
+formulaires sont deux composants voisins, et sans l'événement
+`plannings-mis-a-jour`, l'administrateur générait vingt-deux créneaux et voyait
+un tableau vide jusqu'au rechargement suivant.
+
 ### Notes de relève entre équipes
 
 La rotation du personnel sur un patient hospitalisé est **déjà réglée
@@ -1196,6 +1238,7 @@ docker compose exec app php artisan test  # avec Docker
 | `StaffCareTasksVisibilityTest` | De la prescription à l'écran réel, par la route `/staff/{slug}` : le soin apparaît, le rattachement au service est ce qui le relie à l'infirmier, et les deux configurations qui font disparaître les soins sont couvertes — capacité non cochée, planning absent, avec l'avertissement côté `/admin`. |
 | `StaffNotificationTest` | Les cinq déclencheurs, chacun vérifié aussi par la négative : hors garde, autre service, autre rôle. Rappel de rendez-vous dans la fenêtre configurée et une seule fois, son émis au seul incrément du compteur, cloison entre les cloches de deux comptes. |
 | `ProfileCardTest` | Mot de passe actuel incorrect refusé, confirmation et complexité, hash remplacé, journal sans aucune trace du mot de passe, middleware `AuthenticateSession` en place et session concurrente réellement rejetée. |
+| `ScheduleStaffCoverageTest` | Le personnel générique et les caissiers proposés dans **les deux** formulaires de planning, listes identiques, libellé sans parenthèse vide, rafraîchissement après génération, et suppression groupée avec ses deux garde-fous (sélection limitée à l'affiché, sélection invisible épargnée). |
 | `HandoffNoteTest` | La visibilité par service n'est pas restreinte au médecin admettant (vérifié avant de rien construire), note lue par l'équipe suivante, ligne `patient_history`, refus hors garde et sur séjour clôturé. |
 | `StaffManagerTest` | Section « Personnels » : les deux menus reflètent les tables, le type choisi décide du rôle et de la table de rattachement, refus du changement de rôle, liste réunissant tout le personnel. |
 | `StaffTypeCapabilitiesTest` | Capacités obligatoires indécochables (UI **et** requête forgée), colonne « Fonctions » sans tiret, sections de `/service` et `/reception` pliées aux capacités, non-régression des comptes de démonstration après migration. |

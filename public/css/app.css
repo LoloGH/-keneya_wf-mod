@@ -1292,3 +1292,22 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
     color: var(--gris-700);
 }
 .handoff__note p { margin: .2rem 0 0; }
+
+/* Barre d'actions groupees (v3.2.4). Elle n'existe que quand une ligne est
+   cochee : une barre toujours presente mais inactive n'apprend rien et vole
+   de la place sur tablette. */
+.bulkbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .6rem;
+    margin: .75rem 0;
+    padding: .5rem .75rem;
+    border-radius: var(--rayon);
+    background: var(--bleu-clair);
+    border: 1px solid var(--bleu);
+}
+.bulkbar span { font-weight: 600; }
+
+/* La colonne des cases reste etroite : c'est une poignee, pas une donnee. */
+.table__check { width: 2.2rem; text-align: center; }
