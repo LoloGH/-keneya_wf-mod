@@ -1,9 +1,6 @@
 <section class="card card--accent">
     <h2 class="card__title">Le patient est-il deja venu ?</h2>
-    <p class="hint">
-        Cherchez avant d'enregistrer : un patient deja connu garde son numero de dossier a vie.
-        On lui ouvre un nouvel episode, on ne lui cree pas un second dossier.
-    </p>
+    <p class="hint">Cherchez avant d'enregistrer : un patient deja connu garde son numero de dossier a vie.</p>
 
     <div class="field">
         <label for="lookup-search">Numero de dossier, nom ou telephone</label>

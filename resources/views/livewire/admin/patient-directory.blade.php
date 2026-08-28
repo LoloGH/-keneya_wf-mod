@@ -76,7 +76,7 @@
                     <div class="field">
                         <label for="admin-pj">
                             Fichiers
-                            <span class="field__hint">PDF, JPG ou PNG — 10 Mo maximum, 5 fichiers</span>
+                            <span class="field__hint">PDF, JPG ou PNG. 10 Mo maximum, 5 fichiers</span>
                         </label>
                         <input id="admin-pj" type="file" multiple wire:model="files"
                                accept=".pdf,.jpg,.jpeg,.png">

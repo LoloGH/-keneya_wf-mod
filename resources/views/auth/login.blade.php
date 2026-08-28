@@ -100,7 +100,8 @@
                 Connexion securisee
             </span>
             <p class="login-card__rights">
-                Toutes les droits réservés. By <a href="https://sukaxess.com" target="_blank" rel="noopener">AXESs</a> ®
+                Tous droits reserves &copy; {{ date('Y') }}
+                <a href="https://sukaxess.com" target="_blank" rel="noopener">AXESs</a>
             </p>
         </div>
     </div>

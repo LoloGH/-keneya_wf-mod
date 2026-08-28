@@ -2,7 +2,7 @@
     <h2 class="card__title">Fin de consultation</h2>
 
     @if ($visits->isEmpty())
-        <p class="empty">Aucun patient appele : appelez un patient pour encaisser un acte, etablir une ordonnance ou fixer un rendez-vous.</p>
+        <p class="empty">Appelez un patient pour encaisser un acte, etablir une ordonnance ou fixer un rendez-vous.</p>
     @else
         <div class="field">
             <label for="consultation-visit">Patient</label>

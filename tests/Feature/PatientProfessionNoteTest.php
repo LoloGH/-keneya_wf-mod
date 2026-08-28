@@ -81,7 +81,7 @@ class PatientProfessionNoteTest extends TestCase
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
             ->assertSee('Profession')
-            ->assertSee('un mot pour le service', escape: false)
+            ->assertSee('Note pour le service')
             ->assertSee('Identite du patient')
             ->assertSee('Passage du jour');
     }

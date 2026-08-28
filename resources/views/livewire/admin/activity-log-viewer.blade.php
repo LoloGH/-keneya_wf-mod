@@ -1,9 +1,6 @@
 <section class="card">
     <h2 class="card__title">Journal d'audit</h2>
-    <p class="hint">
-        Lecture seule. Aucune ligne ne peut etre modifiee ni supprimee, y compris par un
-        administrateur — c'est ce qui donne sa valeur au journal.
-    </p>
+    <p class="hint">Lecture seule. Aucune ligne ne peut etre modifiee ni supprimee.</p>
 
     <div class="form form--inline-wrap">
         <div class="field">

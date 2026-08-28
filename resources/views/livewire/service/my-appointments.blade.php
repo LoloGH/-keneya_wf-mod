@@ -1,6 +1,6 @@
 <section class="card">
     <h2 class="card__title">Mes rendez-vous ({{ $appointments->count() }})</h2>
-    <p class="hint">Les rendez-vous que vous avez fixes, du plus proche au plus lointain.</p>
+    <p class="hint">Vos prochains rendez-vous.</p>
 
     <label class="field field--inline">
         <input type="checkbox" wire:model.live="pastToo">

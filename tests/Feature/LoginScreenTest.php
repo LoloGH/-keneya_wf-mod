@@ -60,7 +60,8 @@ class LoginScreenTest extends TestCase
         $response = $this->get('/connexion');
 
         $response->assertOk()
-            ->assertSee('Toutes les droits réservés.', escape: false)
+            ->assertSee('Tous droits reserves', escape: false)
+            ->assertSee(date('Y'))
             ->assertSee('href="https://sukaxess.com"', escape: false)
             ->assertSee('>AXESs</a>', escape: false);
     }

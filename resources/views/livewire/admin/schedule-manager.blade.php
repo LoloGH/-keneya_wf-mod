@@ -1,9 +1,6 @@
 <section class="card">
     <h2 class="card__title">Plannings du personnel</h2>
-    <p class="hint">
-        Les creneaux sont crees ici uniquement. Chaque medecin et chaque receptionniste
-        consulte le sien, en lecture seule, dans sa propre interface.
-    </p>
+    <p class="hint">Chaque agent consulte son planning en lecture seule dans son interface.</p>
 
     <form wire:submit="save" class="form form--inline-wrap">
         <div class="field">

@@ -8,7 +8,7 @@
             <div class="field">
                 <label for="handoff-{{ $hospitalizationId }}">
                     Ajouter une note de releve
-                    <span class="field__hint">visible par tout le personnel de garde sur ce service</span>
+                    <span class="field__hint">visible par le personnel de garde</span>
                 </label>
                 <textarea id="handoff-{{ $hospitalizationId }}" rows="2" wire:model="content"
                           placeholder="A mal dormi, la famille passe ce matin…"></textarea>

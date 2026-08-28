@@ -66,9 +66,8 @@
 
         @if ($matched_role !== '')
             <p class="hint">
-                Ce type reutilise l'interface deja en place du role choisi. Les
-                fonctions marquees « obligatoire » la definissent et ne peuvent
-                pas etre retirees ; les autres restent a votre main.
+                Ce type reutilise l'interface du role choisi. Les fonctions marquees
+                « obligatoire » ne peuvent pas etre retirees.
             </p>
         @endif
 

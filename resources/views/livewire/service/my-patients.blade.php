@@ -79,7 +79,7 @@
                             <div class="field">
                                 <label for="pj-{{ $patient->id }}">
                                     Fichiers
-                                    <span class="field__hint">PDF, JPG ou PNG — 10 Mo maximum, 5 fichiers</span>
+                                    <span class="field__hint">PDF, JPG ou PNG. 10 Mo maximum, 5 fichiers</span>
                                 </label>
                                 <input id="pj-{{ $patient->id }}" type="file" multiple
                                        accept=".pdf,.jpg,.jpeg,.png" wire:model="files">
