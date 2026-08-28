@@ -1,6 +1,6 @@
 <section class="card">
     <h2 class="card__title">Enregistrer un patient</h2>
-    <p class="hint">Uniquement pour un patient qui n'est jamais venu — un nouveau dossier sera cree.</p>
+    <p class="hint">Pour un patient qui n'est jamais venu. Un nouveau dossier sera cree.</p>
 
     <form wire:submit="save" class="form">
         {{-- Le formulaire est groupe par nature de renseignement : ce que la
@@ -83,7 +83,7 @@
                  porte reste vrai a la venue suivante. --}}
             <div class="field">
                 <label for="patient-note">
-                    Note <span class="field__hint">(facultatif) — un mot pour le service</span>
+                    Note pour le service <span class="field__hint">(facultatif)</span>
                 </label>
                 <textarea id="patient-note" rows="2" wire:model="note"
                           placeholder="Malentendant, accompagne par sa fille, vient de Kita…"></textarea>

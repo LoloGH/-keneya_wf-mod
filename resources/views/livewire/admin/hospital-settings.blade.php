@@ -1,9 +1,6 @@
 <section class="card">
     <h2 class="card__title">Etablissement</h2>
-    <p class="hint">
-        Ce nom s'affiche en haut a droite de toutes les interfaces. Il est enregistre en base :
-        aucun redeploiement n'est necessaire pour le changer.
-    </p>
+    <p class="hint">Ce nom apparait dans la barre de toutes les interfaces et sur les tickets imprimes.</p>
 
     <form wire:submit="save" class="form form--inline-wrap">
         <div class="field">

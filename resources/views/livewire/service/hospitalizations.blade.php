@@ -136,7 +136,7 @@
 
                         <div class="field">
                             <label for="care-assign-{{ $sejour->id }}">
-                                Confier a <span class="field__hint">facultatif — sinon ouvert au personnel de garde</span>
+                                Confier a <span class="field__hint">(facultatif)</span>
                             </label>
                             <select id="care-assign-{{ $sejour->id }}" wire:model="careAssignedToUserId">
                                 <option value="">— Personnel de garde —</option>

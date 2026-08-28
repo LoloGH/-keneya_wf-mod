@@ -28,7 +28,7 @@
 
                     <div class="btn-row">
                         @unless ($visit->isClosed())
-                            <button type="button" class="btn btn--secondary"
+                            <button type="button" class="btn btn--ghost btn--small"
                                     wire:click="startReferral({{ $visit->id }})">
                                 Envoyer vers un service
                             </button>

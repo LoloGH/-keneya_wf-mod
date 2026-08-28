@@ -33,7 +33,7 @@
                             <div class="field">
                                 <label for="files-{{ $referral->id }}">
                                     Pieces jointes
-                                    <span class="field__hint">PDF, JPG ou PNG — 10 Mo maximum, 5 fichiers</span>
+                                    <span class="field__hint">PDF, JPG ou PNG. 10 Mo maximum, 5 fichiers</span>
                                 </label>
                                 <input id="files-{{ $referral->id }}" type="file" multiple
                                        accept=".pdf,.jpg,.jpeg,.png" wire:model="files">

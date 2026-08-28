@@ -27,10 +27,11 @@ patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kay
 12. [Catalogues administrables et interfaces générées](#12-catalogues-administrables-et-interfaces-générées)
 13. [Hospitalisation et planning de soins](#13-hospitalisation-et-planning-de-soins)
 14. [Notifications, profil et relèves](#14-notifications-profil-et-relèves)
-15. [Journal d'audit et plannings](#15-journal-daudit-et-plannings)
-16. [Vérification d'un déploiement](#16-vérification-dun-déploiement)
-17. [Tests](#17-tests)
-18. [Organisation du code](#18-organisation-du-code)
+15. [Langage visuel](#15-langage-visuel)
+16. [Journal d'audit et plannings](#16-journal-daudit-et-plannings)
+17. [Vérification d'un déploiement](#17-vérification-dun-déploiement)
+18. [Tests](#18-tests)
+19. [Organisation du code](#19-organisation-du-code)
 
 ---
 
@@ -1168,7 +1169,56 @@ et dite à l'écran plutôt que subie. Pas de champ « lu par », pas d'accusé 
 réception : une note visible suffit, et exiger une lecture confirmée ajouterait
 une file de plus à traiter pour un besoin que l'usage n'a pas montré.
 
-## 15. Journal d'audit et plannings
+## 15. Langage visuel
+
+La feuille de style est unique, servie telle quelle depuis `public/` : aucun
+pipeline de build front, le serveur peut n'avoir aucune connectivité internet.
+Son ordre est fixe : jetons, base, primitives partagées, puis composants métier.
+**Un composant ne redéfinit jamais une couleur ni un espacement en dur** — il
+puise dans les jetons.
+
+| Famille | Jetons |
+|---|---|
+| Typographie | `--texte-xs` … `--texte-2xl`, base à 16px |
+| Espacement | `--e1` … `--e10`, échelle de 4px |
+| Rayons | `--rayon-sm`, `--rayon`, `--rayon-lg`, `--rayon-pilule` |
+| Élévation | `--ombre-1` à `--ombre-3`, chacune en deux couches |
+| Mouvement | `--duree`, `--duree-lente`, `--courbe`, `--transition` |
+
+Le mouvement est court (140 ms) et décéléré : sur une tablette, une transition
+longue donne l'impression que l'application rame. **Le survol enrichit, il ne
+conditionne jamais** — un bouton se soulève d'un pixel, une pastille de frise
+grossit, un onglet souligne son libellé, mais rien de tout cela n'est nécessaire
+pour utiliser l'écran au doigt. `prefers-reduced-motion` coupe l'ensemble, y
+compris les déplacements au survol.
+
+L'anneau de focus est unique pour toute l'application et visible aussi bien sur
+fond clair que sur le bleu nuit de la barre.
+
+### Deux choix de mise en page qui portent le reste
+
+**La file d'attente est une grille explicite**, pas un `flex` qui se rabat. Avec
+le flex, le nom du patient se coupait en deux (« Aminata / Traore ») alors qu'il
+restait la moitié de la largeur libre à droite. Le jeton, l'identité, l'état et
+les actions ont chacun leur colonne ; sous 700px, l'identité passe sous le jeton
+et l'action prend la largeur.
+
+**Le tableau signale qu'il déborde.** Sur tablette, rien n'indiquait qu'il
+restait des colonnes à droite : des ombres portées apparaissent sur les bords
+tant qu'il reste à faire défiler.
+
+### Ton des textes
+
+L'interface dit **quoi faire**, pas pourquoi le code est ainsi. Les paragraphes
+qui expliquaient l'architecture à l'utilisateur (« il est enregistré en base :
+aucun redéploiement n'est nécessaire », « c'est ce qui donne sa valeur au
+journal ») ont été ramenés à ce qui sert : « Ce nom apparaît dans la barre de
+toutes les interfaces et sur les tickets imprimés. », « Lecture seule. »
+
+Le tiret cadratin reste un séparateur — `— Choisir —`, `52 ans — Homme`, une
+valeur absente — jamais une articulation de phrase.
+
+## 16. Journal d'audit et plannings
 
 ### Journal d'audit
 
@@ -1218,7 +1268,7 @@ d'un autre.
   l'établissement à droite, lu depuis la table `settings`** et modifiable par
   l'admin sans redéploiement. Aucun lien de navigation croisée n'y figure.
 
-## 16. Vérification d'un déploiement
+## 17. Vérification d'un déploiement
 
 Avant de remplacer une version en service, un script enchaîne les contrôles et
 rend un verdict :
@@ -1236,7 +1286,7 @@ routes de téléchargement, et les plafonds d'envoi sont ordonnés correctement.
 Il sort en code 1 dès qu'un contrôle est rouge — utilisable tel quel dans une
 procédure de mise à jour.
 
-## 17. Tests
+## 18. Tests
 
 ```bash
 php artisan test                          # sans Docker
@@ -1289,7 +1339,7 @@ Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS. La suite
 a également été passée **contre MariaDB 10.11** — 281 tests au vert — et les
 37 migrations ont été vérifiées **dans les deux sens** sur les deux moteurs.
 
-## 18. Organisation du code
+## 19. Organisation du code
 
 Aucune logique métier ne vit dans les vues Blade ou Livewire : les composants
 valident puis délèguent à une action ou à un service.

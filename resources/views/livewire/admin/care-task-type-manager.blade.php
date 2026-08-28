@@ -1,6 +1,6 @@
 <section class="card">
     <h2 class="card__title">Types de soins</h2>
-    <p class="hint">Serum, injection, pansement… la liste s'enrichit depuis ici.</p>
+    <p class="hint">Les soins que les medecins peuvent prescrire : serum, injection, pansement.</p>
 
     <form wire:submit="save" class="form form--inline-wrap">
         <div class="field">

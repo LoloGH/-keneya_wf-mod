@@ -2,32 +2,94 @@
  * KEneYa WorkFlow — feuille de style unique.
  *
  * Conception mobile/tablette d'abord : la plupart des postes sont des
- * tablettes. Zones tactiles d'au moins 48px, aucune interaction qui depende
- * du survol de la souris, contrastes eleves pour un usage en salle.
+ * tablettes. Zones tactiles d'au moins 44px, aucune interaction qui depende
+ * du survol, contrastes eleves pour un usage en salle. Le survol enrichit,
+ * il ne conditionne jamais.
  *
  * Servie telle quelle depuis public/ : pas de pipeline de build front, le
  * serveur peut n'avoir aucune connectivite internet.
+ *
+ * L'ordre du fichier : jetons, base, primitives partagees, puis les
+ * composants metier. Un composant ne redefinit jamais une couleur ou un
+ * espacement en dur : il pioche dans les jetons ci-dessous.
  */
 
 :root {
-    --bleu: #0f5c8c;
-    --bleu-fonce: #0a3f61;
-    --bleu-clair: #e6f1f8;
-    --vert: #1a7f5a;
-    --vert-clair: #e3f4ed;
-    --ambre: #b06d00;
-    --ambre-clair: #fdf1dc;
-    --rouge: #a32020;
-    --rouge-clair: #fbe9e9;
-    --gris-900: #1c2226;
-    --gris-700: #454f56;
-    --gris-500: #6d7880;
-    --gris-300: #ccd4d9;
-    --gris-100: #f2f5f7;
+    /* --- Couleurs -------------------------------------------------------
+       Un bleu ardoise plutot que le bleu vif d'origine : sur un ecran de
+       service allume douze heures par jour, c'est celui qu'on supporte. */
+    --bleu: #10557f;
+    --bleu-vif: #1470a8;
+    --bleu-fonce: #0b3a58;
+    --bleu-nuit: #082b42;
+    --bleu-clair: #e8f2f8;
+    --bleu-pale: #f4f9fc;
+
+    --vert: #14795a;
+    --vert-clair: #e2f3ec;
+    --ambre: #a66200;
+    --ambre-clair: #fdf1dd;
+    --rouge: #9c1f22;
+    --rouge-clair: #fbeaea;
+
+    --gris-900: #14191d;
+    --gris-800: #2a3339;
+    --gris-700: #4a555d;
+    --gris-500: #6f7a83;
+    --gris-400: #97a2aa;
+    --gris-300: #d3dbe0;
+    --gris-200: #e6ebee;
+    --gris-100: #f1f5f7;
+    --gris-50: #f7fafb;
     --blanc: #ffffff;
+
+    /* --- Typographie ----------------------------------------------------
+       Base a 16px : le 17px d'origine faisait deborder les libelles sur
+       telephone et gonflait chaque carte sans rien gagner en lisibilite. */
+    --texte-xs: .75rem;
+    --texte-sm: .8125rem;
+    --texte-base: .9375rem;
+    --texte-md: 1rem;
+    --texte-lg: 1.125rem;
+    --texte-xl: 1.375rem;
+    --texte-2xl: 1.75rem;
+
+    /* --- Espacement, sur une echelle de 4px ------------------------------ */
+    --e1: .25rem;
+    --e2: .5rem;
+    --e3: .75rem;
+    --e4: 1rem;
+    --e5: 1.25rem;
+    --e6: 1.5rem;
+    --e8: 2rem;
+    --e10: 2.5rem;
+
+    /* --- Rayons ---------------------------------------------------------- */
+    --rayon-sm: 6px;
     --rayon: 10px;
-    --touch: 48px;
-    --ombre: 0 1px 3px rgba(16, 32, 44, .12);
+    --rayon-lg: 14px;
+    --rayon-pilule: 999px;
+
+    /* --- Elevation -------------------------------------------------------
+       Deux ombres superposees : une courte pour poser l'objet, une longue et
+       tres douce pour le detacher du fond. Une ombre unique fait toujours
+       autocollant. */
+    --ombre: 0 1px 2px rgba(11, 40, 60, .05), 0 1px 3px rgba(11, 40, 60, .04);
+    --ombre-1: var(--ombre);
+    --ombre-2: 0 2px 4px rgba(11, 40, 60, .06), 0 6px 16px rgba(11, 40, 60, .07);
+    --ombre-3: 0 8px 16px rgba(11, 40, 60, .08), 0 20px 40px rgba(11, 40, 60, .12);
+    --anneau: 0 0 0 3px rgba(20, 112, 168, .28);
+
+    /* --- Mouvement -------------------------------------------------------
+       Court et decelere : sur une tablette, une transition longue donne
+       l'impression que l'application rame. */
+    --duree: 140ms;
+    --duree-lente: 240ms;
+    --courbe: cubic-bezier(.4, 0, .2, 1);
+    --transition: var(--duree) var(--courbe);
+
+    --touch: 44px;
+    --largeur-max: 1440px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -37,48 +99,95 @@ html { -webkit-text-size-adjust: 100%; }
 body {
     margin: 0;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 17px;
+    font-size: var(--texte-md);
     line-height: 1.5;
     color: var(--gris-900);
     background: var(--gris-100);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3 { margin: 0; line-height: 1.25; }
+/* Titres resserres : au-dela de 1.25 d'interligne, un titre court flotte. */
+h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.011em; }
+
+::selection { background: var(--bleu-clair); color: var(--bleu-fonce); }
 
 .sr-only {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-.mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+/* Chiffres de meme chasse : un numero de ticket ne doit pas danser d'une
+   ligne a l'autre quand la file se rafraichit. */
+.mono {
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: .92em;
+    letter-spacing: -.01em;
+}
+
+/* Un seul anneau de focus pour toute l'application, visible sur fond clair
+   comme sur fond bleu nuit. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--bleu-vif);
+    outline-offset: 2px;
+    border-radius: var(--rayon-sm);
+}
 
 /* ---------- En-tete ---------- */
 
 .app-header {
-    display: flex; flex-wrap: wrap; gap: .75rem 1rem;
+    display: flex; flex-wrap: wrap; gap: var(--e2) var(--e4);
     align-items: center; justify-content: space-between;
-    padding: .75rem 1rem;
-    background: var(--bleu-fonce); color: var(--blanc);
+    padding: var(--e2) var(--e4);
+    background: linear-gradient(180deg, var(--bleu-fonce), var(--bleu-nuit));
+    color: var(--blanc);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, var(--ombre-2);
+    position: sticky; top: 0; z-index: 30;
 }
 
-.app-header__context { display: flex; align-items: center; gap: .85rem; }
+.app-header__brand { display: flex; align-items: center; gap: var(--e3); min-width: 0; }
+
+.app-header__hospital {
+    font-weight: 600; font-size: var(--texte-md);
+    letter-spacing: -.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.app-header__context { display: flex; align-items: center; gap: var(--e2); }
 
 /* Nom du role, ou du service pour un medecin : la seule information de
    contexte a droite de la barre. */
 .app-header__role {
-    font-weight: 600; font-size: .95rem;
-    padding: .3rem .75rem; border-radius: 999px;
-    background: rgba(255, 255, 255, .14);
+    font-weight: 600; font-size: var(--texte-sm);
+    padding: var(--e1) var(--e3); border-radius: var(--rayon-pilule);
+    background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .12);
+    white-space: nowrap; max-width: 40vw;
+    overflow: hidden; text-overflow: ellipsis;
 }
 
-.app-main { max-width: 1400px; margin: 0 auto; padding: 1rem; }
+/* Sur telephone, la marque prend sa ligne et le contexte la suivante : les
+   entasser sur une seule donnait une barre de deux lignes mal alignees. */
+@media (max-width: 600px) {
+    .app-header { padding: var(--e2) var(--e3); gap: var(--e2); }
+    .app-header__hospital { font-size: var(--texte-base); }
+    .app-header__context { margin-left: auto; }
+}
 
-.page-title { font-size: 1.5rem; margin-bottom: 1rem; }
+.app-main { max-width: var(--largeur-max); margin: 0 auto; padding: var(--e4); }
+.app-main--narrow { max-width: 900px; }
+
+@media (max-width: 600px) {
+    .app-main { padding: var(--e3); }
+}
+
+.page-title { font-size: var(--texte-xl); margin-bottom: var(--e4); }
 
 /* ---------- Mise en page ---------- */
 
-.stack { display: flex; flex-direction: column; gap: 1rem; }
-.grid { display: grid; gap: 1rem; margin-bottom: 1rem; }
+.stack { display: flex; flex-direction: column; gap: var(--e4); }
+.grid { display: grid; gap: var(--e4); margin-bottom: var(--e4); }
 .grid--two { grid-template-columns: 1fr; }
 .grid--main { grid-template-columns: 1fr; }
 
@@ -87,113 +196,261 @@ h1, h2, h3 { margin: 0; line-height: 1.25; }
 }
 
 @media (min-width: 1100px) {
-    .grid--main { grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr); align-items: start; }
-    .record-column { position: sticky; top: 1rem; }
+    .grid--main { grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr); align-items: start; }
+    .record-column { position: sticky; top: calc(var(--e4) + 64px); }
 }
 
 .service-head {
     display: flex; flex-wrap: wrap; align-items: flex-end;
-    justify-content: space-between; gap: 1rem; margin-bottom: 1rem;
+    justify-content: space-between; gap: var(--e4); margin-bottom: var(--e4);
 }
 
 /* ---------- Cartes ---------- */
 
 .card {
     background: var(--blanc);
-    border: 1px solid var(--gris-300);
-    border-radius: var(--rayon);
-    box-shadow: var(--ombre);
-    padding: 1rem;
+    border: 1px solid var(--gris-200);
+    border-radius: var(--rayon-lg);
+    box-shadow: var(--ombre-1);
+    padding: var(--e5);
+}
+
+@media (max-width: 600px) {
+    .card { padding: var(--e4); border-radius: var(--rayon); }
 }
 
 .card__head {
-    display: flex; flex-wrap: wrap; gap: .75rem;
-    align-items: center; justify-content: space-between; margin-bottom: .75rem;
+    display: flex; flex-wrap: wrap; gap: var(--e3);
+    align-items: center; justify-content: space-between; margin-bottom: var(--e4);
 }
 
-.card__title { font-size: 1.15rem; margin-bottom: .75rem; }
+.card__title {
+    font-size: var(--texte-lg); font-weight: 650;
+    margin-bottom: var(--e4);
+}
 .card__head .card__title { margin-bottom: 0; }
-.card__subtitle { font-size: 1rem; color: var(--gris-700); margin: 1.25rem 0 .5rem; }
 
-.empty { color: var(--gris-500); font-style: italic; margin: .5rem 0; }
+/* Sous-titre en capitales fines : il separe deux blocs a l'interieur d'une
+   carte sans entrer en concurrence avec son titre. */
+.card__subtitle {
+    font-size: var(--texte-xs); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--gris-500);
+    margin: var(--e6) 0 var(--e2);
+}
+
+.card--accent { border-left: 3px solid var(--bleu-vif); }
+.card--danger { border-color: var(--rouge); }
+
+.empty {
+    color: var(--gris-500);
+    font-size: var(--texte-base);
+    margin: var(--e2) 0;
+}
 
 /* ---------- Formulaires ---------- */
 
-.form { display: flex; flex-direction: column; gap: .85rem; }
-.form--inline-wrap { flex-direction: row; flex-wrap: wrap; align-items: flex-end; }
+.form { display: flex; flex-direction: column; gap: var(--e4); }
+.form--inline-wrap { flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: var(--e3) var(--e4); }
 .form--inline-wrap .field { flex: 1 1 220px; }
 
-.field { display: flex; flex-direction: column; gap: .3rem; }
-.field--inline { flex-direction: row; align-items: center; gap: .6rem; }
-.field-row { display: flex; flex-wrap: wrap; gap: .85rem; }
-.field-row .field { flex: 1 1 140px; }
+.field { display: flex; flex-direction: column; gap: var(--e1); min-width: 0; }
+.field--inline { flex-direction: row; align-items: center; gap: var(--e2); }
+.field-row { display: flex; flex-wrap: wrap; gap: var(--e3) var(--e4); }
+.field-row .field { flex: 1 1 150px; }
+.field-row .field--wide { flex: 2 1 200px; }
 
-.field label { font-weight: 600; font-size: .95rem; }
-.field__hint { font-weight: 400; color: var(--gris-500); font-size: .85rem; }
-.field__error { color: var(--rouge); font-size: .9rem; margin: .15rem 0 0; }
+.field label { font-weight: 600; font-size: var(--texte-base); color: var(--gris-800); }
+.field__hint { font-weight: 400; color: var(--gris-500); font-size: var(--texte-sm); }
+.field__error { color: var(--rouge); font-size: var(--texte-sm); font-weight: 500; margin: var(--e1) 0 0; }
 
 input[type="text"], input[type="email"], input[type="password"], input[type="tel"],
-input[type="number"], input[type="search"], select, textarea {
+input[type="number"], input[type="search"], input[type="date"], input[type="time"],
+input[type="datetime-local"], select, textarea {
     min-height: var(--touch);
-    padding: .6rem .75rem;
+    padding: var(--e2) var(--e3);
     font: inherit;
+    font-size: var(--texte-base);
     color: inherit;
     background: var(--blanc);
     border: 1px solid var(--gris-300);
-    border-radius: var(--rayon);
+    border-radius: var(--rayon-sm);
     width: 100%;
+    transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-textarea { min-height: 6rem; resize: vertical; }
-
-input[type="checkbox"] { width: 1.35rem; height: 1.35rem; }
-
-input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
-    outline: 3px solid var(--bleu);
-    outline-offset: 2px;
+input:hover:not(:disabled), select:hover:not(:disabled), textarea:hover:not(:disabled) {
+    border-color: var(--gris-400);
 }
+
+/* L'anneau remplace le contour au clavier comme a la souris : un champ actif
+   se reconnait a sa bordure bleue et a son halo, pas a un liseré systeme. */
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--bleu-vif);
+    box-shadow: var(--anneau);
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a555d' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--e3) center;
+    background-size: 1.1em;
+    padding-right: var(--e8);
+}
+
+textarea { min-height: 5.5rem; resize: vertical; line-height: 1.5; }
+
+input::placeholder, textarea::placeholder { color: var(--gris-400); }
+
+input[type="checkbox"] {
+    width: 1.2rem; height: 1.2rem;
+    accent-color: var(--bleu-vif);
+    cursor: pointer;
+}
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 /* ---------- Boutons ---------- */
 
 .btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-height: var(--touch); padding: .6rem 1.1rem;
-    font: inherit; font-weight: 600;
-    border: 1px solid transparent; border-radius: var(--rayon);
-    cursor: pointer; text-align: center;
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--e2);
+    min-height: var(--touch); padding: var(--e2) var(--e5);
+    font: inherit; font-size: var(--texte-base); font-weight: 600;
+    line-height: 1.2;
+    border: 1px solid transparent; border-radius: var(--rayon-sm);
+    cursor: pointer; text-align: center; text-decoration: none;
+    transition: background-color var(--transition), border-color var(--transition),
+                color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
 
-.btn[disabled] { opacity: .6; cursor: progress; }
+/* Le bouton se souleve d'un pixel au survol et se repose au clic. C'est le
+   seul mouvement de l'interface : il suffit a rendre l'action tangible. */
+.btn:hover:not([disabled]) { transform: translateY(-1px); }
+.btn:active:not([disabled]) { transform: translateY(0); transition-duration: 60ms; }
 
-.btn--primary { background: var(--bleu); color: var(--blanc); }
-.btn--secondary { background: var(--bleu-clair); color: var(--bleu-fonce); border-color: var(--bleu-clair); }
-.btn--ghost { background: transparent; color: inherit; border-color: currentColor; }
+.btn[disabled] { opacity: .55; cursor: not-allowed; transform: none; }
+
+.btn--primary {
+    background: var(--bleu); color: var(--blanc);
+    box-shadow: var(--ombre-1);
+}
+.btn--primary:hover:not([disabled]) { background: var(--bleu-vif); box-shadow: var(--ombre-2); }
+
+.btn--secondary {
+    background: var(--bleu-clair); color: var(--bleu-fonce);
+    border-color: transparent;
+}
+.btn--secondary:hover:not([disabled]) { background: #dbeaf4; border-color: var(--gris-300); }
+
+/* Bordure discrete au repos, franche au survol : au repos le bouton fantome
+   ne doit pas peser autant qu'une action principale. */
+.btn--ghost {
+    background: transparent; color: var(--gris-800);
+    border-color: var(--gris-300);
+}
+.btn--ghost:hover:not([disabled]) { background: var(--gris-100); border-color: var(--gris-400); }
+
+.btn--danger { background: var(--rouge); color: var(--blanc); }
+.btn--danger:hover:not([disabled]) { background: #b52528; box-shadow: var(--ombre-2); }
+
+.btn--close { background: var(--vert); color: var(--blanc); }
+.btn--close:hover:not([disabled]) { background: #17916b; box-shadow: var(--ombre-2); }
+
+.btn--small { min-height: 36px; padding: var(--e1) var(--e3); font-size: var(--texte-sm); }
 .btn--block { width: 100%; }
 
-.btn-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--e2); align-items: center; }
+.btn-row--centered { justify-content: center; }
 
 /* ---------- Alertes ---------- */
 
 .alert {
-    max-width: 1400px; margin: 1rem auto 0; padding: .85rem 1rem;
-    border-radius: var(--rayon); border: 1px solid transparent; font-weight: 600;
+    display: flex; align-items: flex-start; gap: var(--e3);
+    max-width: var(--largeur-max); margin: var(--e4) auto 0;
+    padding: var(--e3) var(--e4);
+    border-radius: var(--rayon);
+    border: 1px solid transparent;
+    border-left-width: 3px;
+    font-size: var(--texte-base); font-weight: 500;
+    animation: alerte-entree var(--duree-lente) var(--courbe);
 }
 
-.alert--error { background: var(--rouge-clair); border-color: var(--rouge); color: var(--rouge); }
-.alert--success { background: var(--vert-clair); border-color: var(--vert); color: var(--vert); margin-bottom: 1rem; }
+@keyframes alerte-entree {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+}
+
+.alert--error { background: var(--rouge-clair); border-color: var(--rouge); color: #7d191c; }
+.alert--success { background: var(--vert-clair); border-color: var(--vert); color: #0f5f47; margin-bottom: var(--e4); }
+.alert--warning { background: var(--ambre-clair); border-color: var(--ambre); color: #834e00; }
+
+.alert__dismiss {
+    margin-left: auto; flex: 0 0 auto;
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+    background: transparent; border: 0; border-radius: var(--rayon-pilule);
+    font-size: 1.25rem; line-height: 1; color: inherit; cursor: pointer;
+    transition: background-color var(--transition);
+}
+.alert__dismiss:hover { background: rgba(0, 0, 0, .07); }
 
 /* ---------- Tableaux ---------- */
 
-.table-wrap { overflow-x: auto; }
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--gris-200);
+    border-radius: var(--rayon);
+    /* Ombre portee sur les bords quand le tableau deborde : sur tablette,
+       rien n'indiquait qu'il restait des colonnes a droite. */
+    background:
+        linear-gradient(90deg, var(--blanc) 30%, rgba(255, 255, 255, 0)) left / 40px 100% no-repeat,
+        linear-gradient(270deg, var(--blanc) 30%, rgba(255, 255, 255, 0)) right / 40px 100% no-repeat,
+        radial-gradient(farthest-side at 0 50%, rgba(11, 40, 60, .12), transparent) left / 14px 100% no-repeat,
+        radial-gradient(farthest-side at 100% 50%, rgba(11, 40, 60, .12), transparent) right / 14px 100% no-repeat,
+        var(--blanc);
+    background-attachment: local, local, scroll, scroll, local;
+}
 
-.table { width: 100%; border-collapse: collapse; min-width: 520px; }
-.table th, .table td { padding: .7rem .6rem; text-align: left; border-bottom: 1px solid var(--gris-300); }
-.table th { font-size: .85rem; text-transform: uppercase; letter-spacing: .03em; color: var(--gris-700); }
-.table td .btn { min-height: 40px; padding: .35rem .7rem; }
+.table { width: 100%; border-collapse: collapse; min-width: 560px; }
 
-.badge { display: inline-block; padding: .2rem .6rem; border-radius: 999px; font-size: .85rem; font-weight: 600; }
+.table th, .table td {
+    padding: var(--e3);
+    text-align: left;
+    border-bottom: 1px solid var(--gris-200);
+    font-size: var(--texte-base);
+}
+
+.table thead th {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--gris-50);
+    font-size: var(--texte-xs); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--gris-500);
+    border-bottom-color: var(--gris-300);
+}
+
+.table tbody tr { transition: background-color var(--transition); }
+.table tbody tr:hover { background: var(--bleu-pale); }
+.table tbody tr:last-child td { border-bottom: 0; }
+
+.table td .btn { min-height: 36px; padding: var(--e1) var(--e3); font-size: var(--texte-sm); }
+
+/* ---------- Pastilles d'etat ---------- */
+
+.badge {
+    display: inline-flex; align-items: center;
+    padding: var(--e1) var(--e2);
+    border-radius: var(--rayon-sm);
+    font-size: var(--texte-xs); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em;
+    white-space: nowrap;
+}
 .badge--waiting { background: var(--ambre-clair); color: var(--ambre); }
 .badge--called { background: var(--vert-clair); color: var(--vert); }
+.badge--closed { background: var(--gris-200); color: var(--gris-700); }
+.badge--neutral { background: var(--gris-100); color: var(--gris-700); }
 
 /* ---------- Ticket imprime a l'ecran ---------- */
 
@@ -209,34 +466,102 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 /* ---------- File d'attente ---------- */
 
-.queue { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+.queue { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--e2); }
 
+/* Grille explicite plutot qu'un flex qui se rabat : le nom du patient etait
+   coupe en deux (« Aminata / Traore ») alors qu'il restait la moitie de la
+   largeur libre a droite. Le jeton, l'identite, l'etat et les actions ont
+   chacun leur colonne. */
 .queue__item {
-    display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; justify-content: space-between;
-    padding: .6rem; border: 1px solid var(--gris-300); border-radius: var(--rayon);
-    border-left: 6px solid var(--ambre);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--e3);
+    padding: var(--e2) var(--e3);
+    background: var(--blanc);
+    border: 1px solid var(--gris-200);
+    border-left: 3px solid var(--ambre);
+    border-radius: var(--rayon);
+    transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-.queue__item--called { border-left-color: var(--vert); background: var(--gris-100); }
+.queue__item:hover {
+    border-color: var(--gris-300);
+    border-left-color: var(--ambre);
+    box-shadow: var(--ombre-2);
+}
+
+.queue__item--called { border-left-color: var(--vert); background: var(--vert-clair); }
+.queue__item--called:hover { border-left-color: var(--vert); }
+
+/* Sur telephone, l'identite passe sous le jeton et les actions prennent
+   toute la largeur : quatre colonnes sur 390px ne tiennent pas. */
+@media (max-width: 700px) {
+    .queue__item {
+        grid-template-columns: auto minmax(0, 1fr);
+        row-gap: var(--e2);
+        align-items: start;
+    }
+    /* Le jeton garde sa taille : etire sur la hauteur de la rangee, il
+       devenait un grand rectangle vide a cote du nom. */
+    .queue__token { align-self: start; height: 2.75rem; }
+    .queue__item > .badge { grid-column: 2; justify-self: start; }
+    .queue__item > .btn,
+    .queue__item > .btn-row { grid-column: 1 / -1; }
+    .queue__item > .btn { width: 100%; }
+}
+
+/* Sur telephone, le titre d'une carte et son action prennent chacun leur
+   ligne pleine largeur : cote a cote, ils se coupaient tous les deux. */
+@media (max-width: 600px) {
+    .card__head { flex-direction: column; align-items: stretch; gap: var(--e3); }
+    .card__head .btn { width: 100%; }
+}
 
 .queue__patient {
-    display: flex; align-items: center; gap: .85rem; flex: 1 1 260px;
-    min-height: var(--touch); padding: .3rem;
-    background: none; border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer;
+    display: contents;
+    background: none; border: 0; font: inherit; color: inherit;
+    text-align: left; cursor: pointer;
 }
 
 .queue__token {
-    flex: 0 0 auto; min-width: 3rem; padding: .35rem .5rem;
-    font-size: 1.5rem; font-weight: 700; text-align: center;
-    background: var(--bleu-clair); color: var(--bleu-fonce); border-radius: var(--rayon);
+    display: grid; place-items: center;
+    min-width: 2.75rem; min-height: 2.75rem; padding: 0 var(--e2);
+    font-size: var(--texte-lg); font-weight: 700;
+    background: var(--bleu-clair); color: var(--bleu-fonce);
+    border-radius: var(--rayon-sm);
     font-variant-numeric: tabular-nums;
+    transition: background-color var(--transition), color var(--transition);
 }
+.queue__patient:hover .queue__token { background: var(--bleu); color: var(--blanc); }
+.queue__item--called .queue__token { background: var(--vert); color: var(--blanc); }
 
-.queue__identity { display: flex; flex-direction: column; font-size: .9rem; color: var(--gris-700); }
-.queue__identity strong { font-size: 1.05rem; color: var(--gris-900); }
+.queue__identity {
+    display: flex; flex-direction: column; gap: 1px;
+    font-size: var(--texte-sm); color: var(--gris-500);
+    min-width: 0;
+}
+.queue__identity strong {
+    font-size: var(--texte-md); font-weight: 600; color: var(--gris-900);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: color var(--transition);
+}
+.queue__patient:hover .queue__identity strong { color: var(--bleu); }
 
-.referral-form { list-style: none; padding: .85rem; background: var(--bleu-clair); border-radius: var(--rayon); }
-.referral-form__title { margin: 0 0 .5rem; font-weight: 700; }
+.referral-form {
+    list-style: none;
+    padding: var(--e4);
+    background: var(--bleu-pale);
+    border: 1px solid var(--bleu-clair);
+    border-radius: var(--rayon);
+    animation: depliage var(--duree-lente) var(--courbe);
+}
+.referral-form__title { margin: 0 0 var(--e2); font-weight: 650; font-size: var(--texte-base); }
+
+@keyframes depliage {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
+}
 
 /* ---------- Renvois ---------- */
 
@@ -262,30 +587,59 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 /* ---------- Dossier patient ---------- */
 
-.record__identity { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 1rem; margin: 0 0 1rem; }
-.record__identity div { display: flex; flex-direction: column; }
-.record__identity dt { font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: var(--gris-500); }
-.record__identity dd { margin: 0; font-weight: 600; }
+.record__identity {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: var(--e3) var(--e4);
+    margin: 0 0 var(--e4);
+    padding-bottom: var(--e4);
+    border-bottom: 1px solid var(--gris-200);
+}
+.record__identity div { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.record__identity dt {
+    font-size: var(--texte-xs); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em; color: var(--gris-500);
+}
+.record__identity dd { margin: 0; font-weight: 600; font-size: var(--texte-base); overflow-wrap: anywhere; }
 
-.timeline { list-style: none; margin: 0; padding: 0 0 0 1rem; border-left: 2px solid var(--gris-300); }
-
-.timeline__item { position: relative; padding: 0 0 1rem 1rem; }
-
-.timeline__item::before {
-    content: ""; position: absolute; left: -1.4rem; top: .45rem;
-    width: .8rem; height: .8rem; border-radius: 50%; background: var(--gris-500);
+/* La frise : un filet vertical et une pastille par evenement. La pastille
+   grossit au survol de son entree, ce qui aide a suivre une ligne du regard
+   sur un dossier charge. */
+.timeline {
+    list-style: none; margin: 0;
+    padding: 0 0 0 var(--e4);
+    border-left: 1px solid var(--gris-300);
 }
 
-.timeline__item--registration::before { background: var(--bleu); }
+.timeline__item {
+    position: relative;
+    padding: 0 0 var(--e5) var(--e3);
+    transition: color var(--transition);
+}
+.timeline__item:last-child { padding-bottom: 0; }
+
+.timeline__item::before {
+    content: ""; position: absolute; left: calc(-1 * var(--e4) - 5px); top: .4rem;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--gris-400);
+    box-shadow: 0 0 0 3px var(--blanc);
+    transition: transform var(--transition), background-color var(--transition);
+}
+.timeline__item:hover::before { transform: scale(1.35); }
+
+.timeline__item--registration::before { background: var(--bleu-vif); }
 .timeline__item--consultation::before { background: var(--vert); }
 .timeline__item--referral_sent::before { background: var(--ambre); }
 .timeline__item--referral_result::before { background: var(--vert); }
 
-.timeline__head { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between; margin: 0; }
-.timeline__type { font-weight: 700; }
-.timeline__head time { color: var(--gris-500); font-size: .9rem; }
-.timeline__body { margin: .2rem 0; }
-.timeline__meta { margin: 0; font-size: .85rem; color: var(--gris-500); }
+.timeline__head {
+    display: flex; flex-wrap: wrap; gap: var(--e2);
+    align-items: baseline; justify-content: space-between; margin: 0;
+}
+.timeline__type { font-weight: 650; font-size: var(--texte-base); }
+.timeline__head time { color: var(--gris-500); font-size: var(--texte-sm); font-variant-numeric: tabular-nums; }
+.timeline__body { margin: var(--e1) 0; font-size: var(--texte-base); }
+.timeline__meta { margin: 0; font-size: var(--texte-sm); color: var(--gris-500); }
 
 /* ---------- Selecteur de service ---------- */
 
@@ -370,9 +724,21 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 /* ---------- Accompagnateurs ---------- */
 
-.companions-fieldset { border: 1px solid var(--gris-300); border-radius: var(--rayon); padding: .85rem; }
-.companions-fieldset legend { font-weight: 600; padding: 0 .4rem; }
-.companions-fieldset__row { align-items: flex-end; margin-bottom: .6rem; }
+/* Meme cadre que les autres groupes du formulaire : trois encadres de styles
+   differents sur le meme ecran donnaient une page mal assemblee. */
+.companions-fieldset {
+    border: 1px solid var(--gris-200);
+    background: var(--gris-50);
+    border-radius: var(--rayon);
+    padding: var(--e4);
+}
+.companions-fieldset legend {
+    font-weight: 700; padding: 0 var(--e2);
+    font-size: var(--texte-xs); text-transform: uppercase; letter-spacing: .06em;
+    color: var(--gris-500);
+}
+.companions-fieldset input { background: var(--blanc); }
+.companions-fieldset__row { align-items: flex-end; margin-bottom: var(--e3); }
 
 .companions { list-style: none; margin: 0 0 1rem; padding: 0; display: flex; flex-direction: column; gap: .3rem; }
 .companions li { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; font-size: .95rem; }
@@ -434,15 +800,31 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 /* ---------- Onglets internes ---------- */
 
-.tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin: .75rem 0; border-bottom: 2px solid var(--gris-300); }
-
-.tabs__tab {
-    min-height: var(--touch); padding: .5rem 1rem;
-    background: none; border: 0; border-bottom: 3px solid transparent;
-    font: inherit; font-weight: 600; color: var(--gris-700); cursor: pointer;
+.tabs {
+    display: flex; flex-wrap: wrap; gap: var(--e1);
+    margin: var(--e3) 0 var(--e4);
+    border-bottom: 1px solid var(--gris-300);
 }
 
-.tabs__tab--active { color: var(--bleu-fonce); border-bottom-color: var(--bleu); }
+.tabs__tab {
+    position: relative;
+    min-height: var(--touch); padding: var(--e2) var(--e4);
+    background: none; border: 0;
+    font: inherit; font-size: var(--texte-base); font-weight: 600;
+    color: var(--gris-500); cursor: pointer;
+    transition: color var(--transition);
+}
+.tabs__tab:hover { color: var(--gris-900); }
+
+/* Le soulignement grandit depuis le centre : il rend le changement d'onglet
+   lisible sans deplacer le texte. */
+.tabs__tab::after {
+    content: ""; position: absolute; left: 50%; right: 50%; bottom: -1px;
+    height: 2px; background: var(--bleu-vif); border-radius: 2px 2px 0 0;
+    transition: left var(--duree-lente) var(--courbe), right var(--duree-lente) var(--courbe);
+}
+.tabs__tab--active { color: var(--bleu-fonce); }
+.tabs__tab--active::after { left: var(--e3); right: var(--e3); }
 
 /* ---------- Caisse ---------- */
 
@@ -461,34 +843,53 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
    Refonte navigation — bouton icone et barre laterale en onglets
    ========================================================================= */
 
-/* ---------- Bouton icone (deconnexion) ---------- */
+/* ---------- Bouton icone ---------- */
 
 .icon-btn {
     display: inline-flex; align-items: center; justify-content: center;
     width: var(--touch); height: var(--touch);
     padding: 0; color: inherit;
-    background: transparent; border: 1px solid currentColor; border-radius: 50%;
+    background: transparent;
+    border: 1px solid currentColor; border-radius: 50%;
     cursor: pointer;
+    transition: background-color var(--transition), transform var(--transition), border-color var(--transition);
 }
 
-.icon-btn:hover { background: rgba(255, 255, 255, .14); }
+.icon-btn:hover { background: rgba(255, 255, 255, .16); transform: scale(1.06); }
+.icon-btn:active { transform: scale(.97); transition-duration: 60ms; }
+
+/* Sur fond clair, l'aplat blanc du survol ne se voit pas : on assombrit. */
+.icon-btn--danger { color: var(--rouge); border-color: var(--gris-300); }
+.icon-btn--danger:hover { background: var(--rouge-clair); border-color: var(--rouge); }
+
+/* Icone de suppression dans un tableau : discrete au repos, franche au
+   survol, jamais masquee. */
+.btn--icon {
+    width: var(--touch); height: var(--touch);
+    min-height: var(--touch); padding: 0;
+    border-radius: var(--rayon-sm);
+}
+.btn--icon-danger { color: var(--rouge); border-color: var(--gris-300); }
+.btn--icon-danger:hover { background: var(--rouge-clair); border-color: var(--rouge); color: var(--rouge); }
 
 /* ---------- Espace de travail : barre laterale + panneau ---------- */
 
-.workspace { display: grid; gap: 1rem; align-items: start; }
+.workspace { display: grid; gap: var(--e4); align-items: start; }
 
 /* Bouton d'ouverture du tiroir : uniquement sur petit format. */
 .workspace__toggle {
-    display: flex; align-items: center; gap: .6rem;
-    width: 100%; min-height: var(--touch); padding: .6rem .9rem;
-    font: inherit; font-weight: 600; text-align: left;
+    display: flex; align-items: center; gap: var(--e2);
+    width: 100%; min-height: var(--touch); padding: var(--e2) var(--e3);
+    font: inherit; font-size: var(--texte-base); font-weight: 600; text-align: left;
     color: var(--bleu-fonce); background: var(--blanc);
-    border: 1px solid var(--gris-300); border-radius: var(--rayon);
-    box-shadow: var(--ombre); cursor: pointer;
+    border: 1px solid var(--gris-200); border-radius: var(--rayon);
+    box-shadow: var(--ombre-1); cursor: pointer;
+    transition: border-color var(--transition), box-shadow var(--transition);
 }
+.workspace__toggle:hover { border-color: var(--gris-300); box-shadow: var(--ombre-2); }
 
 .workspace__toggle-current {
-    margin-left: auto; font-weight: 400; color: var(--gris-700); font-size: .9rem;
+    margin-left: auto; font-weight: 400; color: var(--gris-500); font-size: var(--texte-sm);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
@@ -496,47 +897,66 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
    sur un petit ecran, une colonne fixe mangerait trop de largeur. */
 .tabnav {
     display: none;
-    background: var(--blanc); border: 1px solid var(--gris-300);
-    border-radius: var(--rayon); box-shadow: var(--ombre); padding: .5rem;
+    background: var(--blanc); border: 1px solid var(--gris-200);
+    border-radius: var(--rayon-lg); box-shadow: var(--ombre-1); padding: var(--e2);
 }
 
-.tabnav--open { display: block; }
+.tabnav--open { display: block; animation: depliage var(--duree-lente) var(--courbe); }
 
-.tabnav__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .15rem; }
-.tabnav__list--nested { margin: .15rem 0 .35rem .85rem; padding-left: .6rem; border-left: 2px solid var(--gris-300); }
+.tabnav__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.tabnav__list--nested {
+    margin: 2px 0 var(--e1) var(--e3);
+    padding-left: var(--e2);
+    border-left: 1px solid var(--gris-200);
+}
 
 .tabnav__item { display: flex; flex-direction: column; }
 
 .tabnav__link,
 .tabnav__group {
-    display: flex; align-items: center; gap: .5rem;
-    width: 100%; min-height: var(--touch); padding: .55rem .75rem;
-    font: inherit; text-align: left; color: var(--gris-900);
-    background: transparent; border: 0; border-radius: var(--rayon); cursor: pointer;
+    position: relative;
+    display: flex; align-items: center; gap: var(--e2);
+    width: 100%; min-height: var(--touch); padding: var(--e2) var(--e3);
+    font: inherit; font-size: var(--texte-base); text-align: left; color: var(--gris-800);
+    background: transparent; border: 0; border-radius: var(--rayon-sm); cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
 }
 
-.tabnav__group { font-weight: 700; color: var(--gris-700); }
-.tabnav__link:hover, .tabnav__group:hover { background: var(--gris-100); }
+.tabnav__group { font-weight: 650; color: var(--gris-500); font-size: var(--texte-sm); }
+.tabnav__link:hover, .tabnav__group:hover { background: var(--gris-100); color: var(--gris-900); }
 
+/* Le trait actif se deploie depuis le haut plutot que d'apparaitre d'un
+   coup : c'est ce qui relie visuellement l'onglet au panneau qu'il ouvre. */
 .tabnav__link--active {
-    background: var(--bleu-clair); color: var(--bleu-fonce); font-weight: 700;
-    box-shadow: inset 3px 0 0 var(--bleu);
+    background: var(--bleu-clair); color: var(--bleu-fonce); font-weight: 650;
+}
+.tabnav__link--active::before {
+    content: ""; position: absolute; left: 0; top: 50%;
+    width: 3px; height: 60%;
+    background: var(--bleu-vif); border-radius: 0 2px 2px 0;
+    transform: translateY(-50%);
+    animation: trait-actif var(--duree-lente) var(--courbe);
 }
 
-.tabnav__chevron { flex: 0 0 auto; transition: transform .15s ease; }
+@keyframes trait-actif {
+    from { height: 0; opacity: 0; }
+    to { height: 60%; opacity: 1; }
+}
+
+.tabnav__chevron { flex: 0 0 auto; transition: transform var(--duree-lente) var(--courbe); }
 .tabnav__chevron--open { transform: rotate(90deg); }
 
 /* Le panneau actif : une seule section a la fois, plus de defilement a
    travers toutes les sections empilees. */
-.workspace__panel { min-width: 0; display: flex; flex-direction: column; gap: 1rem; }
+.workspace__panel { min-width: 0; display: flex; flex-direction: column; gap: var(--e4); }
 .workspace__panel .page-title { margin-bottom: 0; }
 
 /* A partir de la tablette en paysage, la barre laterale devient une colonne
    permanente et le bouton de tiroir disparait. */
 @media (min-width: 900px) {
-    .workspace { grid-template-columns: minmax(210px, 240px) minmax(0, 1fr); }
+    .workspace { grid-template-columns: minmax(200px, 232px) minmax(0, 1fr); gap: var(--e5); }
     .workspace__toggle { display: none; }
-    .tabnav { display: block; position: sticky; top: 1rem; }
+    .tabnav { display: block; position: sticky; top: calc(var(--e4) + 64px); }
 }
 
 /* Dans /service, le dossier patient occupe une troisieme colonne. */
@@ -1023,17 +1443,21 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 /* Chaque animation ne decrit que son point de depart : les couper affiche donc
    la scene dans son etat final, mallette ouverte et elements en place. */
 @media (prefers-reduced-motion: reduce) {
-    .login-page *,
-    .login-page *::before,
-    .login-page *::after {
+    *, *::before, *::after {
         animation-duration: .001ms !important;
         /* Sans cette ligne, le delai reste actif : avec un remplissage « both »
-           l'element garde son etat de depart — donc invisible — pendant deux
+           l'element garde son etat de depart, donc invisible, pendant deux
            secondes. La scene doit etre complete des le premier rendu. */
         animation-delay: 0s !important;
         animation-iteration-count: 1 !important;
         transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
     }
+
+    /* Aucun deplacement au survol : c'est ce que le reglage demande. */
+    .btn:hover:not([disabled]),
+    .icon-btn:hover,
+    .timeline__item:hover::before { transform: none !important; }
 }
 
 /* =========================================================================
@@ -1083,35 +1507,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .care--late .care__time { color: var(--ambre); font-weight: 600; }
 .care--assigned { border-left: 4px solid var(--bleu); }
 
-/* Bouton d'action reduit a son icone : les tableaux d'administration sont
-   deja larges, et le libelle reste porte par aria-label / title. */
-.btn--icon {
-    min-width: var(--touch);
-    padding: 0 .6rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.btn--icon-danger { color: var(--rouge); }
-.btn--icon-danger:hover { background: var(--rouge-clair); }
-
-/* Bandeau de message : le bouton de fermeture ne doit pas ecraser le texte. */
-.alert { display: flex; align-items: flex-start; gap: .75rem; }
-.alert__dismiss {
-    margin-left: auto;
-    flex: 0 0 auto;
-    min-width: 32px;
-    min-height: 32px;
-    font-size: 1.3rem;
-    line-height: 1;
-    border: 0;
-    border-radius: var(--rayon);
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-}
-.alert__dismiss:hover { background: rgba(0, 0, 0, .07); }
-
 /* Cellule d'actions d'un tableau : le bouton et son icone restent sur la meme
    ligne, meme quand le libelle est long (« Modifier / reaffecter »). La
    colonne peut s'elargir, la ligne ne doit pas se casser en deux. */
@@ -1134,14 +1529,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 .capability__lock {
     margin-left: auto;
-    padding: .1rem .4rem;
-    border-radius: var(--rayon);
-    background: var(--gris-300);
-    color: var(--gris-900);
-    font-size: .72rem;
-    font-weight: 600;
+    padding: 1px var(--e2);
+    border-radius: var(--rayon-pilule);
+    background: var(--gris-200);
+    color: var(--gris-700);
+    font-size: var(--texte-xs);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .03em;
+    letter-spacing: .05em;
 }
 
 /* Soin annule (v3.2.3, point 4) : la ligne reste lisible mais visiblement
@@ -1335,30 +1730,39 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: .6rem;
-    margin: .75rem 0;
-    padding: .5rem .75rem;
+    gap: var(--e2);
+    margin: var(--e3) 0;
+    padding: var(--e2) var(--e3);
     border-radius: var(--rayon);
     background: var(--bleu-clair);
-    border: 1px solid var(--bleu);
+    border: 1px solid var(--bleu-vif);
+    font-size: var(--texte-base);
+    animation: depliage var(--duree-lente) var(--courbe);
 }
-.bulkbar span { font-weight: 600; }
+.bulkbar span { font-weight: 650; margin-right: auto; }
 
 /* La colonne des cases reste etroite : c'est une poignee, pas une donnee. */
-.table__check { width: 2.2rem; text-align: center; }
+.table__check { width: 2.4rem; text-align: center; }
+.table__check input { margin: 0; }
 
 /* Groupes du formulaire d'enregistrement (v3.2.5). Le meme cadre que les
    accompagnateurs : l'ecran se lit alors comme trois blocs courts plutot que
    comme une colonne de neuf champs qu'il faut derouler en entier. */
 .formset {
-    border: 1px solid var(--gris-300);
+    border: 1px solid var(--gris-200);
+    background: var(--gris-50);
     border-radius: var(--rayon);
-    padding: .85rem;
+    padding: var(--e4);
     display: flex;
     flex-direction: column;
-    gap: .85rem;
+    gap: var(--e4);
 }
-.formset legend { font-weight: 600; padding: 0 .4rem; }
+.formset legend {
+    font-weight: 700; padding: 0 var(--e2);
+    font-size: var(--texte-xs); text-transform: uppercase; letter-spacing: .06em;
+    color: var(--gris-500);
+}
+.formset input, .formset select, .formset textarea { background: var(--blanc); }
 
 /* Un champ qui merite plus de place que ses voisins sur la meme ligne —
    « Profession » a cote de « Age » et « Sexe ». */
@@ -1367,9 +1771,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 /* Note laissee par l'accueil sur un dossier (v3.2.5). Un liseré ambre : elle
    n'est ni une alerte ni une donnee medicale, mais elle doit se voir. */
 .record__note {
-    margin: .6rem 0 0;
-    padding: .5rem .7rem;
+    margin: 0 0 var(--e4);
+    padding: var(--e3);
+    font-size: var(--texte-base);
     border-left: 3px solid var(--ambre);
-    background: var(--gris-100);
-    border-radius: 0 var(--rayon) var(--rayon) 0;
+    background: var(--ambre-clair);
+    border-radius: 0 var(--rayon-sm) var(--rayon-sm) 0;
 }

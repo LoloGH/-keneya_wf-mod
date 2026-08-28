@@ -186,7 +186,7 @@
     </div>
 
     <p class="login-scene__claim">
-        <strong>Le poste de travail du soignant, pret avant la premiere consultation.</strong>
-        <span>Accueil, file d'attente, caisse, dossier patient — au meme endroit.</span>
+        <strong>Le poste de travail du soignant.</strong>
+        <span>Accueil, file d'attente, caisse et dossier patient au meme endroit.</span>
     </p>
 </div>
