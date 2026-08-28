@@ -64,6 +64,24 @@ class ProfileCardTest extends TestCase
             ->assertDontSee('Service');
     }
 
+    public function test_la_carte_met_la_fonction_a_cote_du_nom(): void
+    {
+        $service = Service::factory()->create(['name' => 'Medecine Generale']);
+        $doctor = $this->makeDoctor($service);
+        $doctor->user->update(['name' => 'Amadou Cisse']);
+
+        // La fonction est ce qu'on lit en premier : elle monte dans l'en-tete
+        // plutot que de figurer comme une ligne de liste parmi d'autres.
+        $rendu = Livewire::actingAs($doctor->user->refresh())
+            ->test(ProfileCard::class)
+            ->call('toggle')
+            ->html();
+
+        $this->assertStringContainsString('profil__head', $rendu);
+        $this->assertStringContainsString('profil__role', $rendu);
+        $this->assertStringNotContainsString('<dt>Fonction</dt>', $rendu);
+    }
+
     // ------------------------------------------- Changement de mot de passe
 
     public function test_un_mot_de_passe_actuel_incorrect_est_refuse(): void

@@ -24,6 +24,8 @@ class PatientRegistrationForm extends Component
 
     public string $gender = 'Homme';
 
+    public string $profession = '';
+
     public string $mobile = '';
 
     public string $crno = '';
@@ -31,6 +33,9 @@ class PatientRegistrationForm extends Component
     public ?int $service_id = null;
 
     public string $reason = '';
+
+    /** Mot de l'accueil au service : « malentendant », « vient de loin »… */
+    public string $note = '';
 
     /**
      * Accompagnateurs saisis avec le patient. Facultatif : un patient peut en
@@ -52,10 +57,12 @@ class PatientRegistrationForm extends Component
             'name' => ['required', 'string', 'max:255'],
             'age' => ['required', 'integer', 'min:0', 'max:130'],
             'gender' => ['required', 'in:Homme,Femme'],
+            'profession' => ['nullable', 'string', 'max:120'],
             'mobile' => ['required', 'string', 'max:30'],
             'crno' => ['nullable', 'string', 'max:20'],
             'service_id' => ['required', 'integer', 'exists:services,id'],
             'reason' => ['nullable', 'string', 'max:500'],
+            'note' => ['nullable', 'string', 'max:1000'],
             'companions' => ['array', 'max:5'],
             'companions.*.name' => ['nullable', 'string', 'max:255'],
             'companions.*.phone' => ['nullable', 'string', 'max:30'],
@@ -72,10 +79,12 @@ class PatientRegistrationForm extends Component
             'name' => 'nom du patient',
             'age' => 'age',
             'gender' => 'sexe',
+            'profession' => 'profession',
             'mobile' => 'telephone',
             'crno' => 'numero de dossier papier',
             'service_id' => 'service',
             'reason' => 'motif',
+            'note' => 'note',
         ];
     }
 
@@ -112,7 +121,7 @@ class PatientRegistrationForm extends Component
             'access_code' => $visit->patient->access_code,
         ];
 
-        $this->reset(['name', 'age', 'mobile', 'crno', 'reason', 'companions']);
+        $this->reset(['name', 'age', 'profession', 'mobile', 'crno', 'reason', 'note', 'companions']);
         $this->gender = 'Homme';
 
         $this->dispatch('patient-enregistre');

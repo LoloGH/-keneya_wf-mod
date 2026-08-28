@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\OnDutyRoster;
 use App\Support\Roles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -137,14 +138,10 @@ class User extends Authenticatable
      */
     public function isOnDutyFor(int $serviceId, ?Carbon $moment = null): bool
     {
-        $moment ??= now();
-
-        return $this->schedules()
-            ->whereDate('date', $moment->toDateString())
-            ->where('service_id', $serviceId)
-            ->whereTime('start_time', '<=', $moment->format('H:i:s'))
-            ->whereTime('end_time', '>=', $moment->format('H:i:s'))
-            ->exists();
+        // Une seule regle de garde dans l'application : elle vit dans
+        // OnDutyRoster, qui repond aussi a la question inverse — qui est de
+        // garde sur ce service ?
+        return app(OnDutyRoster::class)->isOnDuty($this, $serviceId, $moment);
     }
 
     /**

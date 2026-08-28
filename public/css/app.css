@@ -1248,7 +1248,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
     top: calc(100% + .5rem);
     right: 0;
     z-index: 40;
-    width: min(20rem, calc(100vw - 2rem));
+    width: min(23rem, calc(100vw - 2rem));
     background: #fff;
     color: var(--gris-900);
     border: 1px solid var(--gris-300);
@@ -1256,23 +1256,58 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
     box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
 }
 
-.profil__identity { margin: 0; padding: .7rem .8rem; }
+/* En-tete de la carte : avatar, nom, fonction. La fonction monte a cote du
+   nom — c'est ce qu'on lit en premier, pas une ligne de liste parmi d'autres. */
+.profil__head {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .7rem .8rem;
+    border-bottom: 1px solid var(--gris-300);
+}
+.profil__who { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.profil__who strong { overflow-wrap: anywhere; }
+.profil__role { font-size: .82rem; color: var(--gris-700); }
+.profil__head .alert__dismiss { margin-left: auto; }
+
+/* L'avatar de la carte est plus grand que celui de la barre, et sur fond
+   clair : la barre est bleu nuit, la carte est blanche. */
+.profil__avatar--large {
+    width: 2.6rem;
+    height: 2.6rem;
+    flex: 0 0 auto;
+    background: var(--bleu);
+    color: #fff;
+    font-size: .92rem;
+    cursor: default;
+}
+.profil__avatar--large:hover { background: var(--bleu); }
+
+.profil__identity { margin: 0; padding: .7rem .8rem; display: grid; gap: .55rem; }
 .profil__identity dt {
     font-size: .7rem;
     text-transform: uppercase;
     letter-spacing: .03em;
     color: var(--gris-700);
 }
-.profil__identity dd { margin: 0 0 .55rem; font-size: .92rem; }
-.profil__identity dd:last-child { margin-bottom: 0; }
+.profil__identity dd { margin: .1rem 0 0; font-size: .92rem; overflow-wrap: anywhere; }
 
 .profil__actions {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     gap: .5rem;
     padding: .7rem .8rem;
     border-top: 1px solid var(--gris-300);
 }
+/* L'action principale prend la largeur, la deconnexion reste une icone au
+   bout : les deux ne sont pas de meme poids. */
+/* L'action principale tient sur une ligne : coupee en deux, elle doublait la
+   hauteur de la carte pour rien. */
+.profil__grow { flex: 1 1 auto; white-space: nowrap; padding-inline: .75rem; }
+.profil__actions form { display: flex; }
+
+.icon-btn--danger { color: var(--rouge); }
+.icon-btn--danger:hover { background: var(--rouge-clair); }
 .profil__form { padding: .7rem .8rem; border-top: 1px solid var(--gris-300); }
 
 /* Notes de releve (v3.2.3, point 4). Un liseré plutot qu'un cadre : la liste
@@ -1311,3 +1346,30 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 
 /* La colonne des cases reste etroite : c'est une poignee, pas une donnee. */
 .table__check { width: 2.2rem; text-align: center; }
+
+/* Groupes du formulaire d'enregistrement (v3.2.5). Le meme cadre que les
+   accompagnateurs : l'ecran se lit alors comme trois blocs courts plutot que
+   comme une colonne de neuf champs qu'il faut derouler en entier. */
+.formset {
+    border: 1px solid var(--gris-300);
+    border-radius: var(--rayon);
+    padding: .85rem;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+}
+.formset legend { font-weight: 600; padding: 0 .4rem; }
+
+/* Un champ qui merite plus de place que ses voisins sur la meme ligne —
+   « Profession » a cote de « Age » et « Sexe ». */
+.field-row .field--wide { flex: 2 1 200px; }
+
+/* Note laissee par l'accueil sur un dossier (v3.2.5). Un liseré ambre : elle
+   n'est ni une alerte ni une donnee medicale, mais elle doit se voir. */
+.record__note {
+    margin: .6rem 0 0;
+    padding: .5rem .7rem;
+    border-left: 3px solid var(--ambre);
+    background: var(--gris-100);
+    border-radius: 0 var(--rayon) var(--rayon) 0;
+}

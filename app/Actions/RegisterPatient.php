@@ -40,8 +40,13 @@ class RegisterPatient
                 'name' => $data['name'],
                 'age' => $data['age'],
                 'gender' => $data['gender'],
+                // Un champ facultatif laisse vide vaut « non renseigne », pas
+                // « chaine vide » : sinon le dossier affiche une profession
+                // vide au lieu du tiret prevu pour l'absence.
+                'profession' => filled($data['profession'] ?? null) ? $data['profession'] : null,
                 'mobile' => $data['mobile'],
-                'crno' => $data['crno'] ?? null,
+                'crno' => filled($data['crno'] ?? null) ? $data['crno'] : null,
+                'note' => filled($data['note'] ?? null) ? $data['note'] : null,
             ]);
 
             foreach ($companions as $companion) {

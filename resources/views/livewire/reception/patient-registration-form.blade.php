@@ -3,57 +3,93 @@
     <p class="hint">Uniquement pour un patient qui n'est jamais venu — un nouveau dossier sera cree.</p>
 
     <form wire:submit="save" class="form">
-        <div class="field">
-            <label for="patient-name">Nom complet</label>
-            <input id="patient-name" type="text" wire:model="name" autocomplete="off">
-            @error('name') <p class="field__error">{{ $message }}</p> @enderror
-        </div>
-
-        <div class="field-row">
-            <div class="field">
-                <label for="patient-age">Age</label>
-                <input id="patient-age" type="number" inputmode="numeric" min="0" max="130" wire:model="age">
-                @error('age') <p class="field__error">{{ $message }}</p> @enderror
-            </div>
+        {{-- Le formulaire est groupe par nature de renseignement : ce que la
+             receptionniste demande au patient, puis ce qui concerne sa venue du
+             jour. Une colonne unique de neuf champs obligeait a faire defiler
+             tout l'ecran pour un enregistrement de trente secondes. --}}
+        <fieldset class="formset">
+            <legend>Identite du patient</legend>
 
             <div class="field">
-                <label for="patient-gender">Sexe</label>
-                <select id="patient-gender" wire:model="gender">
-                    <option value="Homme">Homme</option>
-                    <option value="Femme">Femme</option>
-                </select>
-                @error('gender') <p class="field__error">{{ $message }}</p> @enderror
+                <label for="patient-name">Nom complet</label>
+                <input id="patient-name" type="text" wire:model="name" autocomplete="off">
+                @error('name') <p class="field__error">{{ $message }}</p> @enderror
             </div>
-        </div>
 
-        <div class="field">
-            <label for="patient-mobile">Telephone</label>
-            <input id="patient-mobile" type="tel" inputmode="tel" wire:model="mobile" placeholder="76 00 00 00">
-            @error('mobile') <p class="field__error">{{ $message }}</p> @enderror
-        </div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="patient-age">Age</label>
+                    <input id="patient-age" type="number" inputmode="numeric" min="0" max="130" wire:model="age">
+                    @error('age') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
 
-        <div class="field">
-            <label for="patient-crno">Numero de dossier papier <span class="field__hint">(facultatif)</span></label>
-            <input id="patient-crno" type="text" wire:model="crno">
-            @error('crno') <p class="field__error">{{ $message }}</p> @enderror
-        </div>
+                <div class="field">
+                    <label for="patient-gender">Sexe</label>
+                    <select id="patient-gender" wire:model="gender">
+                        <option value="Homme">Homme</option>
+                        <option value="Femme">Femme</option>
+                    </select>
+                    @error('gender') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
 
-        <div class="field">
-            <label for="patient-service">Service</label>
-            <select id="patient-service" wire:model="service_id">
-                <option value="">— Choisir un service —</option>
-                @foreach ($services as $service)
-                    <option value="{{ $service->id }}">{{ $service->name }}</option>
-                @endforeach
-            </select>
-            @error('service_id') <p class="field__error">{{ $message }}</p> @enderror
-        </div>
+                <div class="field field--wide">
+                    <label for="patient-profession">Profession</label>
+                    <input id="patient-profession" type="text" wire:model="profession"
+                           placeholder="cultivateur, enseignante…">
+                    @error('profession') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
+            </div>
 
-        <div class="field">
-            <label for="patient-reason">Motif <span class="field__hint">(facultatif)</span></label>
-            <input id="patient-reason" type="text" wire:model="reason">
-            @error('reason') <p class="field__error">{{ $message }}</p> @enderror
-        </div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="patient-mobile">Telephone</label>
+                    <input id="patient-mobile" type="tel" inputmode="tel" wire:model="mobile" placeholder="76 00 00 00">
+                    @error('mobile') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="field">
+                    <label for="patient-crno">
+                        Numero de dossier papier <span class="field__hint">(facultatif)</span>
+                    </label>
+                    <input id="patient-crno" type="text" wire:model="crno">
+                    @error('crno') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="formset">
+            <legend>Passage du jour</legend>
+
+            <div class="field-row">
+                <div class="field">
+                    <label for="patient-service">Service</label>
+                    <select id="patient-service" wire:model="service_id">
+                        <option value="">— Choisir un service —</option>
+                        @foreach ($services as $service)
+                            <option value="{{ $service->id }}">{{ $service->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('service_id') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="field">
+                    <label for="patient-reason">Motif <span class="field__hint">(facultatif)</span></label>
+                    <input id="patient-reason" type="text" wire:model="reason">
+                    @error('reason') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            {{-- La note vit sur le dossier, pas sur le passage : ce qu'elle
+                 porte reste vrai a la venue suivante. --}}
+            <div class="field">
+                <label for="patient-note">
+                    Note <span class="field__hint">(facultatif) — un mot pour le service</span>
+                </label>
+                <textarea id="patient-note" rows="2" wire:model="note"
+                          placeholder="Malentendant, accompagne par sa fille, vient de Kita…"></textarea>
+                @error('note') <p class="field__error">{{ $message }}</p> @enderror
+            </div>
+        </fieldset>
 
         {{-- Accompagnateurs : information non medicale, sans ticket propre. --}}
         <fieldset class="companions-fieldset">

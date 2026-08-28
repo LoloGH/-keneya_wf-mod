@@ -25,8 +25,10 @@ class Patient extends Model
         'name',
         'age',
         'gender',
+        'profession',
         'mobile',
         'crno',
+        'note',
         'access_code',
         'portal_token',
     ];

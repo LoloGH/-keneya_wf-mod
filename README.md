@@ -425,7 +425,7 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 | `doctors` | Rattachement d'un compte à un service, réaffectable à tout moment. Un médecin multi-services a plusieurs lignes. |
 | `receptionists` | Rattachement d'un compte au rôle d'accueil. |
 | `cashiers` | Rattachement d'un compte au rôle de caissier, sur le modèle de `receptionists`. |
-| **`patients`** | **Identité permanente et rien d'autre** : `patient_code` (`HFD-00001`) à vie, `crno` (dossier papier), plus `access_code` (4 chiffres) et `portal_token` (UUID) pour le portail. |
+| **`patients`** | **Identité permanente et rien d'autre** : profession, note libre de l'accueil, : `patient_code` (`HFD-00001`) à vie, `crno` (dossier papier), plus `access_code` (4 chiffres) et `portal_token` (UUID) pour le portail. |
 | **`visits`** | **Un passage / épisode de soins** : service courant, ticket, statut (`waiting`, `called`, `closed`), ouverture et clôture, plus `pending_next_service_id` — la destination qui attend le paiement. |
 | `companions` | Accompagnateurs d'un patient. Information non médicale, sans ticket propre. |
 | `visitors` | Fiche visiteur (`HFD-V-00001`), avec ticket dans la file du service visité et **le patient visité** (`patient_id`, facultatif hors service clinique). |
@@ -591,6 +591,13 @@ partout ailleurs — aucune mécanique parallèle à maintenir.
 |---|---|
 | **Caisse Ticket** | Le ticket de consultation, avant de voir un praticien. |
 | **Caisse Services** | Un acte de plateau technique (échographie, laboratoire…). |
+
+L'**accueil** est un service depuis la v3.2.5, pour la même raison : il a des
+heures et du personnel. Une réceptionniste n'ayant aucun service de
+rattachement, son créneau n'avait auparavant rien à désigner — elle n'était donc
+de garde nulle part, et ne recevait jamais de notification. Comme la caisse, ce
+n'est **pas une destination de soins** : `ServiceKind::NON_CARE_SLUGS` les tient
+tous deux hors des menus d'orientation.
 
 Depuis la v3.2.3, l'administrateur peut en **déclarer d'autres** : le menu
 « Type » de « Services → Liste des services » liste tous les `service_kinds`,
@@ -990,6 +997,13 @@ qu'ailleurs : une dépendance de plus à faire tourner sur le VPS pour un gain q
 l'usage n'a pas encore réclamé. Si le délai s'avère trop long en service réel,
 Laravel Reverb est la suite logique.
 
+Depuis la v3.2.5 l'intervalle est de **cinq secondes**, et toutes les listes de
+travail le partagent. Trois écrans portaient encore leur propre rythme (10 s,
+15 s, 30 s) : un soin prescrit mettait ainsi jusqu'à trente secondes à
+apparaître chez l'infirmier, et la notification arrivait bien avant la tâche
+qu'elle annonçait. Une seule valeur à régler — `KENEYA_POLL_INTERVAL` — si la
+charge devenait sensible sur le VPS.
+
 **Cinq déclencheurs**, tous ciblés sur le personnel *effectivement de garde* :
 
 | Événement | Qui est prévenu |
@@ -1068,6 +1082,27 @@ le nouveau n'y figurent**, sous aucune forme.
 > fonctionner. Il est désormais appliqué. Les sessions déjà ouvertes au moment du
 > déploiement ne sont pas coupées : sans marqueur, le middleware le pose et
 > laisse passer.
+
+### Le créneau sans service
+
+Le formulaire présente le service comme facultatif, et il l'est pour lire son
+propre planning. Mais un créneau muet ne rendait de garde pour **aucun** service :
+ni notification, ni soin visible, sans que rien ne le dise. Un planning généré
+avec « Service : — Aucun — » — le choix par défaut — était donc entièrement
+inopérant.
+
+Depuis la v3.2.5, un tel créneau vaut pour les **services de rattachement** de la
+personne : un médecin de Médecine Générale planifié « 08h à 14h, aucun service »
+est de garde à Médecine Générale, ce qui est la seule lecture raisonnable. Il ne
+déborde pas pour autant sur les autres services.
+
+Une réceptionniste ou un caissier n'ont pas de service de rattachement : leur
+créneau doit nommer le service (Accueil, Caisse Ticket…). C'est précisément ce
+pour quoi l'accueil est devenu un service.
+
+La règle vit en un seul endroit, `App\Services\OnDutyRoster` — « moi,
+maintenant ? » comme « eux, maintenant ? » y passent, `User::isOnDutyFor()`
+compris.
 
 ### Qui apparaît dans les plannings
 
@@ -1238,6 +1273,9 @@ docker compose exec app php artisan test  # avec Docker
 | `StaffCareTasksVisibilityTest` | De la prescription à l'écran réel, par la route `/staff/{slug}` : le soin apparaît, le rattachement au service est ce qui le relie à l'infirmier, et les deux configurations qui font disparaître les soins sont couvertes — capacité non cochée, planning absent, avec l'avertissement côté `/admin`. |
 | `StaffNotificationTest` | Les cinq déclencheurs, chacun vérifié aussi par la négative : hors garde, autre service, autre rôle. Rappel de rendez-vous dans la fenêtre configurée et une seule fois, son émis au seul incrément du compteur, cloison entre les cloches de deux comptes. |
 | `ProfileCardTest` | Mot de passe actuel incorrect refusé, confirmation et complexité, hash remplacé, journal sans aucune trace du mot de passe, middleware `AuthenticateSession` en place et session concurrente réellement rejetée. |
+| `ReceptionServiceAndDutyTest` | L'accueil comme service exclu des destinations de soins, la réceptionniste de garde, et le créneau sans service qui vaut pour le service de rattachement — sans déborder sur les autres, et sans suffire à qui n'a pas de rattachement. |
+| `PatientProfessionNoteTest` | Profession et note enregistrées, facultatives, vidées entre deux patients, et relues au dossier par le médecin. |
+| `PollIntervalTest` | Aucun écran de travail ne porte son propre intervalle : tous suivent `keneya.poll_interval`. |
 | `ScheduleStaffCoverageTest` | Le personnel générique et les caissiers proposés dans **les deux** formulaires de planning, listes identiques, libellé sans parenthèse vide, rafraîchissement après génération, et suppression groupée avec ses deux garde-fous (sélection limitée à l'affiché, sélection invisible épargnée). |
 | `HandoffNoteTest` | La visibilité par service n'est pas restreinte au médecin admettant (vérifié avant de rien construire), note lue par l'équipe suivante, ligne `patient_history`, refus hors garde et sur séjour clôturé. |
 | `StaffManagerTest` | Section « Personnels » : les deux menus reflètent les tables, le type choisi décide du rôle et de la table de rattachement, refus du changement de rôle, liste réunissant tout le personnel. |

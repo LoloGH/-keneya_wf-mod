@@ -33,6 +33,9 @@ class ServiceSeeder extends Seeder
             // meme token, meme « Appeler le suivant ».
             ['name' => Service::CAISSE_TICKET, 'slug' => ServiceKind::SLUG_CAISSE],
             ['name' => Service::CAISSE_SERVICES, 'slug' => ServiceKind::SLUG_CAISSE],
+
+            // L'accueil aussi : c'est la que la receptionniste est de garde.
+            ['name' => Service::RECEPTION, 'slug' => ServiceKind::SLUG_RECEPTION],
         ];
 
         foreach ($services as $service) {

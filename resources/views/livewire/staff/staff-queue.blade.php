@@ -1,4 +1,4 @@
-<section class="card" wire:poll.10s>
+<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
     <div class="card__head">
         <h2 class="card__title">File d'attente — {{ $service->name }}</h2>
         @if ($type->can(\App\Models\StaffType::CAP_QUEUE))
