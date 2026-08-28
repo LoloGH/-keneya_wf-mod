@@ -35,9 +35,17 @@ return [
     | phase : un rafraichissement toutes les quelques secondes suffit et reste
     | robuste sur une connexion limitee.
     |
+    | Cinq secondes depuis la v3.2.5 : toutes les listes de travail et la cloche
+    | suivent cette valeur, la ou trois ecrans portaient encore leur propre
+    | rythme (10 s, 15 s, 30 s). Un soin prescrit mettait ainsi jusqu'a trente
+    | secondes a apparaitre chez l'infirmier, et la notification arrivait bien
+    | avant la tache qu'elle annonçait.
+    |
+    | Une seule valeur a regler si la charge devenait sensible sur le VPS.
+    |
     */
 
-    'poll_interval' => env('KENEYA_POLL_INTERVAL', '10s'),
+    'poll_interval' => env('KENEYA_POLL_INTERVAL', '5s'),
 
     'board_poll_interval' => env('KENEYA_BOARD_POLL_INTERVAL', '5s'),
 

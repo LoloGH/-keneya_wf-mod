@@ -1,4 +1,4 @@
-<section class="card" wire:poll.30s>
+<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
     <div class="card__head">
         <h2 class="card__title">Soins programmes — {{ $service->name }}</h2>
         <label class="field--check">

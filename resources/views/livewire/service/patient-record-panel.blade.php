@@ -12,10 +12,17 @@
             <div><dt>Nom</dt><dd>{{ $patient->name }}</dd></div>
             <div><dt>Age</dt><dd>{{ $patient->age }} ans</dd></div>
             <div><dt>Sexe</dt><dd>{{ $patient->gender }}</dd></div>
+            <div><dt>Profession</dt><dd>{{ $patient->profession ?: '—' }}</dd></div>
             <div><dt>Telephone</dt><dd>{{ $patient->mobile }}</dd></div>
             <div><dt>Dossier papier</dt><dd>{{ $patient->crno ?: '—' }}</dd></div>
             <div><dt>Passages</dt><dd>{{ $patient->visits->count() }}</dd></div>
         </dl>
+
+        {{-- Le mot laisse par l'accueil. Il vaut pour toutes les venues, donc
+             il s'affiche avec l'identite et non dans la frise du jour. --}}
+        @if (filled($patient->note))
+            <p class="record__note"><strong>Note de l'accueil :</strong> {{ $patient->note }}</p>
+        @endif
 
         @if ($patient->companions->isNotEmpty())
             <h3 class="card__subtitle">Accompagnateurs</h3>

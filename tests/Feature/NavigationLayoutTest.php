@@ -219,11 +219,17 @@ class NavigationLayoutTest extends TestCase
 
     public function test_la_deconnexion_est_offerte_par_la_carte_de_profil(): void
     {
-        Livewire::actingAs($this->makeAdmin())
+        // Icone seule dans la carte, comme les autres actions de la barre : le
+        // libelle reste porte par aria-label et title, jamais par un texte
+        // visible qui doublerait l'icone.
+        $rendu = Livewire::actingAs($this->makeAdmin())
             ->test(ProfileCard::class)
             ->call('toggle')
-            ->assertSee('Se deconnecter')
-            ->assertSee('data-testid="logout"', escape: false);
+            ->assertSee('data-testid="logout"', escape: false)
+            ->assertSee('aria-label="Se deconnecter"', escape: false)
+            ->html();
+
+        $this->assertStringNotContainsString('>Se deconnecter<', $rendu);
     }
 
     public function test_la_deconnexion_fonctionne_toujours(): void

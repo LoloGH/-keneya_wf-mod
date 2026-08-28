@@ -18,6 +18,9 @@ class Service extends Model
 
     public const CAISSE_SERVICES = 'Caisse Services';
 
+    /** Le poste d'accueil, pose a l'installation (v3.2.5). */
+    public const RECEPTION = 'Accueil';
+
     protected $fillable = ['name', 'service_kind_id'];
 
     public function serviceKind(): BelongsTo
@@ -64,7 +67,7 @@ class Service extends Model
     {
         $query->whereHas(
             'serviceKind',
-            fn (Builder $kind) => $kind->where('slug', '!=', ServiceKind::SLUG_CAISSE),
+            fn (Builder $kind) => $kind->whereNotIn('slug', ServiceKind::NON_CARE_SLUGS),
         );
     }
 
