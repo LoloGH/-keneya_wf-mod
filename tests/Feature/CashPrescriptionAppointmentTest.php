@@ -83,7 +83,9 @@ class CashPrescriptionAppointmentTest extends TestCase
             ->test(ConsultationActions::class, ['serviceId' => $service->getKey()])
             ->set('visitId', $visit->getKey())
             ->set('tab', 'ordonnance')
-            ->set('prescription', 'Paracetamol 500 mg, 3 fois par jour pendant 5 jours.')
+            ->set('prescriptionLines.0.medicament', 'Paracetamol 500 mg')
+            ->set('prescriptionLines.0.posologie', '3 fois par jour')
+            ->set('prescriptionLines.0.duree', '5 jours')
             ->call('savePrescription')
             ->assertHasNoErrors();
 
@@ -111,7 +113,7 @@ class CashPrescriptionAppointmentTest extends TestCase
         $visit = $this->makeVisit($service, ['status' => Visit::STATUS_CALLED]);
 
         $prescription = app(CreatePrescription::class)
-            ->execute($visit, $auteur, 'Repos et hydratation.');
+            ->execute($visit, $auteur, [['medicament' => 'Repos et hydratation']]);
 
         $this->actingAs($confrere->user)
             ->get(route('service.prescription.pdf', $prescription))

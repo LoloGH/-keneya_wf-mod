@@ -63,7 +63,11 @@
                                 {{ $ordonnance->created_at->format('d/m/Y') }}
                                 — {{ $ordonnance->doctor?->name() }}
                             </p>
-                            <p class="referrals__result">{{ $ordonnance->content }}</p>
+                            <ol class="ordo-lu">
+                                @foreach ($ordonnance->lignes() as $ligne)
+                                    <li>{{ \App\Models\Prescription::ligneEnTexte($ligne) }}</li>
+                                @endforeach
+                            </ol>
                         </li>
                     @endforeach
                 </ul>

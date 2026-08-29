@@ -1778,3 +1778,60 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     background: var(--ambre-clair);
     border-radius: 0 var(--rayon-sm) var(--rayon-sm) 0;
 }
+
+/* Ordonnance ligne a ligne (v3.2.6). Le rang est un reperage, pas une donnee
+   a saisir : il reste hors des champs, dans sa propre colonne. */
+.ordo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--e2); }
+
+.ordo__line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--e3);
+    padding: var(--e3);
+    background: var(--gris-50);
+    border: 1px solid var(--gris-200);
+    border-radius: var(--rayon);
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+.ordo__line:focus-within { border-color: var(--bleu-vif); box-shadow: var(--anneau); }
+
+.ordo__rank {
+    display: grid; place-items: center;
+    width: 1.75rem; height: 1.75rem;
+    margin-top: 1.6rem;
+    background: var(--bleu-clair); color: var(--bleu-fonce);
+    border-radius: var(--rayon-pilule);
+    font-size: var(--texte-sm); font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Grille explicite plutot qu'un flex qui se rabat : avec le flex, « Duree »
+   retombait seule sur une deuxieme ligne alors que la place restait. */
+.ordo__fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, .8fr);
+    gap: var(--e2) var(--e3);
+    min-width: 0;
+}
+
+@media (max-width: 820px) {
+    .ordo__fields { grid-template-columns: minmax(0, 1fr); }
+}
+
+.ordo__remove { margin-top: 1.5rem; }
+
+/* L'ajout d'une ligne est l'action attendue apres avoir rempli la precedente :
+   elle porte son icone et reste a gauche du bouton d'enregistrement. */
+.ordo__add { gap: var(--e1); }
+
+@media (max-width: 600px) {
+    .ordo__line { grid-template-columns: auto minmax(0, 1fr); }
+    .ordo__rank { margin-top: 1.5rem; }
+    .ordo__remove { grid-column: 2; justify-self: end; margin-top: 0; }
+}
+
+/* Ordonnance en lecture : les lignes gardent leur numerotation, c'est ce qui
+   fait qu'on s'y retrouve au comptoir. */
+.ordo-lu { margin: var(--e1) 0 0; padding-left: var(--e5); }
+.ordo-lu li { margin: 0 0 var(--e1); }
