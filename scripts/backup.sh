@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Sauvegarde de la base de KEneYa WorkFlow.
+# Sauvegarde de KEneYa WorkFlow : base SQL et pieces jointes.
 #
 #   ./scripts/backup.sh [dossier-de-destination]
 #
@@ -9,8 +9,14 @@
 #   - installation native (Apache + PHP-FPM + MariaDB de l'hote),
 #     ou aucun conteneur `db` n'existe.
 #
-# Produit un fichier keneya_workflow-AAAAMMJJ-HHMMSS.sql dans le dossier
-# indique (par defaut ./backups). Voir README pour la planification par cron.
+# Produit dans le dossier indique (par defaut ./backups) :
+#   - keneya_workflow-AAAAMMJJ-HHMMSS.sql : la base ;
+#   - attachments-AAAAMMJJ-HHMMSS.tar.gz  : les pieces jointes, qui vivent hors
+#     de la base et sans lesquelles un dossier patient ne se restaure pas.
+#
+# Les pieces jointes sont deposees par le serveur web : la sauvegarde doit donc
+# tourner sous un compte capable de les lire (root, ou le compte du serveur
+# web). Sinon le script s'arrete plutot que de produire une archive partielle.
 
 set -euo pipefail
 
@@ -37,6 +43,7 @@ if docker compose ps -q db 2>/dev/null | grep -q .; then
         mariadb-dump \
             --user="$DB_USER" \
             --single-transaction \
+            --no-tablespaces \
             --routines \
             "$DB_NAME" > "$FILE"
 else
@@ -57,6 +64,7 @@ else
         --host="${DB_HOST:-127.0.0.1}" \
         --port="${DB_PORT:-3306}" \
         --single-transaction \
+        --no-tablespaces \
         --routines \
         "$DB_NAME" > "$FILE"
 fi
@@ -71,7 +79,34 @@ fi
 
 chmod 600 "$FILE"
 
-echo "Sauvegarde ecrite : $FILE ($(du -h "$FILE" | cut -f1))"
+echo "Sauvegarde SQL ecrite : $FILE ($(du -h "$FILE" | cut -f1))"
 
-# Conservation des 30 dernieres sauvegardes.
+# Les pieces jointes vivent hors de la base (storage/app/attachments) : un
+# export SQL seul ne permettrait pas de restaurer un dossier patient complet.
+PIECES="storage/app/attachments"
+
+if [ -d "$PIECES" ] && [ -n "$(ls -A "$PIECES" 2>/dev/null)" ]; then
+    ARCHIVE="$DEST/attachments-$STAMP.tar.gz"
+
+    # Les fichiers sont deposes par le serveur web : si l'utilisateur qui
+    # sauvegarde ne peut pas les lire, tar n'archive qu'une partie du dossier
+    # sans que rien ne l'indique. On refuse plutot que de produire une archive
+    # trompeuse.
+    if ! tar czf "$ARCHIVE" -C "$PIECES" . 2>"$DEST/.tar-erreurs"; then
+        echo "Erreur : archivage des pieces jointes incomplet." >&2
+        sed 's/^/    /' "$DEST/.tar-erreurs" >&2
+        echo "    Lancez la sauvegarde avec un compte capable de lire $PIECES (root, ou le compte du serveur web)." >&2
+        rm -f "$ARCHIVE" "$DEST/.tar-erreurs"
+        exit 1
+    fi
+
+    rm -f "$DEST/.tar-erreurs"
+    chmod 600 "$ARCHIVE"
+    echo "Sauvegarde des pieces jointes ecrite : $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"
+else
+    echo "Aucune piece jointe a sauvegarder."
+fi
+
+# Conservation des 30 dernieres sauvegardes de chaque type.
 ls -1t "$DEST"/*.sql 2>/dev/null | tail -n +31 | xargs -r rm --
+ls -1t "$DEST"/*.tar.gz 2>/dev/null | tail -n +31 | xargs -r rm --
