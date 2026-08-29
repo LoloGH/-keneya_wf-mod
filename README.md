@@ -6,7 +6,7 @@ patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kay
 
 > **Nom du produit** : `KƐnƐya WorkFlow` (affiché tel quel dans l'interface et la
 > documentation).
-> **Identifiant technique** : `keneya-workflow` — le caractère `Ɛ` n'apparaît
+> **Identifiant technique** : `keneya-workflow` - le caractère `Ɛ` n'apparaît
 > jamais dans le code, les configurations ou les identifiants système.
 
 ---
@@ -39,7 +39,7 @@ patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kay
 ## 1. Principe : un rôle, une interface
 
 Contrainte de conception centrale : **chaque rôle n'a accès qu'à sa propre
-interface**. Il n'y a aucune navigation croisée — pas de menu partagé, pas de
+interface**. Il n'y a aucune navigation croisée - pas de menu partagé, pas de
 lien vers un autre module, pas de tableau de bord générique. Chaque poste
 (tablette ou PC dédié) n'affiche que l'interface du rôle connecté.
 
@@ -48,13 +48,13 @@ lien vers un autre module, pas de tableau de bord générique. Chaque poste
 | `admin` | `/admin` | Établissement, services, réceptionnistes, médecins (avec réaffectation), plannings du personnel (jour par jour et génération groupée), vue globale des patients avec accès à tout dossier, suppression définitive d'un dossier, journal d'audit. |
 | `receptionist` | `/reception` | Recherche de dossier existant, enregistrement patient et visiteur, rendez-vous du jour, passages du jour (avec réimpression du ticket), écran de salle d'attente, son propre planning. |
 | `doctor` | `/service` | File d'attente, renvois entrants et sortants, clôture de renvoi et de dossier, conclusion de consultation, ordonnances, « Mes patients » et « Mes rendez-vous », son propre planning, et le dossier patient dans un panneau de la même page. **Aucune fonction de caisse.** |
-| `cashier` | `/caisse` | Les files de caisse — « Caisse Ticket », « Caisse Services », et toute caisse ajoutée ensuite — encaissement et orientation vers le service qui attend, son propre planning. |
-| *(type de personnel sans rôle)* | `/staff/{slug}` | Interface **composée** des seules fonctions cochées par l'administrateur — voir §12. Cloisonnée exactement comme les quatre autres. |
+| `cashier` | `/caisse` | Les files de caisse - « Caisse Ticket », « Caisse Services », et toute caisse ajoutée ensuite - encaissement et orientation vers le service qui attend, son propre planning. |
+| *(type de personnel sans rôle)* | `/staff/{slug}` | Interface **composée** des seules fonctions cochées par l'administrateur - voir §12. Cloisonnée exactement comme les quatre autres. |
 
 Mise en œuvre :
 
 - Après authentification, `HomeController` redirige immédiatement vers `/admin`,
-  `/reception`, `/service` ou `/caisse` selon le rôle — jamais vers une page
+  `/reception`, `/service` ou `/caisse` selon le rôle - jamais vers une page
   commune.
 - Le middleware `EnsureRoleScope` (alias `role.scope`) protège chaque groupe de
   routes. Un utilisateur qui tape une autre URL à la main est **redirigé vers sa
@@ -71,7 +71,7 @@ Mise en œuvre :
 - **Chaque fonctionnalité ajoutée est une section d'une interface existante,
   jamais une nouvelle route partagée.** Même les téléchargements sont
   dédoublés : `/service/pieces-jointes/{id}` pour le médecin,
-  `/admin/pieces-jointes/{id}` pour l'admin. Deux tests verrouillent la règle —
+  `/admin/pieces-jointes/{id}` pour l'admin. Deux tests verrouillent la règle -
   l'un vérifie les redirections, l'autre qu'aucune route ne porte deux
   `role.scope` différents.
 - `EnsureRoleScope` est évalué **avant** la résolution des modèles de route
@@ -108,7 +108,7 @@ Quatre services : `app` (PHP-FPM 8.3 + Laravel), `web` (Nginx), `db`
 Docker Engine (Linux) et Docker Desktop / WSL2 (Windows), sans modification.
 
 Le service **`scheduler`** est apparu en v3.2.3 : même image et même code que
-`app`, mais il ne sert aucune requête HTTP — il lance `php artisan
+`app`, mais il ne sert aucune requête HTTP - il lance `php artisan
 schedule:work`, qui réveille le planificateur Laravel chaque minute. C'est lui
 qui envoie les rappels de rendez-vous ; **sans ce conteneur, ils ne partiront
 jamais et rien ne le signalera.** `docker compose logs scheduler` montre ses
@@ -180,7 +180,7 @@ MariaDB 10.6+.
 > `App\Models\Attachment::MAX_SIZE_KB`). L'image Docker applique déjà ces
 > valeurs.
 
-### Linux — Nginx + PHP-FPM
+### Linux - Nginx + PHP-FPM
 
 ```bash
 sudo apt install php8.3-fpm php8.3-mysql php8.3-mbstring php8.3-intl \
@@ -198,7 +198,7 @@ php artisan config:cache && php artisan route:cache && php artisan view:cache
 sudo chown -R www-data:www-data storage bootstrap/cache
 ```
 
-Serveur virtuel Nginx (`/etc/nginx/sites-available/keneya-workflow`) — la
+Serveur virtuel Nginx (`/etc/nginx/sites-available/keneya-workflow`) - la
 configuration de `docker/nginx/default.conf` sert de base ; il suffit de
 remplacer `fastcgi_pass app:9000;` par
 `fastcgi_pass unix:/run/php/php8.3-fpm.sock;` et d'adapter `root` :
@@ -220,7 +220,7 @@ server {
 }
 ```
 
-### Windows — IIS + PHP, ou Apache
+### Windows - IIS + PHP, ou Apache
 
 **IIS + PHP (FastCGI)**
 
@@ -327,7 +327,7 @@ dédiée : ces types n'existent que si l'administrateur en crée. La marche à s
 est « Personnel → Types de personnel », puis « Personnel → Personnels » pour y
 rattacher quelqu'un.
 
-Depuis la v3.2.3, « Personnel → Personnels » gère **tout** le personnel — les
+Depuis la v3.2.3, « Personnel → Personnels » gère **tout** le personnel - les
 sections séparées « Médecins », « Réceptionnistes » et « Interfaces dédiées » ont
 fusionné. Le menu « Type de personnel » liste tous les `staff_types` et le menu
 « Service » tous les services, caisses comprises ; c'est le type choisi qui
@@ -372,7 +372,7 @@ docker run --rm -v keneya_storage:/data -v "$PWD/backups:/out" alpine \
     tar czf /out/keneya_storage-$(date +%Y%m%d).tar.gz -C /data .
 ```
 
-Export `.sql` — la même commande des deux côtés :
+Export `.sql` - la même commande des deux côtés :
 
 ```bash
 docker compose exec -T db mariadb-dump \
@@ -388,13 +388,13 @@ dernières sauvegardes :
 powershell -File .\scripts\backup.ps1 -Destination D:\sauvegardes # Windows
 ```
 
-**Planification — Linux (cron), tous les jours à 22h00 :**
+**Planification - Linux (cron), tous les jours à 22h00 :**
 
 ```cron
 0 22 * * * cd /var/www/keneya-workflow && ./scripts/backup.sh /var/sauvegardes/keneya >> /var/log/keneya-backup.log 2>&1
 ```
 
-**Planification — Windows (Planificateur de tâches) :**
+**Planification - Windows (Planificateur de tâches) :**
 
 ```powershell
 $action  = New-ScheduledTaskAction -Execute 'powershell.exe' `
@@ -422,13 +422,13 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 | `hospitalizations` | Séjour d'un patient : salle, service, admission, sortie. |
 | `care_task_types` | Catalogue des types de soins (sérum, injection, pansement…). |
 | `handoff_notes` | Notes de relève entre équipes sur un séjour : texte libre, daté et signé. |
-| `staff_notifications` | Une ligne **par destinataire** — c'est ce qui permet de dire « lue » pour l'un et pas pour l'autre. |
+| `staff_notifications` | Une ligne **par destinataire** - c'est ce qui permet de dire « lue » pour l'un et pas pour l'autre. |
 | `care_tasks` | Une administration, individuellement marquable `pending` / `done` / `missed` / `cancelled`. Un soin annulé garde son motif, son auteur et son heure d'annulation. |
 | `doctors` | Rattachement d'un compte à un service, réaffectable à tout moment. Un médecin multi-services a plusieurs lignes. |
 | `receptionists` | Rattachement d'un compte au rôle d'accueil. |
 | `cashiers` | Rattachement d'un compte au rôle de caissier, sur le modèle de `receptionists`. |
 | **`patients`** | **Identité permanente et rien d'autre** : `patient_code` (`HFD-00001`) à vie, `crno` (dossier papier), profession, note libre de l'accueil, plus `access_code` (4 chiffres) et `portal_token` (UUID) pour le portail. |
-| **`visits`** | **Un passage / épisode de soins** : service courant, ticket, statut (`waiting`, `called`, `closed`), ouverture et clôture, plus `pending_next_service_id` — la destination qui attend le paiement. |
+| **`visits`** | **Un passage / épisode de soins** : service courant, ticket, statut (`waiting`, `called`, `closed`), ouverture et clôture, plus `pending_next_service_id` - la destination qui attend le paiement. |
 | `companions` | Accompagnateurs d'un patient. Information non médicale, sans ticket propre. |
 | `visitors` | Fiche visiteur (`HFD-V-00001`), avec ticket dans la file du service visité et **le patient visité** (`patient_id`, facultatif hors service clinique). |
 | `portal_access_attempts` | Tentatives de code du portail par dossier, avec verrouillage temporaire. |
@@ -445,8 +445,8 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 Trois garanties structurelles :
 
 - **`patient_code` est attribué dans `PatientObserver::creating`**, jamais dans
-  un contrôleur. Quel que soit le point d'entrée — formulaire, seeder, import,
-  `tinker` — un patient ne peut pas exister sans identifiant unique.
+  un contrôleur. Quel que soit le point d'entrée - formulaire, seeder, import,
+  `tinker` - un patient ne peut pas exister sans identifiant unique.
 - **`patient_history` est append-only** : `PatientHistoryObserver` lève une
   exception sur toute tentative de mise à jour ou de suppression. Le seul point
   d'écriture est `PatientHistoryRecorder`.
@@ -456,27 +456,27 @@ Trois garanties structurelles :
 
 **Les séries de numérotation (v3.2.6).** La première série va de `HFD-00001` à
 `HFD-99999`. Au-delà, une lettre prend le relais : `HFD-A0001` à `HFD-A9999`,
-puis `HFD-B0001`, jusqu'à `HFD-Z9999`. Le numéro reste court — dictable au
-téléphone, lisible sur un ticket thermique — et la capacité passe à un peu plus
+puis `HFD-B0001`, jusqu'à `HFD-Z9999`. Le numéro reste court - dictable au
+téléphone, lisible sur un ticket thermique - et la capacité passe à un peu plus
 de 350 000 dossiers.
 
 Le générateur ordonne sur le **code lui-même**, pas sur l'identifiant de ligne :
 dès qu'un dossier de la série A précède une reprise de la série numérique, trier
 par `id` redonnerait un numéro déjà pris. Au bout de `Z9999` il s'arrête avec un
-message explicite plutôt que de fabriquer un numéro ambigu — un numéro de
+message explicite plutôt que de fabriquer un numéro ambigu - un numéro de
 dossier vaut à vie, un doublon ne se rattrape pas.
 
 Les migrations `2025_04_01_*` ajoutent la couche v3.2.1 : les types de service
 (avec conversion des trois valeurs de l'ancien `enum`), les types de personnel,
 l'ouverture du parcours de soin au personnel générique, et l'hospitalisation.
-Leur `down()` est fonctionnel et vérifié sur SQLite comme sur MariaDB — celui des
+Leur `down()` est fonctionnel et vérifié sur SQLite comme sur MariaDB - celui des
 types de service restaure l'ancien `enum`, les types ajoutés par l'admin
 retombant sur « clinique », faute d'équivalent.
 
 Les migrations `2025_03_01_*` ajoutent la couche v3.2 : les caissiers, le
 troisième type de service, le routage sous condition de paiement, le patient
 visité et le portail. Leur `down()` est fonctionnel et vérifié sur SQLite comme
-sur MariaDB — celui du type de service supprime au passage les caisses et leurs
+sur MariaDB - celui du type de service supprime au passage les caisses et leurs
 files, sans quoi MariaDB refuserait de rétrécir la colonne.
 
 ### Migration depuis la v1
@@ -486,7 +486,7 @@ existantes** plutôt que de simplement supprimer des colonnes : chaque patient
 déjà enregistré reçoit une `visits` portant son service, son ticket et son
 statut d'origine, et les lignes `referrals` / `patient_history` sont rattachées
 à cette visite. Le `down()` fait le chemin inverse et restaure fidèlement
-l'ancien schéma — vérifié dans les deux sens.
+l'ancien schéma - vérifié dans les deux sens.
 
 > Les données de démonstration du VPS sont jetables, comme confirmé. La reprise
 > a quand même été écrite : elle coûte une dizaine de lignes et rend la
@@ -505,7 +505,7 @@ Dans `/reception`, la recherche précède toujours l'enregistrement :
 
 1. Recherche par `patient_code`, nom ou téléphone.
 2. Si un patient est trouvé, son identité s'affiche pour **confirmation visuelle
-   par la réceptionniste** — deux homonymes ne doivent jamais être confondus.
+   par la réceptionniste** - deux homonymes ne doivent jamais être confondus.
 3. « Nouvel épisode » crée une ligne `visits` rattachée au `patient_id`
    existant, avec un motif en texte libre. **Aucune ligne `patients`, aucun
    nouveau `patient_code`.**
@@ -523,7 +523,7 @@ laboratoire, même si son résultat s'affiche bien chez le médecin.
 **Le retour ne repasse jamais par la caisse.** Le paiement ne conditionne que le
 trajet *aller* : on ne fait pas payer deux fois un patient pour revenir voir le
 médecin qui l'a envoyé. `SendReferral` et `CompleteReferral` restent donc **deux
-chemins de code séparés** qui n'appellent jamais la même logique de routage —
+chemins de code séparés** qui n'appellent jamais la même logique de routage -
 mutualiser les deux réintroduirait le péage sur le retour à la première
 refactorisation. Un dossier clôturé entre-temps ne revient pas en file : un
 résultat en retard ne doit pas ressusciter un dossier clos.
@@ -546,8 +546,8 @@ résultat en retard ne doit pas ressusciter un dossier clos.
    le message le dit explicitement plutôt que de griser un bouton sans
    expliquer pourquoi.
 
-Une visite `closed` sort de la file active — « Appeler le suivant » ne la
-propose plus — mais **son dossier reste intégralement lisible** : la clôture ne
+Une visite `closed` sort de la file active - « Appeler le suivant » ne la
+propose plus - mais **son dossier reste intégralement lisible** : la clôture ne
 filtre jamais la lecture, seulement la file d'attente.
 
 ### Files et tickets
@@ -563,7 +563,7 @@ du médecin et l'écran de salle d'attente.
 ### Pièces jointes
 
 PDF, JPG et PNG, 10 Mo maximum, 5 fichiers par résultat. **Le type et la taille
-sont revérifiés côté serveur dans `StoreAttachment`** — le type MIME réel du
+sont revérifiés côté serveur dans `StoreAttachment`** - le type MIME réel du
 fichier reçu, pas l'extension annoncée : un formulaire se contourne, pas une
 action.
 
@@ -572,8 +572,8 @@ volume Docker **`keneya_storage`**, persistant entre redéploiements. Aucun
 stockage cloud : la connectivité du site ne le permet pas.
 
 **Lecture et écriture depuis le dossier.** Une pièce jointe s'ajoute
-directement au dossier d'un patient — depuis « Mes patients » côté `/service`,
-depuis la vue globale des patients côté `/admin` — et plus seulement en réponse
+directement au dossier d'un patient - depuis « Mes patients » côté `/service`,
+depuis la vue globale des patients côté `/admin` - et plus seulement en réponse
 à un renvoi. `attachments.patient_id` reste le point d'ancrage ;
 `patient_history_id` et `referral_id` ne sont renseignés que pour une pièce
 rattachée à un contexte précis.
@@ -586,7 +586,7 @@ interfaces, afin que médecin et admin lisent exactement la même histoire.
 
 **Impression.** Chaque pièce jointe et chaque ordonnance porte une action
 « Imprimer » qui ouvre un rendu autonome (`resources/views/print/`) déclenchant
-`window.print()` — pas de génération PDF côté serveur pour cela. Le PDF
+`window.print()` - pas de génération PDF côté serveur pour cela. Le PDF
 dompdf de l'ordonnance reste disponible en téléchargement côté médecin.
 
 ### Caisse : un rôle, une interface, un passage obligé
@@ -599,7 +599,7 @@ autres.
 
 Les caisses sont des **services à part entière** (`services.kind = caisse`,
 créés par le seeder) : même file, même token, même « Appeler le suivant » que
-partout ailleurs — aucune mécanique parallèle à maintenir.
+partout ailleurs - aucune mécanique parallèle à maintenir.
 
 | Caisse | Ce qu'on y règle |
 |---|---|
@@ -608,7 +608,7 @@ partout ailleurs — aucune mécanique parallèle à maintenir.
 
 L'**accueil** est un service depuis la v3.2.5, pour la même raison : il a des
 heures et du personnel. Une réceptionniste n'ayant aucun service de
-rattachement, son créneau n'avait auparavant rien à désigner — elle n'était donc
+rattachement, son créneau n'avait auparavant rien à désigner - elle n'était donc
 de garde nulle part, et ne recevait jamais de notification. Comme la caisse, ce
 n'est **pas une destination de soins** : `ServiceKind::NON_CARE_SLUGS` les tient
 tous deux hors des menus d'orientation.
@@ -637,7 +637,7 @@ Le routage sous condition de paiement s'appuie sur une seule colonne,
   **régénère un token dans la file cible**.
 
 La caisse n'est jamais proposée comme **destination de soins** : ni dans la
-liste des services de l'accueil, ni dans celle des renvois — la règle est
+liste des services de l'accueil, ni dans celle des renvois - la règle est
 appliquée côté serveur (`Service::careServices()`, `SendReferral`), pas
 seulement dans les listes déroulantes. En revanche, depuis la v3.2.3, elle est
 proposée comme **service d'affectation** dans « Personnel → Personnels » :
@@ -664,7 +664,7 @@ ordonnances.
 Distincte de l'ordonnance, qui reste dédiée aux médicaments : un champ libre
 « Conclusion de la consultation » écrit une ligne `patient_history`
 (`consultation_conclusion`) rattachée au passage en cours. Pas de table
-supplémentaire — la conclusion prend place dans la même frise que le reste.
+supplémentaire - la conclusion prend place dans la même frise que le reste.
 
 ### Rendez-vous
 
@@ -674,19 +674,19 @@ juste sous « Mes patients », liste les rendez-vous à venir du médecin connec
 triés par date. La section « Rendez-vous du
 jour » de `/reception` liste les rendez-vous, avec **« Orienter le patient »** :
 à l'arrivée, une nouvelle `visits` s'ouvre directement dans la file du service
-prévu, sous l'identité existante — pas de réenregistrement pour quelqu'un que
+prévu, sous l'identité existante - pas de réenregistrement pour quelqu'un que
 l'hôpital connaît déjà. `no_show` distingue le patient qui ne s'est pas
 présenté d'une annulation volontaire.
 
 ## 11. Portail patient, impression et suppression de dossier
 
-### Portail patient — lien permanent, code à quatre chiffres
+### Portail patient - lien permanent, code à quatre chiffres
 
 Le patient consulte ses documents et ses rendez-vous depuis son téléphone, sur
 `/mes-documents/{portal_token}`. **Le lien ne périme jamais**, c'est la demande
 du porteur du projet ; la sécurité repose donc sur deux couches et non sur une :
 
-1. `patients.portal_token` est un **UUID non devinable** — jamais le
+1. `patients.portal_token` est un **UUID non devinable** - jamais le
    `patient_code`, jamais l'`id` auto-incrémenté. Il faut déjà connaître ce lien
    précis pour tenter quoi que ce soit.
 2. `patients.access_code`, quatre chiffres générés à la création du dossier et
@@ -698,7 +698,7 @@ du porteur du projet ; la sécurité repose donc sur deux couches et non sur une
 Le verrouillage est volontairement **temporaire** : un patient qui se trompe
 deux fois ne doit pas rester bloqué à vie devant ses propres documents.
 
-La page **n'affiche rien** — pas même le nom du patient — tant que le code n'a
+La page **n'affiche rien** - pas même le nom du patient - tant que le code n'a
 pas été validé, et l'accès accordé vit en session côté serveur, pas dans une
 propriété Livewire qui voyagerait avec le client. Le SMS contenant le lien part
 **sur demande explicite** depuis `/reception` ou `/service` (« Envoyer le lien de
@@ -710,7 +710,7 @@ ne voyage jamais par SMS.
 Bouton « Imprimer le ticket » à deux endroits dans `/reception` : juste après
 l'enregistrement, et sur chaque ligne des « Passages du jour » pour une
 réimpression. La vue `resources/views/reception/print-ticket.blade.php` est une
-page autonome — ni barre de navigation, ni navigation verticale — et l'impression
+page autonome - ni barre de navigation, ni navigation verticale - et l'impression
 est déclenchée par `window.print()` côté navigateur, sans PDF serveur :
 l'imprimante est déjà branchée au poste de la réceptionniste.
 
@@ -727,13 +727,13 @@ une imprimante thermique 58-80 mm comme sur une feuille A4.
 `visitors.patient_id` relie un visiteur au patient qu'il vient voir. Le champ
 est **obligatoire dès qu'un service clinique est choisi** (la règle est appliquée
 dans `RegisterVisitor`, pas seulement dans le formulaire) et reste facultatif
-pour un service non clinique — une démarche administrative n'a pas de patient à
+pour un service non clinique - une démarche administrative n'a pas de patient à
 visiter. Le nom du patient visité apparaît sur `/board` et dans les passages du
 jour, pour que le personnel sache qui orienter où.
 
 ### Suppression d'un dossier patient
 
-Opération sensible, réservée à `admin` et à `/admin` — jamais atteignable depuis
+Opération sensible, réservée à `admin` et à `/admin` - jamais atteignable depuis
 `/reception`, `/service` ou `/caisse`, y compris en appelant le composant
 directement.
 
@@ -744,7 +744,7 @@ directement.
   ce n'est pas une donnée du dossier médical.
 - Confirmation en deux temps : l'admin **retape le `patient_code` exact** et
   saisit un **motif obligatoire**. Un simple « Êtes-vous sûr ? » ne protège de
-  rien — on clique oui par réflexe.
+  rien - on clique oui par réflexe.
 - **Jamais journalisée dans `patient_history`** (elle disparaîtrait avec le
   reste) : l'opération est consignée **exclusivement dans le journal d'audit**,
   qui ne référence pas le patient par clé étrangère et lui survit donc. L'entrée
@@ -774,7 +774,7 @@ sur « plateau technique ».
 > deux services cliniques ne se paie plus. Décocher la case sur un type suffit à
 > supprimer l'étape, sans toucher au code.
 
-Trois types sont posés à l'installation — Clinique, Plateau technique, Caisse — et
+Trois types sont posés à l'installation - Clinique, Plateau technique, Caisse - et
 restent structurants : le code les reconnaît par leur **`slug`**, jamais par leur
 libellé. Ils sont donc renommables (« Plateau technique » peut devenir « Examens
 complémentaires ») mais pas supprimables. Un type créé ensuite n'a aucun
@@ -785,7 +785,7 @@ comportement codé, et n'est supprimable que s'il n'est utilisé par aucun servi
 Nouvelle section « Personnel → Types de personnel » dans `/admin`. **Deux chemins
 distincts**, et l'admin voit lequel il emprunte :
 
-1. **`matched_role` renseigné** (`doctor`, `receptionist`, `cashier` — jamais
+1. **`matched_role` renseigné** (`doctor`, `receptionist`, `cashier` - jamais
    `admin`, qui n'a pas vocation à être multiplié) : le type réutilise telle
    quelle une des quatre interfaces déjà construites et testées. Rien ne change
    dans leur fonctionnement, et les personnes continuent d'être créées dans les
@@ -797,8 +797,8 @@ distincts**, et l'admin voit lequel il emprunte :
    `cashiers`, ou `staff_members` s'il est vide). Sans cette correspondance,
    élargir le menu aurait créé des comptes portant le rôle « médecin » avec un
    type « Caissier ». **Un compte ne change pas de rôle en changeant de type** :
-   le formulaire refuse explicitement — changer de rôle change de table, donc
-   d'interface et d'historique — et il faut passer par la suppression du
+   le formulaire refuse explicitement - changer de rôle change de table, donc
+   d'interface et d'historique - et il faut passer par la suppression du
    rattachement, avec ses garde-fous.
 
 2. **`matched_role` vide** : le type reçoit une interface **composée de briques
@@ -825,7 +825,7 @@ adossés à un rôle. La distinction n'est plus « avec ou sans rôle » mais
   (`StaffType::ROLE_CAPABILITIES`), jamais en base : un médecin sans file
   d'attente ni dossier patient n'est plus un médecin. Elles apparaissent
   cochées et verrouillées dans le formulaire, et `normalizeCapabilities()` les
-  réintroduit à l'enregistrement — les décocher depuis le navigateur, ou en
+  réintroduit à l'enregistrement - les décocher depuis le navigateur, ou en
   forger une par requête directe, ne change rien à ce qui est écrit ;
 - les capacités **optionnelles** sont de vrais choix d'organisation : cet
   hôpital fait-il prescrire ses sages-femmes, hospitaliser ses urgentistes ?
@@ -840,7 +840,7 @@ adossés à un rôle. La distinction n'est plus « avec ou sans rôle » mais
 Un type **sans rôle** n'impose rien : tout le catalogue y reste optionnel.
 
 Les sections de `/service`, `/reception` et `/caisse` se plient à ces capacités
-par le **même mécanisme** que `/staff/{slug}` — `User::hasCapability()` — et
+par le **même mécanisme** que `/staff/{slug}` - `User::hasCapability()` - et
 non par une seconde règle à tenir à jour. Masquer une section ne suffisant
 jamais, le trait `RequiresCapability` refuse aussi côté serveur : un composant
 Livewire s'appelle sans passer par le menu.
@@ -850,15 +850,15 @@ partagent le même rôle (« Médecin » et « Sage-femme » adossés à `doctor
 laissé vide, la résolution retombe sur le type d'origine du rôle, de sorte
 qu'un compte antérieur au v3.2.2 en ait toujours un.
 
-**Une seule route pour tous ces types** — `Route::get('/staff/{slug}', StaffInterfaceController::class)`
-— jamais une route générée à la volée : `route:cache` ne verrait pas des routes
+**Une seule route pour tous ces types** - `Route::get('/staff/{slug}', StaffInterfaceController::class)`
+- jamais une route générée à la volée : `route:cache` ne verrait pas des routes
 déclarées depuis la base. Le `slug` n'est qu'une valeur lue en base par une route
 qui existe déjà dans le code.
 
 `EnsureRoleScope` gère ce cas dynamiquement (`role.scope:staff`) : il compare le
 type du compte connecté au slug demandé, avec la **même redirection propre** que
 pour les quatre rôles fixes. Un slug inconnu est traité comme un refus, jamais
-comme un 404 — on ne laisse pas deviner quels types existent en tapant des URL.
+comme un 404 - on ne laisse pas deviner quels types existent en tapant des URL.
 
 Une capacité non cochée n'affiche pas une section vide : elle n'affiche rien, et
 **le composant correspondant refuse dès son montage**. La capacité est un
@@ -866,7 +866,7 @@ garde-fou serveur, pas un filtre d'affichage.
 
 `staff_members` rattache une personne à son type et à son service, sur le modèle
 de `doctors`. Un acte posé par un membre du personnel générique est signé par
-`*_staff_member_id` — **jamais** par `*_doctor_id` : on ne fabrique pas de faux
+`*_staff_member_id` - **jamais** par `*_doctor_id` : on ne fabrique pas de faux
 médecins dans un dossier. Le petit objet `App\Support\Caregiver` traduit une
 fois pour toutes « qui agit » vers le bon couple de colonnes, ce qui évite de
 dupliquer chaque Action en deux versions.
@@ -882,7 +882,7 @@ Au moment de créer un type sans rôle, l'admin voit **un aperçu des sections q
 apparaîtront réellement**, recalculé à chaque case cochée : il doit comprendre ce
 qu'il vient de créer avant qu'un membre du personnel ne s'y connecte. Et les
 combinaisons de capacités sont couvertes par une **suite paramétrée**, pas par un
-test manuel par métier — sinon la surface fonctionnelle grandirait plus vite que
+test manuel par métier - sinon la surface fonctionnelle grandirait plus vite que
 ce qui est vérifié.
 
 ## 13. Hospitalisation et planning de soins
@@ -894,7 +894,7 @@ plusieurs jours.
 ### Salles et capacité
 
 Catalogue administrable dans « Hospitalisation → Salles ». **L'occupation n'est
-jamais stockée** : elle se compte à la volée sur les hospitalisations actives —
+jamais stockée** : elle se compte à la volée sur les hospitalisations actives -
 un compteur en base finit toujours par mentir sur ce qu'il prétend compter.
 
 À l'admission, une salle déjà pleine **avertit sans bloquer** : l'admission passe
@@ -905,7 +905,7 @@ Une salle qui héberge encore quelqu'un n'est pas supprimable.
 ### Admission et sortie
 
 L'admission se déclenche depuis `/service` sur un patient appelé. Elle **clôture
-sa visite en cours** — il quitte la file d'attente — et ouvre une
+sa visite en cours** - il quitte la file d'attente - et ouvre une
 `hospitalizations`, les deux dans la même transaction : un patient hospitalisé
 qui resterait dans une file serait une incohérence visible au tableau
 d'affichage. Une ligne `patient_history` (`hospitalization_admitted`) la place
@@ -914,14 +914,14 @@ sur la même frise chronologique que le reste du dossier.
 La sortie est **bloquée tant qu'il reste des soins `pending`**, avec un message
 explicite : clôturer silencieusement un plan de soins inachevé reviendrait à
 effacer la trace de ce qui n'a pas été fait. Un soin peut être marqué « manqué »
-— il reste alors visible dans le dossier, qualifié plutôt qu'effacé.
+- il reste alors visible dans le dossier, qualifié plutôt qu'effacé.
 
 ### Planning de soins
 
 Le médecin prescrit le soin et sa récurrence ; **il n'assigne pas nommément un
 infirmier à chaque occurrence**. La tâche devient visible pour tout membre du
 personnel dont le type porte `has_care_tasks` et qui est **de garde sur ce
-service au moment présent**, d'après les `schedules` déjà en place — s'appuyer
+service au moment présent**, d'après les `schedules` déjà en place - s'appuyer
 sur les rotations enregistrées plutôt que dupliquer une logique d'assignation qui
 casserait au premier remplacement d'équipe.
 
@@ -936,7 +936,7 @@ restriction d'accès** : un soin ne doit jamais rester bloqué parce que la
 personne désignée est absente.
 
 Un soin dont l'heure est passée sans être marqué s'affiche **en retard**, calculé
-à l'affichage — pas de bascule automatique de statut, donc aucune dépendance à un
+à l'affichage - pas de bascule automatique de statut, donc aucune dépendance à un
 scheduler dans cette version. La traçabilité réelle vient de
 `completed_by_user_id`, renseigné au moment du geste, et chaque soin réalisé
 écrit une ligne `patient_history` (`care_task_completed`) sur la frise du dossier.
@@ -950,19 +950,19 @@ v3.2.3, « Voir et corriger les soins » ouvre la liste des soins d'un séjour d
 **annulable**.
 
 **Rien n'est effacé.** Une correction est journalisée avec son avant et son
-après ; une annulation pose le statut `cancelled` avec son motif — obligatoire —
+après ; une annulation pose le statut `cancelled` avec son motif - obligatoire -
 son auteur et son heure. Les deux écrivent aussi une ligne `patient_history`
 (`care_task_revised`, `care_task_cancelled`) : le dossier d'un patient ne se
 réécrit pas, il s'augmente.
 
 **Qui peut le faire** : le médecin prescripteur, ou un médecin du même service
-porteur de `has_hospitalization` — celui qui tient le service quand le
+porteur de `has_hospitalization` - celui qui tient le service quand le
 prescripteur n'est pas de garde. L'infirmier exécute un soin et peut le marquer
 « manqué » ; décider de son arrêt ne relève pas de lui. Le refus est explicite,
 et le cloisonnement par service précède le contrôle d'accès : un soin d'un autre
 service n'existe pas.
 
-**Un soin annulé ne compte plus nulle part** — ni dans « n soin(s) en attente »,
+**Un soin annulé ne compte plus nulle part** - ni dans « n soin(s) en attente »,
 ni dans les soins qui bloquent une sortie d'hospitalisation, ni sur la feuille de
 garde du personnel (scope `CareTask::countable()`). Il reste lisible au dossier,
 barré, avec son motif. Annuler corrige le compte ; ça ne le maquille pas.
@@ -974,7 +974,7 @@ ligne**, rendue par une icône (`<x-delete-action>`). Elle n'est jamais masquée
 même quand la suppression sera refusée : un bouton qui disparaît sans
 explication laisse l'administrateur devant une case vide, sans savoir si le
 droit lui manque ou si l'action n'a jamais existé. **C'est le serveur qui
-refuse, en disant pourquoi** — un message visible immédiatement, y compris sur
+refuse, en disant pourquoi** - un message visible immédiatement, y compris sur
 tablette où aucune infobulle ne s'affiche au survol.
 
 Les refus en place :
@@ -993,19 +993,19 @@ Pour un compte du personnel, `DeleteStaffAccount` applique une règle simple :
 `*_staff_member_id` sont ce qui dit qui a fait quoi ; les vider rendrait
 anonymes des consultations et des ordonnances déjà signées. Reste donc
 supprimable ce qui doit l'être : le compte créé par erreur, ou jamais utilisé.
-Le planning personnel, lui, part avec le compte — il n'appartient pas au dossier
+Le planning personnel, lui, part avec le compte - il n'appartient pas au dossier
 patient. Un médecin rattaché à plusieurs services ne perd que le rattachement
 retiré ; son compte ne disparaît qu'avec le dernier.
 
 La suppression est journalisée **avant** l'opération, dans l'audit, qui lui
-survit — même principe que pour la suppression d'un dossier patient.
+survit - même principe que pour la suppression d'un dossier patient.
 
 ## 14. Notifications, profil et relèves
 
 ### Cloche de notification
 
 Une cloche dans la barre de marque, sur les cinq interfaces, avec le nombre de
-non-lues en badge et `wire:poll` à dix secondes — même intervalle que le reste
+non-lues en badge et `wire:poll` à dix secondes - même intervalle que le reste
 de l'application, **pas de WebSocket** dans cette version, pour la même raison
 qu'ailleurs : une dépendance de plus à faire tourner sur le VPS pour un gain que
 l'usage n'a pas encore réclamé. Si le délai s'avère trop long en service réel,
@@ -1015,7 +1015,7 @@ Depuis la v3.2.5 l'intervalle est de **cinq secondes**, et toutes les listes de
 travail le partagent. Trois écrans portaient encore leur propre rythme (10 s,
 15 s, 30 s) : un soin prescrit mettait ainsi jusqu'à trente secondes à
 apparaître chez l'infirmier, et la notification arrivait bien avant la tâche
-qu'elle annonçait. Une seule valeur à régler — `KENEYA_POLL_INTERVAL` — si la
+qu'elle annonçait. Une seule valeur à régler - `KENEYA_POLL_INTERVAL` - si la
 charge devenait sensible sur le VPS.
 
 **Cinq déclencheurs**, tous ciblés sur le personnel *effectivement de garde* :
@@ -1030,10 +1030,10 @@ charge devenait sensible sur le VPS.
 
 Le ciblage passe par **`App\Services\OnDutyRoster`**, unique règle de garde de
 l'application. `User::isOnDutyFor()` répondait déjà à « moi, maintenant ? » ; il
-manquait la question inverse — « eux, maintenant ? ». Les deux lisent la même
+manquait la question inverse - « eux, maintenant ? ». Les deux lisent la même
 table et la même fenêtre horaire. `schedules` est le bon support et le seul : il
 porte à la fois la personne et le service, quelle que soit sa table de
-rattachement — médecin, réceptionniste, caissier ou personnel générique y
+rattachement - médecin, réceptionniste, caissier ou personnel générique y
 entrent de la même façon.
 
 L'entrée en file est captée par un **observateur sur `Visit`**, pas par un appel
@@ -1047,7 +1047,7 @@ d'un patient qui n'est jamais entré.
 **Le son** ne part qu'à l'arrivée d'une notification, jamais à chaque sondage :
 le composant garde le dernier total connu et n'émet l'événement
 `notification-nouvelle` que si le nombre augmente. La comparaison est faite dans
-le composant plutôt que dans le navigateur — c'est la même règle, mais celle-ci
+le composant plutôt que dans le navigateur - c'est la même règle, mais celle-ci
 se teste.
 
 Le fichier livré est `public/sounds/notification.wav`, une cloche courte générée
@@ -1058,33 +1058,33 @@ tout, et la cloche reste muette sans erreur.
 
 Les navigateurs refusent de jouer un son tant que la page n'a reçu aucune
 interaction. Le personnel s'étant déjà connecté, la condition est remplie en
-pratique — mais `play()` est quand même enveloppé dans un `catch` : une cloche
+pratique - mais `play()` est quand même enveloppé dans un `catch` : une cloche
 muette vaut mieux qu'une erreur JavaScript dans la console d'un poste de soins.
 
 ### Rappel de rendez-vous
 
 Seul déclencheur qui ne répond à aucun geste humain, donc le seul qui exige une
 tâche périodique : `keneya:rappels-rendez-vous`, toutes les quinze minutes.
-`appointments.reminder_sent_at` garantit **un rappel et un seul** — la commande
+`appointments.reminder_sent_at` garantit **un rappel et un seul** - la commande
 repasse sur une fenêtre qui se recouvre largement.
 
 Le délai est réglable via la table `settings`
 (clé `appointment_reminder_minutes`, 60 minutes par défaut), comme
-`hospital_name` — pas codé en dur : une consultation programmée ne se prépare
+`hospital_name` - pas codé en dur : une consultation programmée ne se prépare
 pas comme un bloc.
 
 ### Carte de profil
 
 L'icône de déconnexion isolée était la seule action du coin supérieur droit, ce
 qui n'y laissait aucune place pour la seule chose qu'un agent ait besoin de faire
-sur son propre compte. Elle cède la place à un **avatar aux initiales** — pas de
-photo à stocker ni à redimensionner — qui ouvre une carte : nom, fonction,
+sur son propre compte. Elle cède la place à un **avatar aux initiales** - pas de
+photo à stocker ni à redimensionner - qui ouvre une carte : nom, fonction,
 service s'il y en a un, adresse e-mail, puis « Changer le mot de passe » et
 « Se déconnecter ».
 
 Le changement de mot de passe vérifie l'actuel **côté serveur** (`Hash::check`),
-impose huit caractères avec lettres et chiffres — rien de plus sévère, un mot de
-passe impossible à retenir finit écrit sur un papier collé à l'écran — puis
+impose huit caractères avec lettres et chiffres - rien de plus sévère, un mot de
+passe impossible à retenir finit écrit sur un papier collé à l'écran - puis
 ferme les autres sessions (`Auth::logoutOtherDevices()`) en gardant la courante.
 L'événement `mot_de_passe_change` est journalisé ; **ni l'ancien mot de passe ni
 le nouveau n'y figurent**, sous aucune forme.
@@ -1102,7 +1102,7 @@ le nouveau n'y figurent**, sous aucune forme.
 Le formulaire présente le service comme facultatif, et il l'est pour lire son
 propre planning. Mais un créneau muet ne rendait de garde pour **aucun** service :
 ni notification, ni soin visible, sans que rien ne le dise. Un planning généré
-avec « Service : — Aucun — » — le choix par défaut — était donc entièrement
+avec « Service : - Aucun - » - le choix par défaut - était donc entièrement
 inopérant.
 
 Depuis la v3.2.5, un tel créneau vaut pour les **services de rattachement** de la
@@ -1114,14 +1114,14 @@ Une réceptionniste ou un caissier n'ont pas de service de rattachement : leur
 créneau doit nommer le service (Accueil, Caisse Ticket…). C'est précisément ce
 pour quoi l'accueil est devenu un service.
 
-La règle vit en un seul endroit, `App\Services\OnDutyRoster` — « moi,
+La règle vit en un seul endroit, `App\Services\OnDutyRoster` - « moi,
 maintenant ? » comme « eux, maintenant ? » y passent, `User::isOnDutyFor()`
 compris.
 
 ### Qui apparaît dans les plannings
 
 Les deux formulaires de « Personnel → Plannings » interrogeaient les **rôles
-Spatie**. Un type de personnel sans rôle — un infirmier, un brancardier — n'en
+Spatie**. Un type de personnel sans rôle - un infirmier, un brancardier - n'en
 porte aucun : il était donc introuvable dans les menus, et **personne ne pouvait
 lui poser un créneau**. Or c'est le planning qui décide de sa garde, donc de
 tout ce qu'il voit. C'était la cause réelle des « soins programmés invisibles
@@ -1130,7 +1130,7 @@ côté infirmier ». Le formulaire jour par jour oubliait en plus les caissiers.
 Les deux formulaires et le filtre partagent désormais **une seule source**,
 `User::staff()` : tout compte porteur d'un rattachement, quelle que soit sa
 table (`doctors`, `receptionists`, `cashiers`, `staff_members`). Le rattachement
-est le bon critère — il existe pour les quatre chemins, là où le rôle n'existe
+est le bon critère - il existe pour les quatre chemins, là où le rôle n'existe
 que pour trois. Un administrateur, qui n'exerce dans aucun service, reste
 naturellement hors de ces menus.
 
@@ -1142,7 +1142,7 @@ Coulibaly (Infirmier) » plutôt qu'une parenthèse vide.
 Une génération groupée produit facilement vingt-deux créneaux ; les retirer un
 par un n'est pas praticable. Une case par ligne, une case « tout sélectionner »
 en tête, et une barre d'actions qui **n'apparaît que lorsqu'une ligne est
-cochée** — une barre toujours présente mais inactive n'apprend rien et vole de
+cochée** - une barre toujours présente mais inactive n'apprend rien et vole de
 la place sur tablette.
 
 Deux garde-fous, tous deux couverts par un test :
@@ -1150,7 +1150,7 @@ Deux garde-fous, tous deux couverts par un test :
 - « tout sélectionner » ne porte que sur **ce qui est affiché** : une case qui
   emporterait aussi des créneaux hors écran est un piège, pas un raccourci ;
 - une sélection devenue invisible après un changement de filtre **n'est pas
-  supprimée** — on n'efface pas ce que l'administrateur ne voit plus.
+  supprimée** - on n'efface pas ce que l'administrateur ne voit plus.
 
 La suppression est journalisée en une ligne récapitulative (« 4 créneau(x)
 supprimés en une fois : Dr Modibo Keita (4) »), pas en quatre lignes séparées.
@@ -1165,7 +1165,7 @@ un tableau vide jusqu'au rechargement suivant.
 La rotation du personnel sur un patient hospitalisé est **déjà réglée
 structurellement**, et c'est vérifié par un test plutôt que supposé :
 « Patients hospitalisés » n'est filtré que par service, jamais par médecin
-admettant, et les soins sont ouverts à tout le personnel de garde —
+admettant, et les soins sont ouverts à tout le personnel de garde -
 l'assignation nommée reste une priorité d'affichage. Aucun mécanisme de
 transfert explicite n'est donc nécessaire.
 
@@ -1177,7 +1177,7 @@ porteurs de `has_care_tasks`. Chaque note écrit une ligne `patient_history`
 (`handoff_note`) : elle fait partie du parcours du patient, pas d'un carnet
 parallèle.
 
-Hors garde, une note **se lit mais ne s'écrit pas** — même règle que les soins,
+Hors garde, une note **se lit mais ne s'écrit pas** - même règle que les soins,
 et dite à l'écran plutôt que subie. Pas de champ « lu par », pas d'accusé de
 réception : une note visible suffit, et exiger une lecture confirmée ajouterait
 une file de plus à traiter pour un besoin que l'usage n'a pas montré.
@@ -1189,11 +1189,11 @@ une file de plus à traiter pour un besoin que l'usage n'a pas montré.
 L'ordonnance était une zone de texte unique, rendue telle quelle à l'impression.
 Elle s'écrit désormais **ligne par ligne** : le médecin remplit médicament,
 posologie et durée, puis « Ajouter une ligne » en ouvre une autre, numérotée.
-Vingt lignes au maximum — un clic resté appuyé n'en crée pas mille.
+Vingt lignes au maximum - un clic resté appuyé n'en crée pas mille.
 
 Les lignes ouvertes mais laissées vides sont écartées à l'enregistrement : le
 médecin peut avoir ouvert une ligne de trop. Une posologie sans médicament est
-refusée — le médicament fait la ligne. La dernière ligne ne disparaît pas quand
+refusée - le médicament fait la ligne. La dernière ligne ne disparaît pas quand
 on la retire, elle se vide : sans champ, le formulaire n'aurait plus rien à
 remplir.
 
@@ -1227,7 +1227,7 @@ grid**, la mise en page repose donc sur des tableaux et des marges.
 La feuille de style est unique, servie telle quelle depuis `public/` : aucun
 pipeline de build front, le serveur peut n'avoir aucune connectivité internet.
 Son ordre est fixe : jetons, base, primitives partagées, puis composants métier.
-**Un composant ne redéfinit jamais une couleur ni un espacement en dur** — il
+**Un composant ne redéfinit jamais une couleur ni un espacement en dur** - il
 puise dans les jetons.
 
 | Famille | Jetons |
@@ -1240,7 +1240,7 @@ puise dans les jetons.
 
 Le mouvement est court (140 ms) et décéléré : sur une tablette, une transition
 longue donne l'impression que l'application rame. **Le survol enrichit, il ne
-conditionne jamais** — un bouton se soulève d'un pixel, une pastille de frise
+conditionne jamais** - un bouton se soulève d'un pixel, une pastille de frise
 grossit, un onglet souligne son libellé, mais rien de tout cela n'est nécessaire
 pour utiliser l'écran au doigt. `prefers-reduced-motion` coupe l'ensemble, y
 compris les déplacements au survol.
@@ -1259,7 +1259,7 @@ versionnés tels quels dans `public/images/` :
 | `keneya-icone-source.svg` | Monogramme seul |
 
 Ce ne sont pas des dessins vectoriels : chacun n'est qu'une **image matricielle
-encodée en base64** dans une balise `<image>` — 506 Ko et 1,3 Mo. Les servir tels
+encodée en base64** dans une balise `<image>` - 506 Ko et 1,3 Mo. Les servir tels
 quels ferait passer 1,8 Mo sur le réseau de l'hôpital au premier chargement. On
 en dérive donc, une fois pour toutes, les fichiers réellement servis :
 
@@ -1267,7 +1267,7 @@ en dérive donc, une fois pour toutes, les fichiers réellement servis :
 |---|---|---|
 | `keneya-logo.png` | Carte de connexion | Fond clair |
 | `keneya-logo-clair.png` | Moniteur de salle d'attente | Fond sombre |
-| `keneya-icone.png` | — | Monogramme, fond clair |
+| `keneya-icone.png` | - | Monogramme, fond clair |
 | `keneya-icone-claire.png` | Barre de navigation, décor de connexion | Fond sombre |
 | `keneya-icone-impression.png` | Ticket, reçu, ordonnance, PDF | Aplati sur du blanc |
 | `favicon.svg`, `favicon.ico`, `apple-touch-icon.png` | Onglet, écran d'accueil | |
@@ -1283,10 +1283,10 @@ python3 scripts/generer-logos.py
 **La déclinaison claire est calculée, pas dessinée.** Le bleu nuit passe au
 blanc, le vert à un vert plus clair. Deux pièges, tous deux visibles à l'œil
 avant d'être corrigés : le passage bleu → vert du W est un dégradé, et un seuil
-net y laissait un bord en dents de scie — la teinte est donc mélangée
+net y laissait un bord en dents de scie - la teinte est donc mélangée
 progressivement ; et les trois pastilles qui prolongent l'arc s'effacent par
 transparence, pas par la couleur, si bien que posées sur un fond sombre elles
-viraient au gris — leur opacité est relevée.
+viraient au gris - leur opacité est relevée.
 
 **La version des impressions est aplatie sur du blanc.** dompdf range la
 transparence d'un PNG dans un masque séparé qu'il ne compresse pas : le fichier
@@ -1327,8 +1327,8 @@ aucun redéploiement n'est nécessaire », « c'est ce qui donne sa valeur au
 journal ») ont été ramenés à ce qui sert : « Ce nom apparaît dans la barre de
 toutes les interfaces et sur les tickets imprimés. », « Lecture seule. »
 
-Le tiret cadratin reste un séparateur — `— Choisir —`, `52 ans — Homme`, une
-valeur absente — jamais une articulation de phrase.
+Le tiret cadratin reste un séparateur - `- Choisir -`, `52 ans - Homme`, une
+valeur absente - jamais une articulation de phrase.
 
 ## 17. Journal d'audit et plannings
 
@@ -1346,22 +1346,22 @@ seules connexions :
   `patients.access_code` et `patients.portal_token` ne figurent jamais dans un
   log.
 - Les actions métier qui ne sont **pas** de simples opérations CRUD portent un
-  log explicite et lisible en français — « Appeler le suivant », « Envoyer vers
+  log explicite et lisible en français - « Appeler le suivant », « Envoyer vers
   un service », « Clôturer un dossier », « Confirmer le paiement et orienter »,
-  « Générer un planning », « Supprimer un dossier » — plutôt qu'un diff
+  « Générer un planning », « Supprimer un dossier » - plutôt qu'un diff
   d'attributs illisible à la relecture.
 - Ces logs sont écrits **après** le commit de leur transaction : un journal ne
   doit jamais mentionner une opération qui a fini par échouer.
 
 Le tableau reste filtrable par utilisateur, par type d'action et par date, et
-paginé — le volume est nettement plus important qu'avant. Il est
+paginé - le volume est nettement plus important qu'avant. Il est
 **en lecture seule sans exception** : le composant n'expose aucune méthode de
-modification ni de suppression, y compris pour l'admin — un journal que l'on
+modification ni de suppression, y compris pour l'admin - un journal que l'on
 peut retoucher ne prouve rien. Un test vérifie l'absence de ces méthodes.
 
 ### Plannings
 
-La gestion complète — créer, modifier, supprimer — est **exclusivement dans
+La gestion complète - créer, modifier, supprimer - est **exclusivement dans
 `/admin`**, avec deux formulaires complémentaires : la saisie jour par jour pour
 les ajustements ponctuels, et une **génération groupée** (`BulkCreateSchedule`)
 qui décrit une plage de dates et les jours de la semaine concernés et crée un
@@ -1374,7 +1374,7 @@ d'un autre.
 ### Identité visuelle
 
 - Page de connexion : formulaire centré sur une image de fond institutionnelle.
-  Le placeholder livré est `public/images/login-background.jpg` — le remplacer
+  Le placeholder livré est `public/images/login-background.jpg` - le remplacer
   par une photo de l'hôpital suffit, aucun code à toucher.
 - Barre de marque sur les quatre interfaces : logo à gauche, **nom de
   l'établissement à droite, lu depuis la table `settings`** et modifiable par
@@ -1395,7 +1395,7 @@ passage et aucune visite n'est orpheline, la suite de tests est au vert, une
 réceptionniste connectée est bien redirigée depuis `/admin`, `/service` et les
 routes de téléchargement, et les plafonds d'envoi sont ordonnés correctement.
 
-Il sort en code 1 dès qu'un contrôle est rouge — utilisable tel quel dans une
+Il sort en code 1 dès qu'un contrôle est rouge - utilisable tel quel dans une
 procédure de mise à jour.
 
 ## 19. Tests
@@ -1432,10 +1432,10 @@ docker compose exec app php artisan test  # avec Docker
 | `StaffTypeInterfaceTest` | Types de personnel, cloisonnement de `/staff/{slug}`, et **suite paramétrée par combinaison de capacités** : seules les sections cochées apparaissent, et une action hors capacité est refusée côté serveur. |
 | `HospitalizationTest` | Admission clôturant la visite, occupation calculée à la volée, salle pleine avertissant sans bloquer, génération groupée de soins, filtrage « de garde », marquage fait/manqué, sortie bloquée tant qu'un soin reste en attente. |
 | `CareTaskRevisionTest` | Correction d'un soin avec son avant/après au journal, annulation motivée d'un soin même déjà administré, exclusion de tous les décomptes, et contrôle d'accès : prescripteur ou médecin du service, jamais l'infirmier de garde. |
-| `StaffCareTasksVisibilityTest` | De la prescription à l'écran réel, par la route `/staff/{slug}` : le soin apparaît, le rattachement au service est ce qui le relie à l'infirmier, et les deux configurations qui font disparaître les soins sont couvertes — capacité non cochée, planning absent, avec l'avertissement côté `/admin`. |
+| `StaffCareTasksVisibilityTest` | De la prescription à l'écran réel, par la route `/staff/{slug}` : le soin apparaît, le rattachement au service est ce qui le relie à l'infirmier, et les deux configurations qui font disparaître les soins sont couvertes - capacité non cochée, planning absent, avec l'avertissement côté `/admin`. |
 | `StaffNotificationTest` | Les cinq déclencheurs, chacun vérifié aussi par la négative : hors garde, autre service, autre rôle. Rappel de rendez-vous dans la fenêtre configurée et une seule fois, son émis au seul incrément du compteur, cloison entre les cloches de deux comptes. |
 | `ProfileCardTest` | Mot de passe actuel incorrect refusé, confirmation et complexité, hash remplacé, journal sans aucune trace du mot de passe, middleware `AuthenticateSession` en place et session concurrente réellement rejetée. |
-| `ReceptionServiceAndDutyTest` | L'accueil comme service exclu des destinations de soins, la réceptionniste de garde, et le créneau sans service qui vaut pour le service de rattachement — sans déborder sur les autres, et sans suffire à qui n'a pas de rattachement. |
+| `ReceptionServiceAndDutyTest` | L'accueil comme service exclu des destinations de soins, la réceptionniste de garde, et le créneau sans service qui vaut pour le service de rattachement - sans déborder sur les autres, et sans suffire à qui n'a pas de rattachement. |
 | `PatientProfessionNoteTest` | Profession et note enregistrées, facultatives, vidées entre deux patients, et relues au dossier par le médecin. |
 | `PrescriptionLinesTest` | Saisie ligne à ligne : ligne vide d'emblée, ajout borné à vingt, dernière ligne qui se vide au lieu de disparaître, lignes vides écartées, posologie sans médicament refusée, relecture d'une ordonnance antérieure, impression numérotée et portail patient. |
 | `PollIntervalTest` | Aucun écran de travail ne porte son propre intervalle : tous suivent `keneya.poll_interval`. |
@@ -1449,7 +1449,7 @@ docker compose exec app php artisan test  # avec Docker
 | `SmsGatewayTest` | Format international, passerelle désactivée ou injoignable. |
 
 Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS. La suite
-a également été passée **contre MariaDB 10.11** — 281 tests au vert — et les
+a également été passée **contre MariaDB 10.11** - 281 tests au vert - et les
 37 migrations ont été vérifiées **dans les deux sens** sur les deux moteurs.
 
 ## 20. Organisation du code
@@ -1500,4 +1500,4 @@ validation et d'erreur.
 
 ---
 
-© AXESs — KƐnƐya WorkFlow.
+© AXESs - KƐnƐya WorkFlow.
