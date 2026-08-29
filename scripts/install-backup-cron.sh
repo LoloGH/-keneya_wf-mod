@@ -19,7 +19,10 @@ MINUTE="${HEURE#*:}"
 HH="${HEURE%%:*}"
 
 MARQUEUR="# keneya-workflow-backup"
-LIGNE="${MINUTE#0} ${HH#0} * * * cd $PROJET && ./scripts/backup.sh $DEST >> $PROJET/storage/logs/backup.log 2>&1 $MARQUEUR"
+# `bash ...` plutot que `./...` : le bit executable peut manquer selon la
+# facon dont le depot a ete recupere, et une tache cron muette est pire
+# qu'une tache absente.
+LIGNE="${MINUTE#0} ${HH#0} * * * cd $PROJET && bash ./scripts/backup.sh $DEST >> $PROJET/storage/logs/backup.log 2>&1 $MARQUEUR"
 
 # On conserve la crontab existante en retirant uniquement notre propre ligne.
 NOUVELLE="$( { crontab -l 2>/dev/null || true; } | grep -v -F "$MARQUEUR" ; echo "$LIGNE" )"
@@ -28,4 +31,4 @@ printf '%s\n' "$NOUVELLE" | crontab -
 
 echo "Tache installee : sauvegarde quotidienne a $HEURE vers $DEST"
 echo "Verification :   crontab -l | grep keneya"
-echo "Premier essai :  cd $PROJET && ./scripts/backup.sh $DEST"
+echo "Premier essai :  cd $PROJET && bash ./scripts/backup.sh $DEST"
