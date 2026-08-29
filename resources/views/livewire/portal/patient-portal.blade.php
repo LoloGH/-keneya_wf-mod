@@ -68,6 +68,12 @@
                                     <li>{{ \App\Models\Prescription::ligneEnTexte($ligne) }}</li>
                                 @endforeach
                             </ol>
+
+                            <a href="{{ route('portal.prescription.pdf', [$patient->portal_token, $ordonnance]) }}"
+                               class="attachments__link">
+                                Telecharger l'ordonnance
+                                <span class="attachments__size">PDF</span>
+                            </a>
                         </li>
                     @endforeach
                 </ul>
