@@ -6,7 +6,9 @@ use App\Actions\RegisterPatient;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Models\Visitor;
+use App\Services\PatientCodeGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use RuntimeException;
 use Tests\TestCase;
 
 /**
@@ -88,5 +90,60 @@ class PatientCodeTest extends TestCase
         $this->assertSame(1, Patient::count());
         $this->assertSame(2, $patient->visits()->count());
         $this->assertSame('HFD-00001', $patient->refresh()->patient_code);
+    }
+
+    // ------------------------------------------- Series a lettre (v3.2.6)
+
+    public function test_la_serie_numerique_passe_a_la_serie_a_apres_99999(): void
+    {
+        Patient::factory()->create(['patient_code' => 'HFD-99999']);
+
+        // 100 000 dossiers ne tiennent pas sur cinq chiffres : une lettre
+        // prend le relais plutot que d'allonger le numero.
+        $this->assertSame('HFD-A0001', app(PatientCodeGenerator::class)->forPatient());
+    }
+
+    public function test_une_serie_a_lettre_s_incremente_sur_quatre_chiffres(): void
+    {
+        Patient::factory()->create(['patient_code' => 'HFD-A0001']);
+
+        $this->assertSame('HFD-A0002', app(PatientCodeGenerator::class)->forPatient());
+    }
+
+    public function test_la_fin_d_une_serie_a_lettre_ouvre_la_suivante(): void
+    {
+        Patient::factory()->create(['patient_code' => 'HFD-A9999']);
+
+        $this->assertSame('HFD-B0001', app(PatientCodeGenerator::class)->forPatient());
+    }
+
+    public function test_l_ordre_suit_le_code_et_non_l_ordre_de_creation(): void
+    {
+        // Un dossier de la serie A cree avant une reprise de la serie
+        // numerique : trier par identifiant redonnerait 00043 pour dernier et
+        // fabriquerait un doublon.
+        Patient::factory()->create(['patient_code' => 'HFD-A0007']);
+        Patient::factory()->create(['patient_code' => 'HFD-00042']);
+
+        $this->assertSame('HFD-A0008', app(PatientCodeGenerator::class)->forPatient());
+    }
+
+    public function test_la_derniere_serie_refuse_d_aller_plus_loin(): void
+    {
+        Patient::factory()->create(['patient_code' => 'HFD-Z9999']);
+
+        // Fabriquer un numero au-dela de Z9999 reviendrait a risquer un
+        // doublon sur un dossier qui vaut a vie.
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Z9999');
+
+        app(PatientCodeGenerator::class)->forPatient();
+    }
+
+    public function test_les_fiches_visiteur_suivent_les_memes_series(): void
+    {
+        Visitor::factory()->create(['visitor_code' => 'HFD-V-99999']);
+
+        $this->assertSame('HFD-V-A0001', app(PatientCodeGenerator::class)->forVisitor());
     }
 }
