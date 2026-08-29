@@ -20,8 +20,16 @@
 
         /* En-tete : l'etablissement domine, le type de document se lit sous
            lui, et le numero de dossier reste a droite ou l'oeil le cherche. */
-        .head { border-bottom: 2px solid #10557f; padding-bottom: 10px; margin-bottom: 16px; }
+        /* `width: 100%` est indispensable : sans elle dompdf ajuste le tableau
+           a son contenu, le filet de l'en-tete s'arrete au milieu de la page et
+           le numero de dossier ne va pas se ranger a droite. */
+        .head { width: 100%; border-bottom: 2px solid #10557f; padding-bottom: 10px; margin-bottom: 16px; }
         .head td { vertical-align: bottom; }
+        /* Le monogramme signe le document sans prendre le pas sur le nom de
+           l'etablissement, qui reste ce que le patient et le pharmacien lisent
+           en premier. dompdf lit l'image sur le disque : un chemin, pas une URL. */
+        .head .logo { width: 46px; }
+        .head .logo img { width: 40px; height: 32px; }
         .head h1 { margin: 0; font-size: 16px; color: #0b3a58; letter-spacing: -.2px; }
         .head .type { margin: 3px 0 0; font-size: 10px; text-transform: uppercase;
                       letter-spacing: 1.4px; color: #4a555d; }
@@ -50,7 +58,7 @@
            seul bloc de texte, sans colonnes a remplir. */
         .lignes .libre { font-weight: normal; }
 
-        .sign { margin-top: 40px; }
+        .sign { width: 100%; margin-top: 40px; }
         .sign td { vertical-align: top; }
         .sign .cachet { width: 45%; font-size: 9px; color: #6f7a83; }
         .sign .cachet .cadre { border: 1px dashed #d3dbe0; height: 62px; margin-top: 4px; }
@@ -68,6 +76,7 @@
 <body>
     <table class="head">
         <tr>
+            <td class="logo"><img src="{{ public_path('images/keneya-icone-impression.png') }}" alt=""></td>
             <td>
                 <h1>{{ $hospitalName }}</h1>
                 <p class="type">Ordonnance medicale</p>

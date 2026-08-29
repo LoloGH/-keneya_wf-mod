@@ -85,7 +85,7 @@
             <rect x="596" y="196" width="140" height="92" rx="8" fill="url(#kw-monitor)" stroke="#2f7fa8" stroke-width="2" />
             <rect x="659" y="288" width="14" height="34" fill="#2a6d92" />
             <rect x="628" y="322" width="76" height="9" rx="4" fill="#2a6d92" />
-            <x-brand-logo variant="light" x="614" y="216" width="104" height="52" />
+            <x-brand-logo svg variant="light" x="614" y="216" width="104" height="52" />
 
             {{-- Dossiers medicaux. --}}
             <rect x="492" y="316" width="76" height="8" rx="3" fill="#e7eff4" />

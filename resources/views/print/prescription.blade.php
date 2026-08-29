@@ -8,7 +8,9 @@
     <style>
         body { margin: 0; padding: 20px; font-family: system-ui, sans-serif; background: #eef2f5; color: #1c2226; }
         .sheet { max-width: 760px; margin: 0 auto; background: #fff; padding: 32px; border-radius: 8px; }
-        .head { border-bottom: 2px solid #0f5c8c; padding-bottom: 12px; margin-bottom: 20px; }
+        .head { display: flex; align-items: center; gap: 14px;
+                border-bottom: 2px solid #0f5c8c; padding-bottom: 12px; margin-bottom: 20px; }
+        .head__logo { flex: 0 0 auto; width: 48px; height: auto; }
         .head h1 { margin: 0; font-size: 1.15rem; color: #0a3f61; }
         .head p { margin: 2px 0 0; color: #454f56; font-size: .9rem; }
         .meta { width: 100%; border-collapse: collapse; margin-bottom: 22px; font-size: .95rem; }
@@ -56,8 +58,12 @@
 <body>
     <div class="sheet">
         <div class="head">
-            <h1>{{ $hospitalName }}</h1>
-            <p>Ordonnance medicale</p>
+            <img class="head__logo" src="{{ asset('images/keneya-icone-impression.png') }}"
+                 alt="" width="200" height="158">
+            <div>
+                <h1>{{ $hospitalName }}</h1>
+                <p>Ordonnance medicale</p>
+            </div>
         </div>
 
         <table class="meta">

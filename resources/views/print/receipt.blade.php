@@ -10,6 +10,9 @@
                color: #10171c; display: flex; flex-direction: column; align-items: center; gap: 14px; }
         .ticket { width: 100%; max-width: 44ch; background: #fff; padding: 14px 16px;
                   border: 1px solid #ccd4d9; border-radius: 6px; }
+        /* Le monogramme coiffe le ticket. Volontairement petit : sur un rouleau
+           thermique il sort en niveaux de gris, il doit rester net. */
+        .ticket__logo { display: block; width: 52px; height: auto; margin: 0 auto 6px; }
         .ticket__hospital { margin: 0; font-size: 1rem; font-weight: 700; text-align: center; }
         .ticket__product { margin: 2px 0 10px; font-size: .72rem; text-align: center; color: #5a656d; }
         .ticket__rule { border: 0; border-top: 1px dashed #9aa5ac; margin: 10px 0; }
@@ -31,6 +34,8 @@
 </head>
 <body>
     <div class="ticket">
+        <img class="ticket__logo" src="{{ asset('images/keneya-icone-impression.png') }}"
+             alt="" width="200" height="158">
         <p class="ticket__hospital">{{ $hospitalName }}</p>
         <p class="ticket__product">{{ config('keneya.name') }}</p>
         <hr class="ticket__rule">
