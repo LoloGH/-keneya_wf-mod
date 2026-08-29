@@ -7,7 +7,9 @@
     <style>
         body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: #eef2f5; color: #10171c; }
         .sheet { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; }
-        .sheet__head { border-bottom: 2px solid #0f5c8c; padding-bottom: 10px; margin-bottom: 16px; }
+        .sheet__head { display: flex; align-items: center; gap: 14px;
+                       border-bottom: 2px solid #0f5c8c; padding-bottom: 10px; margin-bottom: 16px; }
+        .sheet__head__logo { flex: 0 0 auto; width: 44px; height: auto; }
         .sheet__head h1 { margin: 0; font-size: 1.1rem; color: #0a3f61; }
         .sheet__head p { margin: 2px 0 0; font-size: .85rem; color: #5a656d; }
         .sheet img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
@@ -32,12 +34,16 @@
 <body>
     <div class="sheet">
         <div class="sheet__head">
+            <img class="sheet__head__logo" src="{{ asset('images/keneya-icone-impression.png') }}"
+                 alt="" width="200" height="158">
+            <div>
             <h1>{{ $hospitalName }}</h1>
             <p>
                 {{ $attachment->original_name }} —
                 dossier {{ $attachment->patient->patient_code }} —
                 {{ $attachment->created_at->format('d/m/Y H:i') }}
             </p>
+            </div>
         </div>
 
         @if ($attachment->isImage())

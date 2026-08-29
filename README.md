@@ -1248,6 +1248,65 @@ compris les déplacements au survol.
 L'anneau de focus est unique pour toute l'application et visible aussi bien sur
 fond clair que sur le bleu nuit de la barre.
 
+### Le logo
+
+Le logo est fourni par le porteur du projet. Ses deux fichiers d'origine sont
+versionnés tels quels dans `public/images/` :
+
+| Fichier | Contenu |
+|---|---|
+| `keneya-logo-source.svg` | Logo complet : monogramme + « KƐNƐYA WORKFLOW » |
+| `keneya-icone-source.svg` | Monogramme seul |
+
+Ce ne sont pas des dessins vectoriels : chacun n'est qu'une **image matricielle
+encodée en base64** dans une balise `<image>` — 506 Ko et 1,3 Mo. Les servir tels
+quels ferait passer 1,8 Mo sur le réseau de l'hôpital au premier chargement. On
+en dérive donc, une fois pour toutes, les fichiers réellement servis :
+
+| Fichier | Où | Pourquoi |
+|---|---|---|
+| `keneya-logo.png` | Carte de connexion | Fond clair |
+| `keneya-logo-clair.png` | Moniteur de salle d'attente | Fond sombre |
+| `keneya-icone.png` | — | Monogramme, fond clair |
+| `keneya-icone-claire.png` | Barre de navigation, décor de connexion | Fond sombre |
+| `keneya-icone-impression.png` | Ticket, reçu, ordonnance, PDF | Aplati sur du blanc |
+| `favicon.svg`, `favicon.ico`, `apple-touch-icon.png` | Onglet, écran d'accueil | |
+
+`php artisan` n'y touche pas : la dérivation se relance à la main, et seulement
+si le porteur du projet fournit de nouveaux fichiers d'origine.
+
+```bash
+pip install pillow numpy
+python3 scripts/generer-logos.py
+```
+
+**La déclinaison claire est calculée, pas dessinée.** Le bleu nuit passe au
+blanc, le vert à un vert plus clair. Deux pièges, tous deux visibles à l'œil
+avant d'être corrigés : le passage bleu → vert du W est un dégradé, et un seuil
+net y laissait un bord en dents de scie — la teinte est donc mélangée
+progressivement ; et les trois pastilles qui prolongent l'arc s'effacent par
+transparence, pas par la couleur, si bien que posées sur un fond sombre elles
+viraient au gris — leur opacité est relevée.
+
+**La version des impressions est aplatie sur du blanc.** dompdf range la
+transparence d'un PNG dans un masque séparé qu'il ne compresse pas : le fichier
+des écrans, transparent et cinq fois plus grand, ajoutait une centaine de
+kilo-octets à chaque ordonnance PDF. Le papier étant blanc, la transparence n'y
+sert à rien.
+
+Tout passe par un seul composant, `<x-brand-logo>` :
+
+```blade
+<x-brand-logo />                          {{-- monogramme couleur --}}
+<x-brand-logo variant="light" />          {{-- monogramme clair --}}
+<x-brand-logo lockup variant="color" />   {{-- logo complet --}}
+<x-brand-logo svg x="10" y="10" ... />    {{-- à l'intérieur d'un <svg> --}}
+```
+
+`svg` sert au décor de la page de connexion, où le logo est posé dans une
+illustration : une balise `<img>` n'a pas cours à l'intérieur d'un `<svg>`, il
+faut un `<image>`.
+
 ### Deux choix de mise en page qui portent le reste
 
 **La file d'attente est une grille explicite**, pas un `flex` qui se rabat. Avec
