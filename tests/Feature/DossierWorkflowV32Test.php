@@ -304,7 +304,7 @@ class DossierWorkflowV32Test extends TestCase
         );
 
         $this->travelTo(now()->setTime(10, 0));
-        app(CreatePrescription::class)->execute($visit, $doctor, 'Amoxicilline 1 g.');
+        app(CreatePrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
 
         $this->travelTo(now()->setTime(11, 0));
         app(StoreAttachment::class)->executeForPatient(
@@ -347,7 +347,7 @@ class DossierWorkflowV32Test extends TestCase
         $patient = Patient::factory()->create();
         $visit = $this->makeVisit($service, [], $patient);
 
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, 'Amoxicilline 1 g.');
+        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
 
         $piece = app(StoreAttachment::class)->executeForPatient(
             UploadedFile::fake()->create('scanner.pdf', 30, 'application/pdf'),
@@ -370,14 +370,18 @@ class DossierWorkflowV32Test extends TestCase
         $patient = Patient::factory()->create(['name' => 'Moussa Keita']);
         $visit = $this->makeVisit($service, [], $patient);
 
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, 'Amoxicilline 1 g, matin et soir.');
+        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g', 'posologie' => 'matin et soir']]);
 
         $this->actingAs($doctor->user)
             ->get(route('service.prescription.print', $prescription))
             ->assertOk()
             ->assertSee('Moussa Keita')
             ->assertSee($patient->patient_code)
-            ->assertSee('Amoxicilline 1 g, matin et soir.')
+            // Chaque ligne a sa colonne : le medicament et la posologie ne
+            // sont plus un seul bloc de texte.
+            ->assertSee('Amoxicilline 1 g')
+            ->assertSee('matin et soir')
+            ->assertSee('Signature du medecin')
             ->assertSee('window.print()', escape: false);
     }
 
@@ -390,7 +394,7 @@ class DossierWorkflowV32Test extends TestCase
         $intrus = $this->makeDoctor($autre);
 
         $visit = $this->makeVisit($service);
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, 'Amoxicilline 1 g.');
+        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
 
         $this->actingAs($intrus->user)
             ->get(route('service.prescription.print', $prescription))

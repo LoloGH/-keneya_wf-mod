@@ -13,11 +13,29 @@
         .head p { margin: 2px 0 0; color: #454f56; font-size: .9rem; }
         .meta { width: 100%; border-collapse: collapse; margin-bottom: 22px; font-size: .95rem; }
         .meta td { padding: 4px 0; vertical-align: top; }
-        .meta .label { color: #6d7880; width: 150px; text-transform: uppercase; font-size: .72rem; letter-spacing: .04em; }
-        .content { border: 1px solid #ccd4d9; border-radius: 6px; padding: 18px; min-height: 260px;
-                   white-space: pre-wrap; line-height: 1.65; }
-        .sign { margin-top: 40px; text-align: right; }
-        .sign .line { display: inline-block; border-top: 1px solid #454f56; padding-top: 6px; min-width: 240px; }
+        .meta .label { color: #6f7a83; width: 150px; text-transform: uppercase; font-size: .72rem; letter-spacing: .05em; }
+
+        /* Le tableau des lignes est le corps du document : chacune porte son
+           rang, comme a la lecture au comptoir de la pharmacie. */
+        .lignes { width: 100%; border-collapse: collapse; }
+        .lignes thead th {
+            font-size: .7rem; text-transform: uppercase; letter-spacing: .06em;
+            color: #6f7a83; text-align: left; font-weight: 400;
+            border-bottom: 1px solid #10557f; padding: 0 8px 6px;
+        }
+        .lignes td { padding: 10px 8px; border-bottom: 1px solid #e6ebee; vertical-align: top; }
+        .lignes .rang { width: 28px; color: #10557f; font-weight: 700; text-align: center; }
+        .lignes .medicament { font-weight: 700; }
+        .lignes .duree { width: 110px; white-space: nowrap; }
+        .lignes .vide { color: #97a2aa; }
+
+        .sign { display: flex; justify-content: space-between; gap: 24px; margin-top: 44px; }
+        .sign .cachet { font-size: .72rem; color: #6f7a83; }
+        .sign .cachet .cadre { border: 1px dashed #d3dbe0; height: 70px; width: 190px; margin-top: 4px; }
+        .sign .medecin { align-self: flex-end; text-align: right; }
+        .sign .medecin .trait { border-top: 1px solid #4a555d; padding-top: 6px; min-width: 220px; }
+        .sign .medecin strong { display: block; }
+        .sign .medecin span { font-size: .72rem; color: #6f7a83; }
         .foot { margin-top: 26px; font-size: .72rem; color: #6d7880; text-align: center; }
         .actions { max-width: 760px; margin: 14px auto 0; display: flex; gap: 8px; }
         .actions a, .actions button {
@@ -39,7 +57,7 @@
     <div class="sheet">
         <div class="head">
             <h1>{{ $hospitalName }}</h1>
-            <p>{{ config('keneya.name') }} — Ordonnance</p>
+            <p>Ordonnance medicale</p>
         </div>
 
         <table class="meta">
@@ -53,11 +71,49 @@
                 <td>{{ $prescription->created_at->format('d/m/Y H:i') }}</td></tr>
         </table>
 
-        <div class="content">{{ $prescription->content }}</div>
+        @php $lignes = $prescription->lignes(); @endphp
 
-        <div class="sign"><div class="line">{{ $prescription->doctor->name() }}</div></div>
+        <table class="lignes">
+            <thead>
+                <tr>
+                    <th class="rang">N&deg;</th>
+                    <th>Medicament</th>
+                    <th>Posologie</th>
+                    <th class="duree">Duree</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($lignes as $rang => $ligne)
+                    <tr>
+                        <td class="rang">{{ $rang + 1 }}</td>
+                        <td class="medicament">{{ $ligne['medicament'] }}</td>
+                        <td>{{ $ligne['posologie'] }}</td>
+                        <td class="duree">{{ $ligne['duree'] }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4" class="vide">Aucune ligne.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
 
-        <div class="foot">Document genere par {{ config('keneya.name') }} — {{ $hospitalName }}</div>
+        <div class="sign">
+            <div class="cachet">
+                Cachet de l'etablissement
+                <div class="cadre"></div>
+            </div>
+            <div class="medecin">
+                <div class="trait">
+                    <strong>{{ $prescription->doctor->name() }}</strong>
+                    <span>Signature du medecin</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="foot">
+            {{ config('keneya.name') }} &middot; {{ $hospitalName }} &middot;
+            Ordonnance {{ $prescription->patient->patient_code }}
+            du {{ $prescription->created_at->format('d/m/Y') }} a {{ $prescription->created_at->format('H:i') }}
+        </div>
     </div>
 
     {{-- $pdfUrl reste nul pour les roles qui n'ont pas la route PDF : la vue

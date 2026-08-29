@@ -27,11 +27,12 @@ patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kay
 12. [Catalogues administrables et interfaces générées](#12-catalogues-administrables-et-interfaces-générées)
 13. [Hospitalisation et planning de soins](#13-hospitalisation-et-planning-de-soins)
 14. [Notifications, profil et relèves](#14-notifications-profil-et-relèves)
-15. [Langage visuel](#15-langage-visuel)
-16. [Journal d'audit et plannings](#16-journal-daudit-et-plannings)
-17. [Vérification d'un déploiement](#17-vérification-dun-déploiement)
-18. [Tests](#18-tests)
-19. [Organisation du code](#19-organisation-du-code)
+15. [Ordonnances et documents imprimés](#15-ordonnances-et-documents-imprimés)
+16. [Langage visuel](#16-langage-visuel)
+17. [Journal d'audit et plannings](#17-journal-daudit-et-plannings)
+18. [Vérification d'un déploiement](#18-vérification-dun-déploiement)
+19. [Tests](#19-tests)
+20. [Organisation du code](#20-organisation-du-code)
 
 ---
 
@@ -426,7 +427,7 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 | `doctors` | Rattachement d'un compte à un service, réaffectable à tout moment. Un médecin multi-services a plusieurs lignes. |
 | `receptionists` | Rattachement d'un compte au rôle d'accueil. |
 | `cashiers` | Rattachement d'un compte au rôle de caissier, sur le modèle de `receptionists`. |
-| **`patients`** | **Identité permanente et rien d'autre** : profession, note libre de l'accueil, : `patient_code` (`HFD-00001`) à vie, `crno` (dossier papier), plus `access_code` (4 chiffres) et `portal_token` (UUID) pour le portail. |
+| **`patients`** | **Identité permanente et rien d'autre** : `patient_code` (`HFD-00001`) à vie, `crno` (dossier papier), profession, note libre de l'accueil, plus `access_code` (4 chiffres) et `portal_token` (UUID) pour le portail. |
 | **`visits`** | **Un passage / épisode de soins** : service courant, ticket, statut (`waiting`, `called`, `closed`), ouverture et clôture, plus `pending_next_service_id` — la destination qui attend le paiement. |
 | `companions` | Accompagnateurs d'un patient. Information non médicale, sans ticket propre. |
 | `visitors` | Fiche visiteur (`HFD-V-00001`), avec ticket dans la file du service visité et **le patient visité** (`patient_id`, facultatif hors service clinique). |
@@ -435,7 +436,7 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 | `patient_history` | Journal **append-only** du parcours, ancré sur la visite. `type` couvre aussi `consultation_conclusion`, `payment_confirmed`, `hospitalization_admitted`, `hospitalization_discharged` et `care_task_completed`. Signé par `doctor_id` **ou** `staff_member_id`. |
 | `attachments` | Pièces jointes (PDF, JPG, PNG). `patient_id` est le point d'ancrage ; `referral_id` et `patient_history_id` ne sont renseignés qu'en contexte. |
 | `payments` | Encaissements, en FCFA sans décimales : `ticket` (consultation) ou `service` (acte). |
-| `prescriptions` | Ordonnances en texte libre, exportables en PDF. |
+| `prescriptions` | Ordonnances **ligne par ligne** (`lines`, JSON : médicament, posologie, durée), exportables en PDF. `content` ne sert plus qu'aux ordonnances antérieures à la v3.2.6. |
 | `appointments` | Rendez-vous : `scheduled`, `checked_in`, `no_show`, `cancelled`. |
 | `schedules` | Créneaux de travail du personnel. |
 | `settings` | Réglages modifiables sans redéploiement (nom de l'établissement). |
@@ -452,6 +453,18 @@ Trois garanties structurelles :
 - **L'identité ne porte aucun état de passage.** Un patient qui revient six mois
   plus tard ouvre une nouvelle `visits` sous le même `patient_code` : l'épisode
   précédent reste intact et consultable, distinct du nouveau.
+
+**Les séries de numérotation (v3.2.6).** La première série va de `HFD-00001` à
+`HFD-99999`. Au-delà, une lettre prend le relais : `HFD-A0001` à `HFD-A9999`,
+puis `HFD-B0001`, jusqu'à `HFD-Z9999`. Le numéro reste court — dictable au
+téléphone, lisible sur un ticket thermique — et la capacité passe à un peu plus
+de 350 000 dossiers.
+
+Le générateur ordonne sur le **code lui-même**, pas sur l'identifiant de ligne :
+dès qu'un dossier de la série A précède une reprise de la série numérique, trier
+par `id` redonnerait un numéro déjà pris. Au bout de `Z9999` il s'arrête avec un
+message explicite plutôt que de fabriquer un numéro ambigu — un numéro de
+dossier vaut à vie, un doublon ne se rattrape pas.
 
 Les migrations `2025_04_01_*` ajoutent la couche v3.2.1 : les types de service
 (avec conversion des trois valeurs de l'ancien `enum`), les types de personnel,
@@ -1169,7 +1182,47 @@ et dite à l'écran plutôt que subie. Pas de champ « lu par », pas d'accusé 
 réception : une note visible suffit, et exiger une lecture confirmée ajouterait
 une file de plus à traiter pour un besoin que l'usage n'a pas montré.
 
-## 15. Langage visuel
+## 15. Ordonnances et documents imprimés
+
+### L'ordonnance s'écrit ligne par ligne
+
+L'ordonnance était une zone de texte unique, rendue telle quelle à l'impression.
+Elle s'écrit désormais **ligne par ligne** : le médecin remplit médicament,
+posologie et durée, puis « Ajouter une ligne » en ouvre une autre, numérotée.
+Vingt lignes au maximum — un clic resté appuyé n'en crée pas mille.
+
+Les lignes ouvertes mais laissées vides sont écartées à l'enregistrement : le
+médecin peut avoir ouvert une ligne de trop. Une posologie sans médicament est
+refusée — le médicament fait la ligne. La dernière ligne ne disparaît pas quand
+on la retire, elle se vide : sans champ, le formulaire n'aurait plus rien à
+remplir.
+
+Les lignes vivent dans une colonne JSON (`prescriptions.lines`) plutôt que dans
+une table dédiée : elles ne sont jamais interrogées seules, toujours lues avec
+leur ordonnance. Même choix que pour `staff_types.capabilities`.
+
+**Une ordonnance porte ses lignes, ou son ancien texte, jamais les deux.**
+`Prescription::lignes()` est le seul point de lecture : il rend les lignes
+telles quelles, ou découpe le texte libre d'une ordonnance antérieure en lignes
+sans posologie ni durée distinctes. L'affichage et l'impression n'ont ainsi
+qu'un seul chemin à connaître.
+
+### Les documents imprimés
+
+Trois documents sortent de l'application, tous rendus en HTML : le **ticket** et
+le **reçu** au format ticket (44 caractères de large, du 58-80 mm au A4 sans
+supposer un format précis), et l'**ordonnance** en A4, à l'écran comme en PDF via
+dompdf.
+
+L'ordonnance porte l'établissement en tête, le numéro de dossier à droite où
+l'œil le cherche, les quatre renseignements du passage sur une ligne, puis le
+tableau numéroté des lignes. En pied : un cadre pour le cachet de
+l'établissement et un trait de signature nommé.
+
+Rien n'y est laissé au navigateur côté PDF : **dompdf ne connaît ni flexbox ni
+grid**, la mise en page repose donc sur des tableaux et des marges.
+
+## 16. Langage visuel
 
 La feuille de style est unique, servie telle quelle depuis `public/` : aucun
 pipeline de build front, le serveur peut n'avoir aucune connectivité internet.
@@ -1218,7 +1271,7 @@ toutes les interfaces et sur les tickets imprimés. », « Lecture seule. »
 Le tiret cadratin reste un séparateur — `— Choisir —`, `52 ans — Homme`, une
 valeur absente — jamais une articulation de phrase.
 
-## 16. Journal d'audit et plannings
+## 17. Journal d'audit et plannings
 
 ### Journal d'audit
 
@@ -1268,7 +1321,7 @@ d'un autre.
   l'établissement à droite, lu depuis la table `settings`** et modifiable par
   l'admin sans redéploiement. Aucun lien de navigation croisée n'y figure.
 
-## 17. Vérification d'un déploiement
+## 18. Vérification d'un déploiement
 
 Avant de remplacer une version en service, un script enchaîne les contrôles et
 rend un verdict :
@@ -1286,7 +1339,7 @@ routes de téléchargement, et les plafonds d'envoi sont ordonnés correctement.
 Il sort en code 1 dès qu'un contrôle est rouge — utilisable tel quel dans une
 procédure de mise à jour.
 
-## 18. Tests
+## 19. Tests
 
 ```bash
 php artisan test                          # sans Docker
@@ -1325,6 +1378,7 @@ docker compose exec app php artisan test  # avec Docker
 | `ProfileCardTest` | Mot de passe actuel incorrect refusé, confirmation et complexité, hash remplacé, journal sans aucune trace du mot de passe, middleware `AuthenticateSession` en place et session concurrente réellement rejetée. |
 | `ReceptionServiceAndDutyTest` | L'accueil comme service exclu des destinations de soins, la réceptionniste de garde, et le créneau sans service qui vaut pour le service de rattachement — sans déborder sur les autres, et sans suffire à qui n'a pas de rattachement. |
 | `PatientProfessionNoteTest` | Profession et note enregistrées, facultatives, vidées entre deux patients, et relues au dossier par le médecin. |
+| `PrescriptionLinesTest` | Saisie ligne à ligne : ligne vide d'emblée, ajout borné à vingt, dernière ligne qui se vide au lieu de disparaître, lignes vides écartées, posologie sans médicament refusée, relecture d'une ordonnance antérieure, impression numérotée et portail patient. |
 | `PollIntervalTest` | Aucun écran de travail ne porte son propre intervalle : tous suivent `keneya.poll_interval`. |
 | `ScheduleStaffCoverageTest` | Le personnel générique et les caissiers proposés dans **les deux** formulaires de planning, listes identiques, libellé sans parenthèse vide, rafraîchissement après génération, et suppression groupée avec ses deux garde-fous (sélection limitée à l'affiché, sélection invisible épargnée). |
 | `HandoffNoteTest` | La visibilité par service n'est pas restreinte au médecin admettant (vérifié avant de rien construire), note lue par l'équipe suivante, ligne `patient_history`, refus hors garde et sur séjour clôturé. |
@@ -1339,7 +1393,7 @@ Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS. La suite
 a également été passée **contre MariaDB 10.11** — 281 tests au vert — et les
 37 migrations ont été vérifiées **dans les deux sens** sur les deux moteurs.
 
-## 19. Organisation du code
+## 20. Organisation du code
 
 Aucune logique métier ne vit dans les vues Blade ou Livewire : les composants
 valident puis délèguent à une action ou à un service.

@@ -255,7 +255,7 @@ class StaffTypeCapabilitiesTest extends TestCase
         Livewire::actingAs($user)
             ->test(ConsultationActions::class, ['serviceId' => $service->getKey()])
             ->set('visitId', $visit->getKey())
-            ->set('prescription', 'Paracetamol 500 mg.')
+            ->set('prescriptionLines.0.medicament', 'Paracetamol 500 mg')
             ->call('savePrescription')
             ->assertStatus(403);
     }

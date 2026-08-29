@@ -1,55 +1,143 @@
+{{-- Ordonnance au format A4, rendue par dompdf.
+
+     Rien n'y est laisse au navigateur : dompdf ne connait ni flexbox ni
+     grid, la mise en page repose donc sur des tableaux et des marges. --}}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="utf-8">
     <title>Ordonnance {{ $prescription->patient->patient_code }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #1c2226; margin: 0; padding: 32px; }
-        .head { border-bottom: 2px solid #0f5c8c; padding-bottom: 12px; margin-bottom: 20px; }
-        .head h1 { margin: 0; font-size: 18px; color: #0a3f61; }
-        .head p { margin: 2px 0 0; color: #454f56; }
-        .meta { width: 100%; margin-bottom: 22px; border-collapse: collapse; }
-        .meta td { padding: 4px 0; vertical-align: top; }
-        .meta .label { color: #6d7880; width: 130px; text-transform: uppercase; font-size: 10px; letter-spacing: .04em; }
-        .content { border: 1px solid #ccd4d9; border-radius: 6px; padding: 16px; min-height: 260px; white-space: pre-wrap; line-height: 1.6; }
-        .sign { margin-top: 36px; text-align: right; }
-        .sign .line { display: inline-block; border-top: 1px solid #454f56; padding-top: 6px; min-width: 220px; }
-        .foot { margin-top: 28px; font-size: 10px; color: #6d7880; text-align: center; }
+        @page { margin: 18mm 16mm; }
+
+        body {
+            font-family: "DejaVu Sans", sans-serif;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #14191d;
+            margin: 0;
+        }
+
+        /* En-tete : l'etablissement domine, le type de document se lit sous
+           lui, et le numero de dossier reste a droite ou l'oeil le cherche. */
+        .head { border-bottom: 2px solid #10557f; padding-bottom: 10px; margin-bottom: 16px; }
+        .head td { vertical-align: bottom; }
+        .head h1 { margin: 0; font-size: 16px; color: #0b3a58; letter-spacing: -.2px; }
+        .head .type { margin: 3px 0 0; font-size: 10px; text-transform: uppercase;
+                      letter-spacing: 1.4px; color: #4a555d; }
+        .head .dossier { text-align: right; font-size: 10px; color: #4a555d; }
+        .head .dossier strong { display: block; font-size: 14px; color: #14191d; letter-spacing: .5px; }
+
+        .meta { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+        .meta td { padding: 3px 12px 3px 0; vertical-align: top; }
+        .meta .label { color: #6f7a83; font-size: 9px; text-transform: uppercase; letter-spacing: .8px; }
+
+        /* Le tableau des lignes : c'est le corps du document. Chaque ligne
+           porte son rang, comme a la lecture au comptoir. */
+        .lignes { width: 100%; border-collapse: collapse; }
+        .lignes thead th {
+            font-size: 9px; text-transform: uppercase; letter-spacing: .8px;
+            color: #6f7a83; text-align: left; font-weight: normal;
+            border-bottom: 1px solid #10557f; padding: 0 6px 5px;
+        }
+        .lignes td { padding: 8px 6px; border-bottom: 1px solid #e6ebee; vertical-align: top; }
+        .lignes .rang { width: 22px; color: #10557f; font-weight: bold; text-align: center; }
+        .lignes .medicament { font-weight: bold; }
+        .lignes .duree { width: 90px; white-space: nowrap; }
+        .lignes .vide { color: #97a2aa; }
+
+        /* Les lignes reprises d'une ordonnance ecrite avant la v3.2.6 : un
+           seul bloc de texte, sans colonnes a remplir. */
+        .lignes .libre { font-weight: normal; }
+
+        .sign { margin-top: 40px; }
+        .sign td { vertical-align: top; }
+        .sign .cachet { width: 45%; font-size: 9px; color: #6f7a83; }
+        .sign .cachet .cadre { border: 1px dashed #d3dbe0; height: 62px; margin-top: 4px; }
+        .sign .medecin { width: 45%; text-align: right; }
+        .sign .medecin .trait { border-top: 1px solid #4a555d; padding-top: 5px; margin-top: 52px; }
+        .sign .medecin strong { display: block; }
+        .sign .medecin span { font-size: 9px; color: #6f7a83; }
+
+        .foot {
+            position: fixed; bottom: -8mm; left: 0; right: 0;
+            font-size: 8px; color: #97a2aa; text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div class="head">
-        <h1>{{ $hospitalName }}</h1>
-        <p>{{ $productName }} — Ordonnance</p>
-    </div>
+    <table class="head">
+        <tr>
+            <td>
+                <h1>{{ $hospitalName }}</h1>
+                <p class="type">Ordonnance medicale</p>
+            </td>
+            <td class="dossier">
+                Dossier
+                <strong>{{ $prescription->patient->patient_code }}</strong>
+            </td>
+        </tr>
+    </table>
 
     <table class="meta">
         <tr>
             <td class="label">Patient</td>
-            <td><strong>{{ $prescription->patient->name }}</strong> ({{ $prescription->patient->patient_code }})</td>
-        </tr>
-        <tr>
-            <td class="label">Age / Sexe</td>
-            <td>{{ $prescription->patient->age }} ans — {{ $prescription->patient->gender }}</td>
-        </tr>
-        <tr>
+            <td class="label">Age et sexe</td>
             <td class="label">Service</td>
-            <td>{{ $prescription->visit?->service?->name ?? '—' }}</td>
+            <td class="label">Date</td>
         </tr>
         <tr>
-            <td class="label">Date</td>
-            <td>{{ $prescription->created_at->format('d/m/Y H:i') }}</td>
+            <td><strong>{{ $prescription->patient->name }}</strong></td>
+            <td>{{ $prescription->patient->age }} ans, {{ $prescription->patient->gender }}</td>
+            <td>{{ $prescription->visit?->service?->name ?? 'Non precise' }}</td>
+            <td>{{ $prescription->created_at->format('d/m/Y') }}</td>
         </tr>
     </table>
 
-    <div class="content">{{ $prescription->content }}</div>
+    @php $lignes = $prescription->lignes(); @endphp
 
-    <div class="sign">
-        <div class="line">{{ $prescription->doctor->name() }}</div>
-    </div>
+    <table class="lignes">
+        <thead>
+            <tr>
+                <th class="rang">N&deg;</th>
+                <th>Medicament</th>
+                <th>Posologie</th>
+                <th class="duree">Duree</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($lignes as $rang => $ligne)
+                <tr>
+                    <td class="rang">{{ $rang + 1 }}</td>
+                    <td class="medicament">{{ $ligne['medicament'] }}</td>
+                    <td>{{ $ligne['posologie'] ?: '' }}</td>
+                    <td class="duree">{{ $ligne['duree'] ?: '' }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="4" class="vide">Aucune ligne.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <table class="sign">
+        <tr>
+            <td class="cachet">
+                Cachet de l'etablissement
+                <div class="cadre"></div>
+            </td>
+            <td></td>
+            <td class="medecin">
+                <div class="trait">
+                    <strong>{{ $prescription->doctor->name() }}</strong>
+                    <span>Signature du medecin</span>
+                </div>
+            </td>
+        </tr>
+    </table>
 
     <div class="foot">
-        Document genere par {{ $productName }} — {{ $hospitalName }}
+        {{ $productName }} &middot; {{ $hospitalName }} &middot;
+        Ordonnance {{ $prescription->patient->patient_code }} du {{ $prescription->created_at->format('d/m/Y') }} a {{ $prescription->created_at->format('H:i') }}
     </div>
 </body>
 </html>

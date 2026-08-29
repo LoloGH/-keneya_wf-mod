@@ -38,7 +38,20 @@ class ConsultationActions extends Component
 
     public string $conclusion = '';
 
-    public string $prescription = '';
+    /**
+     * Lignes de l'ordonnance en cours de saisie (v3.2.6).
+     *
+     * Une ligne vide est ouverte d'emblee : le medecin n'a pas a cliquer pour
+     * commencer a ecrire.
+     *
+     * @var array<int, array{medicament: string, posologie: string, duree: string}>
+     */
+    public array $prescriptionLines = [self::LIGNE_VIDE];
+
+    /** Garde-fou : une ordonnance n'a pas cinquante lignes. */
+    public const MAX_LIGNES = 20;
+
+    private const LIGNE_VIDE = ['medicament' => '', 'posologie' => '', 'duree' => ''];
 
     public string $appointmentAt = '';
 
@@ -56,7 +69,8 @@ class ConsultationActions extends Component
 
     protected function resetServiceState(): void
     {
-        $this->reset(['visitId', 'conclusion', 'prescription', 'appointmentAt']);
+        $this->reset(['visitId', 'conclusion', 'appointmentAt']);
+        $this->prescriptionLines = [self::LIGNE_VIDE];
         $this->resetValidation();
     }
 
@@ -92,25 +106,64 @@ class ConsultationActions extends Component
         $this->dispatch('file-mise-a-jour');
     }
 
+    /** Ouvre une ligne de plus, sous la derniere. */
+    public function addPrescriptionLine(): void
+    {
+        if (count($this->prescriptionLines) >= self::MAX_LIGNES) {
+            return;
+        }
+
+        $this->prescriptionLines[] = self::LIGNE_VIDE;
+    }
+
+    /**
+     * Retire une ligne. La derniere ne se retire pas : le formulaire garderait
+     * une zone de saisie vide sans champ.
+     */
+    public function removePrescriptionLine(int $index): void
+    {
+        if (count($this->prescriptionLines) <= 1) {
+            $this->prescriptionLines = [self::LIGNE_VIDE];
+
+            return;
+        }
+
+        unset($this->prescriptionLines[$index]);
+        $this->prescriptionLines = array_values($this->prescriptionLines);
+        $this->resetValidation();
+    }
+
     public function savePrescription(CreatePrescription $action): void
     {
         $this->assertCapability(StaffType::CAP_PRESCRIBE);
 
         $this->validate([
             'visitId' => ['required', 'integer', 'exists:visits,id'],
-            'prescription' => ['required', 'string', 'min:3', 'max:5000'],
-        ], attributes: ['visitId' => 'patient', 'prescription' => 'ordonnance']);
+            'prescriptionLines' => ['array', 'max:'.self::MAX_LIGNES],
+            'prescriptionLines.*.medicament' => ['nullable', 'string', 'max:255'],
+            'prescriptionLines.*.posologie' => ['nullable', 'string', 'max:255'],
+            'prescriptionLines.*.duree' => ['nullable', 'string', 'max:120'],
+        ], attributes: ['visitId' => 'patient']);
 
         $visit = $this->visitInThisService();
 
-        $prescription = $action->execute($visit, $this->currentDoctor(), $this->prescription);
+        try {
+            $prescription = $action->execute($visit, $this->currentDoctor(), $this->prescriptionLines);
+        } catch (InvalidArgumentException $e) {
+            // Le medicament fait la ligne : le message le dit plutot que de
+            // signaler un champ vide parmi vingt.
+            $this->addError('prescriptionLines', $e->getMessage());
+
+            return;
+        }
 
         session()->flash('service.status', sprintf(
-            'Ordonnance enregistree pour %s.',
+            'Ordonnance enregistree pour %s : %d ligne(s).',
             $visit->patient->name,
+            count($prescription->lignes()),
         ));
 
-        $this->reset('prescription');
+        $this->prescriptionLines = [self::LIGNE_VIDE];
         $this->dispatch('ordonnance-creee', prescriptionId: $prescription->getKey());
         $this->dispatch('file-mise-a-jour');
     }
