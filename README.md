@@ -1,10 +1,10 @@
-# KƐnƐya WorkFlow
+# KƐNƐYA WorkFlow
 
 Gestion de file d'attente hospitalière avec renvoi inter-services et **dossier
 patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kayes**
 (Mali), et conçue pour être réutilisée dans d'autres établissements maliens.
 
-> **Nom du produit** : `KƐnƐya WorkFlow` (affiché tel quel dans l'interface et la
+> **Nom du produit** : `KƐNƐYA WorkFlow` (affiché tel quel dans l'interface et la
 > documentation).
 > **Identifiant technique** : `keneya-workflow` - le caractère `Ɛ` n'apparaît
 > jamais dans le code, les configurations ou les identifiants système.
@@ -1500,4 +1500,4 @@ validation et d'erreur.
 
 ---
 
-© AXESs - KƐnƐya WorkFlow.
+© AXESs - KƐNƐYA WorkFlow.
