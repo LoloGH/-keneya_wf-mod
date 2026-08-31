@@ -25,14 +25,18 @@ class LoginScreenTest extends TestCase
             ->assertSee('name="_token"', escape: false);
     }
 
-    public function test_les_trois_champs_attendus_par_le_serveur_sont_presents(): void
+    /**
+     * La maquette v3.2.6 ne comporte pas de case « rester connecte » : le
+     * formulaire ne poste donc plus « remember ». Le serveur continue de
+     * l'accepter, si la case devait revenir.
+     */
+    public function test_les_deux_champs_attendus_par_le_serveur_sont_presents(): void
     {
         $response = $this->get('/connexion');
 
         $response->assertOk()
             ->assertSee('name="email"', escape: false)
-            ->assertSee('name="password"', escape: false)
-            ->assertSee('name="remember"', escape: false);
+            ->assertSee('name="password"', escape: false);
     }
 
     // ----------------------------------------------------- La scene et la carte
@@ -42,15 +46,15 @@ class LoginScreenTest extends TestCase
         $response = $this->get('/connexion');
 
         $response->assertOk()
-            ->assertSee('login-scene', escape: false)
+            ->assertSee('login-stage__scene', escape: false)
             ->assertSee('login-card', escape: false)
-            ->assertSee('Bienvenue', escape: false)
-            ->assertSee(hospital_name());
+            ->assertSee('Bienvenue', escape: false);
 
-        // La scene est decorative : elle ne doit rien annoncer aux lecteurs
-        // d'ecran, qui ne rencontrent que le logo et le formulaire.
+        // La scene est une photographie posee en fond : elle n'apporte aucun
+        // texte au document. Le nom du produit reste accessible par
+        // l'alternative du bloc de marque, seule image porteuse de sens.
         $this->assertStringContainsString(
-            '<svg class="login-scene__art" viewBox="0 0 760 560" preserveAspectRatio="xMidYMax meet" aria-hidden="true">',
+            'alt="'.config('keneya.name').' — Espace professionnel"',
             $response->getContent(),
         );
     }

@@ -1,19 +1,24 @@
 <x-layouts.auth :title="'Connexion — '.config('keneya.name')">
+    {{-- Sous 1024 px, la photo devient un bandeau et la carte passe dessous :
+         la marque se pose alors sur le bandeau, comme sur la maquette. Elle
+         est masquee sur grand ecran, ou l'image la porte deja. --}}
+    <img class="login-band__marque"
+         src="{{ asset('images/login-marque-bandeau.png') }}"
+         alt="{{ config('keneya.name') }} — Espace professionnel"
+         width="910" height="180">
+
     <div class="login-card">
-        {{-- Logo complet, pleine largeur de la carte : il porte deja le nom du
-             produit, inutile de le repeter a cote. --}}
-        <x-brand-logo lockup class="login-card__logo" />
+        {{-- Le bloc de marque de la maquette : symbole, nom du produit et
+             mention « Espace professionnel », dans une seule image. Il porte
+             son texte en alternative pour les lecteurs d'ecran. --}}
+        <img class="login-card__marque"
+             src="{{ asset('images/login-marque.png') }}"
+             alt="{{ config('keneya.name') }} — Espace professionnel"
+             width="680" height="484">
 
         <div class="login-card__head">
-            <h1 class="login-card__title">Bienvenue</h1>
-            <p class="login-card__subtitle">Connectez-vous a votre espace professionnel.</p>
-            <p class="login-card__site">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M4 21V6l7-3 7 3v15" /><path d="M9 21v-5h4v5" />
-                </svg>
-                {{ hospital_name() }}
-            </p>
+            <h1 class="login-card__title">Bienvenue !</h1>
+            <p class="login-card__subtitle">Connectez-vous a votre espace professionnel</p>
         </div>
 
         {{-- Les messages du serveur sont repris tels quels, groupes en tete de
@@ -37,14 +42,14 @@
             @csrf
 
             <div class="field">
-                <label for="email">Adresse e-mail</label>
+                <label for="email">Nom d'utilisateur ou e-mail</label>
                 <div class="login-control">
                     <svg class="login-control__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="8" r="3.6" /><path d="M4.5 20c.6-3.8 3.7-6 7.5-6s6.9 2.2 7.5 6" />
                     </svg>
                     <input id="email" name="email" type="email" inputmode="email" autocomplete="username"
-                           placeholder="Entrez votre adresse e-mail"
+                           placeholder="Entrez votre identifiant"
                            value="{{ old('email') }}" required autofocus
                            @error('email') aria-invalid="true" @enderror>
                 </div>
@@ -80,12 +85,12 @@
                 </div>
             </div>
 
-            <label class="field field--inline">
-                <input type="checkbox" name="remember" value="1">
-                <span>Rester connecte sur ce poste</span>
-            </label>
-
-            <button type="submit" class="btn btn--primary btn--block login-submit" data-submit>
+            <button type="submit" class="login-submit" data-submit>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" />
+                    <path d="M10 17l5-5-5-5" /><path d="M15 12H3" />
+                </svg>
                 <span data-submit-label>Se connecter</span>
             </button>
         </form>
@@ -94,8 +99,8 @@
             <span class="login-card__secure">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="4.5" y="10" width="15" height="10.5" rx="2.5" />
-                    <path d="M8 10V7.5a4 4 0 0 1 8 0V10" />
+                    <path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.3-7.5 9.5-4.4-1.2-7.5-5.1-7.5-9.5V6Z" />
+                    <path d="M8.8 12.2l2.2 2.2 4.2-4.4" />
                 </svg>
                 Connexion securisee
             </span>
@@ -104,6 +109,41 @@
                 <a href="https://sukaxess.com" target="_blank" rel="noopener">AXESs</a>
             </p>
         </div>
+
+        {{-- Les quatre atouts de la maquette mobile. Sur grand ecran, ils sont
+             deja dans l'image de fond : inutile de les repeter. --}}
+        <ul class="login-atouts">
+            <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.3-7.5 9.5-4.4-1.2-7.5-5.1-7.5-9.5V6Z" />
+                    <path d="M8.8 12.2l2.2 2.2 4.2-4.4" />
+                </svg>
+                Securise
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
+                </svg>
+                Rapide
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="3.5" />
+                    <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" />
+                </svg>
+                Centralise
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8-4.2-4.1 5.9-.9Z" />
+                </svg>
+                Performant
+            </li>
+        </ul>
     </div>
 
     {{-- Deux interactions, et rien de plus : afficher le mot de passe, et
