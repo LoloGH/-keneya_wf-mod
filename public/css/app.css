@@ -1147,14 +1147,14 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     /* Sa largeur est bornee par la hauteur disponible : la carte est deux
        fois plus haute que large, c'est donc la hauteur qui commande, sans quoi
        elle deborderait et defilerait. */
-    --carte-l: clamp(18rem, min(30vw, 46vh), 38rem);
+    --carte-l: clamp(18rem, min(34vw, 54vh), 42rem);
     width: var(--carte-l);
     max-height: 95vh;
     box-sizing: border-box;
     overflow: auto;
 
     background: #fff;
-    border-radius: 6.15cqw;
+    border-radius: 3.2cqw;
     box-shadow: 0 4.68cqw 12.29cqw rgba(4, 28, 46, .16);
 
     /* Les dimensions internes suivent la largeur de la carte, pas celle de la
@@ -1176,7 +1176,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     flex-direction: column;
     align-items: stretch;
     box-sizing: border-box;
-    padding: 7.6cqw 8.34cqw 0;
+    padding: 6.2cqw 8.6cqw 0;
 }
 
 /* Le bloc de marque est repris tel quel de la maquette : meme composition,
@@ -1184,12 +1184,12 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
    fonctionne sur un reseau d'hopital, parfois sans acces exterieur. */
 .login-card__marque {
     display: block;
-    width: 64%;
+    width: 52%;
     height: auto;
     margin: 0 auto;
 }
 
-.login-card__head { text-align: center; margin: 4.39cqw 0 0; }
+.login-card__head { text-align: center; margin: 3.6cqw 0 0; }
 
 .login-card__title {
     margin: 0;
@@ -1201,7 +1201,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 
 .login-card__subtitle {
-    margin: 1.87cqw 0 0;
+    margin: 1.5cqw 0 0;
     font-size: 3.25cqw;
     line-height: 1.4;
     color: var(--or-gris);
@@ -1211,7 +1211,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     display: inline-flex;
     align-items: center;
     gap: 1.6cqw;
-    margin: 3.2cqw 0 0;
+    margin: 2.6cqw 0 0;
     padding: 1.4cqw 3.2cqw;
     font-size: 2.8cqw;
     font-weight: 600;
@@ -1225,8 +1225,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 6.9cqw;
-    margin-top: 7.6cqw;
+    gap: 5.6cqw;
+    margin-top: 6.4cqw;
 }
 
 /* La session persistante existe cote serveur depuis toujours ; il ne manquait
@@ -1252,7 +1252,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 .login-remember input:focus-visible { outline: 2px solid var(--or-teal); outline-offset: 2px; }
 
-.login-form .field { display: flex; flex-direction: column; gap: 2.52cqw; margin: 0; }
+.login-form .field { display: flex; flex-direction: column; gap: 2.2cqw; margin: 0; }
 
 .login-form label {
     font-size: 2.93cqw;
@@ -1274,7 +1274,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 .login-control input {
     width: 100%;
-    height: 12.12cqw;
+    height: 11.4cqw;
     box-sizing: border-box;
     padding: 0 3.51cqw 0 11.71cqw;
     font-family: inherit;
@@ -1326,7 +1326,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     justify-content: center;
     gap: 2.49cqw;
     width: 100%;
-    height: 12.53cqw;
+    height: 11.8cqw;
     margin-top: .85cqw;
     padding: 0;
     font-family: inherit;
@@ -1384,7 +1384,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-alert svg { width: 3.81cqw; height: 3.81cqw; flex: 0 0 auto; margin-top: .4cqw; }
 
 .login-card__foot {
-    margin-top: 5.4cqw;
+    margin-top: 4.4cqw;
     text-align: center;
 }
 
@@ -1392,7 +1392,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     content: "";
     display: block;
     height: 1px;
-    margin-bottom: 6.26cqw;
+    margin-bottom: 5cqw;
     background: var(--or-bord);
 }
 
@@ -1411,8 +1411,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
    sur mobile, sous la rangee des atouts — l'ordre du document suffit, aucun
    reordonnancement visuel n'est necessaire. */
 .login-card__rights {
-    margin: 3.4cqw 0 0;
-    padding-bottom: 8.6cqw;
+    margin: 2.8cqw 0 0;
+    padding-bottom: 6.4cqw;
     font-size: 2.72cqw;
     color: var(--or-gris);
     text-align: center;
@@ -2004,7 +2004,23 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
    tard en herite sans intervention. Discret par construction — il informe, il
    ne doit pas concurrencer le travail affiche au-dessus. */
 
+/* Il se cale en bas de la fenetre par symetrie avec la barre de marque, qui
+   se cale en haut : sur une page courte, la marge automatique l'y pousse ; sur
+   une page longue, « sticky » l'y retient pendant le defilement. */
+.app-body,
+.board-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
 .app-footer {
+    margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    background: var(--gris-100, #f1f4f6);
     padding: var(--e4, 1.2rem) var(--e4, 1.2rem) var(--e5, 1.6rem);
     text-align: center;
     font-size: .82rem;
@@ -2029,8 +2045,14 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 /* Sur le mur de la salle d'attente, l'ecran est lu de loin : le pied de page
    se fait plus discret encore, et ne prend pas de place sur les tickets. */
 .app-footer--board {
+    /* Le pied tenant desormais le bas de l'ecran, il passe au-dessus des
+       cartes : sa discretion vient de la couleur du texte, plus d'une
+       transparence qui laisserait defiler la file au travers. */
+    background: var(--gris-900, #14191d);
+    color: #78848c;
     padding: .5rem;
     font-size: .72rem;
     border-top: 0;
-    opacity: .7;
 }
+
+.app-footer--board .app-footer__produit strong { color: #97a3ab; }
