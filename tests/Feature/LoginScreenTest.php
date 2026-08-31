@@ -35,6 +35,17 @@ class LoginScreenTest extends TestCase
             ->assertSee('name="remember"', escape: false);
     }
 
+    /**
+     * Le produit est destine a plusieurs etablissements : l'ecran de connexion
+     * doit dire auquel on se connecte.
+     */
+    public function test_le_nom_de_l_etablissement_est_affiche(): void
+    {
+        $this->get('/connexion')
+            ->assertOk()
+            ->assertSee(hospital_name());
+    }
+
     // ----------------------------------------------------- La scene et la carte
 
     public function test_la_scene_accompagne_la_carte_sans_masquer_le_formulaire(): void
@@ -42,15 +53,15 @@ class LoginScreenTest extends TestCase
         $response = $this->get('/connexion');
 
         $response->assertOk()
-            ->assertSee('login-scene', escape: false)
+            ->assertSee('login-stage__scene', escape: false)
             ->assertSee('login-card', escape: false)
-            ->assertSee('Bienvenue', escape: false)
-            ->assertSee(hospital_name());
+            ->assertSee('Bienvenue', escape: false);
 
-        // La scene est decorative : elle ne doit rien annoncer aux lecteurs
-        // d'ecran, qui ne rencontrent que le logo et le formulaire.
+        // La scene est une photographie posee en fond : elle n'apporte aucun
+        // texte au document. Le nom du produit reste accessible par
+        // l'alternative du bloc de marque, seule image porteuse de sens.
         $this->assertStringContainsString(
-            '<svg class="login-scene__art" viewBox="0 0 760 560" preserveAspectRatio="xMidYMax meet" aria-hidden="true">',
+            'alt="'.config('keneya.name').' — Espace professionnel"',
             $response->getContent(),
         );
     }

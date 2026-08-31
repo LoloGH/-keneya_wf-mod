@@ -8,25 +8,21 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    {{-- Le fond est la premiere chose que voit l'utilisateur : on demande au
+         navigateur de le chercher des la lecture de l'en-tete, sans attendre
+         d'avoir analyse la feuille de style. --}}
+    <link rel="preload" as="image" href="{{ asset('images/login-fond.jpg') }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    {{-- La scene est dessinee ; le visuel institutionnel ne sert plus que de
-         texture au fond, tres en retrait. Il reste remplacable sans toucher au
-         code : il suffit de deposer une autre image sous
-         public/images/login-background.jpg. --}}
-    <style>
-        .login-scene {
-            background-image:
-                linear-gradient(160deg, rgba(10, 63, 97, .94) 0%, rgba(7, 42, 65, .97) 100%),
-                url('{{ asset('images/login-background.jpg') }}');
-        }
-    </style>
     @livewireStyles
 </head>
 <body class="login-page">
-    <x-login-scene />
-
-    <div class="login-panel">
-        {{ $slot }}
+    {{-- La scene porte l'image de la maquette et sert de repere : la carte de
+         connexion est positionnee en pourcentages de cet element, ce qui la
+         fait tomber exactement sur celle qui est dessinee dans l'image. --}}
+    <div class="login-stage">
+        <div class="login-stage__scene">
+            {{ $slot }}
+        </div>
     </div>
     @livewireScripts
 </body>
