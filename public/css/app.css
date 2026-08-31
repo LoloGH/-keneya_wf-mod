@@ -1107,18 +1107,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     background: #f4f6f8;
 }
 
-/* La photographie ne contient plus aucune interface : ni carte, ni titre, ni
-   barre d'atouts. Elle peut donc etre recadree plein ecran, a n'importe quel
-   format, sans que rien d'utile ne se fasse couper — d'ou la disparition des
-   bandes laterales. Tout ce qui porte du sens est du texte, au-dessus. */
+/* La photographie porte le discours de la maquette : logo, accroche et barre
+   d'atouts y sont peints, tous dans sa moitie gauche.
+
+   Elle a ete elargie au format 2,32:1 en etirant la baie vitree de droite, ou
+   il n'y a rien a lire. Elle est ainsi plus large que toutes les fenetres
+   courantes : « cover » la cale donc sur la hauteur, et ce qui se fait couper
+   est le vide de droite, jamais le haut ni le bas de la scene. */
 .login-stage {
     position: fixed;
     inset: 0;
     overflow: hidden;
-    /* Ancrage a gauche : le logo, le titre et la barre d'atouts sont peints
-       dans cette moitie de l'image. Sur une fenetre moins large que le 16:9 de
-       l'image, c'est donc la fenetre — a droite, vide — qui se fait rogner, et
-       jamais le discours. */
     background: #eef2f5 url('../images/login-scene.jpg') left center / cover no-repeat;
 }
 
@@ -1132,15 +1131,25 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-card {
     position: absolute;
     top: 50%;
-    right: 2.71vw;
-    transform: translateY(-50%);
 
-    /* La carte garde les proportions de la maquette (479 x 950). Sa largeur
-       suit donc la fenetre, mais est aussi bornee par la hauteur disponible :
-       sur un ecran large et court, c'est la hauteur qui commande, sans quoi la
-       carte deborderait et defilerait. */
-    width: clamp(19rem, min(34.17vw, 42vh), 33rem);
-    max-height: 92vh;
+    /* L'image etant calee sur la hauteur, le dessin s'arrete toujours a la
+       meme distance du bord gauche : 103,6 % de la hauteur de la fenetre. La
+       carte se pose au milieu de ce qui reste — le vide de la scene — sans
+       jamais sortir de la fenetre si ce vide se reduit. */
+    left: clamp(calc(2vw + var(--carte-l) / 2),
+                calc(51.8vh + 50vw),
+                calc(98vw - var(--carte-l) / 2));
+    transform: translate(-50%, -50%);
+
+    /* Elle arrive par la droite, une seule fois, au chargement. */
+    animation: kw-carte-entre 620ms cubic-bezier(.22, .61, .36, 1) both;
+
+    /* Sa largeur est bornee par la hauteur disponible : la carte est deux
+       fois plus haute que large, c'est donc la hauteur qui commande, sans quoi
+       elle deborderait et defilerait. */
+    --carte-l: clamp(18rem, min(30vw, 46vh), 38rem);
+    width: var(--carte-l);
+    max-height: 95vh;
     box-sizing: border-box;
     overflow: auto;
 
@@ -1167,7 +1176,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     flex-direction: column;
     align-items: stretch;
     box-sizing: border-box;
-    padding: 10.01cqw 8.34cqw 0;
+    padding: 7.6cqw 8.34cqw 0;
 }
 
 /* Le bloc de marque est repris tel quel de la maquette : meme composition,
@@ -1175,7 +1184,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
    fonctionne sur un reseau d'hopital, parfois sans acces exterieur. */
 .login-card__marque {
     display: block;
-    width: 85.2%;
+    width: 64%;
     height: auto;
     margin: 0 auto;
 }
@@ -1216,8 +1225,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 8.34cqw;
-    margin-top: 8.5cqw;
+    gap: 6.9cqw;
+    margin-top: 7.6cqw;
 }
 
 /* La session persistante existe cote serveur depuis toujours ; il ne manquait
@@ -1347,6 +1356,16 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 @keyframes kw-tourne { to { transform: rotate(360deg); } }
 
+/* L'etat d'arrivee n'est pas decrit : c'est celui de la carte elle-meme, donc
+   la regle de centrage reste la seule source de sa position. Le reglage
+   « animations reduites » du systeme la pose directement en place. */
+@keyframes kw-carte-entre {
+    from {
+        opacity: 0;
+        transform: translate(calc(-50% + 6rem), -50%);
+    }
+}
+
 /* Les messages du serveur n'existent pas sur la maquette : ils s'inserent
    au-dessus du formulaire, dans le meme vocabulaire graphique. */
 .login-alert {
@@ -1365,8 +1384,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-alert svg { width: 3.81cqw; height: 3.81cqw; flex: 0 0 auto; margin-top: .4cqw; }
 
 .login-card__foot {
-    margin-top: 6.03cqw;
-    padding: 0 0 13.46cqw;
+    margin-top: 5.4cqw;
     text-align: center;
 }
 
@@ -1389,10 +1407,15 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 .login-card__secure svg { width: 4.68cqw; height: 4.68cqw; color: var(--or-teal); }
 
+/* La mention d'editeur ferme la carte. Elle est sortie du pied pour passer,
+   sur mobile, sous la rangee des atouts — l'ordre du document suffit, aucun
+   reordonnancement visuel n'est necessaire. */
 .login-card__rights {
-    margin: 3.75cqw 0 0;
+    margin: 3.4cqw 0 0;
+    padding-bottom: 8.6cqw;
     font-size: 2.72cqw;
     color: var(--or-gris);
+    text-align: center;
 }
 
 .login-card__rights a { color: var(--or-teal); font-weight: 600; text-decoration: none; }
@@ -1434,24 +1457,22 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         flex-direction: column;
     }
 
-    /* Le bandeau : le cadrage vise le soignant et sa mallette, qui se
-       retrouveraient hors champ avec un centrage simple. */
+    /* Le bandeau est decoupe dans la scene sans aucun texte peint : le
+       soignant, sa mallette et l'ecran au centre, et au-dessus d'eux la bande
+       de mur clair ou vient se poser la marque. */
     .login-stage__scene::before {
         content: "";
         display: block;
-        height: 42dvh;
-        /* Recadrage propre de la photographie : l'image de grand ecran porte
-           deja le titre, la carte et les atouts, qui n'ont rien a faire dans
-           un bandeau. */
-        background: url('../images/login-scene-mobile.jpg') center 8% / cover no-repeat;
+        height: 44dvh;
+        background: url('../images/login-scene-mobile.jpg') center top / cover no-repeat;
     }
 
     .login-band__marque {
         display: block;
         position: absolute;
-        top: 1.3rem;
-        left: 1.3rem;
-        width: min(48vw, 15rem);
+        top: .95rem;
+        left: 1.15rem;
+        width: min(60vw, 18.5rem);
         height: auto;
         filter: drop-shadow(0 0 6px rgba(255, 255, 255, .95))
                 drop-shadow(0 0 14px rgba(255, 255, 255, .75));
@@ -1515,11 +1536,11 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     .login-alert { gap: .55rem; margin-top: 1.1rem; padding: .75rem .9rem; font-size: .92rem; border-radius: 10px; }
     .login-alert svg { width: 1.05rem; height: 1.05rem; margin-top: .1rem; }
 
-    .login-card__foot { margin-top: 1.5rem; padding: 0 0 .5rem; }
+    .login-card__foot { margin-top: 1.5rem; }
     .login-card__foot::before { margin-bottom: 1.1rem; }
     .login-card__secure { font-size: .97rem; gap: .45rem; }
     .login-card__secure svg { width: 1.2rem; height: 1.2rem; }
-    .login-card__rights { margin-top: .85rem; font-size: .86rem; }
+    .login-card__rights { margin-top: 1rem; padding-bottom: .6rem; font-size: .86rem; }
 }
 
 /* Tablette : la carte s'elargit avec l'ecran, mais le formulaire garde une
@@ -1527,10 +1548,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 @media (min-width: 48rem) and (max-width: 64rem) {
     .login-stage__scene::before {
         height: 45dvh;
-        /* Recadrage paysage sans texte peint : sur l'image complete, le logo
-           de l'image et celui du gabarit se superposaient. */
+        /* Meme scene, cadre plus large : le bandeau d'une tablette est bien
+           plus etale que celui d'un telephone. */
         background-image: url('../images/login-scene-tablette.jpg');
-        background-position: center 40%;
+        background-position: center top;
     }
 
     .login-card__inner { padding: 2.2rem 2rem 1.8rem; }
@@ -1559,6 +1580,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         list-style: none;
         border-top: 1px solid var(--or-bord);
     }
+
+    /* La mention d'editeur passe sous les icones : c'est la derniere ligne de
+       la page, apres les atouts. */
+    .login-card__rights { margin-top: 1.1rem; }
 
     .login-atouts li {
         display: flex;

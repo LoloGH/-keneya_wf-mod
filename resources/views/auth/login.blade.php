@@ -18,7 +18,7 @@
             <img class="login-card__marque"
                  src="{{ asset('images/login-marque.png') }}"
                  alt="{{ config('keneya.name') }} — Espace professionnel"
-                 width="680" height="484">
+                 width="496" height="422">
 
             <div class="login-card__head">
                 <h1 class="login-card__title">Bienvenue !</h1>
@@ -120,10 +120,6 @@
                     </svg>
                     Connexion securisee
                 </span>
-                <p class="login-card__rights">
-                    Tous droits reserves &copy; {{ date('Y') }}
-                    <a href="https://sukaxess.com" target="_blank" rel="noopener">AXESs</a>
-                </p>
             </div>
 
             {{-- Les quatre atouts de la maquette mobile. Sur grand ecran, ils sont
@@ -160,6 +156,13 @@
                     Performant
                 </li>
             </ul>
+
+            {{-- La mention d'editeur ferme la carte, sous les atouts sur mobile
+                 et juste sous la ligne « connexion securisee » ailleurs. --}}
+            <p class="login-card__rights">
+                Tous droits reserves &copy; {{ date('Y') }}
+                <a href="https://sukaxess.com" target="_blank" rel="noopener">AXESs</a>
+            </p>
         </div>
     </div>
 

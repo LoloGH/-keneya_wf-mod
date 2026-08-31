@@ -77,6 +77,23 @@ class LoginScreenTest extends TestCase
             ->assertSee('>AXESs</a>', escape: false);
     }
 
+    /**
+     * Sur telephone, la rangee des quatre atouts ferme la carte et la mention
+     * de l'editeur vient sous elle. Aucune regle de style ne les reordonne :
+     * c'est l'ordre du document qui le dit, et c'est donc lui qu'on verifie.
+     */
+    public function test_la_mention_de_droits_vient_apres_la_rangee_des_atouts(): void
+    {
+        $contenu = $this->get('/connexion')->assertOk()->getContent();
+
+        $atouts = strpos($contenu, 'login-atouts');
+        $droits = strpos($contenu, 'login-card__rights');
+
+        $this->assertNotFalse($atouts);
+        $this->assertNotFalse($droits);
+        $this->assertGreaterThan($atouts, $droits);
+    }
+
     // --------------------------------------------------------- Les protections
 
     public function test_le_message_du_serveur_est_repris_dans_la_carte(): void
