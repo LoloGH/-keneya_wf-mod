@@ -1115,91 +1115,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     position: fixed;
     inset: 0;
     overflow: hidden;
-    background: #eef2f5 url('../images/login-scene.jpg') center center / cover no-repeat;
+    /* Ancrage a gauche : le logo, le titre et la barre d'atouts sont peints
+       dans cette moitie de l'image. Sur une fenetre moins large que le 16:9 de
+       l'image, c'est donc la fenetre — a droite, vide — qui se fait rogner, et
+       jamais le discours. */
+    background: #eef2f5 url('../images/login-scene.jpg') left center / cover no-repeat;
 }
 
 .login-stage__scene {
     position: absolute;
     inset: 0;
 }
-
-/* ---------- Le discours, a gauche ----------
-   Il etait peint dans l'image : il est desormais du texte. Il se traduit, se
-   lit a la loupe, reste net sur un videoprojecteur, et ne coute plus une
-   retouche graphique a chaque correction. Le voile clair garantit le contraste
-   par-dessus l'affiche d'anatomie et les classeurs. */
-
-.login-hero {
-    position: absolute;
-    /* Large et bas plutot qu'etroit et haut : le bloc tient ainsi au-dessus
-       de la tete du soignant, sans jamais la recouvrir. */
-    top: 4vh;
-    left: max(4.5vw, 1.5rem);
-    max-width: min(42rem, 46vw);
-    padding: .95rem 1.4rem 1rem;
-
-    /* Pas de flou d'arriere-plan : il rendrait le visage du soignant
-       meconnaissable des que le bloc l'effleure. Un simple voile clair suffit
-       au contraste, et laisse la photographie intacte. */
-    background: rgba(255, 255, 255, .8);
-    border-radius: 14px;
-}
-
-.login-hero__title {
-    margin: 0;
-    font-size: clamp(1.35rem, 2.05vw, 2.05rem);
-    line-height: 1.15;
-    font-weight: 700;
-    letter-spacing: -.015em;
-    color: #06214a;
-    text-wrap: balance;
-}
-
-.login-hero__sub {
-    margin: .45rem 0 0;
-    font-size: clamp(.88rem, 1vw, 1.02rem);
-    line-height: 1.5;
-    color: #46586f;
-}
-
-.login-hero::after {
-    content: "";
-    display: block;
-    width: 2.8rem;
-    height: 3px;
-    margin-top: .75rem;
-    background: #05a39d;
-    border-radius: 2px;
-}
-
-.login-atouts.login-atouts--scene {
-    position: absolute;
-    left: max(4.5vw, 1.5rem);
-    bottom: 5vh;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.2rem;
-    max-width: min(54rem, 60vw);
-    margin: 0;
-    padding: 1rem 1.3rem;
-    list-style: none;
-    background: rgba(255, 255, 255, .86);
-    border-radius: 14px;
-}
-
-.login-atouts.login-atouts--scene li {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: start;
-    gap: .6rem;
-    font-size: .76rem;
-    line-height: 1.35;
-    color: #46586f;
-}
-
-.login-atouts.login-atouts.login-atouts--scene li + li { border-left: 1px solid #dbe3ea; padding-left: 1.2rem; }
-.login-atouts.login-atouts--scene svg { width: 1.4rem; height: 1.4rem; color: #05a39d; }
-.login-atouts.login-atouts--scene b { display: block; font-size: .74rem; letter-spacing: .07em; text-transform: uppercase; color: #06214a; }
 
 /* ---------- La carte de connexion ---------- */
 
@@ -1452,7 +1378,6 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
     /* Le discours de la scene n'a pas sa place sur un petit ecran : on y vient
        pour se connecter, pas pour lire une accroche. */
-    .login-hero, .login-atouts.login-atouts--scene { display: none; }
     .login-stage { position: static; overflow: visible; }
 
     .login-stage { background: #eef2f5; }
@@ -1480,7 +1405,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         /* Recadrage propre de la photographie : l'image de grand ecran porte
            deja le titre, la carte et les atouts, qui n'ont rien a faire dans
            un bandeau. */
-        background: url('../images/login-scene-mobile.jpg') center 30% / cover no-repeat;
+        background: url('../images/login-scene-mobile.jpg') center 8% / cover no-repeat;
     }
 
     .login-band__marque {
@@ -1552,8 +1477,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 @media (min-width: 48rem) and (max-width: 64rem) {
     .login-stage__scene::before {
         height: 45dvh;
-        background-image: url('../images/login-scene.jpg');
-        background-position: center 55%;
+        /* Recadrage paysage sans texte peint : sur l'image complete, le logo
+           de l'image et celui du gabarit se superposaient. */
+        background-image: url('../images/login-scene-tablette.jpg');
+        background-position: center 40%;
     }
 
     .login-card__inner { padding: 2.2rem 2rem 1.8rem; }

@@ -7,45 +7,6 @@
          alt="{{ config('keneya.name') }} — Espace professionnel"
          width="910" height="180">
 
-    {{-- Le discours de la scene. Il etait peint dans l'image ; il est
-         desormais du texte : traduisible, net a toutes les tailles, et
-         corrigible sans repasser par une retouche graphique. --}}
-    <div class="login-hero">
-        <h2 class="login-hero__title">Le poste de travail du soignant.</h2>
-        <p class="login-hero__sub">Accueil, file d'attente, caisse et dossier patient au meme endroit.</p>
-    </div>
-
-    <ul class="login-atouts login-atouts--scene">
-            <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3l7.5 3v5.5c0 4.4-3.1 8.3-7.5 9.5-4.4-1.2-7.5-5.1-7.5-9.5V6Z" /><path d="M8.8 12.2l2.2 2.2 4.2-4.4" />
-                </svg>
-                <span><b>Securise</b>Vos donnees sont protegees</span>
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
-                </svg>
-                <span><b>Rapide</b>Accedez a vos outils en quelques clics</span>
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="3.5" /><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" />
-                </svg>
-                <span><b>Centralise</b>Toutes vos activites au meme endroit</span>
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8-5.3-2.8-5.3 2.8 1-5.8-4.2-4.1 5.9-.9Z" />
-                </svg>
-                <span><b>Performant</b>Concu pour les professionnels</span>
-            </li>
-    </ul>
-
     {{-- L'enveloppe porte le remplissage et sert d'echelle : la carte,
          elle, est le conteneur de requetes, et un conteneur ne peut pas
          exprimer son propre remplissage dans ses unites. --}}
