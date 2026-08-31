@@ -1104,72 +1104,67 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     min-height: 100vh;
     min-height: 100dvh;
     margin: 0;
-    background: #0c1a26;
+    background: #f4f6f8;
 }
 
+/* La scene est la photographie de la maquette, recadree sur sa partie utile :
+   la carte qui y etait dessinee en a ete retiree, c'est desormais la vraie
+   carte qui occupe cette place. L'image se fond a droite dans le clair de la
+   page, si bien qu'elle n'a plus besoin d'etre recadree ni completee — plus de
+   bandes sur les ecrans plus larges que la maquette. */
 .login-stage {
     position: fixed;
     inset: 0;
     overflow: hidden;
-
-    /* La meme image, agrandie et floutee, remplit ce que le cadrage complet
-       laisse de cote sur un ecran plus large que la maquette. Un aplat de
-       couleur y ferait une bande morte. */
-    background: url('../images/login-fond.jpg') center center / cover no-repeat;
-}
-
-.login-stage::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    backdrop-filter: blur(26px) saturate(.85);
-    background: rgba(238, 242, 245, .55);
+    background: #f4f6f8 url('../images/login-fond.jpg') left center / auto 100% no-repeat;
 }
 
 .login-stage__scene {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    /* Cadrage complet, et non « cover » : l'image est en 5:4, la plupart des
-       ecrans en 16:9. Recadrer amputerait la carte en haut et en bas, alors
-       que c'est l'element avec lequel on travaille. */
-    width: min(100vw, calc(100dvh * 1.24955));
-    aspect-ratio: 1402 / 1122;
-
-    background: url('../images/login-fond.jpg') center center / 100% 100% no-repeat;
-
-    container-type: size;
-    container-name: scene;
+    inset: 0;
 }
 
 /* ---------- La carte de connexion ---------- */
 
 .login-card {
     position: absolute;
-    left: 63.12%;
-    width: 34.17%;
-    top: 9.80%;
-    height: 84.85%;
+    top: 50%;
+    right: 2.71vw;
+    transform: translateY(-50%);
 
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-
+    /* La carte garde les proportions de la maquette (479 x 950). Sa largeur
+       suit donc la fenetre, mais est aussi bornee par la hauteur disponible :
+       sur un ecran large et court, c'est la hauteur qui commande, sans quoi la
+       carte deborderait et defilerait. */
+    width: clamp(19rem, min(34.17vw, 46vh), 33rem);
+    max-height: 92vh;
     box-sizing: border-box;
-    padding: 3.42cqw 2.85cqw 0;
     overflow: auto;
 
     background: #fff;
-    border-radius: 2.1cqw;
-    box-shadow: 0 1.6cqw 4.2cqw rgba(4, 28, 46, .18);
+    border-radius: 6.15cqw;
+    box-shadow: 0 4.68cqw 12.29cqw rgba(4, 28, 46, .16);
+
+    /* Les dimensions internes suivent la largeur de la carte, pas celle de la
+       fenetre : les proportions de la maquette sont donc tenues a toute
+       taille, sans jeu de tailles a maintenir. Le remplissage vit dans
+       l'enveloppe : un conteneur ne peut pas s'exprimer dans ses propres
+       unites. */
+    container-type: inline-size;
 
     --or-teal: #05a39d;
     --or-teal-fonce: #048c87;
     --or-nuit: #06214a;
     --or-gris: #6b7c93;
     --or-bord: #e5e9ef;
+}
+
+.login-card__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-sizing: border-box;
+    padding: 10.01cqw 8.34cqw 0;
 }
 
 /* Le bloc de marque est repris tel quel de la maquette : meme composition,
@@ -1182,11 +1177,11 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     margin: 0 auto;
 }
 
-.login-card__head { text-align: center; margin: 1.5cqw 0 0; }
+.login-card__head { text-align: center; margin: 4.39cqw 0 0; }
 
 .login-card__title {
     margin: 0;
-    font-size: 2.14cqw;
+    font-size: 6.26cqw;
     line-height: 1.2;
     font-weight: 700;
     letter-spacing: -.01em;
@@ -1194,8 +1189,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 
 .login-card__subtitle {
-    margin: .64cqw 0 0;
-    font-size: 1.11cqw;
+    margin: 1.87cqw 0 0;
+    font-size: 3.25cqw;
     line-height: 1.4;
     color: var(--or-gris);
 }
@@ -1203,14 +1198,14 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 2.85cqw;
-    margin-top: 3.71cqw;
+    gap: 8.34cqw;
+    margin-top: 10.86cqw;
 }
 
-.login-form .field { display: flex; flex-direction: column; gap: .86cqw; margin: 0; }
+.login-form .field { display: flex; flex-direction: column; gap: 2.52cqw; margin: 0; }
 
 .login-form label {
-    font-size: 1cqw;
+    font-size: 2.93cqw;
     font-weight: 700;
     color: var(--or-nuit);
     letter-spacing: .005em;
@@ -1220,24 +1215,24 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 .login-control__icon {
     position: absolute;
-    left: 1.35cqw;
-    width: 1.5cqw;
-    height: 1.5cqw;
+    left: 3.95cqw;
+    width: 4.39cqw;
+    height: 4.39cqw;
     color: #9aa8bb;
     pointer-events: none;
 }
 
 .login-control input {
     width: 100%;
-    height: 4.14cqw;
+    height: 12.12cqw;
     box-sizing: border-box;
-    padding: 0 1.2cqw 0 4cqw;
+    padding: 0 3.51cqw 0 11.71cqw;
     font-family: inherit;
-    font-size: 1.07cqw;
+    font-size: 3.13cqw;
     color: var(--or-nuit);
     background: #fff;
     border: 1px solid var(--or-bord);
-    border-radius: .78cqw;
+    border-radius: 2.28cqw;
     transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -1246,31 +1241,31 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-control input:focus {
     outline: none;
     border-color: var(--or-teal);
-    box-shadow: 0 0 0 .28cqw rgba(5, 163, 157, .18);
+    box-shadow: 0 0 0 .82cqw rgba(5, 163, 157, .18);
 }
 
 .login-control input:focus-visible { outline: 2px solid var(--or-teal); outline-offset: 2px; }
 .login-control input[aria-invalid="true"] { border-color: #c0392b; }
-.login-control input.login-control__input--pw { padding-right: 4cqw; }
+.login-control input.login-control__input--pw { padding-right: 11.71cqw; }
 
 .login-peek {
     position: absolute;
-    right: .9cqw;
+    right: 2.63cqw;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.4cqw;
-    height: 2.4cqw;
+    width: 7.03cqw;
+    height: 7.03cqw;
     padding: 0;
     color: #8d9bad;
     background: none;
     border: 0;
-    border-radius: .5cqw;
+    border-radius: 1.46cqw;
     cursor: pointer;
 }
 
 .login-peek:hover, .login-peek[aria-pressed="true"] { color: var(--or-teal); }
-.login-peek svg { width: 1.5cqw; height: 1.5cqw; display: block; }
+.login-peek svg { width: 4.39cqw; height: 4.39cqw; display: block; }
 .login-peek [data-icon="off"] { display: none; }
 .login-peek[aria-pressed="true"] [data-icon="on"] { display: none; }
 .login-peek[aria-pressed="true"] [data-icon="off"] { display: block; }
@@ -1279,18 +1274,18 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: .85cqw;
+    gap: 2.49cqw;
     width: 100%;
-    height: 4.28cqw;
-    margin-top: .29cqw;
+    height: 12.53cqw;
+    margin-top: .85cqw;
     padding: 0;
     font-family: inherit;
-    font-size: 1.21cqw;
+    font-size: 3.54cqw;
     font-weight: 700;
     color: #fff;
     background: var(--or-teal);
     border: 0;
-    border-radius: .78cqw;
+    border-radius: 2.28cqw;
     cursor: pointer;
     transition: background-color 160ms ease;
 }
@@ -1298,12 +1293,12 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-submit:hover:not([disabled]) { background: var(--or-teal-fonce); }
 .login-submit:focus-visible { outline: 3px solid var(--or-nuit); outline-offset: 3px; }
 .login-submit[disabled] { opacity: .8; cursor: default; }
-.login-submit svg { width: 1.5cqw; height: 1.5cqw; flex: 0 0 auto; }
+.login-submit svg { width: 4.39cqw; height: 4.39cqw; flex: 0 0 auto; }
 
 .login-spinner {
-    width: 1.2cqw;
-    height: 1.2cqw;
-    border: .17cqw solid rgba(255, 255, 255, .45);
+    width: 3.51cqw;
+    height: 3.51cqw;
+    border: .5cqw solid rgba(255, 255, 255, .45);
     border-top-color: #fff;
     border-radius: 50%;
     animation: kw-tourne 700ms linear infinite;
@@ -1315,22 +1310,22 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
    au-dessus du formulaire, dans le meme vocabulaire graphique. */
 .login-alert {
     display: flex;
-    gap: .85cqw;
-    margin-top: 2.14cqw;
-    padding: 1cqw 1.2cqw;
-    font-size: 1.02cqw;
+    gap: 2.49cqw;
+    margin-top: 6.26cqw;
+    padding: 2.93cqw 3.51cqw;
+    font-size: 2.99cqw;
     line-height: 1.4;
     color: #8a2b21;
     background: #fdecea;
     border: 1px solid #f3c6c0;
-    border-radius: .78cqw;
+    border-radius: 2.28cqw;
 }
 
-.login-alert svg { width: 1.3cqw; height: 1.3cqw; flex: 0 0 auto; margin-top: .15cqw; }
+.login-alert svg { width: 3.81cqw; height: 3.81cqw; flex: 0 0 auto; margin-top: .4cqw; }
 
 .login-card__foot {
-    margin-top: 2.06cqw;
-    padding: 0 0 4.6cqw;
+    margin-top: 6.03cqw;
+    padding: 0 0 13.46cqw;
     text-align: center;
 }
 
@@ -1338,24 +1333,24 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     content: "";
     display: block;
     height: 1px;
-    margin-bottom: 2.14cqw;
+    margin-bottom: 6.26cqw;
     background: var(--or-bord);
 }
 
 .login-card__secure {
     display: inline-flex;
     align-items: center;
-    gap: .6cqw;
-    font-size: 1.07cqw;
+    gap: 1.76cqw;
+    font-size: 3.13cqw;
     font-weight: 600;
     color: var(--or-nuit);
 }
 
-.login-card__secure svg { width: 1.6cqw; height: 1.6cqw; color: var(--or-teal); }
+.login-card__secure svg { width: 4.68cqw; height: 4.68cqw; color: var(--or-teal); }
 
 .login-card__rights {
-    margin: 1.28cqw 0 0;
-    font-size: .93cqw;
+    margin: 3.75cqw 0 0;
+    font-size: 2.72cqw;
     color: var(--or-gris);
 }
 
@@ -1379,10 +1374,11 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     .login-page { display: block; }
     .login-stage { position: static; overflow: visible; }
 
+    .login-stage { background: #eef2f5; }
+
     .login-stage__scene {
         position: relative;
-        top: auto;
-        left: auto;
+        inset: auto;
         transform: none;
         width: 100%;
         height: auto;
@@ -1422,15 +1418,20 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         z-index: 1;
         left: auto;
         top: auto;
+        right: auto;
+        transform: none;
+        max-height: none;
+        container-type: normal;
         flex: 1;
         width: 100%;
         height: auto;
         margin: -1.75rem 0 0;
-        padding: 1.9rem 1.5rem 1.6rem;
         border-radius: 22px 22px 0 0;
         box-shadow: 0 -.5rem 1.6rem rgba(6, 33, 74, .14);
         overflow: visible;
     }
+
+    .login-card__inner { padding: 1.9rem 1.5rem 1.6rem; }
 
     /* La marque est sur le bandeau : la repeter dans la carte ferait double. */
     .login-card__marque { display: none; }
@@ -1474,7 +1475,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         background-position: center 60%;
     }
 
-    .login-card { padding: 2.2rem 2rem 1.8rem; }
+    .login-card__inner { padding: 2.2rem 2rem 1.8rem; }
 
     .login-card__head,
     .login-form,
