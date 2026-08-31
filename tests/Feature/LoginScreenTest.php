@@ -25,18 +25,25 @@ class LoginScreenTest extends TestCase
             ->assertSee('name="_token"', escape: false);
     }
 
-    /**
-     * La maquette v3.2.6 ne comporte pas de case « rester connecte » : le
-     * formulaire ne poste donc plus « remember ». Le serveur continue de
-     * l'accepter, si la case devait revenir.
-     */
-    public function test_les_deux_champs_attendus_par_le_serveur_sont_presents(): void
+    public function test_les_trois_champs_attendus_par_le_serveur_sont_presents(): void
     {
         $response = $this->get('/connexion');
 
         $response->assertOk()
             ->assertSee('name="email"', escape: false)
-            ->assertSee('name="password"', escape: false);
+            ->assertSee('name="password"', escape: false)
+            ->assertSee('name="remember"', escape: false);
+    }
+
+    /**
+     * Le produit est destine a plusieurs etablissements : l'ecran de connexion
+     * doit dire auquel on se connecte.
+     */
+    public function test_le_nom_de_l_etablissement_est_affiche(): void
+    {
+        $this->get('/connexion')
+            ->assertOk()
+            ->assertSee(hospital_name());
     }
 
     // ----------------------------------------------------- La scene et la carte

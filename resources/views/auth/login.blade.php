@@ -23,6 +23,13 @@
             <div class="login-card__head">
                 <h1 class="login-card__title">Bienvenue !</h1>
                 <p class="login-card__subtitle">Connectez-vous a votre espace professionnel</p>
+                <p class="login-card__site">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 21V6l7-3 7 3v15" /><path d="M9 21v-5h4v5" />
+                    </svg>
+                    {{ hospital_name() }}
+                </p>
             </div>
 
             {{-- Les messages du serveur sont repris tels quels, groupes en tete de
@@ -88,6 +95,11 @@
                         </button>
                     </div>
                 </div>
+
+                <label class="login-remember">
+                    <input type="checkbox" name="remember" value="1">
+                    <span>Rester connecte sur ce poste</span>
+                </label>
 
                 <button type="submit" class="login-submit" data-submit>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

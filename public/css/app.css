@@ -1139,7 +1139,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
        suit donc la fenetre, mais est aussi bornee par la hauteur disponible :
        sur un ecran large et court, c'est la hauteur qui commande, sans quoi la
        carte deborderait et defilerait. */
-    width: clamp(19rem, min(34.17vw, 46vh), 33rem);
+    width: clamp(19rem, min(34.17vw, 42vh), 33rem);
     max-height: 92vh;
     box-sizing: border-box;
     overflow: auto;
@@ -1198,12 +1198,50 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     color: var(--or-gris);
 }
 
+.login-card__site {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.6cqw;
+    margin: 3.2cqw 0 0;
+    padding: 1.4cqw 3.2cqw;
+    font-size: 2.8cqw;
+    font-weight: 600;
+    color: #05736f;
+    background: #e6f6f4;
+    border-radius: 99px;
+}
+
+.login-card__site svg { width: 3.4cqw; height: 3.4cqw; }
+
 .login-form {
     display: flex;
     flex-direction: column;
     gap: 8.34cqw;
-    margin-top: 10.86cqw;
+    margin-top: 8.5cqw;
 }
+
+/* La session persistante existe cote serveur depuis toujours ; il ne manquait
+   que la case pour la demander. Elle se place sous les champs, avant le
+   bouton, la ou l'utilisateur decide. */
+.login-remember {
+    display: flex;
+    align-items: center;
+    gap: 2.4cqw;
+    margin: -4cqw 0 -2cqw;
+    font-size: 2.9cqw;
+    color: var(--or-gris);
+    cursor: pointer;
+}
+
+.login-remember input {
+    width: 4.2cqw;
+    height: 4.2cqw;
+    margin: 0;
+    accent-color: var(--or-teal);
+    cursor: pointer;
+}
+
+.login-remember input:focus-visible { outline: 2px solid var(--or-teal); outline-offset: 2px; }
 
 .login-form .field { display: flex; flex-direction: column; gap: 2.52cqw; margin: 0; }
 
@@ -1446,7 +1484,19 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     .login-card__title { font-size: 1.62rem; }
     .login-card__subtitle { font-size: .95rem; margin-top: .35rem; }
 
-    .login-form { gap: 1.15rem; margin-top: 1.5rem; }
+    .login-card__site {
+        gap: .4rem;
+        margin-top: .7rem;
+        padding: .3rem .8rem;
+        font-size: .82rem;
+    }
+
+    .login-card__site svg { width: .95rem; height: .95rem; }
+
+    .login-form { gap: 1.15rem; margin-top: 1.2rem; }
+
+    .login-remember { gap: .55rem; margin: -.5rem 0 -.25rem; font-size: .88rem; }
+    .login-remember input { width: 1.05rem; height: 1.05rem; }
     .login-form .field { gap: .45rem; }
     .login-form label { font-size: .9rem; }
 
