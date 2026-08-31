@@ -12,6 +12,9 @@
 </head>
 <body class="board-body">
     {{ $slot }}
+
+    <x-app-footer class="app-footer--board" />
+
     @livewireScripts
 </body>
 </html>

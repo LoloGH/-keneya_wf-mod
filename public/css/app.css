@@ -1107,22 +1107,99 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     background: #f4f6f8;
 }
 
-/* La scene est la photographie de la maquette, recadree sur sa partie utile :
-   la carte qui y etait dessinee en a ete retiree, c'est desormais la vraie
-   carte qui occupe cette place. L'image se fond a droite dans le clair de la
-   page, si bien qu'elle n'a plus besoin d'etre recadree ni completee — plus de
-   bandes sur les ecrans plus larges que la maquette. */
+/* La photographie ne contient plus aucune interface : ni carte, ni titre, ni
+   barre d'atouts. Elle peut donc etre recadree plein ecran, a n'importe quel
+   format, sans que rien d'utile ne se fasse couper — d'ou la disparition des
+   bandes laterales. Tout ce qui porte du sens est du texte, au-dessus. */
 .login-stage {
     position: fixed;
     inset: 0;
     overflow: hidden;
-    background: #f4f6f8 url('../images/login-fond.jpg') left center / auto 100% no-repeat;
+    background: #eef2f5 url('../images/login-scene.jpg') center center / cover no-repeat;
 }
 
 .login-stage__scene {
     position: absolute;
     inset: 0;
 }
+
+/* ---------- Le discours, a gauche ----------
+   Il etait peint dans l'image : il est desormais du texte. Il se traduit, se
+   lit a la loupe, reste net sur un videoprojecteur, et ne coute plus une
+   retouche graphique a chaque correction. Le voile clair garantit le contraste
+   par-dessus l'affiche d'anatomie et les classeurs. */
+
+.login-hero {
+    position: absolute;
+    /* Large et bas plutot qu'etroit et haut : le bloc tient ainsi au-dessus
+       de la tete du soignant, sans jamais la recouvrir. */
+    top: 4vh;
+    left: max(4.5vw, 1.5rem);
+    max-width: min(42rem, 46vw);
+    padding: .95rem 1.4rem 1rem;
+
+    /* Pas de flou d'arriere-plan : il rendrait le visage du soignant
+       meconnaissable des que le bloc l'effleure. Un simple voile clair suffit
+       au contraste, et laisse la photographie intacte. */
+    background: rgba(255, 255, 255, .8);
+    border-radius: 14px;
+}
+
+.login-hero__title {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.05vw, 2.05rem);
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -.015em;
+    color: #06214a;
+    text-wrap: balance;
+}
+
+.login-hero__sub {
+    margin: .45rem 0 0;
+    font-size: clamp(.88rem, 1vw, 1.02rem);
+    line-height: 1.5;
+    color: #46586f;
+}
+
+.login-hero::after {
+    content: "";
+    display: block;
+    width: 2.8rem;
+    height: 3px;
+    margin-top: .75rem;
+    background: #05a39d;
+    border-radius: 2px;
+}
+
+.login-atouts.login-atouts--scene {
+    position: absolute;
+    left: max(4.5vw, 1.5rem);
+    bottom: 5vh;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.2rem;
+    max-width: min(54rem, 60vw);
+    margin: 0;
+    padding: 1rem 1.3rem;
+    list-style: none;
+    background: rgba(255, 255, 255, .86);
+    border-radius: 14px;
+}
+
+.login-atouts.login-atouts--scene li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: .6rem;
+    font-size: .76rem;
+    line-height: 1.35;
+    color: #46586f;
+}
+
+.login-atouts.login-atouts.login-atouts--scene li + li { border-left: 1px solid #dbe3ea; padding-left: 1.2rem; }
+.login-atouts.login-atouts--scene svg { width: 1.4rem; height: 1.4rem; color: #05a39d; }
+.login-atouts.login-atouts--scene b { display: block; font-size: .74rem; letter-spacing: .07em; text-transform: uppercase; color: #06214a; }
 
 /* ---------- La carte de connexion ---------- */
 
@@ -1372,6 +1449,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 @media (max-width: 64rem) {
     .login-page { display: block; }
+
+    /* Le discours de la scene n'a pas sa place sur un petit ecran : on y vient
+       pour se connecter, pas pour lire une accroche. */
+    .login-hero, .login-atouts.login-atouts--scene { display: none; }
     .login-stage { position: static; overflow: visible; }
 
     .login-stage { background: #eef2f5; }
@@ -1399,7 +1480,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         /* Recadrage propre de la photographie : l'image de grand ecran porte
            deja le titre, la carte et les atouts, qui n'ont rien a faire dans
            un bandeau. */
-        background: url('../images/login-fond-mobile.jpg') center 32% / cover no-repeat;
+        background: url('../images/login-scene-mobile.jpg') center 30% / cover no-repeat;
     }
 
     .login-band__marque {
@@ -1471,8 +1552,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 @media (min-width: 48rem) and (max-width: 64rem) {
     .login-stage__scene::before {
         height: 45dvh;
-        background-image: url('../images/login-fond-tablette.jpg');
-        background-position: center 60%;
+        background-image: url('../images/login-scene.jpg');
+        background-position: center 55%;
     }
 
     .login-card__inner { padding: 2.2rem 2rem 1.8rem; }
@@ -1915,3 +1996,39 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
    fait qu'on s'y retrouve au comptoir. */
 .ordo-lu { margin: var(--e1) 0 0; padding-left: var(--e5); }
 .ordo-lu li { margin: 0 0 var(--e1); }
+
+/* ---------- Pied de page de l'editeur ----------
+   Present sur toutes les interfaces via les gabarits : une page ajoutee plus
+   tard en herite sans intervention. Discret par construction — il informe, il
+   ne doit pas concurrencer le travail affiche au-dessus. */
+
+.app-footer {
+    padding: var(--e4, 1.2rem) var(--e4, 1.2rem) var(--e5, 1.6rem);
+    text-align: center;
+    font-size: .82rem;
+    line-height: 1.5;
+    color: var(--gris-500, #6d7880);
+    border-top: 1px solid var(--gris-200, #e6ebee);
+}
+
+.app-footer p { margin: 0; }
+.app-footer__produit strong { font-weight: 600; color: var(--gris-700, #454f56); }
+.app-footer__rights { margin-top: .15rem; opacity: .85; }
+
+.app-footer a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: .15em;
+}
+
+.app-footer a:hover { color: var(--bleu, #0f5c8c); }
+
+/* Sur le mur de la salle d'attente, l'ecran est lu de loin : le pied de page
+   se fait plus discret encore, et ne prend pas de place sur les tickets. */
+.app-footer--board {
+    padding: .5rem;
+    font-size: .72rem;
+    border-top: 0;
+    opacity: .7;
+}
