@@ -99,5 +99,10 @@
                 </ul>
             @endif
         </section>
+
+        {{-- « Donner votre avis » (v3.2.8, point 4) : une section de ce portail
+             plutot qu'un second systeme d'acces — le patient est deja
+             identifie ici, par le lien et le code qu'il possede. --}}
+        @livewire('portal.patient-feedback-form', ['patientId' => $patient->id], key('avis-'.$patient->id))
     @endif
 </div>

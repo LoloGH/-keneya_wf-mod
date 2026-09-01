@@ -25,6 +25,7 @@
             'view' => 'sections.caisse.queue',
             'context' => ['caisseServiceId' => $caisse->getKey()],
         ])
+        ->push(['key' => 'constat', 'label' => 'Signaler un constat', 'view' => 'sections.caisse.incident'])
         ->push(['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.caisse.schedule'])
         ->all();
 @endphp

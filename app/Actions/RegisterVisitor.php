@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Models\Visitor;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -40,6 +41,9 @@ class RegisterVisitor
             'name' => $data['name'],
             'mobile' => $data['mobile'] ?? null,
             'service_id' => $service->getKey(),
+            // Qui l'a recu : c'est la personne que sa note « personnel »
+            // concernera, la seule qu'il aura rencontree (v3.2.8, point 4).
+            'registered_by_user_id' => Auth::id(),
             'token' => $this->tokens->next($service),
             'reason' => $data['reason'] ?? null,
         ]));

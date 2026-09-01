@@ -128,6 +128,12 @@ final class Audit
 
     public const EVENT_PORTAL_ACCESS = 'consultation_portail';
 
+    /** Depot d'un retour, d'une reclamation ou d'un constat (v3.2.8, point 4). */
+    public const EVENT_FEEDBACK_RECORDED = 'retour_depose';
+
+    /** Traitement d'un retour par l'administration, avec sa note de resolution. */
+    public const EVENT_FEEDBACK_RESOLVED = 'retour_traite';
+
     public const EVENT_PATIENT_DELETED = 'patient_supprime';
 
     /** Modifications d'attributs captees automatiquement par LogsActivity. */
@@ -188,6 +194,8 @@ final class Audit
         self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
         self::EVENT_PORTAL_LINK_SENT => 'Envoi du lien de documents',
         self::EVENT_PORTAL_ACCESS => 'Consultation du portail patient',
+        self::EVENT_FEEDBACK_RECORDED => 'Depot d\'un retour',
+        self::EVENT_FEEDBACK_RESOLVED => 'Traitement d\'un retour',
         self::EVENT_PATIENT_DELETED => 'Suppression d\'un dossier patient',
         self::EVENT_CREATED => 'Creation',
         self::EVENT_UPDATED => 'Modification',

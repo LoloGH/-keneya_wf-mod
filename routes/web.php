@@ -11,6 +11,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Portal\PatientPortalController;
 use App\Http\Controllers\Portal\PortalDownloadController;
 use App\Http\Controllers\Portal\PortalPrescriptionPdfController;
+use App\Http\Controllers\Portal\VisitorFeedbackController;
 use App\Http\Controllers\Reception\PrintTicketController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\Service\AttachmentDownloadController as ServiceAttachmentDownloadController;
@@ -146,4 +147,23 @@ Route::middleware('throttle:10,1')->group(function () {
 
     Route::get('/mes-documents/{token}/ordonnance/{prescription}/pdf', PortalPrescriptionPdfController::class)
         ->name('portal.prescription.pdf');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Page de retour d'un visiteur (v3.2.8, point 4)
+|--------------------------------------------------------------------------
+|
+| Publique elle aussi, mais sans code a quatre chiffres : un visiteur n'a pas
+| de dossier medical a proteger, et rien de medical ne s'affiche ici. Seul le
+| jeton de l'URL — un UUID, jamais le `visitor_code` ni l'id — tient lieu
+| d'adresse.
+|
+| Le `throttle` est plus large que celui du portail patient, la page etant
+| moins sensible, mais il reste indispensable : un identifiant long n'est pas
+| une raison de laisser essayer indefiniment.
+|
+*/
+Route::middleware('throttle:20,1')->group(function () {
+    Route::get('/mon-avis/{token}', VisitorFeedbackController::class)->name('feedback.visitor');
 });

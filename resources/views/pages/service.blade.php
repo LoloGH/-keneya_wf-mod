@@ -31,6 +31,7 @@
         $peut(StaffType::CAP_SCHEDULE_APPOINTMENT)
             ? ['key' => 'mes-rendez-vous', 'label' => 'Mes rendez-vous', 'view' => 'sections.service.my-appointments']
             : null,
+        ['key' => 'constat', 'label' => 'Signaler un constat', 'view' => 'sections.service.incident'],
         ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.service.schedule'],
     ]));
 @endphp

@@ -25,3 +25,16 @@ Schedule::command('keneya:rappels-rendez-vous')
     ->everyFifteenMinutes()
     ->withoutOverlapping()
     ->runInBackground();
+
+/*
+| Invitations des visiteurs a donner leur avis (v3.2.8, point 4).
+|
+| Le delai lui-meme se regle dans les parametres ; cette commande se contente
+| de repasser regulierement pour voir qui l'a depasse. Toutes les quinze
+| minutes suffisent : un quart d'heure de decalage sur un delai de trois heures
+| ne se remarque pas, et la requete est indexee.
+*/
+Schedule::command('keneya:liens-avis-visiteurs')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->runInBackground();
