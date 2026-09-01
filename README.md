@@ -86,7 +86,7 @@ Mise en œuvre :
 
 | Élément | Choix |
 |---|---|
-| Backend | Laravel 12, PHP 8.3 |
+| Backend | Laravel 12, PHP 8.4 |
 | Frontend | Livewire 3 + Alpine (embarqué par Livewire) |
 | Base de données | MySQL / MariaDB |
 | Rôles et permissions | `spatie/laravel-permission` |
@@ -105,9 +105,10 @@ souris.
 
 ## 3. Installation avec Docker (recommandé)
 
-Quatre services : `app` (PHP-FPM 8.3 + Laravel), `web` (Nginx), `db`
-(MariaDB) et `scheduler`. Le `docker-compose.yml` tourne **à l'identique** sous
-Docker Engine (Linux) et Docker Desktop / WSL2 (Windows), sans modification.
+Cinq services : `app` (PHP-FPM 8.4 + Laravel), `web` (Nginx), `db`
+(MariaDB), `scheduler` et `queue-worker`. Le `docker-compose.yml` tourne
+**à l'identique** sous Docker Engine (Linux) et Docker Desktop / WSL2
+(Windows), sans modification.
 
 Le service **`scheduler`** est apparu en v3.2.3 : même image et même code que
 `app`, mais il ne sert aucune requête HTTP - il lance `php artisan
@@ -115,6 +116,17 @@ schedule:work`, qui réveille le planificateur Laravel chaque minute. C'est lui
 qui envoie les rappels de rendez-vous ; **sans ce conteneur, ils ne partiront
 jamais et rien ne le signalera.** `docker compose logs scheduler` montre ses
 exécutions.
+
+Le service **`queue-worker`** est apparu en v3.2.8, sur le même modèle et pour
+la même raison : il lance `php artisan queue:work --tries=3
+--backoff=30,60,120`, qui envoie les SMS en arrière-plan. Depuis cette version,
+enregistrer un patient ne consiste plus à attendre la passerelle : l'action
+rend la main immédiatement et le SMS part ensuite. **Sans ce conteneur,
+l'application fonctionne normalement mais aucun SMS ne part** - les messages
+s'empilent dans la table `jobs`, et la section « SMS » de `/admin` les montre
+bloqués en « En file ». C'est un conteneur distinct du `scheduler` à dessein :
+un worker qui plante et redémarre ne doit interrompre ni les rappels de
+rendez-vous, ni le serveur web.
 
 ### Linux
 
@@ -158,7 +170,7 @@ Sous Windows, les mêmes commandes fonctionnent telles quelles dans PowerShell.
 
 À utiliser si Docker n'est pas installable sur un site donné.
 
-Prérequis communs : PHP 8.3 avec les extensions `pdo_mysql`, `mbstring`,
+Prérequis communs : PHP 8.4 avec les extensions `pdo_mysql`, `mbstring`,
 `intl`, `zip`, `bcmath`, `openssl`, `fileinfo` ; Composer 2 ; MySQL 8 ou
 MariaDB 10.6+.
 
@@ -185,8 +197,8 @@ MariaDB 10.6+.
 ### Linux - Nginx + PHP-FPM
 
 ```bash
-sudo apt install php8.3-fpm php8.3-mysql php8.3-mbstring php8.3-intl \
-                 php8.3-zip php8.3-bcmath nginx mariadb-server
+sudo apt install php8.4-fpm php8.4-mysql php8.4-mbstring php8.4-intl \
+                 php8.4-zip php8.4-bcmath nginx mariadb-server
 
 git clone <url-du-depot> /var/www/keneya-workflow
 cd /var/www/keneya-workflow
@@ -203,7 +215,7 @@ sudo chown -R www-data:www-data storage bootstrap/cache
 Serveur virtuel Nginx (`/etc/nginx/sites-available/keneya-workflow`) - la
 configuration de `docker/nginx/default.conf` sert de base ; il suffit de
 remplacer `fastcgi_pass app:9000;` par
-`fastcgi_pass unix:/run/php/php8.3-fpm.sock;` et d'adapter `root` :
+`fastcgi_pass unix:/run/php/php8.4-fpm.sock;` et d'adapter `root` :
 
 ```nginx
 server {
@@ -215,7 +227,7 @@ server {
     location / { try_files $uri $uri/ /index.php?$query_string; }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.4-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
     }
@@ -226,7 +238,7 @@ server {
 
 **IIS + PHP (FastCGI)**
 
-1. Installer PHP 8.3 (build NTS, x64) dans `C:\php`, activer les extensions
+1. Installer PHP 8.4 (build NTS, x64) dans `C:\php`, activer les extensions
    ci-dessus dans `php.ini`.
 2. Dans le Gestionnaire IIS : *Mappages de gestionnaires* → *Ajouter un mappage
    de module* → chemin `*.php`, module `FastCgiModule`, exécutable
@@ -261,7 +273,7 @@ server {
 
 **Apache (type Laragon en usage serveur)**
 
-Installer Laragon avec PHP 8.3 et MySQL, placer le projet dans
+Installer Laragon avec PHP 8.4 et MySQL, placer le projet dans
 `C:\laragon\www\keneya-workflow`, puis pointer le `DocumentRoot` sur le
 sous-dossier `public` :
 

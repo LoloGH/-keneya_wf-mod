@@ -47,11 +47,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Installer PHP 8.3
+      - name: Installer PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
-          # Meme version et memes extensions que docker/php/Dockerfile.
-          php-version: '8.3'
+          # Memes extensions que docker/php/Dockerfile.
+          #
+          # PHP 8.4 et non 8.3 : le composer.lock committe verrouille
+          # symfony/clock v8.1, qui exige php >= 8.4.1. Le premier passage de
+          # cette CI l'a montre en echouant des `composer install` — le lock
+          # avait ete produit sur PHP 8.4 sans que rien ne le signale. C'est
+          # aussi la version du serveur de production (voir php8.4-fpm dans
+          # docs/exploitation-demo.md).
+          php-version: '8.4'
           extensions: bcmath, intl, pcntl, pdo_mysql, zip, mbstring
           coverage: none
           tools: composer:v2
@@ -60,8 +67,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vendor
-          key: composer-${{ runner.os }}-php8.3-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-php8.3-
+          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php8.4-
 
       - name: composer install
         run: composer install --no-interaction --prefer-dist --no-progress
