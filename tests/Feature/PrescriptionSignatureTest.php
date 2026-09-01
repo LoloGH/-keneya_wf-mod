@@ -1,0 +1,227 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Actions\StoreSignatureImage;
+use App\Livewire\Admin\HospitalSettings;
+use App\Livewire\Shared\ProfileCard;
+use App\Models\Doctor;
+use App\Models\Prescription;
+use App\Models\Service;
+use App\Models\Setting;
+use App\Models\Visit;
+use App\Support\Audit;
+use App\Support\PrescriptionPdfData;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
+use Livewire\Livewire;
+use Spatie\Activitylog\Models\Activity;
+use Tests\TestCase;
+
+/**
+ * Signature, tampons et en-tete d'ordonnance (v3.2.9, point 2).
+ *
+ * Le fil conducteur : ces trois images ont une valeur legale, mais leur
+ * absence ne doit jamais empecher d'imprimer une ordonnance.
+ */
+class PrescriptionSignatureTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seedRoles();
+        Storage::fake('signatures');
+    }
+
+    private function makePrescription(Doctor $doctor, Visit $visit): Prescription
+    {
+        return Prescription::create([
+            'patient_id' => $visit->patient_id,
+            'visit_id' => $visit->getKey(),
+            'doctor_id' => $doctor->getKey(),
+            'content' => 'Paracetamol 500 mg, 3 fois par jour, 5 jours.',
+        ]);
+    }
+
+    // --------------------------------------------- L'absence n'empeche rien
+
+    /**
+     * La verification demandee : sans signature, sans tampon medecin et sans
+     * tampon d'etablissement, l'ordonnance s'imprime normalement.
+     */
+    public function test_une_ordonnance_sans_aucune_image_s_imprime_normalement(): void
+    {
+        $service = Service::factory()->create();
+        $medecin = $this->makeDoctor($service);
+        $visit = $this->makeVisit($service);
+        $ordonnance = $this->makePrescription($medecin, $visit);
+
+        $donnees = PrescriptionPdfData::for($ordonnance->fresh(['patient', 'doctor.user', 'visit.service']));
+
+        $this->assertNull($donnees['doctorSignature']);
+        $this->assertNull($donnees['doctorStamp']);
+        $this->assertNull($donnees['hospitalStamp']);
+
+        $this->actingAs($medecin->user)
+            ->get(route('service.prescription.pdf', $ordonnance))
+            ->assertOk();
+    }
+
+    /**
+     * Un chemin enregistre dont le fichier a disparu ne doit pas faire echouer
+     * la generation : c'est le cas qui casserait dompdf sans ce garde-fou.
+     */
+    public function test_un_chemin_dont_le_fichier_a_disparu_laisse_l_espace_vide(): void
+    {
+        $service = Service::factory()->create();
+        $medecin = $this->makeDoctor($service);
+        $medecin->forceFill(['signature_path' => 'medecins/1/disparue.png'])->save();
+        Setting::put(Setting::HOSPITAL_STAMP_PATH, 'etablissement/disparu.png');
+
+        $visit = $this->makeVisit($service);
+        $ordonnance = $this->makePrescription($medecin, $visit);
+
+        $donnees = PrescriptionPdfData::for($ordonnance);
+
+        $this->assertNull($donnees['doctorSignature']);
+        $this->assertNull($donnees['hospitalStamp']);
+
+        $this->actingAs($medecin->user)
+            ->get(route('service.prescription.pdf', $ordonnance))
+            ->assertOk();
+    }
+
+    // --------------------------------------------- En-tete configurable
+
+    public function test_l_en_tete_reprend_les_coordonnees_reglees_dans_l_administration(): void
+    {
+        Setting::put(Setting::HOSPITAL_ADDRESS, 'Quartier Legal Segou, Kayes');
+        Setting::put(Setting::HOSPITAL_PHONE, '+223 21 52 00 00');
+        Setting::put(Setting::HOSPITAL_EMAIL, 'contact@hfd.ml');
+
+        $service = Service::factory()->create();
+        $medecin = $this->makeDoctor($service);
+        $ordonnance = $this->makePrescription($medecin, $this->makeVisit($service));
+
+        $donnees = PrescriptionPdfData::for($ordonnance);
+
+        $this->assertSame('Quartier Legal Segou, Kayes', $donnees['hospitalAddress']);
+        $this->assertSame('+223 21 52 00 00', $donnees['hospitalPhone']);
+        $this->assertSame('contact@hfd.ml', $donnees['hospitalEmail']);
+    }
+
+    public function test_l_administration_enregistre_les_coordonnees(): void
+    {
+        Livewire::actingAs($this->makeAdmin())
+            ->test(HospitalSettings::class)
+            ->set('hospitalName', 'Hopital Fousseyni Daou')
+            ->set('hospitalAddress', 'Quartier Legal Segou, Kayes')
+            ->set('hospitalPhone', '+223 21 52 00 00')
+            ->set('hospitalEmail', 'contact@hfd.ml')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('contact@hfd.ml', Setting::get(Setting::HOSPITAL_EMAIL));
+    }
+
+    // --------------------------------------------- Depot et securite
+
+    public function test_le_medecin_depose_sa_signature_et_son_tampon(): void
+    {
+        $service = Service::factory()->create();
+        $medecin = $this->makeDoctor($service);
+
+        Livewire::actingAs($medecin->user)
+            ->test(ProfileCard::class)
+            ->call('startSignatureChange')
+            ->set('signatureFile', UploadedFile::fake()->image('signature.png'))
+            ->set('stampFile', UploadedFile::fake()->image('tampon.png'))
+            ->call('saveSignature')
+            ->assertHasNoErrors();
+
+        $medecin->refresh();
+
+        $this->assertNotNull($medecin->signature_path);
+        $this->assertNotNull($medecin->stamp_path);
+        Storage::disk('signatures')->assertExists($medecin->signature_path);
+    }
+
+    /** Une image remplacee disparait du disque : une signature perimee reste utilisable. */
+    public function test_l_image_remplacee_est_effacee_du_disque(): void
+    {
+        $medecin = $this->makeDoctor(Service::factory()->create());
+        $action = app(StoreSignatureImage::class);
+
+        $premier = $action->forDoctorSignature(UploadedFile::fake()->image('une.png'), $medecin);
+        $action->forDoctorSignature(UploadedFile::fake()->image('deux.png'), $medecin->fresh());
+
+        Storage::disk('signatures')->assertMissing($premier);
+    }
+
+    /** Un fichier qui n'est pas une image est refuse cote serveur, pas seulement au formulaire. */
+    public function test_un_fichier_non_image_est_refuse_par_l_action(): void
+    {
+        $medecin = $this->makeDoctor(Service::factory()->create());
+
+        $this->expectException(InvalidArgumentException::class);
+
+        app(StoreSignatureImage::class)->forDoctorSignature(
+            UploadedFile::fake()->create('ordonnance.pdf', 10, 'application/pdf'),
+            $medecin,
+        );
+    }
+
+    public function test_une_image_trop_lourde_est_refusee(): void
+    {
+        $medecin = $this->makeDoctor(Service::factory()->create());
+
+        $this->expectException(InvalidArgumentException::class);
+
+        app(StoreSignatureImage::class)->forDoctorSignature(
+            UploadedFile::fake()->image('enorme.png')->size(3000),
+            $medecin,
+        );
+    }
+
+    /**
+     * La verification demandee : tout changement sur l'une des trois images
+     * apparait au journal d'audit.
+     */
+    public function test_chaque_changement_d_image_est_journalise(): void
+    {
+        $medecin = $this->makeDoctor(Service::factory()->create());
+        $action = app(StoreSignatureImage::class);
+
+        $this->actingAs($medecin->user);
+        $action->forDoctorSignature(UploadedFile::fake()->image('signature.png'), $medecin);
+        $action->forDoctorStamp(UploadedFile::fake()->image('tampon.png'), $medecin->fresh());
+
+        $this->actingAs($this->makeAdmin());
+        $action->forHospitalStamp(UploadedFile::fake()->image('cachet.png'));
+
+        $traces = Activity::where('event', Audit::EVENT_SIGNATURE_CHANGED)->get();
+
+        $this->assertCount(3, $traces);
+        $this->assertTrue($traces->contains(fn ($t) => str_contains($t->description, "Tampon de l'etablissement")));
+    }
+
+    /** Le tampon institutionnel ne se regle que depuis /admin. */
+    public function test_le_tampon_de_l_etablissement_se_depose_depuis_l_administration(): void
+    {
+        Livewire::actingAs($this->makeAdmin())
+            ->test(HospitalSettings::class)
+            ->set('stampFile', UploadedFile::fake()->image('cachet.png'))
+            ->call('saveStamp')
+            ->assertHasNoErrors();
+
+        $chemin = Setting::get(Setting::HOSPITAL_STAMP_PATH);
+
+        $this->assertNotNull($chemin);
+        Storage::disk('signatures')->assertExists($chemin);
+    }
+}

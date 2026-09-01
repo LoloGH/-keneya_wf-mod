@@ -24,7 +24,11 @@
         ['key' => 'tarifs', 'label' => 'Tarifs', 'view' => 'sections.admin.billable-items'],
         ['key' => 'patients', 'label' => 'Patients', 'view' => 'sections.admin.patients'],
         ['key' => 'retours', 'label' => 'Retours et incidents', 'view' => 'sections.admin.feedback'],
-        ['key' => 'sms', 'label' => 'SMS', 'view' => 'sections.admin.sms'],
+        ['key' => 'sms', 'label' => 'SMS', 'children' => [
+            ['key' => 'sms-journal', 'label' => 'Journal des envois', 'view' => 'sections.admin.sms'],
+            ['key' => 'sms-groupes', 'label' => 'Envoi groupe', 'view' => 'sections.admin.broadcast'],
+        ]],
+        ['key' => 'pathologies', 'label' => 'Pathologies', 'view' => 'sections.admin.pathologies'],
         ['key' => 'audit', 'label' => "Journal d'audit", 'view' => 'sections.admin.audit'],
         ['key' => 'suppression', 'label' => 'Supprimer un dossier', 'view' => 'sections.admin.deletion'],
     ];

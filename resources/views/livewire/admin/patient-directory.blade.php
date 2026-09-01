@@ -64,6 +64,13 @@
             <div class="card__head">
                 <h3 class="card__subtitle">Dossier {{ $openPatient->patient_code }} — {{ $openPatient->name }}</h3>
                 <div class="btn-row">
+                    {{-- Sondage a la demande (v3.2.9, point 3) : sans attendre
+                         la cloture ni le delai automatique. --}}
+                    <button type="button" class="btn btn--ghost"
+                            wire:click="launchSurvey({{ $openPatient->id }})"
+                            wire:loading.attr="disabled">
+                        Lancer le sondage maintenant
+                    </button>
                     <button type="button" class="btn btn--ghost" wire:click="startAttachment">
                         Ajouter une piece jointe
                     </button>

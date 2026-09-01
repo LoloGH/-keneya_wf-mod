@@ -46,6 +46,19 @@ class DemoReset extends Command
      * @var array<int, string>
      */
     private const TABLES_TRANSACTIONNELLES = [
+        // Retours et diffusions (v3.2.8 et v3.2.9). Leur absence de cette
+        // liste laissait des `feedback_entries` orphelines pointant vers des
+        // patients supprimes, et un compteur d'echecs SMS qui comptait encore
+        // les messages d'une demonstration effacee.
+        'feedback_survey_ratings',
+        'feedback_entries',
+        'broadcast_messages',
+        'sms_messages',
+        // La file elle-meme : des jobs en attente designeraient des
+        // `sms_messages` disparus.
+        'jobs',
+        'job_batches',
+        'failed_jobs',
         'attachments',
         'care_tasks',
         'hospitalizations',
@@ -81,6 +94,9 @@ class DemoReset extends Command
      * @var array<int, string>
      */
     private const TABLES_CONFIGURATION = [
+        // Catalogue saisi en demonstration, susceptible de porter le
+        // vocabulaire d'un prospect precedent — comme `rooms`.
+        'pathologies',
         'schedules',
         'rooms',
         'care_task_types',

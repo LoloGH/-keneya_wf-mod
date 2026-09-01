@@ -33,6 +33,9 @@
         .head h1 { margin: 0; font-size: 16px; color: #0b3a58; letter-spacing: -.2px; }
         .head .type { margin: 3px 0 0; font-size: 10px; text-transform: uppercase;
                       letter-spacing: 1.4px; color: #4a555d; }
+        /* Coordonnees de l'etablissement, sous son nom : lues par le patient
+           qui veut rappeler, et par la pharmacie qui veut verifier. */
+        .head .coord { margin: 2px 0 0; font-size: 8.5px; color: #4a555d; }
         .head .dossier { text-align: right; font-size: 10px; color: #4a555d; }
         .head .dossier strong { display: block; font-size: 14px; color: #14191d; letter-spacing: .5px; }
 
@@ -63,7 +66,11 @@
         .sign .cachet { width: 45%; font-size: 9px; color: #6f7a83; }
         .sign .cachet .cadre { border: 1px dashed #d3dbe0; height: 62px; margin-top: 4px; }
         .sign .medecin { width: 45%; text-align: right; }
-        .sign .medecin .trait { border-top: 1px solid #4a555d; padding-top: 5px; margin-top: 52px; }
+        .sign .medecin .trait { border-top: 1px solid #4a555d; padding-top: 5px; margin-top: 8px; }
+        /* Les images gardent une hauteur bornee : une signature scannee de
+           travers ne doit pas pousser le pied de page hors de la feuille. */
+        .sign img { max-height: 52px; max-width: 150px; }
+        .sign .medecin .paraphe { height: 56px; text-align: right; }
         .sign .medecin strong { display: block; }
         .sign .medecin span { font-size: 9px; color: #6f7a83; }
 
@@ -80,6 +87,16 @@
             <td>
                 <h1>{{ $hospitalName }}</h1>
                 <p class="type">Ordonnance medicale</p>
+                {{-- Chaque coordonnee n'apparait que si elle est renseignee
+                     dans /admin : rien n'est code en dur ici, et une ligne
+                     laissee vide ne laisse pas de tiret orphelin. --}}
+                @if (filled($hospitalAddress) || filled($hospitalPhone) || filled($hospitalEmail))
+                    <p class="coord">
+                        {{ collect([$hospitalAddress, $hospitalPhone, $hospitalEmail])
+                            ->filter(fn ($valeur) => filled($valeur))
+                            ->join(' · ') }}
+                    </p>
+                @endif
             </td>
             <td class="dossier">
                 Dossier
@@ -128,14 +145,29 @@
         </tbody>
     </table>
 
+    {{-- Signature et tampons. Chaque element manquant laisse son espace vide :
+         une ordonnance doit s'imprimer meme pour un medecin qui n'a rien
+         depose, et meme si l'etablissement n'a pas encore de tampon. --}}
     <table class="sign">
         <tr>
             <td class="cachet">
                 Cachet de l'etablissement
-                <div class="cadre"></div>
+                @if ($hospitalStamp)
+                    <div><img src="{{ $hospitalStamp }}" alt=""></div>
+                @else
+                    <div class="cadre"></div>
+                @endif
             </td>
             <td></td>
             <td class="medecin">
+                <div class="paraphe">
+                    @if ($doctorSignature)
+                        <img src="{{ $doctorSignature }}" alt="">
+                    @endif
+                    @if ($doctorStamp)
+                        <img src="{{ $doctorStamp }}" alt="">
+                    @endif
+                </div>
                 <div class="trait">
                     <strong>{{ $prescription->doctor->name() }}</strong>
                     <span>Signature du medecin</span>

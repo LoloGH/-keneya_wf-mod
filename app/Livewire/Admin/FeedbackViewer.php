@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\SendFeedbackInvitation;
 use App\Livewire\Concerns\NotifiesUser;
 use App\Models\FeedbackEntry;
 use App\Models\Setting;
@@ -137,10 +138,44 @@ class FeedbackViewer extends Component
         $this->notifySuccess('Delai enregistre.');
     }
 
+    /**
+     * « Lancer le sondage maintenant » pour un visiteur (v3.2.9, point 3).
+     *
+     * Sans attendre le delai automatique. Le lien est renvoye meme si un
+     * premier est deja parti : c'est un geste volontaire de l'administrateur,
+     * et la reponse creera sa propre entree sans ecraser la precedente.
+     */
+    public function launchVisitorSurvey(int $visitorId, SendFeedbackInvitation $invitation): void
+    {
+        $visitor = Visitor::findOrFail($visitorId);
+
+        if (blank($visitor->mobile)) {
+            $this->notifyError(sprintf('%s n\'a pas de numero de telephone : le lien ne peut pas partir.', $visitor->name));
+
+            return;
+        }
+
+        $invitation->toVisitor($visitor);
+
+        // La marque d'envoi est posee pour que la tache planifiee ne repasse
+        // pas derriere avec un second lien automatique.
+        if (! $visitor->feedbackLinkSent()) {
+            $visitor->forceFill(['feedback_link_sent_at' => now()])->save();
+        }
+
+        Audit::log(
+            Audit::EVENT_PORTAL_LINK_SENT,
+            sprintf('Sondage de satisfaction lance manuellement pour le visiteur %s.', $visitor->visitor_code),
+            $visitor,
+        );
+
+        $this->notifySuccess(sprintf('Lien du sondage mis en file pour %s.', $visitor->name));
+    }
+
     public function render(): View
     {
         $entries = FeedbackEntry::query()
-            ->with(['patient', 'visitor.service', 'service', 'handledBy', 'submittedBy', 'resolvedBy'])
+            ->with(['patient', 'visitor.service', 'service', 'handledBy', 'submittedBy', 'resolvedBy', 'surveyRatings'])
             ->when($this->type !== '', fn ($query) => $query->where('type', $this->type))
             ->when($this->status !== '', fn ($query) => $query->where('status', $this->status))
             ->orderByDesc('id')
@@ -153,6 +188,10 @@ class FeedbackViewer extends Component
             'openCount' => FeedbackEntry::query()->open()->count(),
             // Le cas qui serait invisible autrement : un visiteur sans numero
             // ne recevra jamais de lien, et rien ne le dirait.
+            // Les visiteurs recents, pour un declenchement a la demande.
+            'recentVisitors' => Visitor::query()
+                ->whereNotNull('mobile')->where('mobile', '!=', '')
+                ->orderByDesc('id')->limit(10)->get(),
             'visitorsWithoutMobile' => Visitor::query()
                 ->whereNull('mobile')
                 ->whereNotNull('feedback_link_sent_at')

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Portal;
 use App\Http\Controllers\Controller;
 use App\Models\Patient;
 use App\Models\Prescription;
+use App\Support\PrescriptionPdfData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -30,11 +31,7 @@ class PortalPrescriptionPdfController extends Controller
 
         $prescription->load(['patient', 'doctor.user', 'visit.service']);
 
-        $pdf = Pdf::loadView('pdf.prescription', [
-            'prescription' => $prescription,
-            'hospitalName' => hospital_name(),
-            'productName' => config('keneya.name'),
-        ])->setPaper('a4');
+        $pdf = Pdf::loadView('pdf.prescription', PrescriptionPdfData::for($prescription))->setPaper('a4');
 
         return $pdf->download(sprintf(
             'ordonnance-%s-%d.pdf',

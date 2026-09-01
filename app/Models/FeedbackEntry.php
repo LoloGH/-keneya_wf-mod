@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Un retour : sondage de satisfaction, reclamation ou constat
@@ -72,6 +73,17 @@ class FeedbackEntry extends Model
             'rating_staff' => 'integer',
             'resolved_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Les notes par etape du parcours (v3.2.9, point 3). Vides pour une
+     * reclamation ou un constat.
+     *
+     * @return HasMany<FeedbackSurveyRating, $this>
+     */
+    public function surveyRatings(): HasMany
+    {
+        return $this->hasMany(FeedbackSurveyRating::class);
     }
 
     public function patient(): BelongsTo

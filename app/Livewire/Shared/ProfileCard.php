@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Shared;
 
+use App\Actions\StoreSignatureImage;
 use App\Support\Audit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * Carte de profil, partagee par les cinq interfaces (v3.2.3, point 3).
@@ -18,7 +20,23 @@ use Livewire\Component;
  */
 class ProfileCard extends Component
 {
+    use WithFileUploads;
+
     public bool $open = false;
+
+    /**
+     * Signature et tampon du praticien (v3.2.9, point 2).
+     *
+     * Ils vivent dans la carte de profil, a cote du changement de mot de
+     * passe : ce sont les deux seules choses qu'un agent gere sur son propre
+     * compte. Le tampon de l'etablissement, lui, n'est pas ici — il est
+     * institutionnel et se regle depuis /admin.
+     */
+    public bool $editingSignature = false;
+
+    public $signatureFile = null;
+
+    public $stampFile = null;
 
     /** Le formulaire de mot de passe est replie tant qu'on ne le demande pas. */
     public bool $changingPassword = false;
@@ -67,6 +85,64 @@ class ProfileCard extends Component
     {
         $this->open = false;
         $this->closePasswordForm();
+    }
+
+    public function startSignatureChange(): void
+    {
+        $this->editingSignature = true;
+        $this->reset(['signatureFile', 'stampFile']);
+        $this->resetValidation();
+    }
+
+    public function closeSignatureForm(): void
+    {
+        $this->editingSignature = false;
+        $this->reset(['signatureFile', 'stampFile']);
+        $this->resetValidation();
+    }
+
+    /**
+     * Depose l'une des deux images, ou les deux. Les regles de validation
+     * doublent celles de l'action : le formulaire refuse tot, l'action refuse
+     * quoi qu'il arrive.
+     */
+    public function saveSignature(StoreSignatureImage $action): void
+    {
+        $medecin = Auth::user()?->doctors()->orderBy('id')->first();
+
+        if (! $medecin) {
+            $this->addError('signatureFile', 'Seul un medecin dispose d\'une signature et d\'un tampon.');
+
+            return;
+        }
+
+        $this->validate([
+            'signatureFile' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'stampFile' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+        ], attributes: ['signatureFile' => 'signature', 'stampFile' => 'tampon']);
+
+        if (! $this->signatureFile && ! $this->stampFile) {
+            $this->addError('signatureFile', 'Choisissez au moins une image a deposer.');
+
+            return;
+        }
+
+        try {
+            if ($this->signatureFile) {
+                $action->forDoctorSignature($this->signatureFile, $medecin);
+            }
+
+            if ($this->stampFile) {
+                $action->forDoctorStamp($this->stampFile, $medecin);
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->addError('signatureFile', $e->getMessage());
+
+            return;
+        }
+
+        session()->flash('profil.status', 'Signature et tampon mis a jour.');
+        $this->closeSignatureForm();
     }
 
     public function startPasswordChange(): void
@@ -125,6 +201,9 @@ class ProfileCard extends Component
             'serviceLabel' => $user?->doctors()->with('service')->first()?->service?->name
                 ?? $user?->staffMember?->service?->name,
             'initials' => $this->initials($user?->name ?? ''),
+            // Seul un praticien depose une signature et un tampon : la section
+            // n'apparait pas pour une receptionniste ou un caissier.
+            'isDoctor' => (bool) $user?->doctors()->exists(),
         ]);
     }
 

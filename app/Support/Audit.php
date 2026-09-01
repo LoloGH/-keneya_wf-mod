@@ -97,6 +97,14 @@ final class Audit
 
     public const EVENT_PAYMENT_RECORDED = 'encaissement';
 
+    /**
+     * Changement d'une signature ou d'un tampon (v3.2.9, point 2).
+     *
+     * Ces trois images valent engagement sur une ordonnance : leur
+     * remplacement ne doit jamais passer inapercu.
+     */
+    public const EVENT_SIGNATURE_CHANGED = 'signature_modifiee';
+
     public const EVENT_PRESCRIPTION_CREATED = 'ordonnance_creee';
 
     public const EVENT_APPOINTMENT_CREATED = 'rendez_vous_cree';
@@ -123,6 +131,15 @@ final class Audit
     public const EVENT_ATTACHMENT_ADDED = 'piece_jointe_ajoutee';
 
     public const EVENT_VISITOR_REGISTERED = 'visiteur_enregistre';
+
+    /**
+     * Diffusion groupee de SMS depuis l'administration (v3.2.9, point 1).
+     *
+     * Le contenu integral du message et le nombre de destinataires partent
+     * dans les proprietes : s'adresser d'un coup a des centaines de patients
+     * demande de pouvoir relire, des mois plus tard, ce qui leur a ete dit.
+     */
+    public const EVENT_BROADCAST_SENT = 'diffusion_sms';
 
     public const EVENT_PORTAL_LINK_SENT = 'lien_portail_envoye';
 
@@ -182,6 +199,7 @@ final class Audit
         self::EVENT_DOCTOR_REASSIGNED => 'Reaffectation d\'un medecin',
         self::EVENT_RECEPTIONIST_CREATED => 'Creation d\'une receptionniste',
         self::EVENT_PAYMENT_RECORDED => 'Encaissement',
+        self::EVENT_SIGNATURE_CHANGED => 'Modification d\'une signature ou d\'un tampon',
         self::EVENT_PRESCRIPTION_CREATED => 'Creation d\'une ordonnance',
         self::EVENT_APPOINTMENT_CREATED => 'Prise de rendez-vous',
         self::EVENT_SCHEDULE_CHANGED => 'Modification d\'un planning',
@@ -192,6 +210,7 @@ final class Audit
         self::EVENT_CONCLUSION_RECORDED => 'Conclusion de consultation',
         self::EVENT_ATTACHMENT_ADDED => 'Ajout d\'une piece jointe',
         self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
+        self::EVENT_BROADCAST_SENT => 'Diffusion groupee de SMS',
         self::EVENT_PORTAL_LINK_SENT => 'Envoi du lien de documents',
         self::EVENT_PORTAL_ACCESS => 'Consultation du portail patient',
         self::EVENT_FEEDBACK_RECORDED => 'Depot d\'un retour',

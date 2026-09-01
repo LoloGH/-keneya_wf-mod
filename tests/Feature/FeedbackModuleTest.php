@@ -124,8 +124,8 @@ class FeedbackModuleTest extends TestCase
 
         $visit = $this->makeVisit($service, ['status' => Visit::STATUS_CALLED], $patient);
 
-        // Une consultation au dossier : c'est elle qui designe le medecin
-        // concerne par la note « personnel ».
+        // Une consultation au dossier : c'est elle qui designe l'etape a
+        // noter, et le medecin concerne.
         PatientHistory::create([
             'patient_id' => $patient->getKey(),
             'visit_id' => $visit->getKey(),
@@ -135,9 +135,13 @@ class FeedbackModuleTest extends TestCase
             'description' => 'Consultation.',
         ]);
 
+        // Depuis la v3.2.9 point 3, la note « personnel » n'est plus saisie :
+        // elle se note etape par etape, et devient leur moyenne.
+        $cle = $service->getKey().':'.$medecin->user_id;
+
         Livewire::test(PatientFeedbackForm::class, ['patientId' => $patient->getKey()])
             ->set('ratingCare', 5)
-            ->set('ratingStaff', 4)
+            ->set('stepRatings.'.$cle, 4)
             ->set('content', 'Accueil rapide et personnel attentionne.')
             ->call('submit')
             ->assertHasNoErrors()
@@ -152,6 +156,11 @@ class FeedbackModuleTest extends TestCase
         $this->assertSame($service->getKey(), $entry->service_id);
         // handled_by_user_id resolu depuis la derniere consultation.
         $this->assertSame($medecin->user_id, $entry->handled_by_user_id);
+
+        $note = $entry->surveyRatings()->sole();
+        $this->assertSame($medecin->user_id, $note->user_id);
+        $this->assertSame(4, $note->rating);
+        $this->assertStringContainsString('Medecine Generale', $note->post_label);
     }
 
     /** Une reclamation ne porte pas de notes : elles n'y ont pas de sens. */
