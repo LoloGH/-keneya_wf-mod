@@ -30,6 +30,23 @@ return [
 
     'disks' => [
 
+        /*
+         * Signatures et tampons (v3.2.9, point 2).
+         *
+         * Un disque a part plutot qu'un sous-dossier de `attachments` : ce sont
+         * des elements a valeur legale, qui n'ont pas a cotoyer les pieces
+         * jointes d'un dossier patient. Comme elles, ils vivent sous
+         * storage/app — donc sur le volume Docker persistant — et ne sont
+         * jamais servis directement par le serveur web : seul dompdf les lit,
+         * par leur chemin sur le disque.
+         */
+        'signatures' => [
+            'driver' => 'local',
+            'root' => storage_path('app/signatures'),
+            'serve' => false,
+            'throw' => false,
+        ],
+
         'attachments' => [
             'driver' => 'local',
             'root' => storage_path('app/attachments'),

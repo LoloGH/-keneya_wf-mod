@@ -19,6 +19,24 @@ class Setting extends Model
     public const HOSPITAL_NAME = 'hospital_name';
 
     /**
+     * En-tete de l'ordonnance (v3.2.9, point 2) : adresse, telephone et
+     * courriel de l'etablissement. En base et non dans le gabarit, comme le
+     * nom : le produit doit servir ailleurs qu'a HFD sans redeploiement.
+     */
+    public const HOSPITAL_ADDRESS = 'hospital_address';
+
+    public const HOSPITAL_PHONE = 'hospital_phone';
+
+    public const HOSPITAL_EMAIL = 'hospital_email';
+
+    /**
+     * Tampon de l'etablissement, commun a tous les medecins. Gere depuis
+     * /admin et de nulle part ailleurs : c'est un element institutionnel, pas
+     * la propriete d'un praticien.
+     */
+    public const HOSPITAL_STAMP_PATH = 'hospital_stamp_path';
+
+    /**
      * Delai, en minutes, entre le rappel et l'heure du rendez-vous
      * (v3.2.3, point 2). Reglable par l'etablissement plutot que code en dur :
      * une consultation programmee ne se prepare pas comme un bloc.

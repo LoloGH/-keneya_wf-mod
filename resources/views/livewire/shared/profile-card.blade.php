@@ -42,8 +42,53 @@
                 </div>
             </dl>
 
-            @if (! $changingPassword)
+            @if (session('profil.status'))
+                <div class="alert alert--success" role="status">{{ session('profil.status') }}</div>
+            @endif
+
+            {{-- Signature et tampon (v3.2.9, point 2) : offerts au seul
+                 medecin, puisque ce sont les elements qu'il appose sur ses
+                 ordonnances. Le tampon de l'etablissement, lui, se regle dans
+                 /admin — il n'appartient a personne en particulier. --}}
+            @if ($isDoctor && $editingSignature)
+                <form wire:submit="saveSignature" class="form profil__form">
+                    <div class="field">
+                        <label for="profil-signature">
+                            Signature
+                            <span class="field__hint">PNG, JPEG ou WebP. 2 Mo maximum</span>
+                        </label>
+                        <input id="profil-signature" type="file" accept="image/png,image/jpeg,image/webp"
+                               wire:model="signatureFile">
+                        @error('signatureFile') <p class="field__error">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="field">
+                        <label for="profil-tampon">
+                            Tampon personnel
+                            <span class="field__hint">PNG, JPEG ou WebP. 2 Mo maximum</span>
+                        </label>
+                        <input id="profil-tampon" type="file" accept="image/png,image/jpeg,image/webp"
+                               wire:model="stampFile">
+                        @error('stampFile') <p class="field__error">{{ $message }}</p> @enderror
+                    </div>
+
+                    <p class="field__hint">
+                        Toute modification est inscrite au journal d'audit.
+                    </p>
+
+                    <div class="profil__actions">
+                        <button type="submit" class="btn btn--primary profil__grow"
+                                wire:loading.attr="disabled">Enregistrer</button>
+                        <button type="button" class="btn btn--ghost"
+                                wire:click="closeSignatureForm">Annuler</button>
+                    </div>
+                </form>
+            @elseif (! $changingPassword)
                 <div class="profil__actions">
+                    @if ($isDoctor)
+                        <button type="button" class="btn btn--secondary profil__grow"
+                                wire:click="startSignatureChange">Signature et tampon</button>
+                    @endif
                     <button type="button" class="btn btn--secondary profil__grow"
                             wire:click="startPasswordChange">Changer le mot de passe</button>
 
@@ -62,7 +107,9 @@
                         </button>
                     </form>
                 </div>
-            @else
+            @endif
+
+            @if ($changingPassword)
                 <form wire:submit="changePassword" class="form profil__form">
                     <div class="field">
                         <label for="profil-current">Mot de passe actuel</label>
