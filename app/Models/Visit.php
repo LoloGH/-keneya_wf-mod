@@ -46,6 +46,7 @@ class Visit extends Model
         'pending_next_service_id',
         'token',
         'status',
+        'pathology_id',
         'opened_at',
         'closed_at',
     ];
@@ -92,6 +93,15 @@ class Visit extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
+    }
+
+    /**
+     * La pathologie notee a la conclusion de consultation (v3.2.9, point 1).
+     * Toujours facultative : elle sert a regrouper, jamais a conditionner.
+     */
+    public function pathology(): BelongsTo
+    {
+        return $this->belongsTo(Pathology::class);
     }
 
     /**

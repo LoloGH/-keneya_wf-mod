@@ -124,6 +124,15 @@ final class Audit
 
     public const EVENT_VISITOR_REGISTERED = 'visiteur_enregistre';
 
+    /**
+     * Diffusion groupee de SMS depuis l'administration (v3.2.9, point 1).
+     *
+     * Le contenu integral du message et le nombre de destinataires partent
+     * dans les proprietes : s'adresser d'un coup a des centaines de patients
+     * demande de pouvoir relire, des mois plus tard, ce qui leur a ete dit.
+     */
+    public const EVENT_BROADCAST_SENT = 'diffusion_sms';
+
     public const EVENT_PORTAL_LINK_SENT = 'lien_portail_envoye';
 
     public const EVENT_PORTAL_ACCESS = 'consultation_portail';
@@ -192,6 +201,7 @@ final class Audit
         self::EVENT_CONCLUSION_RECORDED => 'Conclusion de consultation',
         self::EVENT_ATTACHMENT_ADDED => 'Ajout d\'une piece jointe',
         self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
+        self::EVENT_BROADCAST_SENT => 'Diffusion groupee de SMS',
         self::EVENT_PORTAL_LINK_SENT => 'Envoi du lien de documents',
         self::EVENT_PORTAL_ACCESS => 'Consultation du portail patient',
         self::EVENT_FEEDBACK_RECORDED => 'Depot d\'un retour',

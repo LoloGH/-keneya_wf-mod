@@ -7,6 +7,7 @@ use App\Actions\RecordConsultationConclusion;
 use App\Actions\ScheduleAppointment;
 use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
+use App\Models\Pathology;
 use App\Models\StaffType;
 use App\Models\Visit;
 use Illuminate\Contracts\View\View;
@@ -37,6 +38,9 @@ class ConsultationActions extends Component
     public string $tab = 'conclusion';
 
     public string $conclusion = '';
+
+    /** Pathologie notee avec la conclusion. Facultative, jamais bloquante. */
+    public ?int $pathologyId = null;
 
     /**
      * Lignes de l'ordonnance en cours de saisie (v3.2.6).
@@ -91,18 +95,25 @@ class ConsultationActions extends Component
         $this->validate([
             'visitId' => ['required', 'integer', 'exists:visits,id'],
             'conclusion' => ['required', 'string', 'min:3', 'max:5000'],
-        ], attributes: ['visitId' => 'patient', 'conclusion' => 'conclusion']);
+            // `nullable` et rien d'autre : la pathologie ne doit jamais
+            // empecher une conclusion d'etre enregistree (v3.2.9, point 1).
+            'pathologyId' => ['nullable', 'integer', 'exists:pathologies,id'],
+        ], attributes: [
+            'visitId' => 'patient',
+            'conclusion' => 'conclusion',
+            'pathologyId' => 'pathologie',
+        ]);
 
         $visit = $this->visitInThisService();
 
-        $action->execute($visit, $this->currentDoctor(), $this->conclusion);
+        $action->execute($visit, $this->currentDoctor(), $this->conclusion, $this->pathologyId);
 
         session()->flash('service.status', sprintf(
             'Conclusion enregistree pour %s.',
             $visit->patient->name,
         ));
 
-        $this->reset('conclusion');
+        $this->reset(['conclusion', 'pathologyId']);
         $this->dispatch('file-mise-a-jour');
     }
 
@@ -208,6 +219,7 @@ class ConsultationActions extends Component
     public function render(): View
     {
         return view('livewire.service.consultation-actions', [
+            'pathologies' => Pathology::orderBy('name')->get(),
             'visits' => Visit::query()
                 ->with('patient')
                 ->inTodaysQueue($this->serviceId)

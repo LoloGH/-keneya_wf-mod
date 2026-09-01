@@ -22,6 +22,7 @@ class User extends Authenticatable
         'staff_type_id',
         'name',
         'email',
+        'mobile',
         'password',
     ];
 
@@ -54,6 +55,26 @@ class User extends Authenticatable
     public function doctors(): HasMany
     {
         return $this->hasMany(Doctor::class);
+    }
+
+    /**
+     * Le numero auquel joindre cette personne par SMS (v3.2.9, point 1).
+     *
+     * `users.mobile` d'abord : c'est le numero de la personne, quel que soit
+     * son role. A defaut, celui de sa fiche medecin — les numeros saisis avant
+     * l'existence de cette colonne continuent ainsi de servir, sans ressaisie.
+     * Nul si l'on ne sait pas la joindre : mieux vaut zero destinataire qu'un
+     * envoi dans le vide.
+     */
+    public function smsNumber(): ?string
+    {
+        if (filled($this->mobile)) {
+            return (string) $this->mobile;
+        }
+
+        $fiche = $this->doctors()->whereNotNull('phone')->first();
+
+        return filled($fiche?->phone) ? (string) $fiche->phone : null;
     }
 
     /**

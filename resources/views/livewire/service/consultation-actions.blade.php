@@ -17,37 +17,53 @@
             @error('visitId') <p class="field__error">{{ $message }}</p> @enderror
         </div>
 
+        {{-- L'onglet « Caisse Services » a disparu : depuis la v3.2 point 6,
+             un encaissement se fait a la caisse et nulle part ailleurs. Le
+             composant ne portait deja plus `recordPayment` — un test le
+             verifie — mais le bouton et son formulaire etaient restes ici,
+             sans methode derriere. --}}
         <div class="tabs" role="tablist">
-            <button type="button" role="tab" class="tabs__tab @if ($tab === 'caisse') tabs__tab--active @endif"
-                    wire:click="selectTab('caisse')">Caisse Services</button>
+            <button type="button" role="tab" class="tabs__tab @if ($tab === 'conclusion') tabs__tab--active @endif"
+                    wire:click="selectTab('conclusion')">Conclusion</button>
             <button type="button" role="tab" class="tabs__tab @if ($tab === 'ordonnance') tabs__tab--active @endif"
                     wire:click="selectTab('ordonnance')">Ordonnance</button>
             <button type="button" role="tab" class="tabs__tab @if ($tab === 'rendez-vous') tabs__tab--active @endif"
                     wire:click="selectTab('rendez-vous')">Rendez-vous</button>
         </div>
 
-        @if ($tab === 'caisse')
-            <form wire:submit="recordPayment" class="form">
+        @if ($tab === 'conclusion')
+            {{-- Ce panneau manquait : `recordConclusion()` existait dans le
+                 composant depuis la v3.2 point 5, mais aucune vue ne
+                 l'atteignait. --}}
+            <form wire:submit="recordConclusion" class="form">
                 <div class="field">
-                    <label for="payment-amount">Montant de l'acte <span class="field__hint">en FCFA</span></label>
-                    <input id="payment-amount" type="number" inputmode="numeric" min="1" step="1" wire:model="amount">
-                    @error('amount') <p class="field__error">{{ $message }}</p> @enderror
+                    <label for="consultation-conclusion">Conclusion de la prise en charge</label>
+                    <textarea id="consultation-conclusion" rows="5" wire:model="conclusion"
+                              placeholder="Ce que vous retenez de cette consultation : constat, orientation, suites a donner."></textarea>
+                    @error('conclusion') <p class="field__error">{{ $message }}</p> @enderror
                 </div>
-                <button type="submit" class="btn btn--primary">Encaisser</button>
+
+                {{-- Pathologie : facultative, et elle ne conditionne jamais
+                     l'enregistrement (v3.2.9, point 1). Elle sert a pouvoir
+                     s'adresser plus tard a ce groupe de patients. --}}
+                <div class="field">
+                    <label for="consultation-pathologie">
+                        Pathologie <span class="field__hint">(facultatif)</span>
+                    </label>
+                    <select id="consultation-pathologie" wire:model="pathologyId">
+                        <option value="">— Non precisee —</option>
+                        @foreach ($pathologies as $pathologie)
+                            <option value="{{ $pathologie->id }}">{{ $pathologie->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('pathologyId') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
+
+                <button type="submit" class="btn btn--primary" wire:loading.attr="disabled">
+                    Enregistrer la conclusion
+                </button>
             </form>
 
-            @if ($recentPayments->isNotEmpty())
-                <h3 class="card__subtitle">Encaissements du jour</h3>
-                <ul class="payments">
-                    @foreach ($recentPayments as $payment)
-                        <li>
-                            <strong>{{ $payment->formattedAmount() }}</strong>
-                            — {{ $payment->patient->name }}
-                            <time>{{ $payment->created_at->format('H:i') }}</time>
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
         @elseif ($tab === 'ordonnance')
             {{-- L'ordonnance s'ecrit ligne par ligne, numerotee : c'est ainsi
                  qu'elle sera lue au comptoir de la pharmacie. --}}

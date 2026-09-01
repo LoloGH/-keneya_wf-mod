@@ -2160,3 +2160,20 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     color: var(--gris-500);
     font-variant-numeric: tabular-nums;
 }
+
+/* ---------- Envoi groupe de SMS (v3.2.9) ---------- */
+
+.diffusion__resultats { list-style: none; margin: 0 0 var(--e3); padding: 0; display: grid; gap: var(--e2); }
+.diffusion__resultats li {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--e3);
+    padding: var(--e2) var(--e3); border-radius: var(--rayon-sm); background: var(--gris-100);
+}
+.diffusion__resultats .hint { margin-left: var(--e2); }
+
+/* Le texte exact qui partira, relu une derniere fois avant confirmation. */
+.diffusion__apercu {
+    margin: 0 0 var(--e3); padding: var(--e3) var(--e4);
+    border-left: 3px solid var(--bleu-fonce); border-radius: var(--rayon-sm);
+    background: var(--bleu-clair); color: var(--bleu-fonce);
+    white-space: pre-line;
+}

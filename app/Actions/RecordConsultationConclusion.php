@@ -20,14 +20,25 @@ class RecordConsultationConclusion
 {
     public function __construct(private readonly PatientHistoryRecorder $history) {}
 
-    public function execute(Visit $visit, Doctor $doctor, string $conclusion): PatientHistory
+    /**
+     * `$pathologyId` est toujours facultatif (v3.2.9, point 1) : il sert a
+     * regrouper des patients pour une diffusion ulterieure, et ne doit jamais
+     * conditionner l'enregistrement d'une conclusion.
+     */
+    public function execute(Visit $visit, Doctor $doctor, string $conclusion, ?int $pathologyId = null): PatientHistory
     {
-        $entree = DB::transaction(fn (): PatientHistory => $this->history->record(
-            visit: $visit,
-            type: PatientHistory::TYPE_CONSULTATION_CONCLUSION,
-            description: $conclusion,
-            doctor: $doctor,
-        ));
+        $entree = DB::transaction(function () use ($visit, $doctor, $conclusion, $pathologyId): PatientHistory {
+            if ($pathologyId !== null) {
+                $visit->update(['pathology_id' => $pathologyId]);
+            }
+
+            return $this->history->record(
+                visit: $visit,
+                type: PatientHistory::TYPE_CONSULTATION_CONCLUSION,
+                description: $conclusion,
+                doctor: $doctor,
+            );
+        });
 
         Audit::log(
             Audit::EVENT_CONCLUSION_RECORDED,
