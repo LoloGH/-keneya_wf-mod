@@ -6,6 +6,7 @@ use App\Models\Visitor;
 use App\Services\PatientCodeGenerator;
 use App\Services\StaffNotifier;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
+use Illuminate\Support\Str;
 
 class VisitorObserver implements ShouldHandleEventsAfterCommit
 {
@@ -18,6 +19,13 @@ class VisitorObserver implements ShouldHandleEventsAfterCommit
     {
         if (blank($visitor->visitor_code)) {
             $visitor->visitor_code = $this->codes->forVisitor();
+        }
+
+        // Le jeton de la page de retour est attribue ici, comme le
+        // `portal_token` d'un patient : quel que soit le point d'entree, un
+        // visiteur ne peut pas exister sans adresse de retour utilisable.
+        if (blank($visitor->feedback_token)) {
+            $visitor->feedback_token = (string) Str::uuid();
         }
     }
 

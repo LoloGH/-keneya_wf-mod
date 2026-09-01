@@ -6,6 +6,7 @@ use App\Models\Concerns\RecordsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Visitor extends Model
 {
@@ -17,14 +18,18 @@ class Visitor extends Model
         'name',
         'mobile',
         'service_id',
+        'registered_by_user_id',
         'token',
+        'feedback_token',
         'reason',
+        'feedback_link_sent_at',
     ];
 
     protected function casts(): array
     {
         return [
             'token' => 'integer',
+            'feedback_link_sent_at' => 'datetime',
         ];
     }
 
@@ -39,6 +44,27 @@ class Visitor extends Model
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    /**
+     * L'agent d'accueil qui a recu ce visiteur (v3.2.8, point 4) : c'est la
+     * personne que sa note « personnel » concerne.
+     */
+    public function registeredBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'registered_by_user_id');
+    }
+
+    /** @return HasMany<FeedbackEntry, $this> */
+    public function feedbackEntries(): HasMany
+    {
+        return $this->hasMany(FeedbackEntry::class);
+    }
+
+    /** Le lien de retour lui a-t-il deja ete propose ? */
+    public function feedbackLinkSent(): bool
+    {
+        return $this->feedback_link_sent_at !== null;
     }
 
     public static function auditLabel(): string

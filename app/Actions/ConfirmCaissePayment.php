@@ -2,6 +2,8 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
+use App\Models\BillableItem;
 use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Payment;
@@ -9,7 +11,6 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
-use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,11 +29,19 @@ class ConfirmCaissePayment
     public function __construct(
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
-        private readonly SmsGateway $sms,
     ) {}
 
-    public function execute(Visit $visit, User $cashier, int $amount): Visit
-    {
+    /**
+     * @param  ?BillableItem  $billableItem  l'acte facture, resolu par CaisseBilling
+     * @param  ?string  $overrideReason  motif obligatoire si le montant s'ecarte du tarif
+     */
+    public function execute(
+        Visit $visit,
+        User $cashier,
+        int $amount,
+        ?BillableItem $billableItem = null,
+        ?string $overrideReason = null,
+    ): Visit {
         if (! $visit->awaitsPayment()) {
             throw new InvalidArgumentException("Cette visite n'attend aucun paiement.");
         }
@@ -45,10 +54,24 @@ class ConfirmCaissePayment
             throw new InvalidArgumentException('Le montant doit etre superieur a zero.');
         }
 
+        // Une derogation au tarif est une exception : elle doit etre dite, pas
+        // simplement possible. Sans motif, on refuse plutot que d'enregistrer un
+        // ecart muet.
+        $tarif = $billableItem?->price;
+        $deroge = $tarif !== null && $tarif !== $amount;
+
+        if ($deroge && blank($overrideReason)) {
+            throw new InvalidArgumentException(sprintf(
+                'Le tarif de « %s » est de %s. Indiquez le motif de la derogation pour encaisser un autre montant.',
+                $billableItem->name,
+                $billableItem->formattedPrice(),
+            ));
+        }
+
         $caisse = $visit->service()->firstOrFail();
         $destination = $visit->pendingNextService()->firstOrFail();
 
-        $visit = DB::transaction(function () use ($visit, $cashier, $amount, $caisse, $destination): Visit {
+        $visit = DB::transaction(function () use ($visit, $cashier, $amount, $caisse, $destination, $billableItem, $tarif): Visit {
             // Le type d'encaissement suit la caisse : ticket de consultation
             // d'un cote, acte ou examen de l'autre.
             Payment::create([
@@ -58,7 +81,11 @@ class ConfirmCaissePayment
                     ? Payment::TYPE_SERVICE
                     : Payment::TYPE_TICKET,
                 'service_id' => $destination->getKey(),
+                'billable_item_id' => $billableItem?->getKey(),
                 'amount' => $amount,
+                // Le tarif du jour est fige sur l'encaissement : le catalogue
+                // evoluera, le recu doit rester lisible dans six mois.
+                'catalog_price' => $tarif,
                 'status' => Payment::STATUS_PAID,
                 'recorded_by_user_id' => $cashier->getKey(),
             ]);
@@ -92,22 +119,46 @@ class ConfirmCaissePayment
         Audit::log(
             Audit::EVENT_PAYMENT_CONFIRMED,
             sprintf(
-                'Paiement de %s FCFA confirme a %s ; %s oriente vers %s.',
+                'Paiement de %s FCFA confirme a %s pour %s ; %s oriente vers %s.',
                 number_format($amount, 0, ',', ' '),
                 $caisse->name,
+                $billableItem?->name ?? 'un montant libre',
                 $visit->patient->patient_code,
                 $destination->name,
             ),
             $visit,
-            ['montant' => $amount, 'destination' => $destination->name],
+            [
+                'montant' => $amount,
+                'destination' => $destination->name,
+                'acte' => $billableItem?->name,
+                'tarif_catalogue' => $tarif,
+            ],
         );
 
-        $this->sms->send($visit->patient->mobile, sprintf(
+        // La derogation a son propre evenement : noyee dans les encaissements
+        // ordinaires, elle serait introuvable. C'est justement ce qu'on veut
+        // pouvoir retrouver.
+        if ($deroge) {
+            Audit::log(
+                Audit::EVENT_PRICE_OVERRIDDEN,
+                sprintf(
+                    'Montant de %s FCFA encaisse pour « %s », dont le tarif est de %s. Motif : %s',
+                    number_format($amount, 0, ',', ' '),
+                    $billableItem->name,
+                    $billableItem->formattedPrice(),
+                    $overrideReason,
+                ),
+                $visit,
+                ['montant' => $amount, 'tarif_catalogue' => $tarif, 'motif' => $overrideReason],
+            );
+        }
+
+        SendSmsJob::dispatch($visit->patient->mobile, sprintf(
             '%s : paiement enregistre. Vous etes attendu(e) au service %s, ticket n° %d.',
             config('keneya.name'),
             $destination->name,
             $visit->token,
-        ));
+        ), $visit->patient);
 
         return $visit;
     }

@@ -26,6 +26,9 @@
 
     // Le planning personnel est offert a tout le monde, comme dans les quatre
     // autres interfaces : il ne depend d'aucune capacite.
+    // Signaler un constat est offert a tout le monde, comme le planning :
+    // un incident ne depend d'aucune capacite (v3.2.8, point 4).
+    $sections[] = ['key' => 'constat', 'label' => 'Signaler un constat', 'view' => 'sections.staff.incident'];
     $sections[] = ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.staff.schedule'];
 @endphp
 

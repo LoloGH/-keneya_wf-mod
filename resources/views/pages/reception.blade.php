@@ -20,6 +20,7 @@
             : null,
         ['key' => 'salle-attente', 'label' => "Salle d'attente", 'view' => 'sections.reception.board'],
         ['key' => 'passages', 'label' => 'Passages du jour', 'view' => 'sections.reception.today'],
+        ['key' => 'constat', 'label' => 'Signaler un constat', 'view' => 'sections.reception.incident'],
         ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.reception.schedule'],
     ]));
 @endphp

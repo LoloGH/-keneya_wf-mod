@@ -1,0 +1,103 @@
+name: CI
+
+# Chaque push et chaque pull request : c'est la premiere validation
+# automatique du projet, et elle doit se declencher sans qu'on y pense.
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: Tests (MariaDB 11.4)
+    runs-on: ubuntu-latest
+
+    services:
+      # MariaDB, pas SQLite. La suite de ce projet n'avait jamais ete validee
+      # contre le moteur reellement utilise en production, et les deux ne se
+      # comportent pas pareil : SQLite accepte sans broncher une valeur hors
+      # enum que MariaDB tronque et refuse. Meme version que le service `db`
+      # de docker-compose.yml, pour que la CI teste ce qui tourne a l'hopital.
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_DATABASE: keneya_workflow_test
+          MARIADB_USER: keneya
+          MARIADB_PASSWORD: keneya
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    env:
+      # Ces variables priment sur celles de phpunit.xml : PHPUnit ne pose une
+      # `<env>` que si elle n'est pas deja definie. C'est ce qui permet a la
+      # meme suite de tourner sur SQLite en local et sur MariaDB ici, sans
+      # toucher a phpunit.xml.
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: keneya_workflow_test
+      DB_USERNAME: keneya
+      DB_PASSWORD: keneya
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          # Memes extensions que docker/php/Dockerfile.
+          #
+          # PHP 8.4 et non 8.3 : le composer.lock committe verrouille
+          # symfony/clock v8.1, qui exige php >= 8.4.1. Le premier passage de
+          # cette CI l'a montre en echouant des `composer install` — le lock
+          # avait ete produit sur PHP 8.4 sans que rien ne le signale. C'est
+          # aussi la version du serveur de production (voir php8.4-fpm dans
+          # docs/exploitation-demo.md).
+          php-version: '8.4'
+          extensions: bcmath, intl, pcntl, pdo_mysql, zip, mbstring
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache des dependances Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php8.4-
+
+      - name: composer install
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Preparer l'environnement de test
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Attendre MariaDB
+        run: |
+          for i in $(seq 1 30); do
+            if mysqladmin ping -h 127.0.0.1 -P 3306 --silent; then
+              echo "MariaDB repond."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MariaDB n'a pas repondu dans le delai imparti." >&2
+          exit 1
+
+      - name: Migrations sur la base de service
+        run: php artisan migrate --force
+
+      - name: php artisan test
+        run: php artisan test
+
+      # Apres les tests : un oubli de formatage ne doit pas masquer un vrai
+      # echec fonctionnel dans le journal. `--test` verifie sans corriger, pour
+      # que la CI signale l'ecart sans reecrire le code dans le dos de l'auteur.
+      - name: Style de code (Pint)
+        run: vendor/bin/pint --test

@@ -4,9 +4,11 @@ namespace App\Livewire\Caisse;
 
 use App\Actions\CallNextPatient;
 use App\Actions\ConfirmCaissePayment;
+use App\Models\BillableItem;
 use App\Models\Payment;
 use App\Models\Service;
 use App\Models\Visit;
+use App\Services\CaisseBilling;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -33,6 +35,23 @@ class CaisseQueue extends Component
     public ?int $payingVisitId = null;
 
     public ?int $amount = null;
+
+    /**
+     * L'acte facture, resolu depuis le renvoi ou le ticket (v3.2.8, point 3).
+     * Le caissier ne le choisit pas : il lui est presente.
+     */
+    public ?int $billableItemId = null;
+
+    /** Tarif du catalogue, affiche a cote du montant saisi. */
+    public ?int $catalogPrice = null;
+
+    /**
+     * Derogation au tarif. Volontairement fermee par defaut : corriger un
+     * montant doit etre un geste delibere, pas le comportement ordinaire.
+     */
+    public bool $overridePrice = false;
+
+    public string $overrideReason = '';
 
     public function mount(int $serviceId): void
     {
@@ -63,16 +82,37 @@ class CaisseQueue extends Component
         $this->dispatch('caisse-mise-a-jour');
     }
 
-    public function startPayment(int $visitId): void
+    public function startPayment(int $visitId, CaisseBilling $billing): void
     {
         $this->payingVisitId = $visitId;
-        $this->amount = null;
+        $this->overridePrice = false;
+        $this->overrideReason = '';
         $this->resetValidation();
+
+        $visit = Visit::with('service')->find($visitId);
+        $acte = $visit ? $billing->itemFor($visit) : null;
+
+        $this->billableItemId = $acte?->getKey();
+        $this->catalogPrice = $acte?->price;
+
+        // Le montant se pre-remplit depuis le tarif : le caissier confirme au
+        // lieu de saisir. Sans acte au catalogue, on retombe sur la saisie
+        // libre plutot que de proposer un chiffre invente.
+        $this->amount = $acte?->price;
     }
 
     public function cancel(): void
     {
-        $this->reset(['payingVisitId', 'amount']);
+        $this->reset(['payingVisitId', 'amount', 'billableItemId', 'catalogPrice', 'overridePrice', 'overrideReason']);
+        $this->resetValidation();
+    }
+
+    /** Revenir au tarif du catalogue en un geste. */
+    public function restoreCatalogPrice(): void
+    {
+        $this->overridePrice = false;
+        $this->overrideReason = '';
+        $this->amount = $this->catalogPrice;
         $this->resetValidation();
     }
 
@@ -82,24 +122,42 @@ class CaisseQueue extends Component
      */
     public function confirmAndRoute(ConfirmCaissePayment $action): void
     {
+        $deroge = $this->catalogPrice !== null && (int) $this->amount !== $this->catalogPrice;
+
         $this->validate([
             'payingVisitId' => ['required', 'integer', 'exists:visits,id'],
             'amount' => ['required', 'integer', 'min:1', 'max:9999999999'],
-        ], attributes: ['payingVisitId' => 'patient', 'amount' => 'montant']);
+            // Le motif n'est exige que lorsqu'il y a effectivement derogation :
+            // encaisser au tarif ne doit rien demander de plus qu'avant.
+            'overrideReason' => $deroge ? ['required', 'string', 'min:3', 'max:255'] : ['nullable'],
+        ], attributes: [
+            'payingVisitId' => 'patient',
+            'amount' => 'montant',
+            'overrideReason' => 'motif de la derogation',
+        ]);
 
         $visit = Visit::with(['patient', 'pendingNextService'])
             ->where('service_id', $this->serviceId)
             ->findOrFail($this->payingVisitId);
 
+        $acte = $this->billableItemId ? BillableItem::find($this->billableItemId) : null;
+
         try {
-            $visit = $action->execute($visit, Auth::user(), (int) $this->amount);
+            $visit = $action->execute(
+                $visit,
+                Auth::user(),
+                (int) $this->amount,
+                $acte,
+                $deroge ? $this->overrideReason : null,
+            );
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['amount' => $e->getMessage()]);
         }
 
         session()->flash('caisse.status', sprintf(
-            '%s encaisse. %s oriente vers %s, ticket n° %d.',
+            '%s encaisse%s. %s oriente vers %s, ticket n° %d.',
             number_format((int) $this->amount, 0, ',', ' ').' FCFA',
+            $acte ? ' pour « '.$acte->name.' »' : '',
             $visit->patient->name,
             $visit->service->name,
             $visit->token,
@@ -122,16 +180,27 @@ class CaisseQueue extends Component
     {
         $service = $this->assertCaisse($this->serviceId);
 
+        $billing = app(CaisseBilling::class);
+
+        $queue = Visit::query()
+            ->with(['patient', 'pendingNextService', 'service'])
+            ->inTodaysQueue($this->serviceId)
+            ->orderByRaw("CASE status WHEN 'called' THEN 0 WHEN 'waiting' THEN 1 ELSE 2 END")
+            ->orderBy('token')
+            ->get();
+
+        // L'acte attendu est resolu pour toute la file : le caissier voit ce
+        // qu'il aura a encaisser avant meme d'appeler le patient.
+        $actes = $queue->mapWithKeys(fn (Visit $visit) => [
+            $visit->getKey() => $billing->itemFor($visit),
+        ]);
+
         return view('livewire.caisse.caisse-queue', [
             'service' => $service,
-            'queue' => Visit::query()
-                ->with(['patient', 'pendingNextService'])
-                ->inTodaysQueue($this->serviceId)
-                ->orderByRaw("CASE status WHEN 'called' THEN 0 WHEN 'waiting' THEN 1 ELSE 2 END")
-                ->orderBy('token')
-                ->get(),
+            'actes' => $actes,
+            'queue' => $queue,
             'todayPayments' => Payment::query()
-                ->with(['patient', 'service'])
+                ->with(['patient', 'service', 'billableItem'])
                 ->whereDate('created_at', today())
                 ->where('recorded_by_user_id', Auth::id())
                 ->orderByDesc('id')

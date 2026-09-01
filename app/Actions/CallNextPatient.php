@@ -2,13 +2,13 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Doctor;
 use App\Models\PatientHistory;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
-use App\Services\SmsGateway;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +26,6 @@ class CallNextPatient
 {
     public function __construct(
         private readonly PatientHistoryRecorder $history,
-        private readonly SmsGateway $sms,
     ) {}
 
     public function execute(Service $service, Doctor|User $calledBy): ?Visit
@@ -82,12 +81,12 @@ class CallNextPatient
             $visit,
         );
 
-        $this->sms->send($visit->patient->mobile, sprintf(
+        SendSmsJob::dispatch($visit->patient->mobile, sprintf(
             '%s : c\'est votre tour au service %s (ticket n° %d). Merci de vous presenter.',
             config('keneya.name'),
             $service->name,
             $visit->token,
-        ));
+        ), $visit->patient);
 
         return $visit;
     }

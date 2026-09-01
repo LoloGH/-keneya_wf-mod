@@ -60,7 +60,11 @@ class BulkScheduleForm extends Component
             'weekdays' => ['required', 'array', 'min:1'],
             'weekdays.*' => ['integer', 'between:1,7'],
             'start_time' => ['required', 'date_format:H:i'],
-            'end_time' => ['required', 'date_format:H:i', 'after:start_time'],
+            // Pas de `after:start_time` : une fin anterieure au debut designe
+            // un creneau de nuit (22h – 06h), que l'hopital pratique et que
+            // OnDutyRoster sait desormais lire. Seule l'egalite reste exclue,
+            // un creneau de duree nulle ne voulant rien dire.
+            'end_time' => ['required', 'date_format:H:i', 'different:start_time'],
             'service_id' => ['nullable', 'integer', 'exists:services,id'],
         ], attributes: [
             'user_id' => 'membre du personnel',

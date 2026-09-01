@@ -17,6 +17,7 @@ use App\Models\Service;
 use App\Models\ServiceKind;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use App\Support\Roles;
 use ArrayObject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,11 +45,11 @@ class AcceptanceScenarioTest extends TestCase
         $this->sms = new ArrayObject;
 
         $this->mock(SmsGateway::class)
-            ->shouldReceive('send')
-            ->andReturnUsing(function (string $to, string $text): bool {
+            ->shouldReceive('deliver')
+            ->andReturnUsing(function (string $to, string $text): SmsSendResult {
                 $this->sms[] = ['to' => $to, 'text' => $text];
 
-                return true;
+                return SmsSendResult::sent();
             });
     }
 

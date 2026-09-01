@@ -15,6 +15,7 @@ use App\Models\StaffType;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use App\Support\Roles;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,7 +39,7 @@ class StaffTypeInterfaceTest extends TestCase
     {
         parent::setUp();
 
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     /**

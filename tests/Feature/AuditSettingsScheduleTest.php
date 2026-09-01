@@ -167,7 +167,10 @@ class AuditSettingsScheduleTest extends TestCase
         $this->assertSame(0, Schedule::count());
     }
 
-    public function test_une_fin_de_creneau_avant_son_debut_est_refusee(): void
+    /**
+     * Un creneau de duree nulle ne veut rien dire : il reste refuse.
+     */
+    public function test_un_creneau_de_duree_nulle_est_refuse(): void
     {
         $doctor = $this->makeDoctor(Service::factory()->create());
 
@@ -175,10 +178,36 @@ class AuditSettingsScheduleTest extends TestCase
             ->test(ScheduleManager::class)
             ->set('user_id', $doctor->user_id)
             ->set('date', today()->format('Y-m-d'))
-            ->set('start_time', '14:00')
+            ->set('start_time', '08:00')
             ->set('end_time', '08:00')
             ->call('save')
             ->assertHasErrors('end_time');
+    }
+
+    /**
+     * En revanche, une fin anterieure au debut n'est plus une erreur depuis la
+     * v3.2.8 : elle designe un creneau de nuit, que l'hopital pratique. La
+     * regle precedente le refusait, ce qui obligeait a couper une garde de nuit
+     * en deux lignes — et un « 22h – 06h » saisi malgre tout ne rendait de
+     * garde a aucune heure (voir OnDutyBoundaryTest).
+     */
+    public function test_un_creneau_de_nuit_est_desormais_accepte(): void
+    {
+        $doctor = $this->makeDoctor(Service::factory()->create());
+
+        Livewire::actingAs($this->makeAdmin())
+            ->test(ScheduleManager::class)
+            ->set('user_id', $doctor->user_id)
+            ->set('date', today()->format('Y-m-d'))
+            ->set('start_time', '22:00')
+            ->set('end_time', '06:00')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $creneau = Schedule::sole();
+
+        $this->assertTrue($creneau->crossesMidnight());
+        $this->assertStringContainsString('(nuit)', $creneau->range());
     }
 
     /**

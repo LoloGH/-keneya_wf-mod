@@ -2,6 +2,61 @@
     <h2 class="card__title">Enregistrer un patient</h2>
     <p class="hint">Pour un patient qui n'est jamais venu. Un nouveau dossier sera cree.</p>
 
+    {{-- Doublon probable (v3.2.8, point 1).
+         Interrompt la creation tant que la receptionniste n'a pas tranche :
+         c'est elle qui a la personne devant elle, pas l'application. --}}
+    @if ($duplicateCandidates !== [])
+        <div class="doublon" role="alertdialog" aria-labelledby="doublon-titre">
+            <h3 class="doublon__titre" id="doublon-titre">
+                {{ count($duplicateCandidates) > 1 ? 'Des dossiers existent deja' : 'Un dossier existe deja' }}
+                pour cette personne
+            </h3>
+            <p class="hint">
+                Creer un second dossier donnerait un deuxieme identifiant a la
+                meme personne. Verifiez avant de continuer.
+            </p>
+
+            <ul class="doublon__liste">
+                @foreach ($duplicateCandidates as $candidat)
+                    <li class="doublon__dossier">
+                        <div>
+                            <p class="doublon__nom">
+                                {{ $candidat['name'] }}
+                                <span class="mono">{{ $candidat['patient_code'] }}</span>
+                            </p>
+                            <p class="doublon__detail">
+                                {{ $candidat['age'] }} ans — {{ $candidat['mobile'] }}
+                                @if ($candidat['profession']) — {{ $candidat['profession'] }} @endif
+                                @if ($candidat['last_visit']) — derniere venue le {{ $candidat['last_visit'] }} @endif
+                            </p>
+                        </div>
+
+                        <button type="button" class="btn btn--primary"
+                                wire:click="openEpisodeForExisting({{ $candidat['id'] }})"
+                                wire:loading.attr="disabled">
+                            C'est la meme personne — ouvrir un nouvel episode
+                        </button>
+                    </li>
+                @endforeach
+            </ul>
+
+            <div class="btn-row">
+                <button type="button" class="btn btn--secondary" wire:click="createAnyway"
+                        wire:loading.attr="disabled">
+                    C'est une personne differente — creer quand meme un dossier
+                </button>
+                <button type="button" class="btn btn--ghost" wire:click="dismissDuplicates">
+                    Revenir a la saisie
+                </button>
+            </div>
+
+            <p class="hint">
+                Creer malgre tout est possible et parfois justifie ; la decision
+                est simplement inscrite au journal d'audit.
+            </p>
+        </div>
+    @endif
+
     <form wire:submit="save" class="form">
         {{-- Le formulaire est groupe par nature de renseignement : ce que la
              receptionniste demande au patient, puis ce qui concerne sa venue du

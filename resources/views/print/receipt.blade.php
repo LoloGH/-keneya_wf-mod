@@ -46,7 +46,17 @@
         <table class="rows">
             <tr><th>Dossier</th><td>{{ $payment->patient->patient_code }}</td></tr>
             <tr><th>Nom</th><td>{{ $payment->patient->name }}</td></tr>
-            <tr><th>Objet</th><td>{{ $payment->typeLabel() }}</td></tr>
+            {{-- L'acte facture, nomme (v3.2.8, point 3) : un recu qui ne dit
+                 pas ce qui a ete paye fait perdre au catalogue une bonne part
+                 de son interet. A defaut d'acte — encaissements anterieurs au
+                 catalogue — on retombe sur le type d'encaissement. --}}
+            <tr><th>Objet</th><td>{{ $payment->subjectLabel() }}</td></tr>
+            @if ($payment->billableItem)
+                <tr><th>Tarif</th><td>{{ $payment->billableItem->formattedPrice() }}</td></tr>
+                @if ($payment->isOverridden())
+                    <tr><th>Montant applique</th><td>{{ $payment->formattedAmount() }}</td></tr>
+                @endif
+            @endif
             @if ($payment->service)
                 <tr><th>Service</th><td>{{ $payment->service->name }}</td></tr>
             @endif

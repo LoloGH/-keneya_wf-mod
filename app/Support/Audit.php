@@ -31,6 +31,15 @@ final class Audit
 
     public const EVENT_PATIENT_UPDATED = 'patient_modifie';
 
+    /**
+     * Creation d'un dossier malgre un doublon probable signale (v3.2.8, point 1).
+     *
+     * On n'empeche pas la receptionniste de passer outre — elle voit la
+     * personne, pas nous. Mais la decision est tracee, pour qu'un doublon
+     * eventuel reste explicable plutot que silencieux.
+     */
+    public const EVENT_DUPLICATE_OVERRIDDEN = 'doublon_ignore';
+
     public const EVENT_VISIT_OPENED = 'episode_ouvert';
 
     public const EVENT_VISIT_CLOSED = 'dossier_cloture';
@@ -100,6 +109,15 @@ final class Audit
 
     public const EVENT_PAYMENT_CONFIRMED = 'paiement_confirme';
 
+    /**
+     * Montant encaisse different du tarif du catalogue (v3.2.8, point 3).
+     *
+     * Un evenement a part, et non une propriete de l'encaissement ordinaire :
+     * noyee parmi tous les paiements de la journee, une derogation serait
+     * introuvable — or c'est precisement ce qu'un gestionnaire veut retrouver.
+     */
+    public const EVENT_PRICE_OVERRIDDEN = 'tarif_deroge';
+
     public const EVENT_CONCLUSION_RECORDED = 'conclusion_redigee';
 
     public const EVENT_ATTACHMENT_ADDED = 'piece_jointe_ajoutee';
@@ -109,6 +127,12 @@ final class Audit
     public const EVENT_PORTAL_LINK_SENT = 'lien_portail_envoye';
 
     public const EVENT_PORTAL_ACCESS = 'consultation_portail';
+
+    /** Depot d'un retour, d'une reclamation ou d'un constat (v3.2.8, point 4). */
+    public const EVENT_FEEDBACK_RECORDED = 'retour_depose';
+
+    /** Traitement d'un retour par l'administration, avec sa note de resolution. */
+    public const EVENT_FEEDBACK_RESOLVED = 'retour_traite';
 
     public const EVENT_PATIENT_DELETED = 'patient_supprime';
 
@@ -130,6 +154,7 @@ final class Audit
         self::EVENT_PASSWORD_CHANGED => 'Changement de mot de passe',
         self::EVENT_PATIENT_CREATED => 'Creation d\'un patient',
         self::EVENT_PATIENT_UPDATED => 'Modification d\'un patient',
+        self::EVENT_DUPLICATE_OVERRIDDEN => 'Doublon signale, dossier cree malgre tout',
         self::EVENT_VISIT_OPENED => 'Ouverture d\'un episode',
         self::EVENT_VISIT_CLOSED => 'Cloture d\'un dossier',
         self::EVENT_REFERRAL_SENT => 'Envoi d\'un renvoi',
@@ -163,11 +188,14 @@ final class Audit
         self::EVENT_SCHEDULE_BULK => 'Creation groupee de planning',
         self::EVENT_PATIENT_CALLED => 'Appel du patient suivant',
         self::EVENT_PAYMENT_CONFIRMED => 'Confirmation de paiement',
+        self::EVENT_PRICE_OVERRIDDEN => 'Derogation au tarif',
         self::EVENT_CONCLUSION_RECORDED => 'Conclusion de consultation',
         self::EVENT_ATTACHMENT_ADDED => 'Ajout d\'une piece jointe',
         self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
         self::EVENT_PORTAL_LINK_SENT => 'Envoi du lien de documents',
         self::EVENT_PORTAL_ACCESS => 'Consultation du portail patient',
+        self::EVENT_FEEDBACK_RECORDED => 'Depot d\'un retour',
+        self::EVENT_FEEDBACK_RESOLVED => 'Traitement d\'un retour',
         self::EVENT_PATIENT_DELETED => 'Suppression d\'un dossier patient',
         self::EVENT_CREATED => 'Creation',
         self::EVENT_UPDATED => 'Modification',

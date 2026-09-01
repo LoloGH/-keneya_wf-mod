@@ -58,7 +58,7 @@
 
                             <div class="field">
                                 <label for="to-service-{{ $visit->id }}">Service destinataire</label>
-                                <select id="to-service-{{ $visit->id }}" wire:model="toServiceId">
+                                <select id="to-service-{{ $visit->id }}" wire:model.live="toServiceId">
                                     <option value="">— Choisir un service —</option>
                                     @foreach ($otherServices as $other)
                                         <option value="{{ $other->id }}">
@@ -71,6 +71,29 @@
                                 </select>
                                 @error('toServiceId') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
+
+                            {{-- L'acte precis, et non le service en general
+                                 (v3.2.8, point 3) : c'est lui qui porte le
+                                 tarif, et il voyage avec la visite jusqu'a la
+                                 caisse — le caissier n'aura plus a demander. --}}
+                            @if ($actes->isNotEmpty())
+                                <div class="field">
+                                    <label for="acte-{{ $visit->id }}">Acte demande</label>
+                                    <select id="acte-{{ $visit->id }}" wire:model="billableItemId">
+                                        <option value="">— Aucun acte facturable —</option>
+                                        @foreach ($actes as $acte)
+                                            <option value="{{ $acte->id }}">{{ $acte->label() }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('billableItemId') <p class="field__error">{{ $message }}</p> @enderror
+                                </div>
+                            @elseif ($toServiceId)
+                                <p class="hint">
+                                    Aucun tarif n'est defini pour ce service : le caissier
+                                    devra saisir le montant. Demandez a l'administration
+                                    d'ajouter les actes a la section « Tarifs ».
+                                </p>
+                            @endif
 
                             <div class="field">
                                 <label for="instructions-{{ $visit->id }}">Instructions</label>

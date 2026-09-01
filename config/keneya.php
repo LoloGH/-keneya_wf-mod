@@ -64,4 +64,24 @@ return [
 
     'seed_password' => env('SEED_DEFAULT_PASSWORD', 'motdepasse'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Version livree
+    |--------------------------------------------------------------------------
+    |
+    | Dette signalee des le premier bilan de projet et jamais traitee : aucune
+    | version n'etait identifiable, ni dans l'historique Git ni dans
+    | l'interface. Impossible, devant un ecran, de dire quel etat du code on
+    | avait sous les yeux.
+    |
+    | La valeur est lue dans le fichier `VERSION` a la racine, seul endroit ou
+    | elle est ecrite : une version affichee qui contredirait le depot serait
+    | pire que pas de version du tout. Le resultat est mis en cache par
+    | `php artisan config:cache` en production, ou le fichier ne change qu'au
+    | deploiement.
+    |
+    */
+
+    'version' => trim((string) @file_get_contents(base_path('VERSION'))) ?: 'dev',
+
 ];

@@ -20,7 +20,10 @@ use InvalidArgumentException;
  */
 class CloseVisit
 {
-    public function __construct(private readonly PatientHistoryRecorder $history) {}
+    public function __construct(
+        private readonly PatientHistoryRecorder $history,
+        private readonly SendFeedbackInvitation $invitation,
+    ) {}
 
     public function execute(Visit $visit, Doctor|StaffMember $doctor): Visit
     {
@@ -65,6 +68,12 @@ class CloseVisit
             sprintf('Dossier de la visite #%d cloture par %s.', $visit->getKey(), $doctor->name()),
             $visit,
         );
+
+        // L'invitation a donner son avis part maintenant, et non plus sur
+        // demande du personnel (v3.2.8, point 4) : un sondage qu'il faut penser
+        // a envoyer n'est jamais envoye. Le SMS passe par la file, la cloture
+        // ne l'attend donc pas.
+        $this->invitation->toPatient($visit->patient()->firstOrFail());
 
         return $visit;
     }

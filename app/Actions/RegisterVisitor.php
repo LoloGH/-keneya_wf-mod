@@ -2,12 +2,13 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Models\Visitor;
-use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -20,7 +21,6 @@ class RegisterVisitor
 {
     public function __construct(
         private readonly TokenAllocator $tokens,
-        private readonly SmsGateway $sms,
     ) {}
 
     /**
@@ -41,6 +41,9 @@ class RegisterVisitor
             'name' => $data['name'],
             'mobile' => $data['mobile'] ?? null,
             'service_id' => $service->getKey(),
+            // Qui l'a recu : c'est la personne que sa note « personnel »
+            // concernera, la seule qu'il aura rencontree (v3.2.8, point 4).
+            'registered_by_user_id' => Auth::id(),
             'token' => $this->tokens->next($service),
             'reason' => $data['reason'] ?? null,
         ]));
@@ -58,16 +61,14 @@ class RegisterVisitor
             $visitor,
         );
 
-        if (filled($visitor->mobile)) {
-            $this->sms->send($visitor->mobile, sprintf(
-                '%s : votre fiche visiteur est le %s (service %s, ticket n° %d).%s',
-                config('keneya.name'),
-                $visitor->visitor_code,
-                $visitor->service->name,
-                $visitor->token,
-                $visitor->patient ? ' Visite a '.$visitor->patient->name.'.' : '',
-            ));
-        }
+        SendSmsJob::dispatch($visitor->mobile, sprintf(
+            '%s : votre fiche visiteur est le %s (service %s, ticket n° %d).%s',
+            config('keneya.name'),
+            $visitor->visitor_code,
+            $visitor->service->name,
+            $visitor->token,
+            $visitor->patient ? ' Visite a '.$visitor->patient->name.'.' : '',
+        ), $visitor);
 
         return $visitor;
     }

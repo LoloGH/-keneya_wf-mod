@@ -2068,3 +2068,95 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 
 .app-footer--board .app-footer__produit strong { color: #97a3ab; }
+
+/* ---------- Section « SMS » de l'administration (v3.2.8) ---------- */
+
+.badge--queued { background: var(--gris-100); color: var(--gris-700); }
+.badge--sent { background: var(--bleu-clair); color: var(--bleu-fonce); }
+.badge--delivered { background: var(--vert-clair); color: var(--vert); }
+.badge--failed { background: var(--rouge-clair); color: var(--rouge); }
+
+/* Le compteur d'echecs, en tete de section : c'est lui qui doit se voir sans
+   ouvrir la liste, sans quoi une passerelle en panne reste invisible. */
+.sms-tally {
+    display: flex; align-items: center; gap: var(--e3); flex-wrap: wrap;
+    margin: var(--e3) 0 var(--e4);
+    padding: var(--e3) var(--e4);
+    border-radius: var(--rayon);
+    border: 1px solid transparent; border-left-width: 3px;
+    font-weight: 600;
+}
+.sms-tally--calme { background: var(--vert-clair); border-color: var(--vert); color: #0f5f47; }
+.sms-tally--alerte { background: var(--rouge-clair); border-color: var(--rouge); color: #7d191c; }
+.sms-tally__nombre { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.sms-tally .btn { margin-left: auto; }
+
+.sms-body { max-width: 42ch; color: var(--gris-700); font-size: var(--texte-sm); }
+.sms-reason { color: var(--rouge); font-size: var(--texte-sm); }
+
+/* ---------- Doublon probable a l'enregistrement (v3.2.8) ---------- */
+
+/* Volontairement proche d'une alerte : la creation est interrompue, ce n'est
+   pas un simple message d'information que l'on peut lire en diagonale. */
+.doublon {
+    margin: var(--e4) 0;
+    padding: var(--e4);
+    border-radius: var(--rayon);
+    border: 1px solid var(--ambre); border-left-width: 3px;
+    background: var(--ambre-clair); color: #834e00;
+}
+.doublon__titre { margin: 0 0 var(--e2); font-size: var(--texte-lg); font-weight: 700; }
+.doublon__liste { list-style: none; margin: var(--e3) 0; padding: 0; display: grid; gap: var(--e2); }
+.doublon__dossier {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--e3); flex-wrap: wrap;
+    padding: var(--e3); border-radius: var(--rayon-sm);
+    background: rgba(255, 255, 255, .7);
+}
+.doublon__nom { margin: 0; font-weight: 700; display: flex; gap: var(--e2); align-items: baseline; flex-wrap: wrap; }
+.doublon__detail { margin: var(--e1) 0 0; font-size: var(--texte-sm); }
+.doublon .hint { color: inherit; opacity: .85; }
+
+/* ---------- Catalogue de tarifs a la caisse (v3.2.8) ---------- */
+
+.queue__acte { display: inline-flex; gap: var(--e2); align-items: baseline; font-size: var(--texte-sm); color: var(--gris-700); }
+.queue__acte strong { color: var(--bleu-fonce); }
+
+/* L'acte facture, en tete du formulaire d'encaissement : c'est la reponse a
+   « qu'est-ce que je paie ? », que le caissier devait demander. */
+.acte-facture {
+    display: flex; align-items: baseline; gap: var(--e2); flex-wrap: wrap;
+    margin: 0 0 var(--e3); padding: var(--e3);
+    border-radius: var(--rayon-sm); background: var(--bleu-clair); color: var(--bleu-fonce);
+}
+.acte-facture > span:first-child { font-size: var(--texte-xs); text-transform: uppercase; letter-spacing: .08em; }
+.acte-facture strong { font-size: var(--texte-lg); }
+.acte-facture__tarif { margin-left: auto; font-weight: 800; }
+
+.field--check label { display: flex; align-items: center; gap: var(--e2); font-weight: 500; }
+
+/* ---------- Retours et incidents (v3.2.8) ---------- */
+
+.retour {
+    margin: var(--e3) 0;
+    padding: var(--e3) var(--e4);
+    border: 1px solid var(--gris-200); border-radius: var(--rayon);
+    background: #fff;
+}
+.retour__head { display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap; }
+.retour__head time { margin-left: auto; color: var(--gris-500); font-size: var(--texte-sm); }
+.retour__contexte { display: flex; gap: var(--e2); flex-wrap: wrap; margin: var(--e2) 0 0; font-size: var(--texte-sm); color: var(--gris-700); }
+.retour__notes { margin: var(--e2) 0 0; font-size: var(--texte-sm); }
+.retour__contenu { margin: var(--e2) 0 0; white-space: pre-line; }
+.retour__resolution { margin: var(--e3) 0 0; padding: var(--e2) var(--e3); border-left: 3px solid var(--vert); background: var(--vert-clair); border-radius: var(--rayon-sm); }
+
+/* ---------- Etiquette de version (v3.2.8) ---------- */
+
+/* Discrete a dessein : elle doit pouvoir se lire quand on la cherche, sans
+   entrer en concurrence avec la signature de l'editeur. */
+.app-footer__version {
+    margin-left: var(--e2);
+    font-size: var(--texte-xs);
+    color: var(--gris-500);
+    font-variant-numeric: tabular-nums;
+}

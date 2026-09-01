@@ -28,6 +28,26 @@ class Setting extends Model
     /** Valeur retenue tant que l'administrateur n'a rien choisi. */
     public const DEFAULT_APPOINTMENT_REMINDER_MINUTES = 60;
 
+    /**
+     * L'acte du catalogue qui vaut ticket de consultation (v3.2.8, point 3).
+     *
+     * Un reglage plutot qu'une colonne sur `billable_items` : le ticket n'est
+     * pas une nature d'acte differente des autres, c'est simplement celui que
+     * l'etablissement applique a l'enregistrement. Un autre hopital en
+     * choisira un autre sans que le schema bouge.
+     */
+    public const TICKET_BILLABLE_ITEM_ID = 'ticket_billable_item_id';
+
+    /**
+     * Delai, en heures, entre l'enregistrement d'un visiteur et l'envoi de son
+     * lien de retour (v3.2.8, point 4). Reglable plutot que code en dur : un
+     * etablissement jugera trois heures trop court, un autre trop long.
+     */
+    public const VISITOR_FEEDBACK_DELAY_HOURS = 'visitor_feedback_delay_hours';
+
+    /** Valeur retenue tant que l'administrateur n'a rien choisi. */
+    public const DEFAULT_VISITOR_FEEDBACK_DELAY_HOURS = 3;
+
     protected $fillable = ['key', 'value'];
 
     protected static function booted(): void

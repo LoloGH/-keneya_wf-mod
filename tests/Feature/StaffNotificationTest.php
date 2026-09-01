@@ -23,6 +23,7 @@ use App\Models\User;
 use App\Models\Visit;
 use App\Models\Visitor;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
@@ -44,7 +45,7 @@ class StaffNotificationTest extends TestCase
         parent::setUp();
 
         $this->seedRoles();
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     /** Met une personne de garde sur un service, maintenant. */

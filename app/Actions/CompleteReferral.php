@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Doctor;
 use App\Models\PatientHistory;
 use App\Models\Referral;
@@ -9,7 +10,6 @@ use App\Models\Service;
 use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
-use App\Services\SmsGateway;
 use App\Services\StaffNotifier;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
@@ -41,7 +41,6 @@ class CompleteReferral
 {
     public function __construct(
         private readonly PatientHistoryRecorder $history,
-        private readonly SmsGateway $sms,
         private readonly TokenAllocator $tokens,
         private readonly StaffNotifier $notifier,
     ) {}
@@ -100,15 +99,13 @@ class CompleteReferral
 
         $prescriber = $referral->fromDoctor()->first();
 
-        if ($prescriber && filled($prescriber->phone)) {
-            $this->sms->send($prescriber->phone, sprintf(
-                '%s : resultat disponible pour le patient %s (%s), renvoye vers %s.',
-                config('keneya.name'),
-                $referral->patient->name,
-                $referral->patient->patient_code,
-                $referral->toService->name,
-            ));
-        }
+        SendSmsJob::dispatch($prescriber?->phone, sprintf(
+            '%s : resultat disponible pour le patient %s (%s), renvoye vers %s.',
+            config('keneya.name'),
+            $referral->patient->name,
+            $referral->patient->patient_code,
+            $referral->toService->name,
+        ), $referral);
 
         // Le prescripteur nommement, pas tout le service : c'est lui qui
         // attend cette reponse (v3.2.3, point 2).

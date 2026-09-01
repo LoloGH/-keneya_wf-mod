@@ -2,6 +2,8 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
+use App\Models\BillableItem;
 use App\Models\Doctor;
 use App\Models\PatientHistory;
 use App\Models\Referral;
@@ -9,7 +11,6 @@ use App\Models\Service;
 use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
-use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
 use App\Support\Caregiver;
@@ -28,12 +29,16 @@ class SendReferral
     public function __construct(
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
-        private readonly SmsGateway $sms,
         private readonly RouteThroughCaisse $routing,
     ) {}
 
-    public function execute(Visit $visit, Doctor|StaffMember $fromDoctor, Service $toService, string $instructions): Referral
-    {
+    public function execute(
+        Visit $visit,
+        Doctor|StaffMember $fromDoctor,
+        Service $toService,
+        string $instructions,
+        ?BillableItem $billableItem = null,
+    ): Referral {
         if ($visit->isClosed()) {
             throw new InvalidArgumentException('Ce dossier est cloture : il ne peut plus etre renvoye vers un autre service.');
         }
@@ -50,12 +55,21 @@ class SendReferral
             throw new InvalidArgumentException("La caisse n'est pas une destination de renvoi.");
         }
 
-        $referral = DB::transaction(function () use ($visit, $fromDoctor, $fromService, $toService, $instructions): Referral {
+        // Un acte d'un autre service serait facture au mauvais tarif : le
+        // catalogue perdrait tout interet s'il suffisait de se tromper de liste.
+        if ($billableItem
+            && $billableItem->service_id !== null
+            && $billableItem->service_id !== $toService->getKey()) {
+            throw new InvalidArgumentException("L'acte choisi ne releve pas du service destinataire.");
+        }
+
+        $referral = DB::transaction(function () use ($visit, $fromDoctor, $fromService, $toService, $instructions, $billableItem): Referral {
             $referral = Referral::create([
                 'patient_id' => $visit->patient_id,
                 'visit_id' => $visit->getKey(),
                 'from_service_id' => $fromService->getKey(),
                 'to_service_id' => $toService->getKey(),
+                'billable_item_id' => $billableItem?->getKey(),
                 ...Caregiver::of($fromDoctor)->columns('from'),
                 'instructions' => $instructions,
                 'status' => Referral::STATUS_PENDING,
@@ -80,10 +94,11 @@ class SendReferral
                 visit: $visit,
                 type: PatientHistory::TYPE_REFERRAL_SENT,
                 description: sprintf(
-                    'Renvoye de %s vers %s par %s.%s Instructions : %s',
+                    'Renvoye de %s vers %s par %s.%s%s Instructions : %s',
                     $fromService->name,
                     $toService->name,
                     $fromDoctor->name(),
+                    $billableItem ? ' Acte demande : '.$billableItem->name.'.' : '',
                     $enAttente ? ' Passage par '.$file->name.' avant realisation.' : '',
                     $instructions,
                 ),
@@ -105,13 +120,13 @@ class SendReferral
 
         $courante = $visit->fresh()->load('service');
 
-        $this->sms->send($patient->mobile, sprintf(
+        SendSmsJob::dispatch($patient->mobile, sprintf(
             '%s : vous etes oriente(e) vers %s, ticket n° %d. Dossier %s.',
             config('keneya.name'),
             $courante->service->name,
             $courante->token,
             $patient->patient_code,
-        ));
+        ), $referral);
 
         return $referral;
     }

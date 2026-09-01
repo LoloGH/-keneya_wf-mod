@@ -2,11 +2,11 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Appointment;
 use App\Models\PatientHistory;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
-use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -23,7 +23,6 @@ class CheckInAppointment
     public function __construct(
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
-        private readonly SmsGateway $sms,
     ) {}
 
     public function execute(Appointment $appointment): Visit
@@ -63,13 +62,13 @@ class CheckInAppointment
             return $visit;
         });
 
-        $this->sms->send($visit->patient->mobile, sprintf(
+        SendSmsJob::dispatch($visit->patient->mobile, sprintf(
             '%s : bienvenue. Service %s, ticket n° %d. Dossier %s.',
             config('keneya.name'),
             $visit->service->name,
             $visit->token,
             $visit->patient->patient_code,
-        ));
+        ), $visit->patient);
 
         return $visit;
     }

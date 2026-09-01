@@ -1,5 +1,10 @@
-# PHP-FPM 8.3 pour KEneYa WorkFlow.
-FROM php:8.3-fpm-alpine
+# PHP-FPM 8.4 pour KEneYa WorkFlow.
+#
+# 8.4 et non 8.3 : le composer.lock committe verrouille symfony/clock v8.1, qui
+# exige php >= 8.4.1. Sur 8.3, le `composer install` ci-dessous echoue et
+# l'image ne se construit pas — donc ni `app`, ni `scheduler`, ni
+# `queue-worker`. Le serveur de production tourne deja en php8.4-fpm.
+FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
         git \

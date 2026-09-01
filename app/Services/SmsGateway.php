@@ -26,13 +26,28 @@ class SmsGateway
     /**
      * Envoie un SMS. N'echoue jamais bruyamment : un SMS non parti ne doit pas
      * annuler un enregistrement ou un renvoi deja valide cote metier.
+     *
+     * Conserve pour les appels qui ne s'interessent qu'au succes ; la file
+     * d'attente, elle, passe par `deliver()` dont elle exploite le detail.
      */
     public function send(string $to, string $text): bool
+    {
+        return $this->deliver($to, $text)->successful;
+    }
+
+    /**
+     * Meme envoi que `send()`, mais en rendant compte : identifiant attribue
+     * par la passerelle, raison de l'echec, et surtout s'il vaut la peine de
+     * reessayer. C'est ce que `SendSmsJob` a besoin de savoir pour distinguer
+     * un telephone endormi — qui repondra a la prochaine tentative — d'une
+     * passerelle desactivee, qui ne repondra jamais.
+     */
+    public function deliver(string $to, string $text): SmsSendResult
     {
         $to = $this->normalise($to);
 
         if ($to === '' || trim($text) === '') {
-            return false;
+            return SmsSendResult::rejected('Numero de telephone ou message vide.');
         }
 
         if (! $this->enabled || ! $this->baseUrl) {
@@ -40,7 +55,7 @@ class SmsGateway
                 'to' => $to,
             ]);
 
-            return false;
+            return SmsSendResult::rejected('Passerelle SMS desactivee ou non configuree.');
         }
 
         try {
@@ -54,21 +69,36 @@ class SmsGateway
                 ]);
 
             if ($response->successful()) {
-                return true;
+                // SMSGate renvoie l'identifiant qu'il attribue au message. Il
+                // atteste de l'acceptation, pas de la remise : voir la note sur
+                // le statut « delivered » dans docs/exploitation-demo.md.
+                $identifiant = $response->json('id');
+
+                return SmsSendResult::sent(is_scalar($identifiant) ? (string) $identifiant : null);
             }
 
             Log::warning('Echec d\'envoi SMS', [
                 'to' => $to,
                 'status' => $response->status(),
             ]);
+
+            $raison = sprintf('La passerelle a repondu %d.', $response->status());
+
+            // Une erreur 4xx traduit une demande que la passerelle refusera
+            // toujours (identifiants invalides, numero rejete) : la reessayer
+            // ne ferait que retarder le meme constat. On excepte 408 et 429,
+            // qui invitent explicitement a recommencer plus tard.
+            return $response->clientError() && ! in_array($response->status(), [408, 429], true)
+                ? SmsSendResult::rejected($raison)
+                : SmsSendResult::failed($raison);
         } catch (Throwable $e) {
             Log::warning('Passerelle SMS injoignable', [
                 'to' => $to,
                 'message' => $e->getMessage(),
             ]);
-        }
 
-        return false;
+            return SmsSendResult::failed('Passerelle injoignable : '.$e->getMessage());
+        }
     }
 
     /**

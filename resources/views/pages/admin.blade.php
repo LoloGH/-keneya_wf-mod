@@ -21,7 +21,10 @@
             ['key' => 'salles', 'label' => 'Salles', 'view' => 'sections.admin.rooms'],
             ['key' => 'types-de-soins', 'label' => 'Types de soins', 'view' => 'sections.admin.care-task-types'],
         ]],
+        ['key' => 'tarifs', 'label' => 'Tarifs', 'view' => 'sections.admin.billable-items'],
         ['key' => 'patients', 'label' => 'Patients', 'view' => 'sections.admin.patients'],
+        ['key' => 'retours', 'label' => 'Retours et incidents', 'view' => 'sections.admin.feedback'],
+        ['key' => 'sms', 'label' => 'SMS', 'view' => 'sections.admin.sms'],
         ['key' => 'audit', 'label' => "Journal d'audit", 'view' => 'sections.admin.audit'],
         ['key' => 'suppression', 'label' => 'Supprimer un dossier', 'view' => 'sections.admin.deletion'],
     ];

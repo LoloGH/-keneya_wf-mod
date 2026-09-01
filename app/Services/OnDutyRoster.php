@@ -81,9 +81,7 @@ class OnDutyRoster
         $attaches = $this->attachedUserIds($serviceId);
 
         return Schedule::query()
-            ->whereDate('date', $moment->toDateString())
-            ->whereTime('start_time', '<=', $moment->format('H:i:s'))
-            ->whereTime('end_time', '>=', $moment->format('H:i:s'))
+            ->where(fn (Builder $query) => $this->couvrant($query, $moment))
             ->where(function (Builder $query) use ($serviceId, $attaches) {
                 $query->where('service_id', $serviceId);
 
@@ -93,6 +91,46 @@ class OnDutyRoster
                         ->whereIn('user_id', $attaches));
                 }
             });
+    }
+
+    /**
+     * Les creneaux qui contiennent cet instant, creneaux de nuit compris.
+     *
+     * **Le creneau qui franchit minuit (v3.2.8, point 2).** La condition tenait
+     * en une ligne — `start_time <= T <= end_time` — et elle est fausse des que
+     * la fin precede le debut. Un « 22h – 06h » ne rendait alors de garde a
+     * *aucune* heure : ni a 22h30, ni a 2h du matin. Dans un hopital qui tourne
+     * la nuit, cela suffit a expliquer qu'un declencheur parte le jour et se
+     * taise le soir, sans que rien ne l'annonce.
+     *
+     * Un creneau du 10 mars « 22h – 06h » couvre donc le 10 a partir de 22h,
+     * *et* le 11 jusqu'a 6h : c'est pourquoi la veille est interrogee elle
+     * aussi. Les deux bornes restent inclusives, comme avant.
+     */
+    private function couvrant(Builder $query, Carbon $moment): void
+    {
+        $heure = $moment->format('H:i:s');
+        $jour = $moment->toDateString();
+        $veille = $moment->copy()->subDay()->toDateString();
+
+        // Creneau ordinaire du jour : debut <= maintenant <= fin.
+        $query->where(fn (Builder $ordinaire) => $ordinaire
+            ->whereDate('date', $jour)
+            ->whereColumn('start_time', '<=', 'end_time')
+            ->whereTime('start_time', '<=', $heure)
+            ->whereTime('end_time', '>=', $heure))
+
+            // Creneau de nuit commence aujourd'hui : sa soiree.
+            ->orWhere(fn (Builder $soiree) => $soiree
+                ->whereDate('date', $jour)
+                ->whereColumn('start_time', '>', 'end_time')
+                ->whereTime('start_time', '<=', $heure))
+
+            // Creneau de nuit commence hier : son petit matin.
+            ->orWhere(fn (Builder $matin) => $matin
+                ->whereDate('date', $veille)
+                ->whereColumn('start_time', '>', 'end_time')
+                ->whereTime('end_time', '>=', $heure));
     }
 
     /**

@@ -11,6 +11,7 @@ use App\Models\Prescription;
 use App\Models\Service;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
 use Livewire\Livewire;
@@ -32,7 +33,7 @@ class PrescriptionLinesTest extends TestCase
         parent::setUp();
 
         $this->seedRoles();
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     /** @return array{0: Service, 1: Doctor, 2: Visit} */

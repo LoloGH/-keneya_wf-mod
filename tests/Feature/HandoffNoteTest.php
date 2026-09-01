@@ -16,6 +16,7 @@ use App\Models\StaffType;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use App\Support\Audit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
@@ -39,7 +40,7 @@ class HandoffNoteTest extends TestCase
     {
         parent::setUp();
 
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     private function deGarde(User $user, Service $service): void

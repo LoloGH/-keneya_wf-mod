@@ -10,6 +10,7 @@ use App\Models\Doctor;
 use App\Models\Referral;
 use App\Models\Service;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -32,7 +33,7 @@ class AttachmentTest extends TestCase
         parent::setUp();
 
         Storage::fake('attachments');
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     public function test_une_piece_jointe_accompagne_le_resultat_d_un_renvoi(): void
