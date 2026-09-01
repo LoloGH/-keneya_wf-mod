@@ -61,11 +61,8 @@ class DuplicatePatientFinder
 
         $national = substr($chiffres, -8);
 
-        return Patient::query()
-            ->whereRaw($this->expressionChiffres().' LIKE ?', ['%'.$national])
-            ->orderBy('id')
-            ->limit(self::LIMITE)
-            ->get();
+        // CASSURE VOLONTAIRE — verification de la CI, annulee juste apres.
+        return new Collection;
     }
 
     /**
