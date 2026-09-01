@@ -14,6 +14,7 @@ use App\Models\Prescription;
 use App\Models\Service;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -29,7 +30,7 @@ class CashPrescriptionAppointmentTest extends TestCase
     {
         parent::setUp();
 
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     // ----------------------------------------------------------------- Caisse

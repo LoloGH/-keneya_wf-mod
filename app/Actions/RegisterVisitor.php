@@ -2,10 +2,10 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Models\Visitor;
-use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,6 @@ class RegisterVisitor
 {
     public function __construct(
         private readonly TokenAllocator $tokens,
-        private readonly SmsGateway $sms,
     ) {}
 
     /**
@@ -58,16 +57,14 @@ class RegisterVisitor
             $visitor,
         );
 
-        if (filled($visitor->mobile)) {
-            $this->sms->send($visitor->mobile, sprintf(
-                '%s : votre fiche visiteur est le %s (service %s, ticket n° %d).%s',
-                config('keneya.name'),
-                $visitor->visitor_code,
-                $visitor->service->name,
-                $visitor->token,
-                $visitor->patient ? ' Visite a '.$visitor->patient->name.'.' : '',
-            ));
-        }
+        SendSmsJob::dispatch($visitor->mobile, sprintf(
+            '%s : votre fiche visiteur est le %s (service %s, ticket n° %d).%s',
+            config('keneya.name'),
+            $visitor->visitor_code,
+            $visitor->service->name,
+            $visitor->token,
+            $visitor->patient ? ' Visite a '.$visitor->patient->name.'.' : '',
+        ), $visitor);
 
         return $visitor;
     }

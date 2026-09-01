@@ -2,13 +2,13 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Companion;
 use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Service;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
-use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +25,6 @@ class RegisterPatient
     public function __construct(
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
-        private readonly SmsGateway $sms,
         private readonly RouteThroughCaisse $routing,
     ) {}
 
@@ -98,14 +97,14 @@ class RegisterPatient
             $visit->patient,
         );
 
-        $this->sms->send($visit->patient->mobile, sprintf(
+        SendSmsJob::dispatch($visit->patient->mobile, sprintf(
             '%s : bonjour %s. Votre dossier est le %s. Vous etes attendu(e) au service %s, ticket n° %d.',
             config('keneya.name'),
             $visit->patient->name,
             $visit->patient->patient_code,
             $visit->service->name,
             $visit->token,
-        ));
+        ), $visit->patient);
 
         return $visit;
     }

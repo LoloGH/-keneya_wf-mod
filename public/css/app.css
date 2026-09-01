@@ -2068,3 +2068,28 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 
 .app-footer--board .app-footer__produit strong { color: #97a3ab; }
+
+/* ---------- Section « SMS » de l'administration (v3.2.8) ---------- */
+
+.badge--queued { background: var(--gris-100); color: var(--gris-700); }
+.badge--sent { background: var(--bleu-clair); color: var(--bleu-fonce); }
+.badge--delivered { background: var(--vert-clair); color: var(--vert); }
+.badge--failed { background: var(--rouge-clair); color: var(--rouge); }
+
+/* Le compteur d'echecs, en tete de section : c'est lui qui doit se voir sans
+   ouvrir la liste, sans quoi une passerelle en panne reste invisible. */
+.sms-tally {
+    display: flex; align-items: center; gap: var(--e3); flex-wrap: wrap;
+    margin: var(--e3) 0 var(--e4);
+    padding: var(--e3) var(--e4);
+    border-radius: var(--rayon);
+    border: 1px solid transparent; border-left-width: 3px;
+    font-weight: 600;
+}
+.sms-tally--calme { background: var(--vert-clair); border-color: var(--vert); color: #0f5f47; }
+.sms-tally--alerte { background: var(--rouge-clair); border-color: var(--rouge); color: #7d191c; }
+.sms-tally__nombre { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.sms-tally .btn { margin-left: auto; }
+
+.sms-body { max-width: 42ch; color: var(--gris-700); font-size: var(--texte-sm); }
+.sms-reason { color: var(--rouge); font-size: var(--texte-sm); }

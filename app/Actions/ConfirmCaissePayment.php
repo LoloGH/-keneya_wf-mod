@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Payment;
@@ -9,7 +10,6 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
-use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,7 +28,6 @@ class ConfirmCaissePayment
     public function __construct(
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
-        private readonly SmsGateway $sms,
     ) {}
 
     public function execute(Visit $visit, User $cashier, int $amount): Visit
@@ -102,12 +101,12 @@ class ConfirmCaissePayment
             ['montant' => $amount, 'destination' => $destination->name],
         );
 
-        $this->sms->send($visit->patient->mobile, sprintf(
+        SendSmsJob::dispatch($visit->patient->mobile, sprintf(
             '%s : paiement enregistre. Vous etes attendu(e) au service %s, ticket n° %d.',
             config('keneya.name'),
             $destination->name,
             $visit->token,
-        ));
+        ), $visit->patient);
 
         return $visit;
     }

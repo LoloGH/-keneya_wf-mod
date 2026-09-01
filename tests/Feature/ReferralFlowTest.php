@@ -11,6 +11,7 @@ use App\Models\Referral;
 use App\Models\Service;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use ArrayObject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
@@ -28,7 +29,7 @@ class ReferralFlowTest extends TestCase
     public function test_le_flux_de_renvoi_complet(): void
     {
         $sms = $this->mockSms();
-        $sms->shouldReceive('send')->andReturnTrue();
+        $sms->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
 
         $medecineGenerale = Service::factory()->create(['name' => 'Medecine Generale']);
         $echographie = Service::factory()->plateauTechnique()->create(['name' => 'Echographie']);
@@ -170,7 +171,7 @@ class ReferralFlowTest extends TestCase
 
     public function test_un_renvoi_vers_le_meme_service_est_refuse(): void
     {
-        $this->mockSms()->shouldReceive('send')->andReturnTrue();
+        $this->mockSms()->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
 
         $service = Service::factory()->create();
         $visit = $this->makeVisit($service);
@@ -187,7 +188,7 @@ class ReferralFlowTest extends TestCase
 
     public function test_seul_un_praticien_du_service_destinataire_peut_saisir_le_resultat(): void
     {
-        $this->mockSms()->shouldReceive('send')->andReturnTrue();
+        $this->mockSms()->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
 
         [$referral] = $this->pendingReferral();
         $etranger = $this->makeDoctor(Service::factory()->create());
@@ -199,7 +200,7 @@ class ReferralFlowTest extends TestCase
 
     public function test_un_renvoi_deja_traite_ne_peut_pas_etre_repris(): void
     {
-        $this->mockSms()->shouldReceive('send')->andReturnTrue();
+        $this->mockSms()->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
 
         [$referral, $radiologue] = $this->pendingReferral();
 
@@ -212,7 +213,7 @@ class ReferralFlowTest extends TestCase
 
     public function test_l_historique_est_append_only(): void
     {
-        $this->mockSms()->shouldReceive('send')->andReturnTrue();
+        $this->mockSms()->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
 
         $service = Service::factory()->create();
         app(RegisterPatient::class)->execute([
@@ -266,11 +267,11 @@ class ReferralFlowTest extends TestCase
         $sent = new ArrayObject;
 
         $this->mockSms()
-            ->shouldReceive('send')
-            ->andReturnUsing(function (string $to, string $text) use ($sent): bool {
+            ->shouldReceive('deliver')
+            ->andReturnUsing(function (string $to, string $text) use ($sent): SmsSendResult {
                 $sent[] = ['to' => $to, 'text' => $text];
 
-                return true;
+                return SmsSendResult::sent();
             });
 
         return $sent;

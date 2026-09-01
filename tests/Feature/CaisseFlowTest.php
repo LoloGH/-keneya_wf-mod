@@ -16,6 +16,7 @@ use App\Models\Service;
 use App\Models\ServiceKind;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use App\Support\Audit;
 use App\Support\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,7 +36,7 @@ class CaisseFlowTest extends TestCase
     {
         parent::setUp();
 
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     // --------------------------------------------------------- Cloisonnement

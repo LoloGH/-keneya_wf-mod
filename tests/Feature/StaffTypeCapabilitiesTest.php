@@ -11,6 +11,7 @@ use App\Models\StaffType;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use App\Support\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -27,7 +28,7 @@ class StaffTypeCapabilitiesTest extends TestCase
     {
         parent::setUp();
 
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     private function builtInType(string $role): StaffType

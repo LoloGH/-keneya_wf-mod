@@ -22,6 +22,7 @@
             ['key' => 'types-de-soins', 'label' => 'Types de soins', 'view' => 'sections.admin.care-task-types'],
         ]],
         ['key' => 'patients', 'label' => 'Patients', 'view' => 'sections.admin.patients'],
+        ['key' => 'sms', 'label' => 'SMS', 'view' => 'sections.admin.sms'],
         ['key' => 'audit', 'label' => "Journal d'audit", 'view' => 'sections.admin.audit'],
         ['key' => 'suppression', 'label' => 'Supprimer un dossier', 'view' => 'sections.admin.deletion'],
     ];

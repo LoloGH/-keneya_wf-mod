@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\Visit;
 use App\Models\Visitor;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -24,7 +25,7 @@ class ReceptionInterfaceTest extends TestCase
     {
         parent::setUp();
 
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     public function test_le_formulaire_patient_refuse_une_saisie_incomplete(): void

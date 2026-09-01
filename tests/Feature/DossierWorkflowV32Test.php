@@ -23,6 +23,7 @@ use App\Models\Visit;
 use App\Models\Visitor;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use App\Support\Audit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -45,7 +46,7 @@ class DossierWorkflowV32Test extends TestCase
     {
         parent::setUp();
 
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     // ------------------------------------ Point 1 : visiteurs rattaches

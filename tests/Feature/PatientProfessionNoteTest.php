@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Models\Service;
 use App\Models\Visit;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -28,7 +29,7 @@ class PatientProfessionNoteTest extends TestCase
         parent::setUp();
 
         $this->seedRoles();
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     public function test_la_profession_et_la_note_sont_enregistrees(): void

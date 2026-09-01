@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Jobs\SendSmsJob;
 use App\Models\Doctor;
 use App\Models\PatientHistory;
 use App\Models\Referral;
@@ -9,7 +10,6 @@ use App\Models\Service;
 use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
-use App\Services\SmsGateway;
 use App\Services\TokenAllocator;
 use App\Support\Audit;
 use App\Support\Caregiver;
@@ -28,7 +28,6 @@ class SendReferral
     public function __construct(
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
-        private readonly SmsGateway $sms,
         private readonly RouteThroughCaisse $routing,
     ) {}
 
@@ -105,13 +104,13 @@ class SendReferral
 
         $courante = $visit->fresh()->load('service');
 
-        $this->sms->send($patient->mobile, sprintf(
+        SendSmsJob::dispatch($patient->mobile, sprintf(
             '%s : vous etes oriente(e) vers %s, ticket n° %d. Dossier %s.',
             config('keneya.name'),
             $courante->service->name,
             $courante->token,
             $patient->patient_code,
-        ));
+        ), $referral);
 
         return $referral;
     }

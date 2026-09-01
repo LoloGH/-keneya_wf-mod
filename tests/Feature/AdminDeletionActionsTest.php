@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use App\Support\Audit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
@@ -47,7 +48,7 @@ class AdminDeletionActionsTest extends TestCase
     {
         parent::setUp();
 
-        $this->mock(SmsGateway::class)->shouldReceive('send')->andReturnTrue();
+        $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
     // ------------------------------- L'action est presente, toujours

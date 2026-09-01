@@ -11,6 +11,7 @@ use App\Models\PortalAccessAttempt;
 use App\Models\Prescription;
 use App\Models\Service;
 use App\Services\SmsGateway;
+use App\Services\SmsSendResult;
 use ArrayObject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -174,11 +175,11 @@ class PatientPortalTest extends TestCase
         $messages = new ArrayObject;
 
         $this->mock(SmsGateway::class)
-            ->shouldReceive('send')
-            ->andReturnUsing(function (string $numero, string $texte) use ($messages) {
+            ->shouldReceive('deliver')
+            ->andReturnUsing(function (string $numero, string $texte) use ($messages): SmsSendResult {
                 $messages[] = [$numero, $texte];
 
-                return true;
+                return SmsSendResult::sent();
             });
 
         app(SendPortalLink::class)->execute($patient);
