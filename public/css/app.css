@@ -1860,12 +1860,27 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     padding: .7rem .8rem;
     border-top: 1px solid var(--gris-300);
 }
-/* L'action principale prend la largeur, la deconnexion reste une icone au
+/* Les actions du compte occupent la largeur, la deconnexion reste une icone au
    bout : les deux ne sont pas de meme poids. */
-/* L'action principale tient sur une ligne : coupee en deux, elle doublait la
-   hauteur de la carte pour rien. */
+.profil__links {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* En colonne, chaque action dispose de toute la largeur de la carte : le
+   libelle tient sur une ligne sans que rien ne deborde, et une troisieme
+   action s'ajouterait sans retoucher la mise en page. Cote a cote — la mise en
+   page d'avant la v3.2.9, quand il n'y avait qu'une seule action — deux
+   libelles en `nowrap` ne pouvaient plus retrecir et sortaient du cadre. */
+.profil__links .btn { width: 100%; white-space: nowrap; padding-inline: .75rem; }
+
+/* Utilise par les rangees Enregistrer / Annuler des formulaires de la carte,
+   ou deux boutons courts se partagent bien une ligne. */
 .profil__grow { flex: 1 1 auto; white-space: nowrap; padding-inline: .75rem; }
-.profil__actions form { display: flex; }
+.profil__actions form { display: flex; flex: 0 0 auto; }
 
 .icon-btn--danger { color: var(--rouge); }
 .icon-btn--danger:hover { background: var(--rouge-clair); }

@@ -85,12 +85,19 @@
                 </form>
             @elseif (! $changingPassword)
                 <div class="profil__actions">
-                    @if ($isDoctor)
-                        <button type="button" class="btn btn--secondary profil__grow"
-                                wire:click="startSignatureChange">Signature et tampon</button>
-                    @endif
-                    <button type="button" class="btn btn--secondary profil__grow"
-                            wire:click="startPasswordChange">Changer le mot de passe</button>
+                    {{-- Les actions du compte s'empilent, elles ne se partagent
+                         pas une rangee : cote a cote, « Signature et tampon » et
+                         « Changer le mot de passe » debordaient de la carte des
+                         que le medecin voyait les deux (v3.2.9). Une colonne
+                         reste juste quel qu'en soit le nombre. --}}
+                    <div class="profil__links">
+                        @if ($isDoctor)
+                            <button type="button" class="btn btn--secondary"
+                                    wire:click="startSignatureChange">Signature et tampon</button>
+                        @endif
+                        <button type="button" class="btn btn--secondary"
+                                wire:click="startPasswordChange">Changer le mot de passe</button>
+                    </div>
 
                     {{-- Icone seule, comme les autres actions de la barre : le
                          libelle reste porte par aria-label et title. --}}
