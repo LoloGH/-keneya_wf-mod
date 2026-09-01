@@ -43,7 +43,9 @@ class Payment extends Model
         'visit_id',
         'type',
         'service_id',
+        'billable_item_id',
         'amount',
+        'catalog_price',
         'status',
         'recorded_by_user_id',
     ];
@@ -52,6 +54,7 @@ class Payment extends Model
     {
         return [
             'amount' => 'integer',
+            'catalog_price' => 'integer',
         ];
     }
 
@@ -70,6 +73,12 @@ class Payment extends Model
         return $this->belongsTo(Service::class);
     }
 
+    /** L'acte facture, quand il vient du catalogue (v3.2.8, point 3). */
+    public function billableItem(): BelongsTo
+    {
+        return $this->belongsTo(BillableItem::class);
+    }
+
     public function recordedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by_user_id');
@@ -78,6 +87,25 @@ class Payment extends Model
     public function typeLabel(): string
     {
         return self::TYPE_LABELS[$this->type] ?? $this->type;
+    }
+
+    /**
+     * Ce que le patient a paye, nomme : l'acte du catalogue s'il y en a un,
+     * sinon le type d'encaissement — les encaissements anterieurs au catalogue
+     * n'ont rien de plus precis a montrer.
+     */
+    public function subjectLabel(): string
+    {
+        return $this->billableItem?->name ?? $this->typeLabel();
+    }
+
+    /**
+     * Le montant encaisse s'ecarte-t-il du tarif du catalogue ? Une derogation
+     * doit rester visible : c'est l'exception, pas le fonctionnement normal.
+     */
+    public function isOverridden(): bool
+    {
+        return $this->catalog_price !== null && $this->catalog_price !== $this->amount;
     }
 
     public function statusLabel(): string

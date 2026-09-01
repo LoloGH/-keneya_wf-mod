@@ -51,7 +51,7 @@
             <form wire:submit="sendReferral" class="form my-patients__form">
                 <div class="field">
                     <label for="staff-to-service">Service destinataire</label>
-                    <select id="staff-to-service" wire:model="toServiceId">
+                    <select id="staff-to-service" wire:model.live="toServiceId">
                         <option value="">— Choisir —</option>
                         @foreach ($otherServices as $autre)
                             <option value="{{ $autre->id }}">{{ $autre->name }}</option>
@@ -59,6 +59,21 @@
                     </select>
                     @error('toServiceId') <p class="field__error">{{ $message }}</p> @enderror
                 </div>
+
+                {{-- L'acte precis plutot que le service en general : il porte le
+                     tarif et suit la visite jusqu'a la caisse (v3.2.8, point 3). --}}
+                @if ($actes->isNotEmpty())
+                    <div class="field">
+                        <label for="staff-acte">Acte demande</label>
+                        <select id="staff-acte" wire:model="billableItemId">
+                            <option value="">— Aucun acte facturable —</option>
+                            @foreach ($actes as $acte)
+                                <option value="{{ $acte->id }}">{{ $acte->label() }}</option>
+                            @endforeach
+                        </select>
+                        @error('billableItemId') <p class="field__error">{{ $message }}</p> @enderror
+                    </div>
+                @endif
 
                 <div class="field">
                     <label for="staff-instructions">Instructions</label>

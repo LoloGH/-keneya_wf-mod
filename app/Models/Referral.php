@@ -33,6 +33,7 @@ class Referral extends Model
         'visit_id',
         'from_service_id',
         'to_service_id',
+        'billable_item_id',
         'from_doctor_id',
         'from_staff_member_id',
         'completed_by_doctor_id',
@@ -57,6 +58,17 @@ class Referral extends Model
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    /**
+     * L'acte precis demande, choisi par le prescripteur (v3.2.8, point 3).
+     *
+     * C'est lui qui voyage avec la visite jusqu'a la caisse : le caissier lit
+     * le nom de l'acte et son tarif, au lieu de demander ou de deviner.
+     */
+    public function billableItem(): BelongsTo
+    {
+        return $this->belongsTo(BillableItem::class);
     }
 
     public function visit(): BelongsTo

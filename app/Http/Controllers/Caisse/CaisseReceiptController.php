@@ -22,7 +22,7 @@ class CaisseReceiptController extends Controller
             'Cette action ne releve pas de votre fonction.',
         );
 
-        $payment->load(['patient', 'service', 'recordedBy']);
+        $payment->load(['patient', 'service', 'recordedBy', 'billableItem']);
 
         return view('print.receipt', [
             'payment' => $payment,

@@ -2116,3 +2116,21 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .doublon__nom { margin: 0; font-weight: 700; display: flex; gap: var(--e2); align-items: baseline; flex-wrap: wrap; }
 .doublon__detail { margin: var(--e1) 0 0; font-size: var(--texte-sm); }
 .doublon .hint { color: inherit; opacity: .85; }
+
+/* ---------- Catalogue de tarifs a la caisse (v3.2.8) ---------- */
+
+.queue__acte { display: inline-flex; gap: var(--e2); align-items: baseline; font-size: var(--texte-sm); color: var(--gris-700); }
+.queue__acte strong { color: var(--bleu-fonce); }
+
+/* L'acte facture, en tete du formulaire d'encaissement : c'est la reponse a
+   « qu'est-ce que je paie ? », que le caissier devait demander. */
+.acte-facture {
+    display: flex; align-items: baseline; gap: var(--e2); flex-wrap: wrap;
+    margin: 0 0 var(--e3); padding: var(--e3);
+    border-radius: var(--rayon-sm); background: var(--bleu-clair); color: var(--bleu-fonce);
+}
+.acte-facture > span:first-child { font-size: var(--texte-xs); text-transform: uppercase; letter-spacing: .08em; }
+.acte-facture strong { font-size: var(--texte-lg); }
+.acte-facture__tarif { margin-left: auto; font-weight: 800; }
+
+.field--check label { display: flex; align-items: center; gap: var(--e2); font-weight: 500; }

@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Jobs\SendSmsJob;
+use App\Models\BillableItem;
 use App\Models\Doctor;
 use App\Models\PatientHistory;
 use App\Models\Referral;
@@ -31,8 +32,13 @@ class SendReferral
         private readonly RouteThroughCaisse $routing,
     ) {}
 
-    public function execute(Visit $visit, Doctor|StaffMember $fromDoctor, Service $toService, string $instructions): Referral
-    {
+    public function execute(
+        Visit $visit,
+        Doctor|StaffMember $fromDoctor,
+        Service $toService,
+        string $instructions,
+        ?BillableItem $billableItem = null,
+    ): Referral {
         if ($visit->isClosed()) {
             throw new InvalidArgumentException('Ce dossier est cloture : il ne peut plus etre renvoye vers un autre service.');
         }
@@ -49,12 +55,21 @@ class SendReferral
             throw new InvalidArgumentException("La caisse n'est pas une destination de renvoi.");
         }
 
-        $referral = DB::transaction(function () use ($visit, $fromDoctor, $fromService, $toService, $instructions): Referral {
+        // Un acte d'un autre service serait facture au mauvais tarif : le
+        // catalogue perdrait tout interet s'il suffisait de se tromper de liste.
+        if ($billableItem
+            && $billableItem->service_id !== null
+            && $billableItem->service_id !== $toService->getKey()) {
+            throw new InvalidArgumentException("L'acte choisi ne releve pas du service destinataire.");
+        }
+
+        $referral = DB::transaction(function () use ($visit, $fromDoctor, $fromService, $toService, $instructions, $billableItem): Referral {
             $referral = Referral::create([
                 'patient_id' => $visit->patient_id,
                 'visit_id' => $visit->getKey(),
                 'from_service_id' => $fromService->getKey(),
                 'to_service_id' => $toService->getKey(),
+                'billable_item_id' => $billableItem?->getKey(),
                 ...Caregiver::of($fromDoctor)->columns('from'),
                 'instructions' => $instructions,
                 'status' => Referral::STATUS_PENDING,
@@ -79,10 +94,11 @@ class SendReferral
                 visit: $visit,
                 type: PatientHistory::TYPE_REFERRAL_SENT,
                 description: sprintf(
-                    'Renvoye de %s vers %s par %s.%s Instructions : %s',
+                    'Renvoye de %s vers %s par %s.%s%s Instructions : %s',
                     $fromService->name,
                     $toService->name,
                     $fromDoctor->name(),
+                    $billableItem ? ' Acte demande : '.$billableItem->name.'.' : '',
                     $enAttente ? ' Passage par '.$file->name.' avant realisation.' : '',
                     $instructions,
                 ),

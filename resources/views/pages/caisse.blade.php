@@ -6,7 +6,17 @@
     // l'administrateur peut en creer une troisieme, elle doit alors etre tenue
     // depuis cette interface comme les autres. Une caisse par section, un seul
     // role les voit toutes.
-    $caisses = Service::ofKindSlug(ServiceKind::SLUG_CAISSE)->orderBy('name')->get();
+    // « Caisse Ticket » avant « Caisse Services » (v3.2.8, point 3) : c'est
+    // l'ordre du parcours du patient, qui prend son ticket avant d'etre oriente
+    // vers un acte. L'ordre alphabetique les presentait a l'envers. Les caisses
+    // ajoutees ensuite par l'administrateur suivent, par nom.
+    $ordre = [Service::CAISSE_TICKET => 0, Service::CAISSE_SERVICES => 1];
+
+    $caisses = Service::ofKindSlug(ServiceKind::SLUG_CAISSE)
+        ->orderBy('name')
+        ->get()
+        ->sortBy(fn (Service $caisse) => [$ordre[$caisse->name] ?? 2, $caisse->name])
+        ->values();
 
     $sections = $caisses
         ->map(fn (Service $caisse) => [

@@ -5,6 +5,7 @@ namespace App\Livewire\Staff;
 use App\Actions\CallNextPatient;
 use App\Actions\CloseVisit;
 use App\Actions\SendReferral;
+use App\Models\BillableItem;
 use App\Models\Service;
 use App\Models\StaffMember;
 use App\Models\StaffType;
@@ -30,6 +31,9 @@ class StaffQueue extends Component
     public ?int $referringVisitId = null;
 
     public ?int $toServiceId = null;
+
+    /** L'acte precis demande, parmi les tarifs du service destinataire. */
+    public ?int $billableItemId = null;
 
     public string $instructions = '';
 
@@ -92,14 +96,21 @@ class StaffQueue extends Component
 
         $this->referringVisitId = $visitId;
         $this->toServiceId = null;
+        $this->billableItemId = null;
         $this->instructions = '';
         $this->resetValidation();
     }
 
     public function cancelReferral(): void
     {
-        $this->reset(['referringVisitId', 'toServiceId', 'instructions']);
+        $this->reset(['referringVisitId', 'toServiceId', 'billableItemId', 'instructions']);
         $this->resetValidation();
+    }
+
+    /** Changer de destination change la liste des actes proposes. */
+    public function updatedToServiceId(): void
+    {
+        $this->billableItemId = null;
     }
 
     public function sendReferral(SendReferral $action): void
@@ -109,10 +120,12 @@ class StaffQueue extends Component
         $this->validate([
             'referringVisitId' => ['required', 'integer', 'exists:visits,id'],
             'toServiceId' => ['required', 'integer', 'exists:services,id'],
+            'billableItemId' => ['nullable', 'integer', 'exists:billable_items,id'],
             'instructions' => ['required', 'string', 'min:3', 'max:2000'],
         ], attributes: [
             'referringVisitId' => 'patient',
             'toServiceId' => 'service destinataire',
+            'billableItemId' => 'acte demande',
             'instructions' => 'instructions',
         ]);
 
@@ -124,6 +137,7 @@ class StaffQueue extends Component
                 $this->member(),
                 Service::findOrFail($this->toServiceId),
                 $this->instructions,
+                $this->billableItemId ? BillableItem::find($this->billableItemId) : null,
             );
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['toServiceId' => $e->getMessage()]);
@@ -185,6 +199,9 @@ class StaffQueue extends Component
                 ->get(),
             'otherServices' => $type->can(StaffType::CAP_SEND_REFERRAL)
                 ? Service::careServices()->where('id', '!=', $service->getKey())->orderBy('name')->get()
+                : collect(),
+            'actes' => $this->toServiceId
+                ? BillableItem::forService((int) $this->toServiceId)->orderBy('name')->get()
                 : collect(),
         ]);
     }

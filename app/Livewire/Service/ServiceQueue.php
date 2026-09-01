@@ -6,6 +6,7 @@ use App\Actions\CallNextPatient;
 use App\Actions\CloseVisit;
 use App\Actions\SendReferral;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
+use App\Models\BillableItem;
 use App\Models\Service;
 use App\Models\Visit;
 use Illuminate\Contracts\View\View;
@@ -29,6 +30,13 @@ class ServiceQueue extends Component
     public ?int $referringVisitId = null;
 
     public ?int $toServiceId = null;
+
+    /**
+     * L'acte precis demande, parmi les tarifs du service destinataire
+     * (v3.2.8, point 3) : « Echographie abdominale » plutot que « Echographie ».
+     * Il voyage avec la visite jusqu'a la caisse.
+     */
+    public ?int $billableItemId = null;
 
     public string $instructions = '';
 
@@ -67,13 +75,23 @@ class ServiceQueue extends Component
     {
         $this->referringVisitId = $visitId;
         $this->toServiceId = null;
+        $this->billableItemId = null;
         $this->instructions = '';
         $this->resetValidation();
     }
 
+    /**
+     * Changer de service destinataire change la liste des actes proposes : un
+     * acte de radiologie n'a rien a faire dans un renvoi vers le laboratoire.
+     */
+    public function updatedToServiceId(): void
+    {
+        $this->billableItemId = null;
+    }
+
     public function cancelReferral(): void
     {
-        $this->reset(['referringVisitId', 'toServiceId', 'instructions']);
+        $this->reset(['referringVisitId', 'toServiceId', 'billableItemId', 'instructions']);
         $this->resetValidation();
     }
 
@@ -82,9 +100,11 @@ class ServiceQueue extends Component
         $this->validate([
             'referringVisitId' => ['required', 'integer', 'exists:visits,id'],
             'toServiceId' => ['required', 'integer', 'exists:services,id', 'different:serviceId'],
+            'billableItemId' => ['nullable', 'integer', 'exists:billable_items,id'],
             'instructions' => ['required', 'string', 'min:3', 'max:2000'],
         ], attributes: [
             'toServiceId' => 'service destinataire',
+            'billableItemId' => 'acte demande',
             'instructions' => 'instructions',
         ]);
 
@@ -99,6 +119,7 @@ class ServiceQueue extends Component
                 fromDoctor: $this->currentDoctor(),
                 toService: $toService,
                 instructions: $this->instructions,
+                billableItem: $this->billableItemId ? BillableItem::find($this->billableItemId) : null,
             );
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['toServiceId' => $e->getMessage()]);
@@ -167,6 +188,11 @@ class ServiceQueue extends Component
                 ->with('doctors.user')
                 ->orderBy('name')
                 ->get(),
+            // Les actes du service destinataire choisi. Vide tant qu'aucun
+            // service n'est selectionne : la liste n'aurait aucun sens.
+            'actes' => $this->toServiceId
+                ? BillableItem::forService((int) $this->toServiceId)->orderBy('name')->get()
+                : collect(),
         ]);
     }
 }

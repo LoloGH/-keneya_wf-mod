@@ -109,6 +109,15 @@ final class Audit
 
     public const EVENT_PAYMENT_CONFIRMED = 'paiement_confirme';
 
+    /**
+     * Montant encaisse different du tarif du catalogue (v3.2.8, point 3).
+     *
+     * Un evenement a part, et non une propriete de l'encaissement ordinaire :
+     * noyee parmi tous les paiements de la journee, une derogation serait
+     * introuvable — or c'est precisement ce qu'un gestionnaire veut retrouver.
+     */
+    public const EVENT_PRICE_OVERRIDDEN = 'tarif_deroge';
+
     public const EVENT_CONCLUSION_RECORDED = 'conclusion_redigee';
 
     public const EVENT_ATTACHMENT_ADDED = 'piece_jointe_ajoutee';
@@ -173,6 +182,7 @@ final class Audit
         self::EVENT_SCHEDULE_BULK => 'Creation groupee de planning',
         self::EVENT_PATIENT_CALLED => 'Appel du patient suivant',
         self::EVENT_PAYMENT_CONFIRMED => 'Confirmation de paiement',
+        self::EVENT_PRICE_OVERRIDDEN => 'Derogation au tarif',
         self::EVENT_CONCLUSION_RECORDED => 'Conclusion de consultation',
         self::EVENT_ATTACHMENT_ADDED => 'Ajout d\'une piece jointe',
         self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
