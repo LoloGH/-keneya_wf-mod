@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Models\FeedbackEntry;
+use App\Models\FeedbackSurveyRating;
 use App\Models\Patient;
 use App\Models\User;
 use App\Models\Visitor;
@@ -22,7 +23,7 @@ class RecordFeedback
     public function __construct(private readonly FeedbackAttribution $attribution) {}
 
     /**
-     * @param  array{rating_care?: ?int, rating_staff?: ?int, content?: ?string, service_id?: ?int}  $data
+     * @param  array{rating_care?: ?int, content?: ?string, service_id?: ?int, steps?: array<int, array{label: string, user_id: ?int, rating: int, comment?: ?string}>}  $data
      */
     public function fromPatient(Patient $patient, string $type, array $data): FeedbackEntry
     {
@@ -38,7 +39,7 @@ class RecordFeedback
     }
 
     /**
-     * @param  array{rating_care?: ?int, rating_staff?: ?int, content?: ?string}  $data
+     * @param  array{rating_care?: ?int, rating_staff?: ?int, content?: ?string, steps?: array<int, array{label: string, user_id: ?int, rating: int, comment?: ?string}>}  $data
      */
     public function fromVisitor(Visitor $visitor, string $type, array $data): FeedbackEntry
     {
@@ -78,18 +79,43 @@ class RecordFeedback
      */
     private function create(string $type, array $attributes): FeedbackEntry
     {
+        /** @var array<int, array{label: string, user_id: ?int, rating: int, comment?: ?string}> $etapes */
+        $etapes = $attributes['steps'] ?? [];
+        unset($attributes['steps']);
+
         // Les notes ne s'appliquent qu'au sondage : une reclamation ou un
         // constat n'en porte pas, et en conserver donnerait a croire le
         // contraire.
         if ($type !== FeedbackEntry::TYPE_SURVEY) {
             $attributes['rating_care'] = null;
             $attributes['rating_staff'] = null;
+            $etapes = [];
         }
 
-        return FeedbackEntry::create(array_merge($attributes, [
+        // `rating_staff` n'est plus saisi (v3.2.9, point 3) : il devient la
+        // moyenne des notes par etape. La colonne est conservee plutot que
+        // supprimee — elle porte l'historique des sondages v3.2.8 et reste
+        // lue par l'administration.
+        $attributes['rating_staff'] = $etapes !== []
+            ? (int) round(collect($etapes)->avg('rating'))
+            : ($attributes['rating_staff'] ?? null);
+
+        $entree = FeedbackEntry::create(array_merge($attributes, [
             'type' => $type,
             'status' => FeedbackEntry::STATUS_NEW,
         ]));
+
+        foreach ($etapes as $etape) {
+            FeedbackSurveyRating::create([
+                'feedback_entry_id' => $entree->getKey(),
+                'user_id' => $etape['user_id'] ?? null,
+                'post_label' => $etape['label'],
+                'rating' => $etape['rating'],
+                'comment' => $etape['comment'] ?? null,
+            ]);
+        }
+
+        return $entree;
     }
 
     private function assertType(string $type): void

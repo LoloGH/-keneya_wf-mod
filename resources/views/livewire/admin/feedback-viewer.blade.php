@@ -84,6 +84,21 @@
                 </p>
             @endif
 
+            {{-- Le detail par poste (v3.2.9, point 3) : c'est lui qui dit ou
+                 agir, la ou une note globale ne disait que « ça va » ou
+                 « ça ne va pas ». --}}
+            @if ($entry->surveyRatings->isNotEmpty())
+                <ul class="retour__etapes">
+                    @foreach ($entry->surveyRatings as $note)
+                        <li>
+                            <strong>{{ $note->post_label }}</strong>
+                            <span class="mono">{{ $note->rating }}/5</span>
+                            @if ($note->comment) <span>{{ $note->comment }}</span> @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+
             @if ($entry->content)
                 <p class="retour__contenu">{{ $entry->content }}</p>
             @endif
@@ -136,6 +151,29 @@
     @endforelse
 
     {{ $entries->links() }}
+
+    @if ($recentVisitors->isNotEmpty())
+        <h3 class="card__subtitle">Lancer un sondage visiteur</h3>
+        <p class="hint">
+            Sans attendre le delai automatique. Le sondage ne portera que sur
+            ce que le visiteur a deja vecu.
+        </p>
+        <ul class="diffusion__resultats">
+            @foreach ($recentVisitors as $visiteur)
+                <li>
+                    <span>
+                        {{ $visiteur->name }}
+                        <span class="mono">{{ $visiteur->visitor_code }}</span>
+                        <span class="hint">recu le {{ $visiteur->created_at->format('d/m/Y') }}</span>
+                    </span>
+                    <button type="button" class="btn btn--ghost"
+                            wire:click="launchVisitorSurvey({{ $visiteur->id }})">
+                        Lancer le sondage
+                    </button>
+                </li>
+            @endforeach
+        </ul>
+    @endif
 
     <h3 class="card__subtitle">Envoi differe aux visiteurs</h3>
     <p class="hint">

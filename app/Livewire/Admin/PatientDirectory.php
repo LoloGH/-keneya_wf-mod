@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\SendFeedbackInvitation;
 use App\Actions\StoreAttachment;
 use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Attachment;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Services\PatientTimeline;
+use App\Support\Audit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -55,6 +57,42 @@ class PatientDirectory extends Component
     {
         $this->openPatientId = null;
         $this->cancelAttachment();
+    }
+
+    /**
+     * « Lancer le sondage maintenant » (v3.2.9, point 3).
+     *
+     * Envoie le lien sur-le-champ, sans attendre la cloture de la visite. Le
+     * sondage ne proposera alors que les etapes deja franchies : c'est la
+     * lecture du dossier a cet instant qui les determine, pas un cas
+     * particulier a traiter.
+     *
+     * L'envoi ne remplace jamais un precedent : chaque reponse cree sa propre
+     * entree, et deux sondages successifs restent consultables separement.
+     */
+    public function launchSurvey(int $patientId, SendFeedbackInvitation $invitation): void
+    {
+        $patient = Patient::findOrFail($patientId);
+
+        if (blank($patient->mobile)) {
+            $this->notifyError(sprintf('%s n\'a pas de numero de telephone : le lien ne peut pas partir.', $patient->name));
+
+            return;
+        }
+
+        $invitation->toPatient($patient);
+
+        Audit::log(
+            Audit::EVENT_PORTAL_LINK_SENT,
+            sprintf('Sondage de satisfaction lance manuellement pour %s.', $patient->patient_code),
+            $patient,
+        );
+
+        $this->notifySuccess(sprintf(
+            'Lien du sondage mis en file pour %s (%s).',
+            $patient->name,
+            $patient->mobile,
+        ));
     }
 
     public function startAttachment(): void
