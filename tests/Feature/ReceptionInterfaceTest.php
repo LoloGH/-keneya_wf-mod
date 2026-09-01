@@ -46,11 +46,18 @@ class ReceptionInterfaceTest extends TestCase
 
         $form = Livewire::actingAs($this->makeReceptionist())->test(PatientRegistrationForm::class);
 
-        foreach ([[$urgences, 'Patient A'], [$urgences, 'Patient B'], [$maternite, 'Patient C']] as [$service, $name]) {
+        // Un numero distinct par patient : depuis la v3.2.8, trois personnes
+        // partageant un meme telephone declenchent — a juste titre — la
+        // detection de doublon, ce que ce test ne cherche pas a mesurer.
+        foreach ([
+            [$urgences, 'Patient A', '76000001'],
+            [$urgences, 'Patient B', '76000002'],
+            [$maternite, 'Patient C', '76000003'],
+        ] as [$service, $name, $mobile]) {
             $form->set('name', $name)
                 ->set('age', 30)
                 ->set('gender', 'Femme')
-                ->set('mobile', '76000000')
+                ->set('mobile', $mobile)
                 ->set('service_id', $service->getKey())
                 ->call('save')
                 ->assertHasNoErrors();

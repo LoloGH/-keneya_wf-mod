@@ -31,6 +31,15 @@ final class Audit
 
     public const EVENT_PATIENT_UPDATED = 'patient_modifie';
 
+    /**
+     * Creation d'un dossier malgre un doublon probable signale (v3.2.8, point 1).
+     *
+     * On n'empeche pas la receptionniste de passer outre — elle voit la
+     * personne, pas nous. Mais la decision est tracee, pour qu'un doublon
+     * eventuel reste explicable plutot que silencieux.
+     */
+    public const EVENT_DUPLICATE_OVERRIDDEN = 'doublon_ignore';
+
     public const EVENT_VISIT_OPENED = 'episode_ouvert';
 
     public const EVENT_VISIT_CLOSED = 'dossier_cloture';
@@ -130,6 +139,7 @@ final class Audit
         self::EVENT_PASSWORD_CHANGED => 'Changement de mot de passe',
         self::EVENT_PATIENT_CREATED => 'Creation d\'un patient',
         self::EVENT_PATIENT_UPDATED => 'Modification d\'un patient',
+        self::EVENT_DUPLICATE_OVERRIDDEN => 'Doublon signale, dossier cree malgre tout',
         self::EVENT_VISIT_OPENED => 'Ouverture d\'un episode',
         self::EVENT_VISIT_CLOSED => 'Cloture d\'un dossier',
         self::EVENT_REFERRAL_SENT => 'Envoi d\'un renvoi',

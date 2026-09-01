@@ -2093,3 +2093,26 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 .sms-body { max-width: 42ch; color: var(--gris-700); font-size: var(--texte-sm); }
 .sms-reason { color: var(--rouge); font-size: var(--texte-sm); }
+
+/* ---------- Doublon probable a l'enregistrement (v3.2.8) ---------- */
+
+/* Volontairement proche d'une alerte : la creation est interrompue, ce n'est
+   pas un simple message d'information que l'on peut lire en diagonale. */
+.doublon {
+    margin: var(--e4) 0;
+    padding: var(--e4);
+    border-radius: var(--rayon);
+    border: 1px solid var(--ambre); border-left-width: 3px;
+    background: var(--ambre-clair); color: #834e00;
+}
+.doublon__titre { margin: 0 0 var(--e2); font-size: var(--texte-lg); font-weight: 700; }
+.doublon__liste { list-style: none; margin: var(--e3) 0; padding: 0; display: grid; gap: var(--e2); }
+.doublon__dossier {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--e3); flex-wrap: wrap;
+    padding: var(--e3); border-radius: var(--rayon-sm);
+    background: rgba(255, 255, 255, .7);
+}
+.doublon__nom { margin: 0; font-weight: 700; display: flex; gap: var(--e2); align-items: baseline; flex-wrap: wrap; }
+.doublon__detail { margin: var(--e1) 0 0; font-size: var(--texte-sm); }
+.doublon .hint { color: inherit; opacity: .85; }
