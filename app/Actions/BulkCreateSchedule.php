@@ -44,8 +44,10 @@ class BulkCreateSchedule
             throw new InvalidArgumentException('Choisissez au moins un jour de la semaine.');
         }
 
-        if ($startTime >= $endTime) {
-            throw new InvalidArgumentException("L'heure de fin doit suivre l'heure de debut.");
+        // Une fin anterieure au debut designe un creneau qui franchit minuit,
+        // et non une erreur de saisie : seule l'egalite est refusee.
+        if ($this->normalizeTime($startTime) === $this->normalizeTime($endTime)) {
+            throw new InvalidArgumentException("L'heure de fin doit differer de l'heure de debut.");
         }
 
         $jours = array_map('intval', $weekdays);
