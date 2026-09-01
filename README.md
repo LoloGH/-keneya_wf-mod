@@ -210,7 +210,33 @@ php artisan migrate --seed --force
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 
 sudo chown -R www-data:www-data storage bootstrap/cache
+
+# Signatures et tampons (v3.2.9) : dossier prive, jamais servi directement.
+sudo install -d -o www-data -g www-data -m 750 storage/app/signatures
+
+# Worker de la file SMS et planificateur : sans eux, aucun SMS ne part.
+sudo cp deploy/systemd/keneya-*.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now keneya-queue keneya-scheduler
 ```
+
+> **Les deux services d'arriere-plan ne sont pas optionnels.** La pile Docker
+> les declare (`queue-worker`, `scheduler`) ; une installation native, elle,
+> demarre sans. L'application fonctionne alors normalement en apparence, mais
+> les SMS s'empilent dans la table `jobs` sans jamais partir, et les rappels de
+> rendez-vous comme les liens de sondage ne se declenchent pas — sans qu'aucun
+> ecran ne le signale. Les unites sont fournies dans `deploy/systemd/` ;
+> adaptez-y `WorkingDirectory`, `User` et `Group` si le depot n'est pas dans
+> `/var/www/keneya-workflow`.
+>
+> ```bash
+> systemctl is-active keneya-queue keneya-scheduler   # doit repondre « active »
+> sudo systemctl restart keneya-queue                 # apres chaque deploiement
+> ```
+>
+> Le worker sort de lui-meme toutes les heures (`--max-time=3600`) et systemd
+> le relance : les redemarrages reguliers dans `journalctl -u keneya-queue`
+> sont le fonctionnement attendu, pas un incident.
 
 Serveur virtuel Nginx (`/etc/nginx/sites-available/keneya-workflow`) - la
 configuration de `docker/nginx/default.conf` sert de base ; il suffit de
@@ -378,7 +404,10 @@ Les données vivent dans le volume Docker dédié **`keneya_db`**, distinct du
 code : `docker compose down` ne l'efface pas (`docker compose down -v`, si).
 
 Depuis la v2, **les pièces jointes vivent dans le volume `keneya_storage`**
-(`storage/app/attachments`). Une sauvegarde complète comprend donc les deux :
+(`storage/app/attachments`), rejointes en v3.2.9 par **les signatures et
+tampons des médecins** (`storage/app/signatures`). Une base restaurée sans eux
+réimprime des ordonnances amputées de ce qui les authentifie : ce sont des
+documents à valeur légale. Une sauvegarde complète comprend donc les deux :
 l'export SQL ci-dessous **et** une copie de ce volume, par exemple
 
 ```bash
@@ -394,8 +423,9 @@ docker compose exec -T db mariadb-dump \
     keneya_workflow > keneya_workflow.sql
 ```
 
-Deux scripts prêts à l'emploi horodatent l'export et ne conservent que les 30
-dernières sauvegardes :
+`scripts/backup.sh` fait les trois d'un coup — export SQL, archive des pièces
+jointes, archive des signatures — et conserve trente exemplaires de chaque
+série, comptés série par série. Les deux scripts horodatent l'export :
 
 ```bash
 ./scripts/backup.sh /var/sauvegardes/keneya                       # Linux

@@ -1,0 +1,41 @@
+# Worker de la file d'attente SMS de KENEYA WorkFlow (installation native).
+#
+# Sans ce service, l'application continue de fonctionner normalement mais plus
+# aucun SMS ne part : les jobs s'empilent dans la table `jobs` sans qu'aucun
+# ecran ne le signale. C'est la panne la plus silencieuse du produit.
+#
+# Installation :
+#   sudo cp deploy/systemd/keneya-*.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now keneya-queue keneya-scheduler
+#
+# Adapter WorkingDirectory, User et Group si le depot n'est pas dans
+# /var/www/keneya-workflow ou si le serveur web ne tourne pas en www-data.
+#
+# La pile Docker Compose n'a pas besoin de ce fichier : elle declare deja les
+# services `queue-worker` et `scheduler`.
+
+[Unit]
+Description=KENEYA WorkFlow - worker de la file d'attente SMS
+After=network-online.target mariadb.service mysql.service
+Wants=network-online.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/keneya-workflow
+
+# --max-time=3600 : le worker se termine proprement au bout d'une heure et
+# systemd le relance. Un processus PHP de longue duree finit par garder en
+# memoire des objets et une version du code qui ne sont plus les bons ; ce
+# recyclage horaire evite les deux. Les redemarrages horaires dans le journal
+# sont donc le fonctionnement attendu, pas un incident.
+ExecStart=/usr/bin/php artisan queue:work --tries=3 --backoff=30,60,120 --sleep=3 --max-time=3600
+
+# Un `queue:restart` demande par un deploiement fait sortir le worker avec le
+# code 0 : il doit repartir dans ce cas aussi, d'ou `always` et non `on-failure`.
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

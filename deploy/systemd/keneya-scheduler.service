@@ -1,0 +1,28 @@
+# Planificateur de KENEYA WorkFlow (installation native).
+#
+# Fait tourner ce que `routes/console.php` programme : rappels de rendez-vous,
+# envoi differe des liens de sondage aux visiteurs. Sans ce service, ces envois
+# ne se declenchent jamais, et rien dans l'interface ne l'indique.
+#
+# Voir keneya-queue.service pour la procedure d'installation.
+
+[Unit]
+Description=KENEYA WorkFlow - planificateur (rappels, liens de sondage)
+After=network-online.target mariadb.service mysql.service
+Wants=network-online.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/keneya-workflow
+
+# `schedule:work` plutot qu'une ligne de cron sur `schedule:run` : une seule
+# unite a installer, et le meme comportement que le service `scheduler` de la
+# pile Docker Compose.
+ExecStart=/usr/bin/php artisan schedule:work
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
