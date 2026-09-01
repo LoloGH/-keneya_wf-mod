@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Sauvegarde de KEneYa WorkFlow : base SQL et pieces jointes.
+# Sauvegarde de KEneYa WorkFlow : base SQL, pieces jointes, signatures.
 #
 #   ./scripts/backup.sh [dossier-de-destination]
 #
@@ -12,9 +12,12 @@
 # Produit dans le dossier indique (par defaut ./backups) :
 #   - keneya_workflow-AAAAMMJJ-HHMMSS.sql : la base ;
 #   - attachments-AAAAMMJJ-HHMMSS.tar.gz  : les pieces jointes, qui vivent hors
-#     de la base et sans lesquelles un dossier patient ne se restaure pas.
+#     de la base et sans lesquelles un dossier patient ne se restaure pas ;
+#   - signatures-AAAAMMJJ-HHMMSS.tar.gz   : les signatures et tampons des
+#     medecins, qui vivent egalement hors de la base et sans lesquels une
+#     ordonnance se reimprime amputee de ce qui l'authentifie.
 #
-# Les pieces jointes sont deposees par le serveur web : la sauvegarde doit donc
+# Ces fichiers sont deposes par le serveur web : la sauvegarde doit donc
 # tourner sous un compte capable de les lire (root, ou le compte du serveur
 # web). Sinon le script s'arrete plutot que de produire une archive partielle.
 
@@ -81,32 +84,53 @@ chmod 600 "$FILE"
 
 echo "Sauvegarde SQL ecrite : $FILE ($(du -h "$FILE" | cut -f1))"
 
-# Les pieces jointes vivent hors de la base (storage/app/attachments) : un
-# export SQL seul ne permettrait pas de restaurer un dossier patient complet.
-PIECES="storage/app/attachments"
+# Deux dossiers vivent hors de la base, et un export SQL seul ne suffit donc pas
+# a restaurer l'application :
+#   - storage/app/attachments : les pieces jointes des dossiers patients ;
+#   - storage/app/signatures  : les signatures et tampons apposes sur les
+#     ordonnances (v3.2.9). Une ordonnance restauree sans eux est un document a
+#     valeur legale ampute ; ce dossier est donc sauvegarde au meme titre que
+#     les pieces jointes, et non quand on y pense.
+archiver_dossier() {
+    dossier="$1"
+    prefixe="$2"
+    libelle="$3"
 
-if [ -d "$PIECES" ] && [ -n "$(ls -A "$PIECES" 2>/dev/null)" ]; then
-    ARCHIVE="$DEST/attachments-$STAMP.tar.gz"
+    if [ ! -d "$dossier" ] || [ -z "$(ls -A "$dossier" 2>/dev/null)" ]; then
+        echo "Aucune donnee a sauvegarder dans $dossier."
+        return 0
+    fi
+
+    archive="$DEST/$prefixe-$STAMP.tar.gz"
 
     # Les fichiers sont deposes par le serveur web : si l'utilisateur qui
     # sauvegarde ne peut pas les lire, tar n'archive qu'une partie du dossier
     # sans que rien ne l'indique. On refuse plutot que de produire une archive
     # trompeuse.
-    if ! tar czf "$ARCHIVE" -C "$PIECES" . 2>"$DEST/.tar-erreurs"; then
-        echo "Erreur : archivage des pieces jointes incomplet." >&2
+    if ! tar czf "$archive" -C "$dossier" . 2>"$DEST/.tar-erreurs"; then
+        echo "Erreur : archivage des $libelle incomplet." >&2
         sed 's/^/    /' "$DEST/.tar-erreurs" >&2
-        echo "    Lancez la sauvegarde avec un compte capable de lire $PIECES (root, ou le compte du serveur web)." >&2
-        rm -f "$ARCHIVE" "$DEST/.tar-erreurs"
+        echo "    Lancez la sauvegarde avec un compte capable de lire $dossier (root, ou le compte du serveur web)." >&2
+        rm -f "$archive" "$DEST/.tar-erreurs"
         exit 1
     fi
 
     rm -f "$DEST/.tar-erreurs"
-    chmod 600 "$ARCHIVE"
-    echo "Sauvegarde des pieces jointes ecrite : $ARCHIVE ($(du -h "$ARCHIVE" | cut -f1))"
-else
-    echo "Aucune piece jointe a sauvegarder."
-fi
+    chmod 600 "$archive"
+    echo "Sauvegarde des $libelle ecrite : $archive ($(du -h "$archive" | cut -f1))"
+}
+
+archiver_dossier storage/app/attachments attachments "pieces jointes"
+archiver_dossier storage/app/signatures signatures "signatures et tampons"
 
 # Conservation des 30 dernieres sauvegardes de chaque type.
+#
+# Le tri se fait prefixe par prefixe, et non sur *.tar.gz en bloc : deux series
+# melangees ne laisseraient que quinze exemplaires de chacune, et une serie
+# produite a chaque execution finirait par evincer entierement une serie plus
+# rare. Les pieces jointes disparaitraient alors des sauvegardes sans un mot.
 ls -1t "$DEST"/*.sql 2>/dev/null | tail -n +31 | xargs -r rm --
-ls -1t "$DEST"/*.tar.gz 2>/dev/null | tail -n +31 | xargs -r rm --
+
+for prefixe in attachments signatures; do
+    ls -1t "$DEST/$prefixe"-*.tar.gz 2>/dev/null | tail -n +31 | xargs -r rm --
+done
