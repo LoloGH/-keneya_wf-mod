@@ -48,7 +48,7 @@ class SmsQueueTest extends TestCase
         $visit = app(RegisterPatient::class)->execute([
             'name' => 'Awa Traore',
             'age' => 34,
-            'gender' => 'F',
+            'gender' => 'Femme',
             'mobile' => '70112233',
             'service_id' => $service->getKey(),
         ]);
@@ -84,7 +84,7 @@ class SmsQueueTest extends TestCase
         $visit = app(RegisterPatient::class)->execute([
             'name' => 'Modibo Keita',
             'age' => 51,
-            'gender' => 'M',
+            'gender' => 'Homme',
             'mobile' => '70445566',
             'service_id' => $service->getKey(),
         ]);

@@ -1,5 +1,7 @@
 # KƐNƐYA WorkFlow
 
+[![CI](https://github.com/LoloGH/keneya_workflow/actions/workflows/ci.yml/badge.svg)](https://github.com/LoloGH/keneya_workflow/actions/workflows/ci.yml)
+
 Gestion de file d'attente hospitalière avec renvoi inter-services et **dossier
 patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kayes**
 (Mali), et conçue pour être réutilisée dans d'autres établissements maliens.
