@@ -12,6 +12,9 @@
     <p class="app-footer__produit">
         <strong>{{ config('keneya.name') }}</strong>, un produit d'<a href="https://sukaxess.com"
            target="_blank" rel="noopener">AXESs</a>
+        {{-- La version livree, discrete mais lisible : sans elle, impossible de
+             dire devant un ecran quel etat du code on a sous les yeux. --}}
+        <span class="app-footer__version">v{{ config('keneya.version') }}</span>
     </p>
     <p class="app-footer__rights">
         Tous droits reserves &copy; {{ date('Y') }} AXESs

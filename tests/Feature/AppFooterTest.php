@@ -26,6 +26,24 @@ class AppFooterTest extends TestCase
         $this->assertStringContainsString('href="https://sukaxess.com"', $contenu);
         $this->assertStringContainsString('Tous droits reserves', $contenu);
         $this->assertStringContainsString((string) date('Y'), $contenu);
+
+        // L'etiquette de version (v3.2.8, point 5). Elle est verifiee dans le
+        // pied de page commun, donc sur chacune des interfaces : c'est ce qui
+        // garantit qu'une page ajoutee plus tard la portera aussi.
+        $this->assertStringContainsString('v'.config('keneya.version'), $contenu);
+    }
+
+    /**
+     * La version affichee doit venir du fichier `VERSION`, et de nulle part
+     * ailleurs : une version affichee qui contredirait le depot serait pire que
+     * pas de version du tout — et c'est ce meme fichier que le tag Git suit.
+     */
+    public function test_la_version_affichee_est_celle_du_fichier_version(): void
+    {
+        $fichier = trim((string) file_get_contents(base_path('VERSION')));
+
+        $this->assertSame($fichier, config('keneya.version'));
+        $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', $fichier);
     }
 
     public function test_l_interface_d_administration_porte_le_pied_de_page(): void

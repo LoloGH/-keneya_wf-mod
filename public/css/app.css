@@ -2149,3 +2149,14 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .retour__notes { margin: var(--e2) 0 0; font-size: var(--texte-sm); }
 .retour__contenu { margin: var(--e2) 0 0; white-space: pre-line; }
 .retour__resolution { margin: var(--e3) 0 0; padding: var(--e2) var(--e3); border-left: 3px solid var(--vert); background: var(--vert-clair); border-radius: var(--rayon-sm); }
+
+/* ---------- Etiquette de version (v3.2.8) ---------- */
+
+/* Discrete a dessein : elle doit pouvoir se lire quand on la cherche, sans
+   entrer en concurrence avec la signature de l'editeur. */
+.app-footer__version {
+    margin-left: var(--e2);
+    font-size: var(--texte-xs);
+    color: var(--gris-500);
+    font-variant-numeric: tabular-nums;
+}
