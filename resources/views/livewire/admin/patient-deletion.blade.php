@@ -1,11 +1,12 @@
-<section class="card card--danger">
-    <h2 class="card__title">Supprimer un dossier patient</h2>
-    <p class="hint hint--blocking">
-        Suppression definitive et en cascade : passages, renvois, historique,
-        pieces jointes, encaissements, ordonnances, rendez-vous et
-        accompagnateurs. Rien n'est recuperable. Seul le journal d'audit
-        conserve la trace de l'operation.
-    </p>
+<x-card class="card--danger" icon="suppression" title="Supprimer un dossier patient">
+    {{-- Un bandeau et non un paragraphe : c'est l'ecran le plus destructeur du
+         produit, l'avertissement doit se distinguer du texte d'aide ordinaire
+         que l'oeil apprend a sauter. --}}
+    <x-notice ton="blocage" title="Suppression definitive et en cascade">
+        Passages, renvois, historique, pieces jointes, encaissements,
+        ordonnances, rendez-vous et accompagnateurs. Rien n'est recuperable.
+        Seul le journal d'audit conserve la trace de l'operation.
+    </x-notice>
 
     <div class="field">
         <label for="deletion-search">Rechercher le dossier</label>
@@ -68,4 +69,4 @@
             </form>
         </div>
     @endif
-</section>
+</x-card>

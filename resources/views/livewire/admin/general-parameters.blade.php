@@ -3,11 +3,6 @@
      sont recenses en bas de page, pour qu'on sache ou aller les chercher. --}}
 <div class="pile">
 
-    <x-page-header
-        :fil="['Accueil', 'Systeme', 'Parametres']"
-        titre="Parametres generaux"
-        sous-titre="Les reglages de fonctionnement qui n'appartiennent a aucune section en particulier." />
-
     <x-card title="Rappel des rendez-vous" icon="planning">
         <p class="hint">
             Combien de temps avant l'heure du rendez-vous le SMS de rappel part.

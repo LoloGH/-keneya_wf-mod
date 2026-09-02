@@ -29,11 +29,6 @@
 
 <div class="pile">
 
-    <x-page-header
-        :fil="['Accueil', 'Systeme', 'Sauvegarde']"
-        titre="Sauvegarde"
-        sous-titre="Ce que contient l'installation, et ce qu'une sauvegarde doit emporter." />
-
     <x-card title="Ce qui est en jeu" icon="sauvegarde">
         <div class="chiffres">
             <div class="chiffres__bloc">
@@ -52,9 +47,15 @@
                 <span class="chiffres__valeur mono">{{ number_format($piecesJointes, 0, ',', ' ') }}</span>
                 <span class="chiffres__libelle">pieces jointes — {{ $format($poidsPieces) }}</span>
             </div>
+            {{-- Une absence n'est pas une valeur : le dossier des signatures
+                 n'existe qu'au premier depot, et afficher « dossier absent »
+                 en gros chiffre a cote de vrais nombres se lit comme une
+                 anomalie alors que c'est un etat normal. --}}
             <div class="chiffres__bloc">
-                <span class="chiffres__valeur mono">{{ $format($poidsSignatures) }}</span>
-                <span class="chiffres__libelle">signatures et tampons</span>
+                <span class="chiffres__valeur mono">{{ $poidsSignatures === null ? '—' : $format($poidsSignatures) }}</span>
+                <span class="chiffres__libelle">
+                    signatures et tampons{{ $poidsSignatures === null ? ' — aucun depose a ce jour' : '' }}
+                </span>
             </div>
         </div>
 

@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Retours et incidents</h2>
+<x-card title="Retours et incidents" icon="retour">
     <p class="hint">
         Sondages de satisfaction, reclamations et constats du personnel. Chaque
         entree porte le contexte d'accueil de la personne concernee : elle se
@@ -191,4 +190,4 @@
 
         <button type="submit" class="btn btn--secondary">Enregistrer le delai</button>
     </form>
-</section>
+</x-card>

@@ -21,6 +21,9 @@ use Livewire\WithPagination;
  * passent deja par « Personnels », ou le type de personnel choisi decide du
  * role et du rattachement. Un second formulaire capable de creer des comptes
  * en parallele ouvrirait la porte a des comptes sans personne derriere.
+ *
+ * Le role n'est PAS une colonne de `users` : il est porte par Spatie. Le
+ * filtre passe donc par le scope `role()` du paquet, et non par un `where`.
  */
 class UserDirectory extends Component
 {
@@ -42,31 +45,37 @@ class UserDirectory extends Component
     }
 
     /**
-     * Roles reellement portes par au moins un compte, plutot que la liste
-     * complete : proposer un filtre qui ne ramene jamais rien n'aide personne.
+     * Roles fixes reellement portes par au moins un compte, plutot que la
+     * liste complete : proposer un filtre qui ne ramene jamais rien n'aide
+     * personne.
      *
      * @return array<string, string>
      */
     public function rolesDisponibles(): array
     {
-        return User::query()
-            ->distinct()
-            ->orderBy('role')
-            ->pluck('role')
-            ->filter()
-            ->mapWithKeys(fn (string $role) => [$role => Roles::LABELS[$role] ?? $role])
-            ->all();
+        $disponibles = [];
+
+        foreach (Roles::all() as $role) {
+            if (User::role($role)->exists()) {
+                $disponibles[$role] = Roles::label($role) ?: $role;
+            }
+        }
+
+        return $disponibles;
     }
 
     public function render(): View
     {
+        // Pas de `with('staffType')` : `staffType()` n'est pas une relation
+        // Eloquent mais un accesseur qui resout le type par le role. Le
+        // precharger echouerait, et il n'y a rien a precharger.
         $comptes = User::query()
             ->when($this->recherche !== '', function ($query) {
                 $terme = '%'.trim($this->recherche).'%';
 
                 $query->where(fn ($q) => $q->where('name', 'like', $terme)->orWhere('email', 'like', $terme));
             })
-            ->when($this->role !== '', fn ($query) => $query->where('role', $this->role))
+            ->when($this->role !== '', fn ($query) => $query->role($this->role))
             ->orderBy('name')
             ->paginate(15);
 

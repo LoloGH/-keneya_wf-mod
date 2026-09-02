@@ -6,11 +6,6 @@
      reprend ces memes composants, jamais une copie de ce balisage. --}}
 <div class="pile">
 
-    <x-page-header
-        :fil="['Accueil', 'Etablissement']"
-        titre="Informations de l'etablissement"
-        sous-titre="Ces informations apparaitront sur toutes les ordonnances et tickets imprimes." />
-
     <x-card title="Informations generales" icon="batiment">
         <form wire:submit="save" class="form">
             <x-field name="hospital-name" label="Nom de l'etablissement" error="hospitalName">

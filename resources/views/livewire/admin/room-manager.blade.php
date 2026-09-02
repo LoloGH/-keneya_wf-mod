@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Salles</h2>
+<x-card title="Salles" icon="lit">
     <p class="hint">
         L'occupation est comptee a la volee sur les hospitalisations en cours :
         aucun compteur a tenir a jour.
@@ -70,4 +69,4 @@
             </tbody>
         </table>
     </div>
-</section>
+</x-card>

@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Personnels</h2>
+<x-card title="Personnels" icon="personnel">
 
     <form wire:submit="save" class="form form--inline-wrap">
         <div class="field">
@@ -124,4 +123,4 @@
             </tbody>
         </table>
     </div>
-</section>
+</x-card>

@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Types de personnel</h2>
+<x-card title="Types de personnel" icon="personnel">
     <p class="hint">
         Un type <strong>adosse a un role</strong> reutilise telle quelle une des quatre
         interfaces existantes. Un type <strong>sans role</strong> recoit sa propre interface
@@ -127,4 +126,4 @@
             </tbody>
         </table>
     </div>
-</section>
+</x-card>

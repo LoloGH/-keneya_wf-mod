@@ -2,11 +2,6 @@
      « Personnels », ou le type choisi decide du role et du rattachement. --}}
 <div class="pile">
 
-    <x-page-header
-        :fil="['Accueil', 'Systeme', 'Utilisateurs']"
-        titre="Comptes et acces"
-        sous-titre="Qui peut se connecter, sous quel role. La creation d'un agent se fait dans Personnel." />
-
     <x-card title="Rechercher un compte" icon="recherche">
         <div class="field-row">
             <x-field name="recherche-compte" label="Nom ou adresse e-mail" class="field--wide">

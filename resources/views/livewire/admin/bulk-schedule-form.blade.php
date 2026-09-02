@@ -1,10 +1,6 @@
-<section class="card card--accent">
-    <h2 class="card__title">Generer un planning sur plusieurs jours</h2>
-    <p class="hint">
-        Decrivez une plage de dates et les jours concernes : un creneau est cree
-        pour chaque date correspondante. Le formulaire jour par jour ci-dessous
-        reste disponible pour les ajustements ponctuels.
-    </p>
+<x-card class="card--accent" icon="planning"
+        title="Generer un planning sur plusieurs jours"
+        accroche="Decrivez une plage de dates et les jours concernes : un creneau est cree pour chaque date correspondante. Le formulaire jour par jour ci-dessous reste disponible pour les ajustements ponctuels.">
 
     <form wire:submit="generate" class="form">
         <div class="form form--inline-wrap">
@@ -74,4 +70,4 @@
             <span wire:loading wire:target="generate">Generation…</span>
         </button>
     </form>
-</section>
+</x-card>

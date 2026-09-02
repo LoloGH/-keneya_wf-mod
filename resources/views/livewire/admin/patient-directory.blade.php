@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Patients</h2>
+<x-card title="Patients" icon="patient">
 
     <div class="form form--inline-wrap">
         <div class="field">
@@ -161,4 +160,4 @@
             @endif
         </div>
     @endif
-</section>
+</x-card>

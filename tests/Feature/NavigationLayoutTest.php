@@ -56,10 +56,12 @@ class NavigationLayoutTest extends TestCase
             ->assertSee('Etablissement')          // panneau initial
             ->call('select', 'enfant-b')
             ->assertSet('active', 'enfant-b')
-            // Titre de carte : texte litteral du gabarit, donc non echappe —
-            // contrairement aux libelles de la barre, rendus via {{ }}.
-            ->assertSee("Journal d'audit", escape: false)
-            ->assertDontSee("Nom de l'etablissement", escape: false);
+            // Les titres de carte passent depuis la refonte visuelle par le
+            // composant <x-card>, donc par {{ }} : ils sont echappes comme les
+            // libelles de la barre. C'est aussi ce qu'on veut — un titre venu
+            // de la base ne doit pas pouvoir injecter de balisage.
+            ->assertSee("Journal d'audit")
+            ->assertDontSee("Nom de l'etablissement");
     }
 
     public function test_une_section_inconnue_est_ignoree(): void

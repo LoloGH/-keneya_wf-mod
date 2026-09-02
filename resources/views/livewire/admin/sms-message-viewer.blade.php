@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">SMS</h2>
+<x-card title="SMS" icon="sms">
     <p class="hint">
         Chaque SMS est mis en file puis envoye en arriere-plan : l'enregistrement
         d'un patient n'attend plus la passerelle. Cette liste remplace le journal
@@ -89,4 +88,4 @@
         (voir docs/exploitation-demo.md). Le statut « Remis » reste donc inutilise
         tant que la passerelle n'expose pas cette information.
     </p>
-</section>
+</x-card>
