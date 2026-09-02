@@ -31,8 +31,12 @@ class RecordFeedback
 
         $visite = $patient->visits()->orderByDesc('opened_at')->first();
 
+        // Le passage est conserve, et non plus seulement lu pour en tirer le
+        // service : c'est lui qui delimite la session. Sans ce lien, rien ne
+        // distingue l'avis donne aujourd'hui de celui du mois dernier.
         return $this->create($type, array_merge($data, [
             'patient_id' => $patient->getKey(),
+            'visit_id' => $visite?->getKey(),
             'service_id' => $data['service_id'] ?? $visite?->service_id,
             'handled_by_user_id' => $this->attribution->forVisit($visite)?->getKey(),
         ]));

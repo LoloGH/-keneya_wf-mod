@@ -13,12 +13,24 @@
             </div>
         @endif
 
+        {{-- Le lien recu par SMS reste cliquable apres reponse : la page doit
+             donc dire ce qui a deja ete fait, plutot que reproposer un
+             formulaire qui serait refuse. La reclamation, elle, reste ouverte. --}}
+        @if ($sondageDonne)
+            <x-notice title="Votre avis sur cette venue est enregistre">
+                Merci, il n'y a rien d'autre a noter pour ce passage. Un nouveau
+                sondage vous sera propose lors de votre prochaine venue.
+            </x-notice>
+        @endif
+
         <div class="btn-row">
-            <button type="button"
-                    class="btn {{ $type === \App\Models\FeedbackEntry::TYPE_SURVEY ? 'btn--primary' : 'btn--ghost' }}"
-                    wire:click="selectType('{{ \App\Models\FeedbackEntry::TYPE_SURVEY }}')">
-                Noter mon passage
-            </button>
+            @unless ($sondageDonne)
+                <button type="button"
+                        class="btn {{ $type === \App\Models\FeedbackEntry::TYPE_SURVEY ? 'btn--primary' : 'btn--ghost' }}"
+                        wire:click="selectType('{{ \App\Models\FeedbackEntry::TYPE_SURVEY }}')">
+                    Noter mon passage
+                </button>
+            @endunless
             <button type="button"
                     class="btn {{ $type === \App\Models\FeedbackEntry::TYPE_COMPLAINT ? 'btn--primary' : 'btn--ghost' }}"
                     wire:click="selectType('{{ \App\Models\FeedbackEntry::TYPE_COMPLAINT }}')">

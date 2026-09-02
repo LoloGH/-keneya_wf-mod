@@ -360,6 +360,12 @@ h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.011em; }
 }
 .notice--blocage .notice__icone, .notice--blocage .notice__titre { color: var(--rouge); }
 
+/* Un bandeau suivi d'une action, ou d'un formulaire, a besoin d'air : colles,
+   ils se lisent comme un seul bloc et l'action parait faire partie du message. */
+.notice + .btn-row,
+.notice + .form,
+.btn-row + .form { margin-top: var(--e4); }
+
 /* ---------- En-tete de page : fil d'ariane, titre, sous-titre ---------- */
 .page-header { margin-bottom: var(--e5); }
 

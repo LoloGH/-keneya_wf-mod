@@ -149,6 +149,18 @@ class FeedbackViewer extends Component
     {
         $visitor = Visitor::findOrFail($visitorId);
 
+        // Une venue, un sondage : si le visiteur a deja repondu, le lien ne lui
+        // proposerait plus rien. Sa prochaine venue creera un nouvel
+        // enregistrement, donc une nouvelle session.
+        if (FeedbackEntry::sondageDejaDeposeParVisiteur($visitor)) {
+            $this->notifyError(sprintf(
+                '%s a deja donne son avis sur cette venue.',
+                $visitor->name,
+            ));
+
+            return;
+        }
+
         if (blank($visitor->mobile)) {
             $this->notifyError(sprintf('%s n\'a pas de numero de telephone : le lien ne peut pas partir.', $visitor->name));
 
