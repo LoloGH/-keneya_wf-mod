@@ -162,6 +162,43 @@ h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.011em; }
     border-radius: var(--rayon-sm);
 }
 
+/* ---------- Barres de defilement ----------
+
+   La barre disparait, le defilement reste. Molette, pave tactile, doigt,
+   fleches, Page haut/bas et Espace continuent d'agir : seule la poignee
+   visible s'en va. `overflow` n'est pas touche, et un test verrouille ce
+   couple — masquer n'est pas supprimer.
+
+   Les deux ecritures sont necessaires et aucune n'est de trop :
+   `scrollbar-width` sert Firefox et Safari, `::-webkit-scrollbar` sert Chrome
+   et Edge. En oublier une laisse la barre visible sur la moitie des
+   navigateurs.
+
+   Les tableaux larges gardent la leur, volontairement : un defilement
+   horizontal ne se devine pas, et la barre y est souvent le seul indice
+   qu'une colonne continue a droite.
+
+   Ce qui se perd, et qu'il faut assumer : la barre disait aussi « il y a
+   quelque chose dessous » et « vous en etes la ». Les moyens de defiler
+   restent tous ; l'indice visuel, lui, n'est plus. */
+html,
+body,
+.tabnav,
+.tabnav--open,
+.bell__panel {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.tabnav::-webkit-scrollbar,
+.tabnav--open::-webkit-scrollbar,
+.bell__panel::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
 /* ---------- En-tete ---------- */
 
 .app-header {
