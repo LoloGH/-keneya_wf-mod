@@ -32,6 +32,9 @@ final class PrescriptionPdfData
             'hospitalAddress' => Setting::get(Setting::HOSPITAL_ADDRESS),
             'hospitalPhone' => Setting::get(Setting::HOSPITAL_PHONE),
             'hospitalEmail' => Setting::get(Setting::HOSPITAL_EMAIL),
+            'hospitalWebsite' => Setting::get(Setting::HOSPITAL_WEBSITE),
+            'hospitalHours' => Setting::get(Setting::HOSPITAL_HOURS),
+            'hospitalMotto' => Setting::get(Setting::HOSPITAL_MOTTO),
 
             // Signature et tampons : des chemins absolus, ou null. C'est le
             // modele qui verifie que le fichier est bien la — un chemin mort
