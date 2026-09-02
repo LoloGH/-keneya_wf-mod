@@ -6,6 +6,7 @@ use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Schedule;
 use App\Models\Service;
 use App\Models\User;
+use App\Services\OnDutyRoster;
 use App\Services\StaffNotifier;
 use App\Support\Audit;
 use Illuminate\Contracts\View\View;
@@ -235,6 +236,11 @@ class ScheduleManager extends Component
             'staff' => $staff,
             'services' => Service::orderBy('name')->get(),
             'schedules' => $this->visibleSchedules(),
+            // Un service sans personne de garde ne recoit ses notifications
+            // que par repli, et pas du tout si personne ne lui est rattache.
+            // C'est ici qu'on vient chercher pourquoi la cloche reste vide :
+            // autant le dire au lieu de le laisser deviner.
+            'sansGarde' => app(OnDutyRoster::class)->servicesSansGarde(),
         ]);
     }
 }

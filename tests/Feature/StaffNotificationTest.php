@@ -102,19 +102,35 @@ class StaffNotificationTest extends TestCase
         $this->assertSame(route('service.home'), $notification->link);
     }
 
-    public function test_le_personnel_hors_garde_n_est_pas_prevenu(): void
+    public function test_le_personnel_hors_garde_n_est_pas_prevenu_quand_le_planning_est_tenu(): void
     {
         $service = Service::factory()->create(['name' => 'Medecine Generale']);
-        $doctor = $this->makeDoctor($service);
 
-        // Meme service, meme role, mais aucun creneau : prevenir quelqu'un qui
-        // n'est pas la ne fait qu'ajouter du bruit a son retour.
+        $deGarde = $this->makeDoctor($service);
+        $horsGarde = $this->makeDoctor($service);
+
+        // La regle exacte : un planning tenu fait autorite. Tant qu'une
+        // personne couvre le service, prevenir celles qui ne sont pas la
+        // n'ajoute que du bruit a leur retour.
+        //
+        // Ce test affirmait auparavant la meme chose SANS aucun creneau, ce qui
+        // revenait a ne prevenir personne du tout : c'est le silence complet
+        // que cela produisait sur une installation au planning vide.
+        Schedule::factory()->create([
+            'user_id' => $deGarde->user_id,
+            'service_id' => $service->getKey(),
+            'date' => today(),
+            'start_time' => now()->subHour()->format('H:i'),
+            'end_time' => now()->addHours(3)->format('H:i'),
+        ]);
+
         app(RegisterPatient::class)->execute([
             'name' => 'Aminata Traore', 'age' => 34, 'gender' => 'Femme',
             'mobile' => '76000000', 'service_id' => $service->getKey(),
         ]);
 
-        $this->assertSame(0, StaffNotification::where('user_id', $doctor->user_id)->count());
+        $this->assertSame(0, StaffNotification::where('user_id', $horsGarde->user_id)->count());
+        $this->assertGreaterThan(0, StaffNotification::where('user_id', $deGarde->user_id)->count());
     }
 
     public function test_le_personnel_d_un_autre_service_n_est_pas_prevenu(): void

@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\Models\Doctor;
 use App\Models\Schedule;
+use App\Models\Service;
+use App\Models\ServiceKind;
 use App\Models\StaffMember;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
@@ -59,6 +62,125 @@ class OnDutyRoster
         return $capability === null
             ? $users
             : $users->filter(fn (User $user) => $user->hasCapability($capability))->values();
+    }
+
+    /**
+     * Qui prevenir pour ce service.
+     *
+     * Le personnel de garde d'abord — c'est la bonne reponse quand le planning
+     * est tenu. Mais un planning vide ne doit pas valoir silence : sans aucun
+     * creneau saisi, ce qui est l'etat de toute installation neuve et de bien
+     * des journees ensuite, personne n'etait prevenu de rien. La cloche restait
+     * muette, le son ne partait jamais, et rien n'expliquait pourquoi.
+     *
+     * A defaut de garde, on previent donc le personnel RATTACHE au service : un
+     * medecin d'Echographie est la bonne personne a qui dire qu'un patient
+     * attend en echographie, planning ou pas. Le repli s'arrete la — jamais
+     * « tout le monde », qui transformerait la cloche en bruit de fond.
+     *
+     * Ce repli est deliberement separe de `for()`, qui reste la reponse exacte
+     * a « qui est de garde ». Elargir celle-la elargirait aussi des acces :
+     * c'est elle que `User::isOnDuty()` consulte.
+     *
+     * @return Collection<int, User>
+     */
+    public function aPrevenir(?int $serviceId, ?string $capability = null, ?Carbon $moment = null): Collection
+    {
+        $deGarde = $this->for($serviceId, $capability, $moment);
+
+        if ($deGarde->isNotEmpty() || ! $serviceId) {
+            return $deGarde;
+        }
+
+        return $this->rattaches($serviceId, $capability)
+            ->whenEmpty(fn () => $this->parRoleDuType($serviceId, $capability));
+    }
+
+    /**
+     * Dernier recours : le role qu'implique le TYPE du service.
+     *
+     * Une receptionniste et un caissier n'ont aucun rattachement a un service —
+     * leur lien passe uniquement par le planning, et le repli precedent ne
+     * donne donc rien pour l'Accueil ou une caisse. Or c'est precisement a
+     * l'Accueil qu'un patient entre dans une file : y rester muet etait le plus
+     * couteux des silences.
+     *
+     * Le type du service porte deja l'information, par son slug : un service de
+     * type « reception » est tenu par des receptionnistes, un service de type
+     * « caisse » par des caissiers. Rien a migrer, rien a saisir.
+     *
+     * Les types soignants ne sont pas concernes : leur personnel est rattache
+     * par sa fiche, le repli precedent l'a deja trouve.
+     *
+     * @return Collection<int, User>
+     */
+    private function parRoleDuType(int $serviceId, ?string $capability): Collection
+    {
+        $slug = Service::with('serviceKind')->find($serviceId)?->serviceKind?->slug;
+
+        $role = match ($slug) {
+            ServiceKind::SLUG_RECEPTION => Roles::RECEPTIONIST,
+            ServiceKind::SLUG_CAISSE => Roles::CASHIER,
+            default => null,
+        };
+
+        if (! $role) {
+            return new Collection;
+        }
+
+        // `User::role()` de Spatie leve une exception si le role n'existe pas
+        // encore en base. Une notification ne doit jamais faire echouer l'acte
+        // metier qui l'a declenchee : on interroge la relation directement, ce
+        // qui rend simplement une liste vide.
+        $users = User::whereHas('roles', fn ($q) => $q->where('name', $role))->get();
+
+        return $capability === null
+            ? $users
+            : $users->filter(fn (User $user) => $user->hasCapability($capability))->values();
+    }
+
+    /**
+     * Le personnel rattache a un service par sa fiche, et non par un creneau.
+     *
+     * Une receptionniste et un caissier n'ont pas de rattachement : leur lien
+     * au service passe uniquement par le planning. Pour eux, le repli ne donne
+     * rien — et c'est exact, rien dans les donnees ne dit a quel guichet ils
+     * appartiennent. La section Plannings signale ces services-la.
+     *
+     * @return Collection<int, User>
+     */
+    private function rattaches(int $serviceId, ?string $capability): Collection
+    {
+        $ids = Doctor::where('service_id', $serviceId)->pluck('user_id')
+            ->merge(StaffMember::where('service_id', $serviceId)->pluck('user_id'))
+            ->filter()
+            ->unique();
+
+        if ($ids->isEmpty()) {
+            return new Collection;
+        }
+
+        $users = User::whereIn('id', $ids)->get();
+
+        return $capability === null
+            ? $users
+            : $users->filter(fn (User $user) => $user->hasCapability($capability))->values();
+    }
+
+    /**
+     * Les services sur lesquels personne n'est de garde en ce moment.
+     *
+     * Sert a rendre visible ce qui etait silencieux : un service sans garde ne
+     * recoit ses notifications que par le repli ci-dessus, et pas du tout si
+     * personne ne lui est rattache.
+     *
+     * @return Collection<int, Service>
+     */
+    public function servicesSansGarde(?Carbon $moment = null): Collection
+    {
+        return Service::orderBy('name')->get()
+            ->filter(fn ($service) => $this->for($service->getKey(), null, $moment)->isEmpty())
+            ->values();
     }
 
     /** Cette personne est-elle de garde sur ce service, maintenant ? */
