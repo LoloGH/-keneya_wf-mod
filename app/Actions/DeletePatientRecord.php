@@ -53,12 +53,14 @@ class DeletePatientRecord
             ],
         );
 
-        DB::transaction(function () use ($patient): void {
-            // Les fichiers deposes partent avec le dossier.
-            foreach ($patient->attachments as $piece) {
-                Storage::disk('attachments')->delete($piece->path);
-            }
+        // Les chemins sont releves maintenant, mais les fichiers ne partiront
+        // qu'apres la transaction : le disque, lui, ne sait pas revenir en
+        // arriere. Supprimes a l'interieur, ils etaient detruits meme quand la
+        // transaction echouait ensuite — l'admin voyait une erreur, croyait
+        // que rien n'avait bouge, et le dossier avait perdu ses documents.
+        $fichiers = $patient->attachments->pluck('path')->all();
 
+        DB::transaction(function () use ($patient): void {
             // Ordre impose par les cles etrangeres : les feuilles d'abord.
             $patient->attachments()->delete();
             $patient->prescriptions()->delete();
@@ -83,5 +85,11 @@ class DeletePatientRecord
 
             $patient->delete();
         });
+
+        // La base a tenu : les fichiers peuvent partir. Si cette ligne echoue,
+        // il reste des fichiers que plus aucune ligne ne designe — inertes,
+        // car tout acces passe par l'enregistrement. C'est le seul des deux
+        // echecs possibles qui ne detruit rien.
+        Storage::disk('attachments')->delete($fichiers);
     }
 }

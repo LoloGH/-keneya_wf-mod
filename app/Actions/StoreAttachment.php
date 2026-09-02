@@ -92,11 +92,21 @@ class StoreAttachment
         return $attachment;
     }
 
+    /**
+     * L'enregistrement d'abord, le fichier ensuite — jamais l'inverse.
+     *
+     * Le disque ne sait pas revenir en arriere. Detruire le fichier en premier
+     * laisse, si la suppression en base echoue, une piece jointe que le
+     * dossier affiche toujours et que le serveur ne peut plus servir. Dans cet
+     * ordre-ci, le pire cas est un fichier que plus rien ne designe.
+     */
     public function delete(Attachment $attachment): void
     {
-        Storage::disk('attachments')->delete($attachment->path);
+        $chemin = $attachment->path;
 
         $attachment->delete();
+
+        Storage::disk('attachments')->delete($chemin);
     }
 
     /**
