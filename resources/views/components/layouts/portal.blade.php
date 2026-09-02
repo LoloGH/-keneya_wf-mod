@@ -17,8 +17,13 @@
          l'application. Seule la marque situe le contexte. --}}
     <header class="app-header">
         <div class="app-header__brand">
-            <x-brand-logo variant="light" class="app-header__logo" />
-            <span class="app-header__hospital">{{ hospital_name() }}</span>
+            {{-- Variante couleur : la barre est blanche depuis la refonte, la
+                 declinaison claire y perdait tout contraste. --}}
+            <x-brand-logo variant="color" class="app-header__logo" />
+            <span class="app-header__identite">
+                <span class="app-header__hospital">{{ hospital_name() }}</span>
+                <span class="app-header__produit">Espace patient</span>
+            </span>
         </div>
     </header>
 

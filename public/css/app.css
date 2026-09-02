@@ -890,10 +890,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .board__logo { display: block; width: min(420px, 70%); height: auto; margin: 0 auto; }
 .board--fullscreen .board__header p { margin: .5rem 0 0; opacity: .8; font-size: 1.1rem; }
 .board--fullscreen .board__grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
-.board--fullscreen .board__service { background: #262f35; border-color: #3b464e; }
+/* Le moniteur reste sombre : il est lu de loin, dans un couloir eclaire au
+   neon, et un ecran clair y devient un projecteur. Ce sont donc les teintes
+   qui s'accordent a la marque, pas le fond.
+
+   Le numero appele passe du bleu ciel a une sarcelle claire : c'est la teinte
+   de la marque portee au niveau de luminosite qu'exige un fond sombre — la
+   sarcelle nominale (#16806a) serait illisible a cinq metres. */
+.board--fullscreen .board__service { background: #1f2c31; border-color: #35474e; }
 .board--fullscreen .board__service-name { color: #cfd8dd; font-size: 1.3rem; }
-.board--fullscreen .board__current { color: #6fd0ff; font-size: 4.5rem; }
-.board--fullscreen .board__next-token { background: #1c2226; border-color: #3b464e; color: var(--blanc); }
+.board--fullscreen .board__current { color: #5fe3bd; font-size: 4.5rem; }
+.board--fullscreen .board__next-token { background: #16211f; border-color: #35474e; color: var(--blanc); }
 
 /* =========================================================================
    Addendum v2 / v3 — episodes, cloture, caisse, audit, planning
