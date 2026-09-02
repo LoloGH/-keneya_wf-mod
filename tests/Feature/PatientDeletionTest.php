@@ -17,9 +17,13 @@ use App\Models\Visit;
 use App\Models\Visitor;
 use App\Services\PatientHistoryRecorder;
 use App\Support\Audit;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use Livewire\Livewire;
+use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
@@ -102,6 +106,70 @@ class PatientDeletionTest extends TestCase
         ]);
 
         return [$patient, $depart, $doctor];
+    }
+
+    // ------------------------------- Le disque ne revient pas en arriere
+
+    /**
+     * Constate sur le serveur de demonstration : un dossier intact en base,
+     * une piece jointe qui s'y trouvait toujours, et son fichier detruit.
+     *
+     * La cause etait l'ordre. Les fichiers partaient a l'interieur de la
+     * transaction ; celle-ci echouant plus loin, la base revenait en arriere
+     * et le disque, lui, ne le pouvait pas. L'admin voyait une erreur, en
+     * concluait que rien n'avait bouge, et le dossier avait perdu ses
+     * documents — definitivement, et sans que rien ne le signale.
+     */
+    public function test_une_suppression_qui_echoue_ne_detruit_aucun_fichier(): void
+    {
+        Storage::fake('attachments');
+
+        [$patient] = $this->makeFullRecord();
+        $admin = $this->makeAdmin();
+        $chemin = $patient->attachments->first()->path;
+
+        Storage::disk('attachments')->put($chemin, 'Le bilan sanguin du patient.');
+
+        // On fait echouer la transaction a mi-parcours, apres l'etape ou les
+        // fichiers etaient supprimes auparavant.
+        Event::listen(QueryExecuted::class, function (QueryExecuted $requete): void {
+            if (str_contains(strtolower($requete->sql), 'delete from "visits"')
+                || str_contains(strtolower($requete->sql), 'delete from `visits`')) {
+                throw new RuntimeException('Panne au milieu de la suppression.');
+            }
+        });
+
+        try {
+            app(DeletePatientRecord::class)->execute($patient, $admin, $patient->patient_code, 'Doublon.');
+            $this->fail('La suppression aurait du echouer.');
+        } catch (RuntimeException) {
+            // Attendu.
+        }
+
+        // La base est revenue en arriere...
+        $this->assertDatabaseHas('patients', ['id' => $patient->getKey()]);
+        $this->assertDatabaseHas('attachments', ['patient_id' => $patient->getKey()]);
+
+        // ...et le fichier doit l'avoir suivie. C'est tout l'objet du test :
+        // un dossier qui survit sans ses documents est pire qu'un echec franc.
+        Storage::disk('attachments')->assertExists($chemin);
+    }
+
+    public function test_une_suppression_reussie_emporte_aussi_les_fichiers(): void
+    {
+        Storage::fake('attachments');
+
+        [$patient] = $this->makeFullRecord();
+        $admin = $this->makeAdmin();
+        $chemin = $patient->attachments->first()->path;
+
+        Storage::disk('attachments')->put($chemin, 'Le bilan sanguin du patient.');
+
+        app(DeletePatientRecord::class)->execute($patient, $admin, $patient->patient_code, 'Doublon.');
+
+        // Reculer l'effacement apres la transaction ne doit pas l'annuler :
+        // un document medical ne reste pas sur le disque apres son dossier.
+        Storage::disk('attachments')->assertMissing($chemin);
     }
 
     public function test_la_suppression_emporte_tout_le_dossier(): void
