@@ -1131,7 +1131,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     padding: var(--e2) var(--e2) var(--e4);
 }
 
-.tabnav--open { display: block; animation: depliage var(--duree-lente) var(--courbe); }
+/* Ouvert sur petit ecran, le tiroir defile lui aussi pour son compte : sans
+   plafond de hauteur, treize entrees repoussaient le contenu de la page a
+   plusieurs ecrans de defilement sous la barre. 60 % de la hauteur visible
+   laisse voir qu'il y a quelque chose dessous. */
+.tabnav--open {
+    display: block;
+    animation: depliage var(--duree-lente) var(--courbe);
+    max-height: 60dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
 
 .tabnav__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
 .tabnav__list--nested {

@@ -25,18 +25,53 @@
         // barre repliee ne fait que 66 px de large, et un geste vers la droite
         // se termine donc hors d'elle. Ecoute sur la barre seule, l'evenement
         // n'arrivait jamais et le glissement ne faisait rien.
-        prise(e) { this.depart = e.clientX; },
+        large() { return window.matchMedia('(min-width: 900px)').matches; },
+
+        prise(e) {
+            if (this.large()) {
+                // Sur grand ecran, seul un geste NE la barre elle-meme la
+                // replie : ailleurs dans la page, un glissement horizontal
+                // appartient au contenu — a un tableau large, par exemple.
+                if (! e.target.closest?.('.tabnav')) return;
+            } else if (! this.drawer && e.clientX >= 40) {
+                // Tiroir ferme : le geste qui l'ouvre part du bord gauche de
+                // l'ecran, comme partout ailleurs. L'ecoute est posee sur la
+                // fenetre et non sur l'espace de travail : les premiers pixels
+                // de l'ecran sont la marge de la page, hors de cet element, et
+                // un geste depuis le bord ne l'atteignait donc jamais.
+                return;
+            }
+
+            this.depart = { x: e.clientX, y: e.clientY };
+        },
+
         relache(e) {
-            if (this.depart === null) return;
-            const parcouru = e.clientX - this.depart;
+            if (! this.depart) return;
+
+            const dx = e.clientX - this.depart.x;
+            const dy = e.clientY - this.depart.y;
             this.depart = null;
-            // 40 px : au-dela d'un tremblement de main, en deca d'un geste ample.
-            if (Math.abs(parcouru) < 40) return;
-            const veutReplier = parcouru < 0;
-            if (veutReplier !== this.replie) this.basculer();
+
+            // 40 px : au-dela d'un tremblement de main, en deca d'un geste
+            // ample. Et le mouvement doit etre franchement horizontal, sinon
+            // un defilement un peu oblique replierait la barre sans qu'on l'ait
+            // demande.
+            if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+            const versLaDroite = dx > 0;
+
+            if (this.large()) {
+                if (versLaDroite === this.replie) this.basculer();
+
+                return;
+            }
+
+            // Petit ecran : le meme geste ouvre et ferme le tiroir.
+            this.drawer = versLaDroite;
         },
      }"
-     @keydown.escape.window="drawer = false">
+     @keydown.escape.window="drawer = false"
+     @pointerdown.window="prise($event)" @pointerup.window="relache($event)">
 
     <button type="button" class="workspace__toggle" @click="drawer = !drawer"
             :aria-expanded="drawer ? 'true' : 'false'" aria-controls="nav-sections">
@@ -46,8 +81,7 @@
     </button>
 
     <nav id="nav-sections" class="tabnav" :class="drawer && 'tabnav--open'"
-         aria-label="Sections de cet espace"
-         @pointerdown="prise($event)" @pointerup.window="relache($event)">
+         aria-label="Sections de cet espace">
 
         {{-- Le bouton de repli n'apparait qu'a partir de la tablette en
              paysage : sur petit ecran la barre est deja un tiroir, la replier
