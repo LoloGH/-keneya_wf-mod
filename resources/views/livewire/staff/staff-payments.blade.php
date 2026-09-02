@@ -1,10 +1,9 @@
-<section class="card">
-    <div class="card__head">
-        <h2 class="card__title">Encaissement</h2>
+<x-card title="Encaissement" icon="tarif">
+    <x-slot:actions>
         <p class="hint">
             Encaisse aujourd'hui : <strong>{{ number_format($todayTotal, 0, ',', ' ') }} FCFA</strong>
         </p>
-    </div>
+    </x-slot:actions>
 
     @forelse ($queue as $visit)
         <article class="queue__item">
@@ -34,4 +33,4 @@
     @empty
         <p class="empty">Aucun patient a encaisser aujourd'hui.</p>
     @endforelse
-</section>
+</x-card>

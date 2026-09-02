@@ -51,9 +51,15 @@ class PollIntervalTest extends TestCase
         foreach (self::VUES as $vue) {
             $source = file_get_contents(resource_path('views/'.$vue.'.blade.php'));
 
-            $this->assertStringContainsString(
-                "wire:poll.{{ config('keneya.poll_interval') }}",
-                $source,
+            // Deux ecritures sont legitimes depuis la refonte visuelle :
+            // `wire:poll.{{ … }}` sur une balise HTML ordinaire, et la
+            // propriete `:poll` sur le composant <x-card> — une interpolation
+            // dans un NOM d'attribut ne compile pas sur un composant. Ce qui
+            // compte est identique dans les deux cas : l'intervalle vient de la
+            // configuration, jamais de la vue.
+            $this->assertTrue(
+                str_contains($source, "wire:poll.{{ config('keneya.poll_interval') }}")
+                    || str_contains($source, ':poll="config(\'keneya.poll_interval\')"'),
                 $vue.' doit suivre l\'intervalle commun.',
             );
 

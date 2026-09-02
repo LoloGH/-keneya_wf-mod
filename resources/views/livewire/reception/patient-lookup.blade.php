@@ -1,5 +1,4 @@
-<section class="card card--accent">
-    <h2 class="card__title">Le patient est-il deja venu ?</h2>
+<x-card class="cardcard--accent" title="Le patient est-il deja venu ?" icon="recherche">
     <p class="hint">Cherchez avant d'enregistrer : un patient deja connu garde son numero de dossier a vie.</p>
 
     <div class="field">
@@ -82,4 +81,4 @@
             </form>
         </div>
     @endif
-</section>
+</x-card>

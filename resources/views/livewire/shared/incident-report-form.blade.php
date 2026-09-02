@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Signaler un constat</h2>
+<x-card title="Signaler un constat" icon="alerte">
     <p class="hint">
         Un incident, une observation, un dysfonctionnement. Transmis a la
         direction, qui devra dire comment il a ete traite. Le dossier concerne
@@ -50,4 +49,4 @@
             @endforeach
         </ul>
     @endif
-</section>
+</x-card>

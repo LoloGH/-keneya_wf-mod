@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Fin de consultation</h2>
+<x-card title="Fin de consultation" icon="soins">
 
     @if ($visits->isEmpty())
         <p class="empty">Appelez un patient pour encaisser un acte, etablir une ordonnance ou fixer un rendez-vous.</p>
@@ -149,4 +148,4 @@
             </form>
         @endif
     @endif
-</section>
+</x-card>

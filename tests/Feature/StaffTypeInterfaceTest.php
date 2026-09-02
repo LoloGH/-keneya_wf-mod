@@ -186,11 +186,11 @@ class StaffTypeInterfaceTest extends TestCase
         $reponse = $this->actingAs($user)->get('/staff/'.$type->slug)->assertOk();
 
         foreach ($attendues as $section) {
-            $reponse->assertSee($section, escape: false);
+            $reponse->assertSee($section);
         }
 
         foreach ($absentes as $section) {
-            $reponse->assertDontSee($section, escape: false);
+            $reponse->assertDontSee($section);
         }
     }
 
@@ -200,7 +200,7 @@ class StaffTypeInterfaceTest extends TestCase
 
         $this->actingAs($user)
             ->get('/staff/'.$type->slug)
-            ->assertSee('Mon planning', escape: false);
+            ->assertSee('Mon planning');
     }
 
     // ----------------------------------------- Les capacites gardent le metier

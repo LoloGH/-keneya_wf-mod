@@ -1,5 +1,4 @@
-<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
-    <h2 class="card__title">Passages du jour</h2>
+<x-card title="Passages du jour" icon="document" :poll="config('keneya.poll_interval')">
 
     <div class="field">
         <label for="visits-search" class="sr-only">Rechercher</label>
@@ -70,4 +69,4 @@
             </table>
         </div>
     @endif
-</section>
+</x-card>

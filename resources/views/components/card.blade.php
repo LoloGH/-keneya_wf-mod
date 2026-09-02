@@ -24,9 +24,15 @@
     'accroche' => null,
     'icon' => null,
     'actions' => null,
+    'poll' => null,
 ])
 
-<section {{ $attributes->merge(['class' => 'card']) }}>
+{{-- `poll` plutot qu'un `wire:poll.{{ … }}` ecrit par l'appelant : l'intervalle
+     fait partie du NOM de l'attribut, et une interpolation dans un nom
+     d'attribut ne compile pas sur un composant, dont les attributs sont
+     analyses. Une propriete evite ce piege a toutes les files d'attente. --}}
+<section {{ $attributes->merge(['class' => 'card']) }}
+    @if ($poll) wire:poll.{{ $poll }} @endif>
     @if ($title)
         <header class="card__head">
             <div class="card__heading">

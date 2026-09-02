@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Enregistrer un visiteur</h2>
+<x-card title="Enregistrer un visiteur" icon="personnel">
 
     <form wire:submit="save" class="form">
         <div class="field">
@@ -91,4 +90,4 @@
             </div>
         </div>
     @endif
-</section>
+</x-card>

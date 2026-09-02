@@ -218,8 +218,10 @@ class StaffTypeCapabilitiesTest extends TestCase
             ->get('/service')
             ->assertOk()
             ->assertDontSee('Mes rendez-vous')
-            // Les sections qui tiennent au role restent la.
-            ->assertSee("File d'attente", escape: false)
+            // Les sections qui tiennent au role restent la. L'echappement par
+            // defaut : depuis la refonte visuelle, les titres de carte passent
+            // par <x-card>, donc par {{ }}, comme les libelles de la barre.
+            ->assertSee("File d'attente")
             ->assertSee('Mes patients');
     }
 

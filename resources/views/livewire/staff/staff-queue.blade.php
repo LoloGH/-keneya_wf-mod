@@ -1,13 +1,12 @@
-<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
-    <div class="card__head">
-        <h2 class="card__title">File d'attente — {{ $service->name }}</h2>
+<x-card title="File d'attente — {{ $service->name }}" icon="file" :poll="config('keneya.poll_interval')">
+    <x-slot:actions>
         @if ($type->can(\App\Models\StaffType::CAP_QUEUE))
             <button type="button" class="btn btn--primary" wire:click="callNext" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="callNext">Appeler le suivant</span>
                 <span wire:loading wire:target="callNext">Appel…</span>
             </button>
         @endif
-    </div>
+    </x-slot:actions>
 
     @forelse ($queue as $visit)
         <article class="queue__item queue__item--{{ $visit->status }}">
@@ -90,4 +89,4 @@
     @empty
         <p class="empty">Aucun patient dans cette file aujourd'hui.</p>
     @endforelse
-</section>
+</x-card>

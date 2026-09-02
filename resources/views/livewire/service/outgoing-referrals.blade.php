@@ -1,5 +1,4 @@
-<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
-    <h2 class="card__title">Mes renvois</h2>
+<x-card title="Mes renvois" icon="services" :poll="config('keneya.poll_interval')">
 
     <h3 class="card__subtitle">En attente de resultat ({{ $pending->count() }})</h3>
 
@@ -70,4 +69,4 @@
             @endforeach
         </ul>
     @endif
-</section>
+</x-card>

@@ -1,5 +1,4 @@
-<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
-    <h2 class="card__title">Rendez-vous du jour ({{ $appointments->count() }})</h2>
+<x-card title="Rendez-vous du jour ({{ $appointments->count() }})" icon="planning" :poll="config('keneya.poll_interval')">
 
     @if ($appointments->isEmpty())
         <p class="empty">Aucun rendez-vous prevu aujourd'hui.</p>
@@ -50,4 +49,4 @@
             </table>
         </div>
     @endif
-</section>
+</x-card>

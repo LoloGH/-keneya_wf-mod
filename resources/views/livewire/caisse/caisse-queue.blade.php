@@ -1,6 +1,5 @@
-<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
-    <div class="card__head">
-        <h2 class="card__title">{{ $service->name }}</h2>
+<x-card title="{{ $service->name }}" icon="tarif" :poll="config('keneya.poll_interval')">
+    <x-slot:actions>
         <div class="btn-row">
             <span class="cash-total">Encaisse aujourd'hui : <strong>{{ number_format($todayTotal, 0, ',', ' ') }} FCFA</strong></span>
             <button type="button" class="btn btn--primary" wire:click="callNext" wire:loading.attr="disabled">
@@ -8,7 +7,7 @@
                 <span wire:loading wire:target="callNext">Appel…</span>
             </button>
         </div>
-    </div>
+    </x-slot:actions>
 
     @if ($queue->isEmpty())
         <p class="empty">Aucun patient dans cette file.</p>
@@ -138,4 +137,4 @@
             @endforeach
         </ul>
     @endif
-</section>
+</x-card>

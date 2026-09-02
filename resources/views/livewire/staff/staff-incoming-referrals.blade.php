@@ -1,5 +1,4 @@
-<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
-    <h2 class="card__title">Renvois recus ({{ $referrals->count() }})</h2>
+<x-card title="Renvois recus ({{ $referrals->count() }})" icon="services" :poll="config('keneya.poll_interval')">
 
     @forelse ($referrals as $referral)
         <article class="referrals__item">
@@ -31,4 +30,4 @@
     @empty
         <p class="empty">Aucun renvoi en attente.</p>
     @endforelse
-</section>
+</x-card>

@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Mon planning</h2>
+<x-card title="Mon planning" icon="planning">
     <p class="hint">Vos creneaux des {{ $days }} prochains jours. Seul l'administrateur peut les modifier.</p>
 
     @if ($schedules->isEmpty())
@@ -22,4 +21,4 @@
             </table>
         </div>
     @endif
-</section>
+</x-card>
