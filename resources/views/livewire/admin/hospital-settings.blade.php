@@ -1,70 +1,108 @@
-<section class="card">
-    <h2 class="card__title">Etablissement</h2>
-    <p class="hint">
-        Le nom apparait dans la barre de toutes les interfaces et sur les
-        tickets imprimes. L'adresse, le telephone et le courriel forment
-        l'en-tete des ordonnances : ils ne sont ecrits nulle part dans le code.
-    </p>
+{{-- Etablissement — la page de reference du systeme visuel.
 
-    <form wire:submit="save" class="form">
-        <div class="field">
-            <label for="hospital-name">Nom de l'etablissement</label>
-            <input id="hospital-name" type="text" wire:model="hospitalName">
-            @error('hospitalName') <p class="field__error">{{ $message }}</p> @enderror
-        </div>
+     C'est ici que les composants partages sont mis a l'epreuve les premiers :
+     en-tete de page avec fil d'ariane, cartes a badge d'icone, champs
+     normalises, bandeau d'information. Toute autre section de l'application
+     reprend ces memes composants, jamais une copie de ce balisage. --}}
+<div class="pile">
 
-        <div class="field">
-            <label for="hospital-address">Adresse <span class="field__hint">(facultatif)</span></label>
-            <input id="hospital-address" type="text" wire:model="hospitalAddress"
-                   placeholder="Quartier Legal Segou, Kayes">
-            @error('hospitalAddress') <p class="field__error">{{ $message }}</p> @enderror
-        </div>
+    <x-page-header
+        :fil="['Accueil', 'Etablissement']"
+        titre="Informations de l'etablissement"
+        sous-titre="Ces informations apparaitront sur toutes les ordonnances et tickets imprimes." />
 
-        <div class="field-row">
-            <div class="field">
-                <label for="hospital-phone">Telephone <span class="field__hint">(facultatif)</span></label>
-                <input id="hospital-phone" type="text" wire:model="hospitalPhone" placeholder="+223 21 52 00 00">
-                @error('hospitalPhone') <p class="field__error">{{ $message }}</p> @enderror
+    <x-card title="Informations generales" icon="batiment">
+        <form wire:submit="save" class="form">
+            <x-field name="hospital-name" label="Nom de l'etablissement" error="hospitalName">
+                <input id="hospital-name" type="text" wire:model="hospitalName">
+            </x-field>
+
+            <x-field name="hospital-address" label="Adresse" optionnel error="hospitalAddress">
+                <input id="hospital-address" type="text" wire:model="hospitalAddress"
+                       placeholder="BP 98 - Kayes Plateaux">
+            </x-field>
+
+            <div class="field-row">
+                <x-field name="hospital-phone" label="Telephone" optionnel error="hospitalPhone">
+                    <input id="hospital-phone" type="text" wire:model="hospitalPhone"
+                           placeholder="+223 21 52 12 32">
+                </x-field>
+
+                <x-field name="hospital-email" label="Courriel" optionnel error="hospitalEmail">
+                    <input id="hospital-email" type="email" wire:model="hospitalEmail"
+                           placeholder="contact@hopital.ml">
+                </x-field>
             </div>
 
-            <div class="field">
-                <label for="hospital-email">Courriel <span class="field__hint">(facultatif)</span></label>
-                <input id="hospital-email" type="email" wire:model="hospitalEmail" placeholder="contact@hopital.ml">
-                @error('hospitalEmail') <p class="field__error">{{ $message }}</p> @enderror
+            <h3 class="card__subtitle">Informations complementaires</h3>
+
+            <div class="field-row">
+                <x-field name="hospital-website" label="Site web" optionnel error="hospitalWebsite">
+                    <input id="hospital-website" type="text" wire:model="hospitalWebsite"
+                           placeholder="www.hopital-fousseyni-daou.ml">
+                </x-field>
+
+                <x-field name="hospital-hours" label="Horaires d'ouverture" optionnel error="hospitalHours">
+                    <input id="hospital-hours" type="text" wire:model="hospitalHours"
+                           placeholder="Lun - Ven : 07h30 - 17h00 | Sam : 07h30 - 13h00">
+                </x-field>
+            </div>
+
+            <x-field name="hospital-motto" label="Devise" optionnel error="hospitalMotto">
+                <input id="hospital-motto" type="text" wire:model="hospitalMotto"
+                       placeholder="Notre mission, votre sante.">
+            </x-field>
+
+            <div class="btn-row btn-row--fin">
+                <button type="submit" class="btn btn--primary">
+                    <x-icon name="enregistrer" size="18" />
+                    Enregistrer les modifications
+                </button>
+            </div>
+        </form>
+    </x-card>
+
+    <x-card title="Tampon de l'etablissement" icon="image">
+        {{-- Le tampon institutionnel se gere ici et nulle part ailleurs. La
+             signature du medecin, elle, reste dans la carte de profil de
+             chaque praticien : elle l'engage personnellement, un administrateur
+             ne peut pas en deposer une pour lui. --}}
+        <div class="tampon">
+            <div class="tampon__saisie">
+                <form wire:submit="saveStamp" class="form">
+                    <x-field name="hospital-stamp" label="Image du tampon"
+                             hint="PNG, JPEG ou WebP. 2 Mo maximum" error="stampFile">
+                        <input id="hospital-stamp" type="file"
+                               accept="image/png,image/jpeg,image/webp" wire:model="stampFile">
+                    </x-field>
+
+                    <div class="btn-row">
+                        <button type="submit" class="btn btn--secondary" wire:loading.attr="disabled">
+                            <x-icon name="televerser" size="18" />
+                            {{ $stampPresent ? 'Remplacer le tampon' : 'Deposer le tampon' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="tampon__aide">
+                @if ($stampPresent)
+                    <x-notice title="Bon a savoir">
+                        Le tampon de l'etablissement est enregistre : il figure au bas de
+                        chaque ordonnance, a cote de la signature du medecin prescripteur.
+                    </x-notice>
+                @else
+                    <x-notice ton="alerte" title="Aucun tampon enregistre">
+                        Les ordonnances s'impriment normalement, mais l'emplacement du
+                        cachet reste vide.
+                    </x-notice>
+                @endif
+
+                <p class="hint">
+                    Toute modification du tampon est inscrite au journal d'audit :
+                    c'est une piece a valeur legale.
+                </p>
             </div>
         </div>
-
-        <button type="submit" class="btn btn--primary">Enregistrer</button>
-    </form>
-
-    <h3 class="card__subtitle">Tampon de l'etablissement</h3>
-    <p class="hint">
-        Appose au bas de chaque ordonnance, a cote de la signature du medecin
-        prescripteur. Il se gere ici et nulle part ailleurs : c'est un element
-        institutionnel, pas la propriete d'un praticien. Toute modification est
-        inscrite au journal d'audit.
-    </p>
-
-    <form wire:submit="saveStamp" class="form form--inline-wrap">
-        <div class="field">
-            <label for="hospital-stamp">
-                Image du tampon
-                <span class="field__hint">PNG, JPEG ou WebP. 2 Mo maximum</span>
-            </label>
-            <input id="hospital-stamp" type="file" accept="image/png,image/jpeg,image/webp" wire:model="stampFile">
-            @error('stampFile') <p class="field__error">{{ $message }}</p> @enderror
-        </div>
-
-        <button type="submit" class="btn btn--secondary" wire:loading.attr="disabled">
-            {{ $stampPresent ? 'Remplacer le tampon' : 'Deposer le tampon' }}
-        </button>
-    </form>
-
-    @if ($stampPresent)
-        <p class="hint">Un tampon est enregistre : il figure sur les ordonnances generees.</p>
-    @else
-        <p class="hint hint--blocking">
-            Aucun tampon enregistre : les ordonnances laissent l'emplacement vide.
-        </p>
-    @endif
-</section>
+    </x-card>
+</div>

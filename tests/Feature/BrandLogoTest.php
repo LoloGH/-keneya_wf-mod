@@ -114,16 +114,34 @@ class BrandLogoTest extends TestCase
         $this->assertStringNotContainsString('<p class="login__product">', $corps);
     }
 
-    public function test_la_barre_utilise_la_variante_claire(): void
+    public function test_la_barre_utilise_la_variante_couleur_sur_fond_blanc(): void
     {
+        // La barre etait bleu nuit et portait donc la declinaison claire du
+        // logo. La refonte visuelle l'a passee en blanc : c'est la variante
+        // couleur qui convient, et la variante claire y serait invisible.
         $response = $this->actingAs($this->makeAdmin())->get('/admin');
 
         $response->assertOk()
             ->assertSee('app-header__logo', escape: false)
-            ->assertSee('images/keneya-icone-claire.png', escape: false)
+            ->assertSee('images/keneya-icone.png', escape: false)
             ->assertSee(hospital_name());
 
-        $this->assertStringNotContainsString('app-header__product', $response->getContent());
+        $this->assertStringNotContainsString('keneya-icone-claire.png', $response->getContent());
+    }
+
+    public function test_la_barre_nomme_l_etablissement_puis_le_produit(): void
+    {
+        // Avant la refonte, le nom du produit etait volontairement absent de la
+        // barre. La maquette de reference le remet, en second sous celui de
+        // l'etablissement : c'est l'hopital que l'agent doit reconnaitre, mais
+        // le produit doit rester identifiable — notamment pour une demonstration
+        // commerciale, ou personne ne sait encore comment le logiciel s'appelle.
+        $response = $this->actingAs($this->makeAdmin())->get('/admin');
+
+        $response->assertOk()
+            ->assertSee('app-header__hospital', escape: false)
+            ->assertSee('app-header__produit', escape: false)
+            ->assertSee(config('keneya.name'));
     }
 
     public function test_l_ecran_de_salle_d_attente_utilise_la_variante_claire(): void

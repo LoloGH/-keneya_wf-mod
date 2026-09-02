@@ -30,6 +30,18 @@ class Setting extends Model
     public const HOSPITAL_EMAIL = 'hospital_email';
 
     /**
+     * Complements d'en-tete apparus avec la refonte visuelle : site, horaires
+     * d'ouverture et devise. Ils suivent la meme regle que l'adresse et le
+     * telephone — en base, jamais dans le gabarit. Aucune migration : la table
+     * est un simple couple cle/valeur.
+     */
+    public const HOSPITAL_WEBSITE = 'hospital_website';
+
+    public const HOSPITAL_HOURS = 'hospital_hours';
+
+    public const HOSPITAL_MOTTO = 'hospital_motto';
+
+    /**
      * Tampon de l'etablissement, commun a tous les medecins. Gere depuis
      * /admin et de nulle part ailleurs : c'est un element institutionnel, pas
      * la propriete d'un praticien.

@@ -16,21 +16,49 @@
 
 :root {
     /* --- Couleurs -------------------------------------------------------
-       Un bleu ardoise plutot que le bleu vif d'origine : sur un ecran de
-       service allume douze heures par jour, c'est celui qu'on supporte. */
-    --bleu: #10557f;
-    --bleu-vif: #1470a8;
-    --bleu-fonce: #0b3a58;
-    --bleu-nuit: #082b42;
-    --bleu-clair: #e8f2f8;
-    --bleu-pale: #f4f9fc;
+       Deux teintes portent la marque, et chacune a un role fixe :
 
-    --vert: #14795a;
-    --vert-clair: #e2f3ec;
-    --ambre: #a66200;
+         - le MARINE structure et agit — entree active de la barre laterale,
+           bouton primaire, badge d'icone en tete de carte, filets de titre ;
+         - la SARCELLE signe et met en valeur — monogramme, avatar, etats
+           positifs, filets des documents imprimes.
+
+       Les intervertir ferait perdre la lecture : sur un ecran, ce qui est
+       marine se clique, ce qui est sarcelle se remarque. Le marine reste
+       volontairement desature et sombre — c'est un ecran de service allume
+       douze heures par jour, pas une page d'accueil.
+
+       Les noms `--bleu*` sont conserves : deux mille lignes de regles s'y
+       referent, et les renommer aurait noye le changement de palette dans un
+       diff illisible. Seules les valeurs changent, et tout suit. */
+    --bleu: #123f60;
+    --bleu-vif: #1a5b86;
+    --bleu-fonce: #0e3049;
+    --bleu-nuit: #0a2439;
+    --bleu-clair: #e6eef6;
+    --bleu-pale: #f2f7fb;
+
+    /* La sarcelle de la marque. `--vert` la reprend plutot que de garder un
+       vert distinct : un bandeau de succes d'une teinte et un avatar d'une
+       autre, a deux centimetres l'un de l'autre, se lisent comme une erreur
+       d'impression. Une seule teinte pour « tout va bien » et pour « c'est
+       nous ». */
+    --sarcelle: #16806a;
+    --sarcelle-vif: #1a9a7f;
+    --sarcelle-fonce: #0f5f4e;
+    --sarcelle-clair: #e6f4ef;
+
+    --vert: var(--sarcelle);
+    --vert-clair: var(--sarcelle-clair);
+    --ambre: #9a5b00;
     --ambre-clair: #fdf1dd;
     --rouge: #9c1f22;
     --rouge-clair: #fbeaea;
+
+    /* Fond de page : un bleu-gris tres clair, pas un gris neutre. C'est lui
+       qui fait ressortir le blanc des cartes ; sur un gris neutre elles
+       paraissent grises a leur tour. */
+    --fond: #eef3f8;
 
     --gris-900: #14191d;
     --gris-800: #2a3339;
@@ -78,7 +106,7 @@
     --ombre-1: var(--ombre);
     --ombre-2: 0 2px 4px rgba(11, 40, 60, .06), 0 6px 16px rgba(11, 40, 60, .07);
     --ombre-3: 0 8px 16px rgba(11, 40, 60, .08), 0 20px 40px rgba(11, 40, 60, .12);
-    --anneau: 0 0 0 3px rgba(20, 112, 168, .28);
+    --anneau: 0 0 0 3px rgba(26, 91, 134, .30);
 
     /* --- Mouvement -------------------------------------------------------
        Court et decelere : sur une tablette, une transition longue donne
@@ -102,7 +130,7 @@ body {
     font-size: var(--texte-md);
     line-height: 1.5;
     color: var(--gris-900);
-    background: var(--gris-100);
+    background: var(--fond);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -140,17 +168,30 @@ h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.011em; }
     display: flex; flex-wrap: wrap; gap: var(--e2) var(--e4);
     align-items: center; justify-content: space-between;
     padding: var(--e2) var(--e4);
-    background: linear-gradient(180deg, var(--bleu-fonce), var(--bleu-nuit));
-    color: var(--blanc);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, var(--ombre-2);
+    /* Blanche, et non plus bleu nuit : la barre cesse d'etre un bandeau de
+       marque pour devenir le bord haut de la page. Ce qui la separe du contenu
+       n'est plus une couleur mais un simple filet — c'est ce qui laisse la
+       place aux cartes et a la barre laterale. */
+    background: var(--blanc);
+    color: var(--gris-900);
+    border-bottom: 1px solid var(--gris-200);
+    box-shadow: var(--ombre-1);
     position: sticky; top: 0; z-index: 30;
 }
 
 .app-header__brand { display: flex; align-items: center; gap: var(--e3); min-width: 0; }
 
+.app-header__identite {
+    display: flex; flex-direction: column; line-height: 1.2; min-width: 0;
+}
 .app-header__hospital {
-    font-weight: 600; font-size: var(--texte-md);
-    letter-spacing: -.01em;
+    font-weight: 700; font-size: var(--texte-md);
+    letter-spacing: -.01em; text-transform: uppercase;
+    color: var(--bleu-fonce);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.app-header__produit {
+    font-size: var(--texte-sm); color: var(--gris-500);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -158,13 +199,26 @@ h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.011em; }
 
 /* Nom du role, ou du service pour un medecin : la seule information de
    contexte a droite de la barre. */
+/* La pastille translucide n'avait de sens que sur fond sombre. Sur fond
+   blanc, deux lignes de texte alignees a droite suffisent, et disent plus :
+   qui est connecte, et a quel titre. */
+.app-header__qui {
+    display: flex; flex-direction: column; align-items: flex-end;
+    line-height: 1.25; min-width: 0; max-width: 40vw;
+}
+.app-header__nom {
+    font-weight: 650; font-size: var(--texte-base); color: var(--gris-900);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .app-header__role {
-    font-weight: 600; font-size: var(--texte-sm);
-    padding: var(--e1) var(--e3); border-radius: var(--rayon-pilule);
-    background: rgba(255, 255, 255, .12);
-    border: 1px solid rgba(255, 255, 255, .12);
-    white-space: nowrap; max-width: 40vw;
-    overflow: hidden; text-overflow: ellipsis;
+    font-size: var(--texte-sm); color: var(--gris-500);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Sous 700px le bloc d'identite disparait : le nom complet et le role tiennent
+   deja dans la carte de profil, que l'avatar ouvre d'un geste. */
+@media (max-width: 700px) {
+    .app-header__qui, .app-header__produit { display: none; }
 }
 
 /* Sur telephone, la marque prend sa ligne et le contexte la suivante : les
@@ -244,6 +298,163 @@ h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.011em; }
 
 .card--accent { border-left: 3px solid var(--bleu-vif); }
 .card--danger { border-color: var(--rouge); }
+
+/* ---------- En-tete de carte : badge, titre, accroche ----------
+   Le badge marine devant chaque titre est ce qui donne son rythme a une page
+   longue : l'oeil saute de pastille en pastille et trouve le bloc qu'il
+   cherche sans lire les titres. */
+.card__heading { display: flex; align-items: flex-start; gap: var(--e3); min-width: 0; }
+
+.card__badge {
+    display: grid; place-items: center;
+    flex: 0 0 auto;
+    width: 34px; height: 34px;
+    border-radius: var(--rayon-sm);
+    background: var(--bleu);
+    color: var(--blanc);
+}
+
+.card__intitule { min-width: 0; }
+
+/* L'accroche explique ce que fait le bloc. Elle vit sous le titre et non a
+   cote : mise en ligne, elle repousse les actions hors du cadre des que le
+   texte depasse quelques mots. */
+.card__accroche {
+    margin: var(--e1) 0 0;
+    font-size: var(--texte-base);
+    color: var(--gris-700);
+    line-height: 1.45;
+}
+
+.card__actions { display: flex; flex-wrap: wrap; gap: var(--e2); align-items: center; }
+
+/* ---------- Bandeau d'information ----------
+   Permanent, contrairement a `.alert` qui repond a une action et s'efface.
+   Le liseré porte la couleur, le fond reste tres clair : un aplat sature a
+   cote d'un formulaire attire l'oeil plus que le formulaire. */
+.notice {
+    display: flex; gap: var(--e3); align-items: flex-start;
+    padding: var(--e3) var(--e4);
+    border: 1px solid var(--sarcelle-clair);
+    border-left: 3px solid var(--sarcelle);
+    border-radius: var(--rayon);
+    background: var(--sarcelle-clair);
+    color: var(--gris-800);
+}
+
+.notice__icone { flex: 0 0 auto; color: var(--sarcelle); margin-top: 1px; }
+.notice__titre { margin: 0 0 var(--e1); font-weight: 650; color: var(--sarcelle-fonce); }
+.notice__texte { font-size: var(--texte-base); line-height: 1.5; }
+.notice__texte p { margin: 0; }
+.notice__texte p + p { margin-top: var(--e2); }
+
+.notice--alerte {
+    border-color: var(--ambre-clair); border-left-color: var(--ambre);
+    background: var(--ambre-clair);
+}
+.notice--alerte .notice__icone, .notice--alerte .notice__titre { color: var(--ambre); }
+
+.notice--blocage {
+    border-color: var(--rouge-clair); border-left-color: var(--rouge);
+    background: var(--rouge-clair);
+}
+.notice--blocage .notice__icone, .notice--blocage .notice__titre { color: var(--rouge); }
+
+/* ---------- En-tete de page : fil d'ariane, titre, sous-titre ---------- */
+.page-header { margin-bottom: var(--e5); }
+
+.fil__liste {
+    list-style: none; margin: 0 0 var(--e2); padding: 0;
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--e1);
+    font-size: var(--texte-sm); color: var(--gris-500);
+}
+.fil__etape { display: inline-flex; align-items: center; gap: var(--e1); }
+.fil__separateur { color: var(--gris-400); }
+.fil__etape--courante { color: var(--gris-800); font-weight: 600; }
+
+.page-header__titre {
+    font-size: var(--texte-2xl); font-weight: 700;
+    color: var(--bleu-fonce);
+}
+
+.page-header__sous-titre {
+    margin: var(--e2) 0 0;
+    font-size: var(--texte-md);
+    color: var(--gris-700);
+    max-width: 68ch;
+}
+
+/* Empilement vertical d'une page : en-tete, puis les cartes, toutes espacees
+   pareil. Sans lui chaque section reglait ses propres marges, et deux pages
+   voisines n'avaient pas le meme rythme. */
+.pile { display: flex; flex-direction: column; gap: var(--e4); }
+
+/* Les actions d'un formulaire se rangent a droite, sous le dernier champ,
+   separees par un filet : c'est la ou l'oeil arrive en fin de saisie. */
+.btn-row--fin {
+    justify-content: flex-end;
+    margin-top: var(--e5);
+    padding-top: var(--e4);
+    border-top: 1px solid var(--gris-200);
+}
+
+/* Depot du tampon : la saisie a gauche, ce qu'il faut en savoir a droite.
+   La colonne d'aide passe dessous des que la carte devient etroite — un
+   bandeau d'information comprime sur trois mots par ligne ne se lit plus. */
+.tampon { display: grid; gap: var(--e4); align-items: start; }
+
+@media (min-width: 860px) {
+    .tampon { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); }
+}
+
+.tampon__aide { display: flex; flex-direction: column; gap: var(--e3); }
+.tampon__aide .hint { margin: 0; }
+
+/* Champ court : un delai en minutes n'a pas besoin de toute la largeur d'une
+   carte, et un champ trop large invite a y ecrire autre chose qu'un nombre. */
+.input--court { max-width: 12rem; }
+
+/* Renvois vers les reglages qui vivent dans une autre section. */
+.renvois { margin: var(--e4) 0 0; display: flex; flex-direction: column; gap: 0; }
+.renvois__ligne {
+    display: flex; flex-wrap: wrap; gap: var(--e2) var(--e4);
+    justify-content: space-between; align-items: baseline;
+    padding: var(--e3) 0;
+    border-bottom: 1px solid var(--gris-200);
+}
+.renvois__ligne:last-child { border-bottom: 0; }
+.renvois dt { color: var(--gris-800); }
+.renvois dd { margin: 0; color: var(--gris-700); font-size: var(--texte-base); }
+
+/* Chiffres de constat : ce que contient l'installation. Les valeurs sont en
+   chasse fixe pour qu'une colonne de nombres reste alignee. */
+.chiffres {
+    display: grid; gap: var(--e3);
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    margin-bottom: var(--e4);
+}
+.chiffres__bloc {
+    display: flex; flex-direction: column; gap: var(--e1);
+    padding: var(--e3) var(--e4);
+    background: var(--bleu-pale);
+    border: 1px solid var(--gris-200);
+    border-radius: var(--rayon);
+}
+.chiffres__valeur { font-size: var(--texte-xl); font-weight: 700; color: var(--bleu-fonce); }
+.chiffres__libelle { font-size: var(--texte-sm); color: var(--gris-700); line-height: 1.35; }
+
+/* Bloc de commandes : il se lit, il se copie, il ne se modifie pas. */
+.code-bloc {
+    margin: var(--e4) 0;
+    padding: var(--e3) var(--e4);
+    overflow-x: auto;
+    background: var(--bleu-nuit);
+    color: #e6eef6;
+    border-radius: var(--rayon);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: var(--texte-sm);
+    line-height: 1.7;
+}
 
 .empty {
     color: var(--gris-500);
@@ -345,7 +556,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     background: var(--bleu-clair); color: var(--bleu-fonce);
     border-color: transparent;
 }
-.btn--secondary:hover:not([disabled]) { background: #dbeaf4; border-color: var(--gris-300); }
+.btn--secondary:hover:not([disabled]) { background: var(--bleu-clair); border-color: var(--gris-300); }
 
 /* Bordure discrete au repos, franche au survol : au repos le bouton fantome
    ne doit pas peser autant qu'une action principale. */
@@ -359,7 +570,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .btn--danger:hover:not([disabled]) { background: #b52528; box-shadow: var(--ombre-2); }
 
 .btn--close { background: var(--vert); color: var(--blanc); }
-.btn--close:hover:not([disabled]) { background: #17916b; box-shadow: var(--ombre-2); }
+.btn--close:hover:not([disabled]) { background: var(--sarcelle-vif); box-shadow: var(--ombre-2); }
 
 .btn--small { min-height: 36px; padding: var(--e1) var(--e3); font-size: var(--texte-sm); }
 .btn--block { width: 100%; }
@@ -386,7 +597,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 
 .alert--error { background: var(--rouge-clair); border-color: var(--rouge); color: #7d191c; }
-.alert--success { background: var(--vert-clair); border-color: var(--vert); color: #0f5f47; margin-bottom: var(--e4); }
+.alert--success { background: var(--vert-clair); border-color: var(--vert); color: var(--sarcelle-fonce); margin-bottom: var(--e4); }
 .alert--warning { background: var(--ambre-clair); border-color: var(--ambre); color: #834e00; }
 
 .alert__dismiss {
@@ -858,7 +1069,9 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     transition: background-color var(--transition), transform var(--transition), border-color var(--transition);
 }
 
-.icon-btn:hover { background: rgba(255, 255, 255, .16); transform: scale(1.06); }
+/* Le survol blanc translucide ne se voyait que sur la barre bleu nuit. Sur
+   fond clair il faut au contraire assombrir. */
+.icon-btn:hover { background: var(--gris-100); transform: scale(1.06); }
 .icon-btn:active { transform: scale(.97); transition-duration: 60ms; }
 
 /* Sur fond clair, l'aplat blanc du survol ne se voit pas : on assombrit. */
@@ -901,7 +1114,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .tabnav {
     display: none;
     background: var(--blanc); border: 1px solid var(--gris-200);
-    border-radius: var(--rayon-lg); box-shadow: var(--ombre-1); padding: var(--e2);
+    border-radius: var(--rayon-lg); box-shadow: var(--ombre-1);
+    padding: var(--e2) var(--e2) var(--e4);
 }
 
 .tabnav--open { display: block; animation: depliage var(--duree-lente) var(--courbe); }
@@ -925,28 +1139,42 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     transition: background-color var(--transition), color var(--transition);
 }
 
-.tabnav__group { font-weight: 650; color: var(--gris-500); font-size: var(--texte-sm); }
+.tabnav__group { font-weight: 600; }
 .tabnav__link:hover, .tabnav__group:hover { background: var(--gris-100); color: var(--gris-900); }
 
-/* Le trait actif se deploie depuis le haut plutot que d'apparaitre d'un
-   coup : c'est ce qui relie visuellement l'onglet au panneau qu'il ouvre. */
+/* Intitule de famille : pas un element cliquable, seulement le nom du bloc
+   qui commence. Retire du flux d'accessibilite cote gabarit — un lecteur
+   d'ecran annoncerait un titre la ou il n'y a qu'un reperage visuel. */
+.tabnav__famille {
+    padding: var(--e4) var(--e3) var(--e1);
+    font-size: var(--texte-xs);
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--gris-400);
+}
+.tabnav__famille:first-child { padding-top: var(--e2); }
+
+/* L'icone ne porte jamais sa couleur : elle suit celle du libelle, y compris
+   quand l'entree devient active et passe en blanc sur marine. */
+.tabnav__icone { flex: 0 0 auto; opacity: .82; }
+
+/* L'entree active est une pastille pleine, et non une teinte pale barree d'un
+   trait : sur une barre de treize entrees, une nuance claire ne se distingue
+   plus d'un survol. */
 .tabnav__link--active {
-    background: var(--bleu-clair); color: var(--bleu-fonce); font-weight: 650;
+    background: var(--bleu); color: var(--blanc); font-weight: 600;
 }
-.tabnav__link--active::before {
-    content: ""; position: absolute; left: 0; top: 50%;
-    width: 3px; height: 60%;
-    background: var(--bleu-vif); border-radius: 0 2px 2px 0;
-    transform: translateY(-50%);
-    animation: trait-actif var(--duree-lente) var(--courbe);
-}
+.tabnav__link--active:hover { background: var(--bleu-fonce); color: var(--blanc); }
+.tabnav__link--active .tabnav__icone { opacity: 1; }
 
-@keyframes trait-actif {
-    from { height: 0; opacity: 0; }
-    to { height: 60%; opacity: 1; }
+/* Le chevron du groupe part a droite : il annonce le depliage, pas l'entree —
+   celle-ci a deja son icone a gauche. */
+.tabnav__chevron {
+    flex: 0 0 auto; margin-left: auto;
+    color: var(--gris-400);
+    transition: transform var(--duree-lente) var(--courbe);
 }
-
-.tabnav__chevron { flex: 0 0 auto; transition: transform var(--duree-lente) var(--courbe); }
 .tabnav__chevron--open { transform: rotate(90deg); }
 
 /* Le panneau actif : une seule section a la fois, plus de defilement a
@@ -1167,11 +1395,15 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
        unites. */
     container-type: inline-size;
 
-    --or-teal: #05a39d;
-    --or-teal-fonce: #048c87;
-    --or-nuit: #06214a;
-    --or-gris: #6b7c93;
-    --or-bord: #e5e9ef;
+    /* La carte de connexion avait sa propre palette, un cyan repris d'une
+       maquette anterieure. Elle pointe desormais sur les tokens de la marque :
+       c'est le premier ecran que voit un agent, il ne peut pas etre le seul a
+       ne pas parler la meme langue que le reste du produit. */
+    --or-teal: var(--sarcelle);
+    --or-teal-fonce: var(--sarcelle-fonce);
+    --or-nuit: var(--bleu-fonce);
+    --or-gris: var(--gris-500);
+    --or-bord: var(--gris-200);
 }
 
 .login-card__inner {
@@ -1218,9 +1450,9 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     padding: 1.4cqw 3.2cqw;
     font-size: 2.8cqw;
     font-weight: 600;
-    color: #05736f;
-    background: #e6f6f4;
-    border-radius: 99px;
+    color: var(--sarcelle-fonce);
+    background: var(--sarcelle-clair);
+    border-radius: var(--rayon-pilule);
 }
 
 .login-card__site svg { width: 3.4cqw; height: 3.4cqw; }
@@ -1771,7 +2003,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 /* Une notification non lue se distingue par un liseré, pas par une couleur de
    fond : le panneau reste lisible quand tout est neuf. */
-.bell__item--unread { border-left: 3px solid var(--bleu, #1c3f95); }
+.bell__item--unread { border-left: 3px solid var(--bleu); }
 
 .bell__type {
     font-size: .7rem;
@@ -1795,14 +2027,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     height: 2.1rem;
     border: 0;
     border-radius: 999px;
-    background: rgba(255, 255, 255, .18);
+    /* Sarcelle plein : sur la barre blanche, le fond translucide d'avant
+       n'existait plus. C'est aussi la seule tache de couleur de marque de la
+       barre — l'endroit ou l'on se reconnait. */
+    background: var(--sarcelle);
     color: #fff;
     font-size: .8rem;
     font-weight: 700;
     letter-spacing: .02em;
     cursor: pointer;
 }
-.profil__avatar:hover { background: rgba(255, 255, 255, .3); }
+.profil__avatar:hover { background: var(--sarcelle-vif); }
 
 .profil__panel {
     position: absolute;
@@ -2067,7 +2302,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     text-underline-offset: .15em;
 }
 
-.app-footer a:hover { color: var(--bleu, #0f5c8c); }
+.app-footer a:hover { color: var(--bleu); }
 
 /* Sur le mur de la salle d'attente, l'ecran est lu de loin : le pied de page
    se fait plus discret encore, et ne prend pas de place sur les tickets. */
@@ -2101,7 +2336,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     border: 1px solid transparent; border-left-width: 3px;
     font-weight: 600;
 }
-.sms-tally--calme { background: var(--vert-clair); border-color: var(--vert); color: #0f5f47; }
+.sms-tally--calme { background: var(--vert-clair); border-color: var(--vert); color: var(--sarcelle-fonce); }
 .sms-tally--alerte { background: var(--rouge-clair); border-color: var(--rouge); color: #7d191c; }
 .sms-tally__nombre { font-size: 1.5rem; font-weight: 800; line-height: 1; }
 .sms-tally .btn { margin-left: auto; }
