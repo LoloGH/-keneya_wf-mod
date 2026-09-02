@@ -17,9 +17,10 @@ Artisan::command('inspire', function () {
 | Elle n'a rien a executer si aucun rendez-vous n'approche : la faire tourner
 | souvent ne coute qu'une requete indexee.
 |
-| Elle ne s'execute que si un scheduler tourne reellement — le service
-| `scheduler` du docker-compose. Sans lui, les rappels ne partiront jamais et
-| rien ne le signalera.
+| Elle ne s'execute que si un scheduler tourne reellement : le service
+| `scheduler` du docker-compose, ou l'unite systemd
+| `deploy/systemd/keneya-scheduler.service` sur une installation native. Sans
+| lui, les rappels ne partiront jamais et rien ne le signalera.
 */
 Schedule::command('keneya:rappels-rendez-vous')
     ->everyFifteenMinutes()

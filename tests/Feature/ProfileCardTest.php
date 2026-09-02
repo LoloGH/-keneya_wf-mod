@@ -82,6 +82,28 @@ class ProfileCardTest extends TestCase
         $this->assertStringNotContainsString('<dt>Fonction</dt>', $rendu);
     }
 
+    public function test_les_actions_du_compte_s_empilent_au_lieu_de_se_partager_une_rangee(): void
+    {
+        $doctor = $this->makeDoctor(Service::factory()->create());
+
+        // La v3.2.9 a ajoute « Signature et tampon » a cote de « Changer le mot
+        // de passe » : cote a cote, deux libelles en `nowrap` debordaient de la
+        // carte, entrainant l'icone de deconnexion hors du cadre. La colonne
+        // `profil__links` est ce qui tient cette mise en page ; l'y remettre
+        // dans `profil__actions` ferait revenir la faute sans qu'aucun autre
+        // test ne bronche.
+        $rendu = Livewire::actingAs($doctor->user->refresh())
+            ->test(ProfileCard::class)
+            ->call('toggle')
+            ->html();
+
+        $this->assertStringContainsString('profil__links', $rendu);
+        $this->assertMatchesRegularExpression(
+            '/profil__links.*Signature et tampon.*Changer le mot de passe.*<\/div>/s',
+            $rendu,
+        );
+    }
+
     // ------------------------------------------- Changement de mot de passe
 
     public function test_un_mot_de_passe_actuel_incorrect_est_refuse(): void
