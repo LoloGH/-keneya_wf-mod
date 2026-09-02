@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Enregistrer un patient</h2>
+<x-card title="Enregistrer un patient" icon="ajouter">
     <p class="hint">Pour un patient qui n'est jamais venu. Un nouveau dossier sera cree.</p>
 
     {{-- Doublon probable (v3.2.8, point 1).
@@ -209,4 +208,4 @@
             </div>
         </div>
     @endif
-</section>
+</x-card>

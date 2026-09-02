@@ -1,11 +1,10 @@
-<section class="card" wire:poll.{{ config('keneya.poll_interval') }}>
-    <div class="card__head">
-        <h2 class="card__title">Soins programmes — {{ $service->name }}</h2>
+<x-card title="Soins programmes — {{ $service->name }}" icon="soins" :poll="config('keneya.poll_interval')">
+    <x-slot:actions>
         <label class="field--check">
             <input type="checkbox" wire:model.live="showDone">
             Afficher les soins deja traites
         </label>
-    </div>
+    </x-slot:actions>
 
     @if (! $onDuty)
         {{-- Le filtrage de garde s'appuie sur le planning deja en place : hors
@@ -61,4 +60,4 @@
             <p class="empty">Aucun soin programme pour ce service.</p>
         @endforelse
     @endif
-</section>
+</x-card>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Service;
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
 use App\Models\Prescription;
+use App\Support\PrescriptionPdfData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -37,10 +38,10 @@ class PrintableController extends Controller
 
         $prescription->load(['patient', 'doctor.user', 'visit.service']);
 
-        return view('print.prescription', [
-            'prescription' => $prescription,
-            'hospitalName' => hospital_name(),
-        ]);
+        // Le meme jeu de donnees que le PDF : en-tete complet, tampons,
+        // signature. C'est la raison d'etre de PrescriptionPdfData — le patient
+        // doit voir la meme ordonnance que son medecin, quel que soit le rendu.
+        return view('print.prescription', PrescriptionPdfData::for($prescription));
     }
 
     private function assertDoctorMayRead(Request $request, Attachment $attachment): void

@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Types de service</h2>
+<x-card title="Types de service" icon="services">
     <p class="hint">
         Un type coche « paiement prealable » impose un passage par la
         <strong>{{ \App\Models\Service::CAISSE_SERVICES }}</strong> avant qu'un patient
@@ -64,4 +63,4 @@
             </tbody>
         </table>
     </div>
-</section>
+</x-card>

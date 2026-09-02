@@ -17,18 +17,28 @@
          une interface. --}}
     <header class="app-header">
         <div class="app-header__brand">
-            {{-- Variante claire : la barre est bleu nuit. Le nom du produit
-                 n'est pas repris a cote, le logo le porte deja. --}}
-            <x-brand-logo variant="light" class="app-header__logo" />
-            <span class="app-header__hospital">{{ $hospitalName ?? hospital_name() }}</span>
+            {{-- Variante couleur : la barre est blanche depuis la refonte. Le
+                 nom de l'etablissement domine, celui du produit se lit dessous
+                 en second — c'est l'hopital que l'agent doit reconnaitre, pas
+                 le logiciel. --}}
+            <x-brand-logo variant="color" class="app-header__logo" />
+            <span class="app-header__identite">
+                <span class="app-header__hospital">{{ $hospitalName ?? hospital_name() }}</span>
+                <span class="app-header__produit">{{ config('keneya.name') }}</span>
+            </span>
         </div>
 
         <div class="app-header__context">
             @auth
-                {{-- Le rôle, ou le service pour un medecin : les pages
-                     surchargent `context` quand il y a plus precis a dire. --}}
-                <span class="app-header__role">
-                    {{ $context ?? auth()->user()->roleLabel() }}
+                {{-- Le nom, puis le rôle — ou le service pour un medecin : les
+                     pages surchargent `context` quand il y a plus precis a
+                     dire. Les deux lignes se rangent a droite, contre
+                     l'avatar : c'est un bloc d'identite, pas deux etiquettes. --}}
+                <span class="app-header__qui">
+                    <span class="app-header__nom">{{ auth()->user()->name }}</span>
+                    <span class="app-header__role">
+                        {{ $context ?? auth()->user()->roleLabel() }}
+                    </span>
                 </span>
 
                 @livewire('shared.notification-bell', [], key('notification-bell'))

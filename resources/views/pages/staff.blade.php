@@ -6,30 +6,30 @@
     $sections = [];
 
     if ($type->can(StaffType::CAP_QUEUE)) {
-        $sections[] = ['key' => 'file', 'label' => "File d'attente", 'view' => 'sections.staff.queue'];
+        $sections[] = ['key' => 'file', 'icon' => 'file', 'label' => "File d'attente", 'view' => 'sections.staff.queue'];
     }
 
     if ($type->can(StaffType::CAP_RECEIVE_REFERRAL)) {
-        $sections[] = ['key' => 'renvois', 'label' => 'Renvois recus', 'view' => 'sections.staff.referrals'];
+        $sections[] = ['key' => 'renvois', 'icon' => 'services', 'label' => 'Renvois recus', 'view' => 'sections.staff.referrals'];
     }
 
     if ($type->can(StaffType::CAP_CARE_TASKS)) {
-        $sections[] = ['key' => 'soins', 'label' => 'Soins programmes', 'view' => 'sections.staff.care-tasks'];
+        $sections[] = ['key' => 'soins', 'icon' => 'soins', 'label' => 'Soins programmes', 'view' => 'sections.staff.care-tasks'];
         // Les releves accompagnent les soins : qui administre a besoin de
         // savoir ce que l'equipe precedente a laisse (v3.2.3, point 4).
-        $sections[] = ['key' => 'releves', 'label' => 'Releves', 'view' => 'sections.staff.handoffs'];
+        $sections[] = ['key' => 'releves', 'icon' => 'document', 'label' => 'Releves', 'view' => 'sections.staff.handoffs'];
     }
 
     if ($type->can(StaffType::CAP_ACCEPT_PAYMENT)) {
-        $sections[] = ['key' => 'encaissement', 'label' => 'Encaissement', 'view' => 'sections.staff.payments'];
+        $sections[] = ['key' => 'encaissement', 'icon' => 'tarif', 'label' => 'Encaissement', 'view' => 'sections.staff.payments'];
     }
 
     // Le planning personnel est offert a tout le monde, comme dans les quatre
     // autres interfaces : il ne depend d'aucune capacite.
     // Signaler un constat est offert a tout le monde, comme le planning :
     // un incident ne depend d'aucune capacite (v3.2.8, point 4).
-    $sections[] = ['key' => 'constat', 'label' => 'Signaler un constat', 'view' => 'sections.staff.incident'];
-    $sections[] = ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.staff.schedule'];
+    $sections[] = ['key' => 'constat', 'icon' => 'alerte', 'label' => 'Signaler un constat', 'view' => 'sections.staff.incident'];
+    $sections[] = ['key' => 'planning', 'icon' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.staff.schedule'];
 @endphp
 
 <x-layouts.app :title="$type->name.' — '.config('keneya.name')">

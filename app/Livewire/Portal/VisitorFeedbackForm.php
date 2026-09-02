@@ -33,13 +33,33 @@ class VisitorFeedbackForm extends Component
     public function mount(string $token): void
     {
         $this->token = $token;
+
+        if ($this->sondageDejaDonne()) {
+            $this->type = FeedbackEntry::TYPE_COMPLAINT;
+        }
+    }
+
+    /**
+     * Le sondage de cette venue est-il deja donne ?
+     *
+     * Pas de colonne supplementaire ici : chaque venue d'un visiteur cree son
+     * propre enregistrement, avec son propre jeton de sondage. L'enregistrement
+     * EST la session, et le lien du jour ne rouvre pas celui d'hier.
+     */
+    public function sondageDejaDonne(): bool
+    {
+        return FeedbackEntry::sondageDejaDeposeParVisiteur($this->visitor());
     }
 
     public function selectType(string $type): void
     {
-        $this->type = $type === FeedbackEntry::TYPE_COMPLAINT
-            ? FeedbackEntry::TYPE_COMPLAINT
-            : FeedbackEntry::TYPE_SURVEY;
+        $sondage = $type !== FeedbackEntry::TYPE_COMPLAINT;
+
+        if ($sondage && $this->sondageDejaDonne()) {
+            return;
+        }
+
+        $this->type = $sondage ? FeedbackEntry::TYPE_SURVEY : FeedbackEntry::TYPE_COMPLAINT;
 
         $this->submitted = false;
         $this->resetValidation();
@@ -48,6 +68,14 @@ class VisitorFeedbackForm extends Component
     public function submit(RecordFeedback $action): void
     {
         $sondage = $this->type === FeedbackEntry::TYPE_SURVEY;
+
+        // Verifie avant d'ecrire : le lien du sondage est envoye par SMS et
+        // reste cliquable, y compris apres reponse.
+        if ($sondage && $this->sondageDejaDonne()) {
+            $this->type = FeedbackEntry::TYPE_COMPLAINT;
+
+            return;
+        }
 
         $this->validate([
             'ratingCare' => $sondage ? ['required', 'integer', 'min:1', 'max:5'] : ['nullable'],
@@ -67,6 +95,10 @@ class VisitorFeedbackForm extends Component
 
         $this->reset(['ratingCare', 'ratingStaff', 'content']);
         $this->submitted = true;
+
+        if ($sondage) {
+            $this->type = FeedbackEntry::TYPE_COMPLAINT;
+        }
     }
 
     private function visitor(): Visitor
@@ -78,6 +110,7 @@ class VisitorFeedbackForm extends Component
     {
         return view('livewire.portal.visitor-feedback-form', [
             'visitor' => $this->visitor(),
+            'sondageDonne' => $this->sondageDejaDonne(),
         ]);
     }
 }

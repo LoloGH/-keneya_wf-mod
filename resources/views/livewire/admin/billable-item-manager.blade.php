@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Tarifs</h2>
+<x-card title="Tarifs" icon="tarif">
     <p class="hint">
         Les actes facturables et leur prix, en FCFA. Le medecin choisit l'acte
         precis au moment du renvoi ; le caissier n'a plus qu'a confirmer le
@@ -94,4 +93,4 @@
 
         <button type="submit" class="btn btn--secondary">Enregistrer le ticket</button>
     </form>
-</section>
+</x-card>

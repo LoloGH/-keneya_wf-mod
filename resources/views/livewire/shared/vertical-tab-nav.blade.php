@@ -5,10 +5,7 @@
 
     <button type="button" class="workspace__toggle" @click="drawer = !drawer"
             :aria-expanded="drawer ? 'true' : 'false'" aria-controls="nav-sections">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-        </svg>
+        <x-icon name="file" size="22" />
         <span x-text="drawer ? 'Masquer les sections' : 'Sections'">Sections</span>
         <span class="workspace__toggle-current">{{ $this->activeLabel() }}</span>
     </button>
@@ -16,8 +13,21 @@
     <nav id="nav-sections" class="tabnav" :class="drawer && 'tabnav--open'"
          aria-label="Sections de cet espace">
         <ul class="tabnav__list">
+            @php $familleRendue = null; @endphp
+
             @foreach ($sections as $section)
                 @php $isGroup = ! empty($section['children']); @endphp
+
+                {{-- Une entree peut annoncer la famille qui commence avec elle
+                     (« ETABLISSEMENT », « GESTION », « SYSTEME »). C'est une
+                     simple cle facultative : l'arbre de sections garde
+                     exactement la meme forme, et une interface qui n'en pose
+                     aucune — /caisse et ses trois sections — n'affiche aucun
+                     intitule plutot qu'un decoupage qui n'apprendrait rien. --}}
+                @if (($section['famille'] ?? null) && $section['famille'] !== $familleRendue)
+                    @php $familleRendue = $section['famille']; @endphp
+                    <li class="tabnav__famille" aria-hidden="true">{{ $section['famille'] }}</li>
+                @endif
 
                 <li class="tabnav__item" wire:key="sec-{{ $section['key'] }}">
                     @if ($isGroup)
@@ -27,13 +37,13 @@
                                 wire:click="toggleGroup('{{ $section['key'] }}')"
                                 aria-expanded="{{ $open ? 'true' : 'false' }}"
                                 aria-controls="grp-{{ $section['key'] }}">
-                            <svg class="tabnav__chevron @if ($open) tabnav__chevron--open @endif"
-                                 viewBox="0 0 24 24" width="16" height="16" fill="none"
-                                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                 stroke-linejoin="round" aria-hidden="true">
-                                <path d="M9 6l6 6-6 6" />
-                            </svg>
+                            <x-icon name="{{ $section['icon'] ?? 'chevron' }}" size="18" class="tabnav__icone" />
                             <span>{{ $section['label'] }}</span>
+                            {{-- Liaison `:class` et non un `@if` dans l'attribut : les
+                                 attributs d'un composant Blade sont analyses, une
+                                 directive glissee dedans ne compile pas. --}}
+                            <x-icon name="chevron" size="16"
+                                    :class="$open ? 'tabnav__chevron tabnav__chevron--open' : 'tabnav__chevron'" />
                         </button>
 
                         @if ($open)
@@ -57,7 +67,8 @@
                                 wire:click="select('{{ $section['key'] }}')"
                                 @click="drawer = false"
                                 @if ($active === $section['key']) aria-current="page" @endif>
-                            {{ $section['label'] }}
+                            <x-icon name="{{ $section['icon'] ?? 'chevron' }}" size="18" class="tabnav__icone" />
+                            <span>{{ $section['label'] }}</span>
                         </button>
                     @endif
                 </li>

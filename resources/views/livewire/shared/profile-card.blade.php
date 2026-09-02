@@ -105,12 +105,7 @@
                         @csrf
                         <button type="submit" class="icon-btn icon-btn--danger" data-testid="logout"
                                 aria-label="Se deconnecter" title="Se deconnecter">
-                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M15 17l5-5-5-5" />
-                                <path d="M20 12H9" />
-                                <path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5" />
-                            </svg>
+                            <x-icon name="deconnexion" size="22" />
                         </button>
                     </form>
                 </div>

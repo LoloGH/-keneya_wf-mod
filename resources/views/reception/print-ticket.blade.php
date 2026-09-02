@@ -19,7 +19,7 @@
         body {
             margin: 0; padding: 12px;
             font-family: "DejaVu Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-            color: var(--encre); background: #eef2f5;
+            color: var(--encre); background: #eef3f8;
             display: flex; flex-direction: column; align-items: center; gap: 14px;
         }
 
@@ -66,10 +66,10 @@
         .actions { display: flex; gap: 8px; }
         .actions button {
             min-height: 44px; padding: .55rem 1.1rem; font: inherit; font-weight: 600;
-            border-radius: 8px; border: 1px solid #0f5c8c; cursor: pointer;
-            background: #0f5c8c; color: #fff;
+            border-radius: 8px; border: 1px solid #12314d; cursor: pointer;
+            background: #12314d; color: #fff;
         }
-        .actions button.secondary { background: #fff; color: #0f5c8c; }
+        .actions button.secondary { background: #fff; color: #12314d; }
 
         @media print {
             /* Seul le ticket sort de l'imprimante. */

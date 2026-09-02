@@ -7,18 +7,29 @@
         </div>
     @endif
 
-    <div class="btn-row">
-        <button type="button"
-                class="btn {{ $type === \App\Models\FeedbackEntry::TYPE_SURVEY ? 'btn--primary' : 'btn--ghost' }}"
-                wire:click="selectType('{{ \App\Models\FeedbackEntry::TYPE_SURVEY }}')">
-            Noter mon passage
-        </button>
-        <button type="button"
-                class="btn {{ $type === \App\Models\FeedbackEntry::TYPE_COMPLAINT ? 'btn--primary' : 'btn--ghost' }}"
-                wire:click="selectType('{{ \App\Models\FeedbackEntry::TYPE_COMPLAINT }}')">
-            Deposer une reclamation
-        </button>
-    </div>
+    {{-- Le sondage est borne au passage : une fois l'avis donne, il ne
+         reapparait qu'a la prochaine venue. La reclamation, elle, reste
+         toujours ouverte — on peut avoir note son passage et decouvrir un
+         probleme le lendemain. --}}
+    @if ($sondageDonne)
+        <x-notice title="Votre avis sur ce passage est enregistre">
+            Merci, il n'y a rien d'autre a noter pour cette venue. Le sondage
+            vous sera propose a nouveau lors de votre prochain passage.
+        </x-notice>
+    @else
+        <div class="btn-row">
+            <button type="button"
+                    class="btn {{ $type === \App\Models\FeedbackEntry::TYPE_SURVEY ? 'btn--primary' : 'btn--ghost' }}"
+                    wire:click="selectType('{{ \App\Models\FeedbackEntry::TYPE_SURVEY }}')">
+                Noter mon passage
+            </button>
+            <button type="button"
+                    class="btn {{ $type === \App\Models\FeedbackEntry::TYPE_COMPLAINT ? 'btn--primary' : 'btn--ghost' }}"
+                    wire:click="selectType('{{ \App\Models\FeedbackEntry::TYPE_COMPLAINT }}')">
+                Deposer une reclamation
+            </button>
+        </div>
+    @endif
 
     <form wire:submit="submit" class="form">
         @if ($type === \App\Models\FeedbackEntry::TYPE_SURVEY)

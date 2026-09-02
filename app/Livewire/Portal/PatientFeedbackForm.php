@@ -5,6 +5,7 @@ namespace App\Livewire\Portal;
 use App\Actions\RecordFeedback;
 use App\Models\FeedbackEntry;
 use App\Models\Patient;
+use App\Models\Visit;
 use App\Services\FeedbackJourney;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -46,6 +47,28 @@ class PatientFeedbackForm extends Component
     public function mount(int $patientId): void
     {
         $this->patientId = $patientId;
+
+        // Le sondage de ce passage est deja donne : on ouvre directement sur la
+        // reclamation, seul formulaire qui reste offert.
+        if ($this->sondageDejaDonne()) {
+            $this->type = FeedbackEntry::TYPE_COMPLAINT;
+        }
+    }
+
+    /**
+     * Le passage en cours, celui que le sondage note. C'est lui qui delimite la
+     * session : une fois l'avis donne, le sondage ne revient qu'au passage
+     * suivant.
+     */
+    public function visiteCourante(): ?Visit
+    {
+        return Patient::find($this->patientId)
+            ?->visits()->orderByDesc('opened_at')->first();
+    }
+
+    public function sondageDejaDonne(): bool
+    {
+        return FeedbackEntry::sondageDejaDepose($this->visiteCourante());
     }
 
     /**
@@ -57,18 +80,20 @@ class PatientFeedbackForm extends Component
      */
     private function steps(): Collection
     {
-        $patient = Patient::find($this->patientId);
-
-        return app(FeedbackJourney::class)->steps(
-            $patient?->visits()->orderByDesc('opened_at')->first(),
-        );
+        return app(FeedbackJourney::class)->steps($this->visiteCourante());
     }
 
     public function selectType(string $type): void
     {
-        $this->type = $type === FeedbackEntry::TYPE_COMPLAINT
-            ? FeedbackEntry::TYPE_COMPLAINT
-            : FeedbackEntry::TYPE_SURVEY;
+        $sondage = $type !== FeedbackEntry::TYPE_COMPLAINT;
+
+        // Revenir au sondage apres l'avoir donne n'a pas de sens : le bouton
+        // n'est plus affiche, et une requete forgee ne doit pas le rouvrir.
+        if ($sondage && $this->sondageDejaDonne()) {
+            return;
+        }
+
+        $this->type = $sondage ? FeedbackEntry::TYPE_SURVEY : FeedbackEntry::TYPE_COMPLAINT;
 
         $this->submitted = false;
         $this->resetValidation();
@@ -77,6 +102,15 @@ class PatientFeedbackForm extends Component
     public function submit(RecordFeedback $action): void
     {
         $sondage = $this->type === FeedbackEntry::TYPE_SURVEY;
+
+        // Verifie avant d'ecrire, et pas seulement a l'affichage : un formulaire
+        // se contourne, une action non. Deux onglets ouverts sur le portail
+        // suffiraient a deposer deux fois le meme sondage.
+        if ($sondage && $this->sondageDejaDonne()) {
+            $this->type = FeedbackEntry::TYPE_COMPLAINT;
+
+            return;
+        }
 
         $this->validate([
             // Les notes ne concernent que le sondage ; une reclamation se
@@ -101,6 +135,12 @@ class PatientFeedbackForm extends Component
 
         $this->reset(['ratingCare', 'stepRatings', 'stepComments', 'content']);
         $this->submitted = true;
+
+        // Le sondage vient d'etre donne pour ce passage : la suite du sejour
+        // n'offre plus que la reclamation.
+        if ($sondage) {
+            $this->type = FeedbackEntry::TYPE_COMPLAINT;
+        }
     }
 
     /**
@@ -128,6 +168,7 @@ class PatientFeedbackForm extends Component
     {
         return view('livewire.portal.patient-feedback-form', [
             'steps' => $this->steps(),
+            'sondageDonne' => $this->sondageDejaDonne(),
         ]);
     }
 }

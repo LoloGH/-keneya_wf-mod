@@ -16,23 +16,23 @@
     $peut = fn (string $capacite) => auth()->user()->hasCapability($capacite);
 
     $sections = array_values(array_filter([
-        ['key' => 'file', 'label' => "File d'attente", 'view' => 'sections.service.queue'],
-        ['key' => 'renvois', 'label' => 'Renvois', 'children' => [
-            ['key' => 'renvois-entrants', 'label' => 'Renvois en attente', 'view' => 'sections.service.incoming'],
-            ['key' => 'renvois-sortants', 'label' => 'Mes renvois', 'view' => 'sections.service.outgoing'],
+        ['key' => 'file', 'icon' => 'file', 'label' => "File d'attente", 'view' => 'sections.service.queue'],
+        ['key' => 'renvois', 'icon' => 'services', 'label' => 'Renvois', 'children' => [
+            ['key' => 'renvois-entrants', 'icon' => 'services', 'label' => 'Renvois en attente', 'view' => 'sections.service.incoming'],
+            ['key' => 'renvois-sortants', 'icon' => 'services', 'label' => 'Mes renvois', 'view' => 'sections.service.outgoing'],
         ]],
         $peut(StaffType::CAP_PRESCRIBE)
-            ? ['key' => 'consultation', 'label' => 'Fin de consultation', 'view' => 'sections.service.consultation']
+            ? ['key' => 'consultation', 'icon' => 'soins', 'label' => 'Fin de consultation', 'view' => 'sections.service.consultation']
             : null,
         $peut(StaffType::CAP_ADMIT_HOSPITALIZATION)
-            ? ['key' => 'hospitalisation', 'label' => 'Patients hospitalises', 'view' => 'sections.service.hospitalizations']
+            ? ['key' => 'hospitalisation', 'icon' => 'lit', 'label' => 'Patients hospitalises', 'view' => 'sections.service.hospitalizations']
             : null,
-        ['key' => 'mes-patients', 'label' => 'Mes patients', 'view' => 'sections.service.my-patients'],
+        ['key' => 'mes-patients', 'icon' => 'patient', 'label' => 'Mes patients', 'view' => 'sections.service.my-patients'],
         $peut(StaffType::CAP_SCHEDULE_APPOINTMENT)
-            ? ['key' => 'mes-rendez-vous', 'label' => 'Mes rendez-vous', 'view' => 'sections.service.my-appointments']
+            ? ['key' => 'mes-rendez-vous', 'icon' => 'planning', 'label' => 'Mes rendez-vous', 'view' => 'sections.service.my-appointments']
             : null,
-        ['key' => 'constat', 'label' => 'Signaler un constat', 'view' => 'sections.service.incident'],
-        ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.service.schedule'],
+        ['key' => 'constat', 'icon' => 'alerte', 'label' => 'Signaler un constat', 'view' => 'sections.service.incident'],
+        ['key' => 'planning', 'icon' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.service.schedule'],
     ]));
 @endphp
 

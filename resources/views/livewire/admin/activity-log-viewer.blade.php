@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Journal d'audit</h2>
+<x-card title="Journal d'audit" icon="audit">
     <p class="hint">Lecture seule. Aucune ligne ne peut etre modifiee ni supprimee.</p>
 
     <div class="form form--inline-wrap">
@@ -57,4 +56,4 @@
     </div>
 
     {{ $activities->links() }}
-</section>
+</x-card>

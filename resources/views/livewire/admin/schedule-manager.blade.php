@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Plannings du personnel</h2>
+<x-card title="Plannings du personnel" icon="planning">
     <p class="hint">Chaque agent consulte son planning en lecture seule dans son interface.</p>
 
     <form wire:submit="save" class="form form--inline-wrap">
@@ -123,4 +122,4 @@
             </tbody>
         </table>
     </div>
-</section>
+</x-card>

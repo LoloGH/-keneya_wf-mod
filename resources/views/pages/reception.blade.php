@@ -8,20 +8,20 @@
     $peut = fn (string $capacite) => auth()->user()->hasCapability($capacite);
 
     $sections = array_values(array_filter([
-        ['key' => 'enregistrement', 'label' => 'Enregistrement', 'children' => array_values(array_filter([
-            ['key' => 'recherche', 'label' => 'Rechercher un dossier', 'view' => 'sections.reception.lookup'],
-            ['key' => 'nouveau-patient', 'label' => 'Nouveau patient', 'view' => 'sections.reception.new-patient'],
+        ['key' => 'enregistrement', 'icon' => 'patient', 'label' => 'Enregistrement', 'children' => array_values(array_filter([
+            ['key' => 'recherche', 'icon' => 'recherche', 'label' => 'Rechercher un dossier', 'view' => 'sections.reception.lookup'],
+            ['key' => 'nouveau-patient', 'icon' => 'ajouter', 'label' => 'Nouveau patient', 'view' => 'sections.reception.new-patient'],
             $peut(StaffType::CAP_REGISTER_VISITOR)
-                ? ['key' => 'visiteur', 'label' => 'Visiteur', 'view' => 'sections.reception.visitor']
+                ? ['key' => 'visiteur', 'icon' => 'personnel', 'label' => 'Visiteur', 'view' => 'sections.reception.visitor']
                 : null,
         ]))],
         $peut(StaffType::CAP_SCHEDULE_APPOINTMENT)
-            ? ['key' => 'rendez-vous', 'label' => 'Rendez-vous du jour', 'view' => 'sections.reception.appointments']
+            ? ['key' => 'rendez-vous', 'icon' => 'planning', 'label' => 'Rendez-vous du jour', 'view' => 'sections.reception.appointments']
             : null,
-        ['key' => 'salle-attente', 'label' => "Salle d'attente", 'view' => 'sections.reception.board'],
-        ['key' => 'passages', 'label' => 'Passages du jour', 'view' => 'sections.reception.today'],
-        ['key' => 'constat', 'label' => 'Signaler un constat', 'view' => 'sections.reception.incident'],
-        ['key' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.reception.schedule'],
+        ['key' => 'salle-attente', 'icon' => 'file', 'label' => "Salle d'attente", 'view' => 'sections.reception.board'],
+        ['key' => 'passages', 'icon' => 'document', 'label' => 'Passages du jour', 'view' => 'sections.reception.today'],
+        ['key' => 'constat', 'icon' => 'alerte', 'label' => 'Signaler un constat', 'view' => 'sections.reception.incident'],
+        ['key' => 'planning', 'icon' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.reception.schedule'],
     ]));
 @endphp
 

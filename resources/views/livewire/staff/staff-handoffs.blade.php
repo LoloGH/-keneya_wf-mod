@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Relèves — {{ $service->name }}</h2>
+<x-card title="Relèves — {{ $service->name }}" icon="document">
 
     @forelse ($sejours as $sejour)
         <article class="episode" wire:key="handoff-sejour-{{ $sejour->id }}">
@@ -18,4 +17,4 @@
     @empty
         <p class="empty">Aucun patient hospitalise dans ce service.</p>
     @endforelse
-</section>
+</x-card>

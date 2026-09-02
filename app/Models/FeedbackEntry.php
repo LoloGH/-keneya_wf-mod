@@ -53,6 +53,7 @@ class FeedbackEntry extends Model
     protected $fillable = [
         'type',
         'patient_id',
+        'visit_id',
         'visitor_id',
         'submitted_by_user_id',
         'handled_by_user_id',
@@ -94,6 +95,52 @@ class FeedbackEntry extends Model
     public function visitor(): BelongsTo
     {
         return $this->belongsTo(Visitor::class);
+    }
+
+    /**
+     * Le passage que ce retour concerne. Nul pour un constat general, ou pour
+     * une reclamation deposee hors de tout passage.
+     */
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+    /**
+     * Le sondage de ce passage a-t-il deja ete depose ?
+     *
+     * La regle vit ici, et non dans les deux formulaires : le portail patient
+     * et la page du visiteur doivent la lire de la meme facon, et une action
+     * qui ecrit doit pouvoir la verifier avant d'ecrire — un formulaire se
+     * contourne, pas une regle de modele.
+     */
+    public static function sondageDejaDepose(?Visit $visite): bool
+    {
+        if (! $visite) {
+            return false;
+        }
+
+        return self::query()
+            ->where('type', self::TYPE_SURVEY)
+            ->where('visit_id', $visite->getKey())
+            ->exists();
+    }
+
+    /**
+     * Meme question pour un visiteur. Pas besoin de colonne supplementaire :
+     * chaque venue d'un visiteur cree son propre enregistrement, avec son
+     * propre jeton de sondage. L'enregistrement EST la session.
+     */
+    public static function sondageDejaDeposeParVisiteur(?Visitor $visiteur): bool
+    {
+        if (! $visiteur) {
+            return false;
+        }
+
+        return self::query()
+            ->where('type', self::TYPE_SURVEY)
+            ->where('visitor_id', $visiteur->getKey())
+            ->exists();
     }
 
     public function service(): BelongsTo

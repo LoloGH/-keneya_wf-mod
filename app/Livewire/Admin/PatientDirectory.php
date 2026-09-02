@@ -6,6 +6,7 @@ use App\Actions\SendFeedbackInvitation;
 use App\Actions\StoreAttachment;
 use App\Livewire\Concerns\NotifiesUser;
 use App\Models\Attachment;
+use App\Models\FeedbackEntry;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Services\PatientTimeline;
@@ -69,10 +70,25 @@ class PatientDirectory extends Component
      *
      * L'envoi ne remplace jamais un precedent : chaque reponse cree sa propre
      * entree, et deux sondages successifs restent consultables separement.
+     *
+     * En revanche le sondage est borne au passage : si le patient a deja
+     * repondu pour la visite en cours, le lien le menerait a une page qui ne
+     * lui proposerait rien. Autant le dire ici plutot que de consommer un SMS.
      */
     public function launchSurvey(int $patientId, SendFeedbackInvitation $invitation): void
     {
         $patient = Patient::findOrFail($patientId);
+
+        $visite = $patient->visits()->orderByDesc('opened_at')->first();
+
+        if (FeedbackEntry::sondageDejaDepose($visite)) {
+            $this->notifyError(sprintf(
+                '%s a deja donne son avis sur ce passage. Le sondage lui sera reproposé a sa prochaine venue.',
+                $patient->name,
+            ));
+
+            return;
+        }
 
         if (blank($patient->mobile)) {
             $this->notifyError(sprintf('%s n\'a pas de numero de telephone : le lien ne peut pas partir.', $patient->name));

@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Mes rendez-vous ({{ $appointments->count() }})</h2>
+<x-card title="Mes rendez-vous ({{ $appointments->count() }})" icon="planning">
     <p class="hint">Vos prochains rendez-vous.</p>
 
     <label class="field field--inline">
@@ -43,4 +42,4 @@
             </table>
         </div>
     @endif
-</section>
+</x-card>

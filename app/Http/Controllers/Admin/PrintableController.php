@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
 use App\Models\Prescription;
+use App\Support\PrescriptionPdfData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,9 +34,7 @@ class PrintableController extends Controller
     {
         $prescription->load(['patient', 'doctor.user', 'visit.service']);
 
-        return view('print.prescription', [
-            'prescription' => $prescription,
-            'hospitalName' => hospital_name(),
+        return view('print.prescription', PrescriptionPdfData::for($prescription) + [
             // Le telechargement PDF passe par la route du medecin, inaccessible
             // a l'admin : la vue imprimable se suffit a elle-meme ici.
             'pdfUrl' => null,

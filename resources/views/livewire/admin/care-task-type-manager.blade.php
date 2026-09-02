@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Types de soins</h2>
+<x-card title="Types de soins" icon="soins">
     <p class="hint">Les soins que les medecins peuvent prescrire : serum, injection, pansement.</p>
 
     <form wire:submit="save" class="form form--inline-wrap">
@@ -34,4 +33,4 @@
             </tbody>
         </table>
     </div>
-</section>
+</x-card>

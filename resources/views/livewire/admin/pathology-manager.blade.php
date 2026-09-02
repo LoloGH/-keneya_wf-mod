@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Pathologies</h2>
+<x-card title="Pathologies" icon="pathologie">
     <p class="hint">
         Etiquettes posees a la conclusion d'une consultation, toujours
         facultatives. Elles servent a s'adresser plus tard a un groupe de
@@ -42,4 +41,4 @@
             </tbody>
         </table>
     </div>
-</section>
+</x-card>

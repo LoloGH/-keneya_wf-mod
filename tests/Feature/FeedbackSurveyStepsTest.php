@@ -6,6 +6,7 @@ use App\Actions\CloseVisit;
 use App\Livewire\Admin\FeedbackViewer;
 use App\Livewire\Admin\PatientDirectory;
 use App\Livewire\Portal\PatientFeedbackForm;
+use App\Livewire\Portal\VisitorFeedbackForm;
 use App\Models\FeedbackEntry;
 use App\Models\Patient;
 use App\Models\PatientHistory;
@@ -207,14 +208,18 @@ class FeedbackSurveyStepsTest extends TestCase
     }
 
     /** Deux sondages successifs restent consultables separement. */
-    public function test_deux_sondages_successifs_ne_s_ecrasent_pas(): void
+    public function test_deux_passages_donnent_deux_sondages_qui_ne_s_ecrasent_pas(): void
     {
+        // La regle de la v3.2.9 tient toujours : un second sondage n'ecrase
+        // jamais le premier. Ce qui change, c'est qu'il faut un nouveau passage
+        // pour y avoir droit.
         $service = Service::factory()->create(['name' => 'Accueil']);
         $patient = Patient::factory()->create(['mobile' => '70112233']);
-        $visit = $this->makeVisit($service, [], $patient);
-        $this->etape($visit, $service, PatientHistory::TYPE_REGISTRATION);
 
-        foreach ([3, 5] as $note) {
+        foreach ([[3, '-2 days'], [5, 'now']] as [$note, $quand]) {
+            $visite = $this->makeVisit($service, ['opened_at' => now()->parse($quand)], $patient);
+            $this->etape($visite, $service, PatientHistory::TYPE_REGISTRATION);
+
             Livewire::test(PatientFeedbackForm::class, ['patientId' => $patient->getKey()])
                 ->set('ratingCare', $note)
                 ->set('stepRatings.'.$service->getKey().':0', $note)
@@ -227,6 +232,63 @@ class FeedbackSurveyStepsTest extends TestCase
         $this->assertCount(2, $entrees);
         $this->assertSame(3, $entrees[0]->rating_care);
         $this->assertSame(5, $entrees[1]->rating_care);
+
+        // Et chacune est rattachee a son propre passage.
+        $this->assertNotSame($entrees[0]->visit_id, $entrees[1]->visit_id);
+    }
+
+    public function test_un_seul_sondage_par_passage(): void
+    {
+        $service = Service::factory()->create(['name' => 'Accueil']);
+        $patient = Patient::factory()->create(['mobile' => '70112233']);
+        $visite = $this->makeVisit($service, [], $patient);
+        $this->etape($visite, $service, PatientHistory::TYPE_REGISTRATION);
+
+        $composant = Livewire::test(PatientFeedbackForm::class, ['patientId' => $patient->getKey()])
+            ->set('ratingCare', 4)
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        // Le formulaire bascule de lui-meme sur la reclamation : le sondage de
+        // ce passage est clos.
+        $composant->assertSet('type', FeedbackEntry::TYPE_COMPLAINT);
+
+        // Et une seconde tentative forgee — deux onglets ouverts, un lien SMS
+        // reclique — n'ecrit rien de plus.
+        $composant->set('type', FeedbackEntry::TYPE_SURVEY)
+            ->set('ratingCare', 1)
+            ->call('submit');
+
+        $sondages = FeedbackEntry::where('patient_id', $patient->getKey())
+            ->where('type', FeedbackEntry::TYPE_SURVEY)
+            ->get();
+
+        $this->assertCount(1, $sondages);
+        $this->assertSame(4, $sondages->first()->rating_care);
+    }
+
+    public function test_la_reclamation_reste_ouverte_apres_le_sondage(): void
+    {
+        // « Seule la reclamation peut rester » : on peut avoir note son passage
+        // et decouvrir un probleme le lendemain.
+        $service = Service::factory()->create(['name' => 'Accueil']);
+        $patient = Patient::factory()->create(['mobile' => '70112233']);
+        $visite = $this->makeVisit($service, [], $patient);
+        $this->etape($visite, $service, PatientHistory::TYPE_REGISTRATION);
+
+        Livewire::test(PatientFeedbackForm::class, ['patientId' => $patient->getKey()])
+            ->set('ratingCare', 4)
+            ->call('submit')
+            ->set('content', 'Le guichet etait ferme sans explication.')
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        $this->assertSame(
+            1,
+            FeedbackEntry::where('patient_id', $patient->getKey())
+                ->where('type', FeedbackEntry::TYPE_COMPLAINT)
+                ->count(),
+        );
     }
 
     public function test_un_patient_sans_telephone_ne_declenche_aucun_envoi(): void
@@ -254,5 +316,57 @@ class FeedbackSurveyStepsTest extends TestCase
         $this->assertStringContainsString($visitor->feedback_token, $message->body);
         // Marque comme servi : la tache planifiee ne doit pas renvoyer un second lien.
         $this->assertNotNull($visitor->fresh()->feedback_link_sent_at);
+    }
+
+    // ------------------------------------------- Sondage borne a la session
+
+    public function test_le_visiteur_ne_note_qu_une_fois_par_venue(): void
+    {
+        $visitor = Visitor::factory()->create(['mobile' => '70445566']);
+
+        $composant = Livewire::test(VisitorFeedbackForm::class, ['token' => $visitor->feedback_token])
+            ->set('ratingCare', 4)
+            ->set('ratingStaff', 5)
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        $composant->assertSet('type', FeedbackEntry::TYPE_COMPLAINT);
+
+        // Le lien recu par SMS reste cliquable : une seconde soumission forgee
+        // ne doit rien ecrire de plus.
+        $composant->set('type', FeedbackEntry::TYPE_SURVEY)
+            ->set('ratingCare', 1)
+            ->set('ratingStaff', 1)
+            ->call('submit');
+
+        $this->assertSame(
+            1,
+            FeedbackEntry::where('visitor_id', $visitor->getKey())
+                ->where('type', FeedbackEntry::TYPE_SURVEY)
+                ->count(),
+        );
+    }
+
+    public function test_l_admin_ne_relance_pas_un_sondage_deja_donne(): void
+    {
+        // Envoyer le lien couterait un SMS pour mener a une page qui ne
+        // proposerait plus rien.
+        $service = Service::factory()->create(['name' => 'Accueil']);
+        $patient = Patient::factory()->create(['mobile' => '70112233']);
+        $visite = $this->makeVisit($service, [], $patient);
+        $this->etape($visite, $service, PatientHistory::TYPE_REGISTRATION);
+
+        Livewire::test(PatientFeedbackForm::class, ['patientId' => $patient->getKey()])
+            ->set('ratingCare', 4)
+            ->call('submit')
+            ->assertHasNoErrors();
+
+        SmsMessage::query()->delete();
+
+        Livewire::actingAs($this->makeAdmin())
+            ->test(PatientDirectory::class)
+            ->call('launchSurvey', $patient->getKey());
+
+        $this->assertSame(0, SmsMessage::where('to', '70112233')->count());
     }
 }

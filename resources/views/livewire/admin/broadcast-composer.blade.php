@@ -1,7 +1,6 @@
 @php use App\Models\BroadcastMessage; @endphp
 
-<section class="card">
-    <h2 class="card__title">SMS groupes</h2>
+<x-card title="SMS groupes" icon="sms">
     <p class="hint">
         Le message part par la file d'attente, comme tous les SMS de
         l'application : l'ecran rend la main immediatement, meme pour plusieurs
@@ -159,4 +158,4 @@
             </table>
         </div>
     @endif
-</section>
+</x-card>

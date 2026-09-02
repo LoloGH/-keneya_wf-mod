@@ -1,5 +1,4 @@
-<section class="card">
-    <h2 class="card__title">Mes patients</h2>
+<x-card title="Mes patients" icon="patient">
     <p class="hint">
         Tous les patients que vous avez pris en charge, dossiers clotures compris —
         la cloture retire le patient de la file, jamais de votre historique.
@@ -102,4 +101,4 @@
 
         {{ $patients->links() }}
     @endif
-</section>
+</x-card>

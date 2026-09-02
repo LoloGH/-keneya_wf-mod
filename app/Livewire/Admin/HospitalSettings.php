@@ -33,6 +33,12 @@ class HospitalSettings extends Component
 
     public string $hospitalEmail = '';
 
+    public string $hospitalWebsite = '';
+
+    public string $hospitalHours = '';
+
+    public string $hospitalMotto = '';
+
     public $stampFile = null;
 
     public function mount(): void
@@ -41,6 +47,9 @@ class HospitalSettings extends Component
         $this->hospitalAddress = (string) Setting::get(Setting::HOSPITAL_ADDRESS, '');
         $this->hospitalPhone = (string) Setting::get(Setting::HOSPITAL_PHONE, '');
         $this->hospitalEmail = (string) Setting::get(Setting::HOSPITAL_EMAIL, '');
+        $this->hospitalWebsite = (string) Setting::get(Setting::HOSPITAL_WEBSITE, '');
+        $this->hospitalHours = (string) Setting::get(Setting::HOSPITAL_HOURS, '');
+        $this->hospitalMotto = (string) Setting::get(Setting::HOSPITAL_MOTTO, '');
     }
 
     public function save(): void
@@ -52,17 +61,29 @@ class HospitalSettings extends Component
             'hospitalAddress' => ['nullable', 'string', 'max:255'],
             'hospitalPhone' => ['nullable', 'string', 'max:60'],
             'hospitalEmail' => ['nullable', 'email', 'max:255'],
+            // Le site est saisi tel qu'il se lit sur une ordonnance
+            // (« www.hopital-fousseyni-daou.ml ») : exiger un schema http
+            // ferait echouer la saisie la plus naturelle.
+            'hospitalWebsite' => ['nullable', 'string', 'max:255'],
+            'hospitalHours' => ['nullable', 'string', 'max:255'],
+            'hospitalMotto' => ['nullable', 'string', 'max:255'],
         ], attributes: [
             'hospitalName' => "nom de l'etablissement",
             'hospitalAddress' => 'adresse',
             'hospitalPhone' => 'telephone',
             'hospitalEmail' => 'courriel',
+            'hospitalWebsite' => 'site web',
+            'hospitalHours' => "horaires d'ouverture",
+            'hospitalMotto' => 'devise',
         ]);
 
         Setting::put(Setting::HOSPITAL_NAME, $this->hospitalName);
         Setting::put(Setting::HOSPITAL_ADDRESS, $this->hospitalAddress ?: null);
         Setting::put(Setting::HOSPITAL_PHONE, $this->hospitalPhone ?: null);
         Setting::put(Setting::HOSPITAL_EMAIL, $this->hospitalEmail ?: null);
+        Setting::put(Setting::HOSPITAL_WEBSITE, $this->hospitalWebsite ?: null);
+        Setting::put(Setting::HOSPITAL_HOURS, $this->hospitalHours ?: null);
+        Setting::put(Setting::HOSPITAL_MOTTO, $this->hospitalMotto ?: null);
 
         $this->notifySuccess("Coordonnees de l'etablissement mises a jour.");
     }
