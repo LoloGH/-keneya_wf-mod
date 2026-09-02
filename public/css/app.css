@@ -1356,7 +1356,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     position: fixed;
     inset: 0;
     overflow: hidden;
-    background: #eef2f5 url('../images/login-scene.jpg') left center / cover no-repeat;
+    background: var(--fond) url('../images/login-scene.jpg') left center / cover no-repeat;
 }
 
 .login-stage__scene {
@@ -1683,7 +1683,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
        pour se connecter, pas pour lire une accroche. */
     .login-stage { position: static; overflow: visible; }
 
-    .login-stage { background: #eef2f5; }
+    .login-stage { background: var(--fond); }
 
     .login-stage__scene {
         position: relative;
@@ -1693,7 +1693,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         height: auto;
         min-height: 100dvh;
         aspect-ratio: auto;
-        background: #eef2f5;
+        background: var(--fond);
         container-type: normal;
         display: flex;
         flex-direction: column;

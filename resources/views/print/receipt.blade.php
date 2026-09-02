@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reçu — {{ $hospitalName }}</title>
     <style>
-        body { margin: 0; padding: 12px; font-family: "DejaVu Sans", system-ui, sans-serif; background: #eef2f5;
+        body { margin: 0; padding: 12px; font-family: "DejaVu Sans", system-ui, sans-serif; background: #eef3f8;
                color: #10171c; display: flex; flex-direction: column; align-items: center; gap: 14px; }
         .ticket { width: 100%; max-width: 44ch; background: #fff; padding: 14px 16px;
                   border: 1px solid #ccd4d9; border-radius: 6px; }
@@ -23,7 +23,7 @@
         .rows th { text-align: left; font-weight: 400; color: #5a656d; padding: 3px 0; }
         .rows td { text-align: right; font-weight: 700; padding: 3px 0; }
         .actions button { min-height: 44px; padding: .55rem 1.1rem; font: inherit; font-weight: 600;
-                          border-radius: 8px; border: 1px solid #0f5c8c; background: #0f5c8c; color: #fff; cursor: pointer; }
+                          border-radius: 8px; border: 1px solid #12314d; background: #12314d; color: #fff; cursor: pointer; }
         @media print {
             body { background: #fff; padding: 0; display: block; }
             .actions { display: none !important; }

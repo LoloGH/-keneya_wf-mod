@@ -112,10 +112,7 @@
                                     wire:click="removePrescriptionLine({{ $index }})"
                                     aria-label="Retirer la ligne {{ $index + 1 }}"
                                     title="Retirer cette ligne">
-                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
-                                     stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                                    <path d="M5 12h14" />
-                                </svg>
+                                <x-icon name="retirer" size="18" />
                             </button>
                         </li>
                     @endforeach
@@ -126,10 +123,7 @@
                 <div class="btn-row">
                     @if (count($prescriptionLines) < \App\Livewire\Service\ConsultationActions::MAX_LIGNES)
                         <button type="button" class="btn btn--ghost ordo__add" wire:click="addPrescriptionLine">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                                <path d="M12 5v14M5 12h14" />
-                            </svg>
+                            <x-icon name="ajouter" size="18" />
                             Ajouter une ligne
                         </button>
                     @endif
