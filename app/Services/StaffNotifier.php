@@ -18,7 +18,9 @@ use Illuminate\Support\Collection;
  * Un seul point d'ecriture, comme PatientHistoryRecorder pour le dossier : les
  * declencheurs disent ce qui vient d'arriver, c'est ici qu'on decide qui est
  * concerne — et le ciblage passe toujours par OnDutyRoster, jamais par une
- * requete ecrite sur place.
+ * requete ecrite sur place. Precisement par `aPrevenir()`, qui retombe sur le
+ * personnel rattache quand aucun creneau n'est saisi ; `for()` reste reservee
+ * a la question des droits, ou l'elargir serait une faute.
  *
  * Le titre est redige ici, en francais, une fois pour toutes : la cloche
  * n'aura rien a recomposer a chaque affichage.
@@ -30,15 +32,17 @@ class StaffNotifier
     /**
      * Un patient ou un visiteur vient d'entrer dans une file.
      *
-     * Personne n'est prevenu si personne n'est de garde : une notification que
-     * nul ne lira n'a pas a exister.
+     * Le personnel de garde d'abord ; a defaut, celui qui est rattache au
+     * service. Un planning vide ne doit pas valoir silence — c'est ce qu'il
+     * valait, et la cloche restait muette sur toutes les interfaces sans que
+     * rien ne l'explique.
      */
     public function queueEntry(?int $serviceId, string $qui): int
     {
         $service = $serviceId ? Service::find($serviceId) : null;
 
         return $this->push(
-            $this->roster->for($serviceId),
+            $this->roster->aPrevenir($serviceId),
             StaffNotification::TYPE_NEW_QUEUE_ENTRY,
             sprintf('%s entre dans la file de %s.', $qui, $service?->name ?? 'votre service'),
         );
@@ -74,7 +78,7 @@ class StaffNotifier
     public function careTasksPrescribed(int $serviceId, string $patient, int $combien): int
     {
         return $this->push(
-            $this->roster->for($serviceId, StaffType::CAP_CARE_TASKS),
+            $this->roster->aPrevenir($serviceId, StaffType::CAP_CARE_TASKS),
             StaffNotification::TYPE_CARE_TASK_ASSIGNED,
             sprintf('%d soin(s) programme(s) pour %s.', $combien, $patient),
         );

@@ -1,6 +1,20 @@
 <x-card title="Plannings du personnel" icon="planning">
     <p class="hint">Chaque agent consulte son planning en lecture seule dans son interface.</p>
 
+    {{-- Le planning ne sert pas qu'a savoir qui travaille : c'est lui qui
+         decide qui recoit les notifications. Un service sans garde ne les
+         recoit que par repli sur le personnel rattache, et pas du tout si
+         personne ne l'est. Ce bandeau evite de chercher pourquoi la cloche
+         reste vide. --}}
+    @if ($sansGarde->isNotEmpty())
+        <x-notice ton="alerte" title="Personne n'est de garde en ce moment sur {{ $sansGarde->count() }} service(s)">
+            {{ $sansGarde->pluck('name')->join(', ', ' et ') }}.
+            Les notifications de ces services partent vers le personnel qui y est
+            rattache ; pour un accueil ou une caisse, vers les receptionnistes ou
+            les caissiers. Un creneau saisi ici reprend toujours la main.
+        </x-notice>
+    @endif
+
     <form wire:submit="save" class="form form--inline-wrap">
         <div class="field">
             <label for="schedule-user">Membre du personnel</label>

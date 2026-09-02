@@ -1,7 +1,77 @@
 {{-- Navigation verticale + panneau actif.
      Le tiroir mobile est pilote par Alpine : sur tablette la barre laterale ne
      doit pas manger une portion fixe de l'ecran. --}}
-<div class="workspace" x-data="{ drawer: false }" @keydown.escape.window="drawer = false">
+{{-- `replie` est memorise dans le navigateur : une barre qu'on replie a chaque
+     changement de section ne rend pas le service qu'on lui demande. Le
+     stockage peut echouer (navigation privee, site data bloque) : on retombe
+     alors simplement sur « depliee », sans rien casser.
+
+     Le glissement horizontal ouvre et ferme : vers la droite on deplie, vers la
+     gauche on replie. Le bouton fait la meme chose pour qui prefere cliquer, et
+     reste le seul chemin accessible au clavier. --}}
+<div class="workspace" :class="replie && 'workspace--replie'"
+     x-data="{
+        drawer: false,
+        replie: false,
+        depart: null,
+        init() {
+            try { this.replie = localStorage.getItem('keneya.nav.replie') === '1'; } catch (e) {}
+        },
+        basculer() {
+            this.replie = ! this.replie;
+            try { localStorage.setItem('keneya.nav.replie', this.replie ? '1' : '0'); } catch (e) {}
+        },
+        // Le relachement est ecoute sur la fenetre et non sur la barre : une
+        // barre repliee ne fait que 66 px de large, et un geste vers la droite
+        // se termine donc hors d'elle. Ecoute sur la barre seule, l'evenement
+        // n'arrivait jamais et le glissement ne faisait rien.
+        large() { return window.matchMedia('(min-width: 900px)').matches; },
+
+        prise(e) {
+            if (this.large()) {
+                // Sur grand ecran, seul un geste NE la barre elle-meme la
+                // replie : ailleurs dans la page, un glissement horizontal
+                // appartient au contenu — a un tableau large, par exemple.
+                if (! e.target.closest?.('.tabnav')) return;
+            } else if (! this.drawer && e.clientX >= 40) {
+                // Tiroir ferme : le geste qui l'ouvre part du bord gauche de
+                // l'ecran, comme partout ailleurs. L'ecoute est posee sur la
+                // fenetre et non sur l'espace de travail : les premiers pixels
+                // de l'ecran sont la marge de la page, hors de cet element, et
+                // un geste depuis le bord ne l'atteignait donc jamais.
+                return;
+            }
+
+            this.depart = { x: e.clientX, y: e.clientY };
+        },
+
+        relache(e) {
+            if (! this.depart) return;
+
+            const dx = e.clientX - this.depart.x;
+            const dy = e.clientY - this.depart.y;
+            this.depart = null;
+
+            // 40 px : au-dela d'un tremblement de main, en deca d'un geste
+            // ample. Et le mouvement doit etre franchement horizontal, sinon
+            // un defilement un peu oblique replierait la barre sans qu'on l'ait
+            // demande.
+            if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+            const versLaDroite = dx > 0;
+
+            if (this.large()) {
+                if (versLaDroite === this.replie) this.basculer();
+
+                return;
+            }
+
+            // Petit ecran : le meme geste ouvre et ferme le tiroir.
+            this.drawer = versLaDroite;
+        },
+     }"
+     @keydown.escape.window="drawer = false"
+     @pointerdown.window="prise($event)" @pointerup.window="relache($event)">
 
     <button type="button" class="workspace__toggle" @click="drawer = !drawer"
             :aria-expanded="drawer ? 'true' : 'false'" aria-controls="nav-sections">
@@ -12,6 +82,17 @@
 
     <nav id="nav-sections" class="tabnav" :class="drawer && 'tabnav--open'"
          aria-label="Sections de cet espace">
+
+        {{-- Le bouton de repli n'apparait qu'a partir de la tablette en
+             paysage : sur petit ecran la barre est deja un tiroir, la replier
+             n'aurait aucun sens. --}}
+        <button type="button" class="tabnav__replier" @click="basculer()"
+                :aria-expanded="replie ? 'false' : 'true'" aria-controls="nav-sections"
+                :aria-label="replie ? 'Deplier la navigation' : 'Replier la navigation'"
+                :title="replie ? 'Deplier la navigation' : 'Replier la navigation'">
+            <x-icon name="chevron" size="16" class="tabnav__replier-icone" />
+        </button>
+
         <ul class="tabnav__list">
             @php $familleRendue = null; @endphp
 

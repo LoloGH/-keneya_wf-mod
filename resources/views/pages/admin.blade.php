@@ -37,6 +37,7 @@
             ['key' => 'sms-groupes', 'label' => 'Envoi groupe', 'view' => 'sections.admin.broadcast'],
         ]],
         ['key' => 'pathologies', 'label' => 'Pathologies', 'icon' => 'pathologie', 'view' => 'sections.admin.pathologies'],
+        ['key' => 'analyse', 'label' => 'Analyse', 'icon' => 'pathologie', 'view' => 'sections.admin.performance'],
         ['key' => 'audit', 'label' => "Journal d'audit", 'icon' => 'audit', 'view' => 'sections.admin.audit'],
 
         ['key' => 'utilisateurs', 'label' => 'Utilisateurs', 'icon' => 'utilisateurs',

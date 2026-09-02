@@ -449,6 +449,35 @@ h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.011em; }
 .chiffres__valeur { font-size: var(--texte-xl); font-weight: 700; color: var(--bleu-fonce); }
 .chiffres__libelle { font-size: var(--texte-sm); color: var(--gris-700); line-height: 1.35; }
 
+/* ---------- Jauge de note ----------
+   La longueur encode la valeur, la couleur ne la juge pas. Peindre en rouge
+   l'agent le moins bien note serait un verdict rendu par une feuille de style,
+   sur des effectifs souvent minuscules ; le chiffre et son effectif sont a
+   cote, c'est au lecteur de conclure.
+
+   Elle est masquee aux lecteurs d'ecran (`aria-hidden` cote gabarit) : la note
+   chiffree qui la suit dit deja la meme chose, en mieux. */
+.jauge { display: inline-flex; align-items: center; gap: var(--e2); min-width: 8rem; }
+
+.jauge__piste {
+    flex: 1 1 auto;
+    height: 6px;
+    background: var(--gris-200);
+    border-radius: var(--rayon-pilule);
+    overflow: hidden;
+}
+
+/* Extremite arrondie et ancree a l'origine : une jauge qui flotte ne se compare
+   plus d'une ligne a l'autre. */
+.jauge__valeur {
+    display: block;
+    height: 100%;
+    background: var(--sarcelle);
+    border-radius: var(--rayon-pilule);
+}
+
+.jauge__note { flex: 0 0 auto; font-weight: 650; color: var(--gris-900); }
+
 /* Bloc de commandes : il se lit, il se copie, il ne se modifie pas. */
 .code-bloc {
     margin: var(--e4) 0;
@@ -1131,7 +1160,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     padding: var(--e2) var(--e2) var(--e4);
 }
 
-.tabnav--open { display: block; animation: depliage var(--duree-lente) var(--courbe); }
+/* Ouvert sur petit ecran, le tiroir defile lui aussi pour son compte : sans
+   plafond de hauteur, treize entrees repoussaient le contenu de la page a
+   plusieurs ecrans de defilement sous la barre. 60 % de la hauteur visible
+   laisse voir qu'il y a quelque chose dessous. */
+.tabnav--open {
+    display: block;
+    animation: depliage var(--duree-lente) var(--courbe);
+    max-height: 60dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
 
 .tabnav__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
 .tabnav__list--nested {
@@ -1198,9 +1237,68 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 /* A partir de la tablette en paysage, la barre laterale devient une colonne
    permanente et le bouton de tiroir disparait. */
 @media (min-width: 900px) {
-    .workspace { grid-template-columns: minmax(200px, 232px) minmax(0, 1fr); gap: var(--e5); }
+    .workspace {
+        grid-template-columns: minmax(200px, 232px) minmax(0, 1fr);
+        gap: var(--e5);
+        transition: grid-template-columns var(--duree-lente) var(--courbe);
+    }
     .workspace__toggle { display: none; }
-    .tabnav { display: block; position: sticky; top: calc(var(--e4) + 64px); }
+
+    /* La barre defile pour son propre compte, et non avec la page : treize
+       entrees plus trois intitules de famille depassent la hauteur d'un ecran
+       de portable, et il fallait alors faire descendre tout le contenu pour
+       atteindre la derniere section. `overscroll-behavior` empeche le
+       defilement de se propager a la page une fois la barre en butee. */
+    .tabnav {
+        display: block;
+        position: sticky;
+        top: calc(var(--e4) + 64px);
+        max-height: calc(100dvh - 64px - var(--e8));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    /* Repliee, la barre garde ses icones : masquee, elle obligerait a la
+       rouvrir pour savoir ou l'on est. C'est une colonne de reperes, pas un
+       panneau a cacher. */
+    .workspace--replie { grid-template-columns: 66px minmax(0, 1fr); }
+
+    .workspace--replie .tabnav__link span,
+    .workspace--replie .tabnav__group span,
+    .workspace--replie .tabnav__chevron,
+    .workspace--replie .tabnav__famille { display: none; }
+
+    .workspace--replie .tabnav__link,
+    .workspace--replie .tabnav__group { justify-content: center; padding-inline: 0; }
+
+    /* Les sous-sections n'ont pas d'icone : repliees, elles ne seraient que des
+       lignes vides. Le groupe reste cliquable et les rouvre en depliant. */
+    .workspace--replie .tabnav__list--nested { display: none; }
+
+    .workspace--replie .tabnav__icone { opacity: 1; }
+}
+
+/* Bouton de repli. Il vit dans la barre, aligne a droite quand elle est
+   depliee et centre quand elle ne l'est plus — c'est la meme cible au meme
+   endroit dans les deux etats, ce qui evite de la chercher. */
+.tabnav__replier {
+    display: none;
+    margin: 0 0 var(--e1) auto;
+    width: 30px; height: 30px;
+    align-items: center; justify-content: center;
+    color: var(--gris-500);
+    background: transparent;
+    border: 1px solid var(--gris-200); border-radius: var(--rayon-sm);
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
+}
+.tabnav__replier:hover { background: var(--gris-100); color: var(--gris-900); }
+.tabnav__replier-icone { transform: rotate(180deg); transition: transform var(--duree-lente) var(--courbe); }
+.workspace--replie .tabnav__replier { margin-inline: auto; }
+.workspace--replie .tabnav__replier-icone { transform: rotate(0deg); }
+
+@media (min-width: 900px) {
+    .tabnav__replier { display: flex; }
 }
 
 /* Dans /service, le dossier patient occupe une troisieme colonne. */
@@ -2282,11 +2380,13 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 
 .app-footer {
+    /* `margin-top: auto` suffit a le coller en bas d'une page courte : le corps
+       est une colonne flex de la hauteur de l'ecran. Il etait en plus `sticky`,
+       ce qui n'ajoutait rien sur une page courte et recouvrait le bas du
+       contenu a chaque position de defilement sur une page longue — la
+       signature du produit mangeait la derniere ligne d'un tableau. */
     margin-top: auto;
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
-    background: var(--gris-100, #f1f4f6);
+    background: var(--fond);
 
     /* Les deux mentions se rangent sur une seule ligne quand la largeur le
        permet, et se replient l'une sous l'autre sinon. */
