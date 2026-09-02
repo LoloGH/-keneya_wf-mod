@@ -1198,9 +1198,68 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 /* A partir de la tablette en paysage, la barre laterale devient une colonne
    permanente et le bouton de tiroir disparait. */
 @media (min-width: 900px) {
-    .workspace { grid-template-columns: minmax(200px, 232px) minmax(0, 1fr); gap: var(--e5); }
+    .workspace {
+        grid-template-columns: minmax(200px, 232px) minmax(0, 1fr);
+        gap: var(--e5);
+        transition: grid-template-columns var(--duree-lente) var(--courbe);
+    }
     .workspace__toggle { display: none; }
-    .tabnav { display: block; position: sticky; top: calc(var(--e4) + 64px); }
+
+    /* La barre defile pour son propre compte, et non avec la page : treize
+       entrees plus trois intitules de famille depassent la hauteur d'un ecran
+       de portable, et il fallait alors faire descendre tout le contenu pour
+       atteindre la derniere section. `overscroll-behavior` empeche le
+       defilement de se propager a la page une fois la barre en butee. */
+    .tabnav {
+        display: block;
+        position: sticky;
+        top: calc(var(--e4) + 64px);
+        max-height: calc(100dvh - 64px - var(--e8));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    /* Repliee, la barre garde ses icones : masquee, elle obligerait a la
+       rouvrir pour savoir ou l'on est. C'est une colonne de reperes, pas un
+       panneau a cacher. */
+    .workspace--replie { grid-template-columns: 66px minmax(0, 1fr); }
+
+    .workspace--replie .tabnav__link span,
+    .workspace--replie .tabnav__group span,
+    .workspace--replie .tabnav__chevron,
+    .workspace--replie .tabnav__famille { display: none; }
+
+    .workspace--replie .tabnav__link,
+    .workspace--replie .tabnav__group { justify-content: center; padding-inline: 0; }
+
+    /* Les sous-sections n'ont pas d'icone : repliees, elles ne seraient que des
+       lignes vides. Le groupe reste cliquable et les rouvre en depliant. */
+    .workspace--replie .tabnav__list--nested { display: none; }
+
+    .workspace--replie .tabnav__icone { opacity: 1; }
+}
+
+/* Bouton de repli. Il vit dans la barre, aligne a droite quand elle est
+   depliee et centre quand elle ne l'est plus — c'est la meme cible au meme
+   endroit dans les deux etats, ce qui evite de la chercher. */
+.tabnav__replier {
+    display: none;
+    margin: 0 0 var(--e1) auto;
+    width: 30px; height: 30px;
+    align-items: center; justify-content: center;
+    color: var(--gris-500);
+    background: transparent;
+    border: 1px solid var(--gris-200); border-radius: var(--rayon-sm);
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
+}
+.tabnav__replier:hover { background: var(--gris-100); color: var(--gris-900); }
+.tabnav__replier-icone { transform: rotate(180deg); transition: transform var(--duree-lente) var(--courbe); }
+.workspace--replie .tabnav__replier { margin-inline: auto; }
+.workspace--replie .tabnav__replier-icone { transform: rotate(0deg); }
+
+@media (min-width: 900px) {
+    .tabnav__replier { display: flex; }
 }
 
 /* Dans /service, le dossier patient occupe une troisieme colonne. */

@@ -1,7 +1,42 @@
 {{-- Navigation verticale + panneau actif.
      Le tiroir mobile est pilote par Alpine : sur tablette la barre laterale ne
      doit pas manger une portion fixe de l'ecran. --}}
-<div class="workspace" x-data="{ drawer: false }" @keydown.escape.window="drawer = false">
+{{-- `replie` est memorise dans le navigateur : une barre qu'on replie a chaque
+     changement de section ne rend pas le service qu'on lui demande. Le
+     stockage peut echouer (navigation privee, site data bloque) : on retombe
+     alors simplement sur « depliee », sans rien casser.
+
+     Le glissement horizontal ouvre et ferme : vers la droite on deplie, vers la
+     gauche on replie. Le bouton fait la meme chose pour qui prefere cliquer, et
+     reste le seul chemin accessible au clavier. --}}
+<div class="workspace" :class="replie && 'workspace--replie'"
+     x-data="{
+        drawer: false,
+        replie: false,
+        depart: null,
+        init() {
+            try { this.replie = localStorage.getItem('keneya.nav.replie') === '1'; } catch (e) {}
+        },
+        basculer() {
+            this.replie = ! this.replie;
+            try { localStorage.setItem('keneya.nav.replie', this.replie ? '1' : '0'); } catch (e) {}
+        },
+        // Le relachement est ecoute sur la fenetre et non sur la barre : une
+        // barre repliee ne fait que 66 px de large, et un geste vers la droite
+        // se termine donc hors d'elle. Ecoute sur la barre seule, l'evenement
+        // n'arrivait jamais et le glissement ne faisait rien.
+        prise(e) { this.depart = e.clientX; },
+        relache(e) {
+            if (this.depart === null) return;
+            const parcouru = e.clientX - this.depart;
+            this.depart = null;
+            // 40 px : au-dela d'un tremblement de main, en deca d'un geste ample.
+            if (Math.abs(parcouru) < 40) return;
+            const veutReplier = parcouru < 0;
+            if (veutReplier !== this.replie) this.basculer();
+        },
+     }"
+     @keydown.escape.window="drawer = false">
 
     <button type="button" class="workspace__toggle" @click="drawer = !drawer"
             :aria-expanded="drawer ? 'true' : 'false'" aria-controls="nav-sections">
@@ -11,7 +46,19 @@
     </button>
 
     <nav id="nav-sections" class="tabnav" :class="drawer && 'tabnav--open'"
-         aria-label="Sections de cet espace">
+         aria-label="Sections de cet espace"
+         @pointerdown="prise($event)" @pointerup.window="relache($event)">
+
+        {{-- Le bouton de repli n'apparait qu'a partir de la tablette en
+             paysage : sur petit ecran la barre est deja un tiroir, la replier
+             n'aurait aucun sens. --}}
+        <button type="button" class="tabnav__replier" @click="basculer()"
+                :aria-expanded="replie ? 'false' : 'true'" aria-controls="nav-sections"
+                :aria-label="replie ? 'Deplier la navigation' : 'Replier la navigation'"
+                :title="replie ? 'Deplier la navigation' : 'Replier la navigation'">
+            <x-icon name="chevron" size="16" class="tabnav__replier-icone" />
+        </button>
+
         <ul class="tabnav__list">
             @php $familleRendue = null; @endphp
 
