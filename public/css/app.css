@@ -445,8 +445,27 @@ body::-webkit-scrollbar,
     font-size: var(--texte-xs); color: var(--gris-500);
 }
 .fil__etape { display: inline-flex; align-items: center; gap: var(--e1); }
-.fil__etape a { color: inherit; text-decoration: none; border-radius: var(--rayon-sm); }
-.fil__etape a:hover { color: var(--bleu-fonce); text-decoration: underline; }
+
+/* Les maillons qui menent quelque part sont des boutons : une section n'a pas
+   d'adresse propre, c'est un etat de la barre laterale. Ils en gardent
+   l'apparence d'un lien — c'est ce que le lecteur attend d'un fil d'Ariane.
+
+   Leur cible tactile fait 30 px et non les 44 px de regle. C'est assume : le
+   fil est un raccourci, jamais le seul chemin — la barre laterale mene aux
+   memes sections et respecte, elle, les 44 px. Un fil a hauteur de doigt
+   ferait une bande de la hauteur d'un titre au-dessus de chaque page. */
+.fil__lien {
+    display: inline-flex; align-items: center;
+    min-height: 30px; padding: 0 var(--e1);
+    margin: 0 calc(var(--e1) * -1);
+    font: inherit; color: inherit;
+    background: transparent; border: 0; border-radius: var(--rayon-sm);
+    cursor: pointer;
+    transition: color var(--transition);
+}
+
+.fil__lien:hover { color: var(--bleu-fonce); text-decoration: underline; }
+
 .fil__separateur { color: var(--gris-300); }
 .fil__etape--courante { color: var(--gris-700); font-weight: 500; }
 

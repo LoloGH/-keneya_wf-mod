@@ -87,6 +87,56 @@ class VerticalTabNav extends Component
     }
 
     /**
+     * Premiere section de l'espace : la destination du premier maillon du fil
+     * d'Ariane, qui porte le nom de l'espace (« Accueil », « Service »,
+     * « Caisse », « Poste »).
+     */
+    public function selectPremier(): void
+    {
+        if ($leaf = $this->firstLeaf($this->sections)) {
+            $this->select($leaf['key']);
+        }
+    }
+
+    /**
+     * Premiere section d'une famille : la destination d'un maillon
+     * intermediaire du fil d'Ariane, qui porte un intitule de famille
+     * (« Etablissement », « Gestion », « Systeme »).
+     *
+     * Une famille n'est pas une page — c'est un intitule de reperage dans la
+     * barre laterale. Cliquer dessus mene donc a sa premiere section, ce que
+     * ferait la barre elle-meme. A defaut de famille, on accepte le libelle
+     * d'une section : un fil peut nommer une section parente plutot qu'une
+     * famille, et il vaut mieux y aller que ne rien faire.
+     *
+     * Un intitule qui ne correspond a rien ne fait rien, sans erreur : le fil
+     * est ecrit a la main dans chaque vue de section, et une faute de frappe
+     * ne doit pas casser la page.
+     */
+    public function selectFamille(string $famille): void
+    {
+        foreach ($this->sections as $section) {
+            if (($section['famille'] ?? null) === $famille) {
+                if ($leaf = $this->firstLeaf([$section])) {
+                    $this->select($leaf['key']);
+                }
+
+                return;
+            }
+        }
+
+        foreach ($this->sections as $section) {
+            if (($section['label'] ?? null) === $famille) {
+                if ($leaf = $this->firstLeaf([$section])) {
+                    $this->select($leaf['key']);
+                }
+
+                return;
+            }
+        }
+    }
+
+    /**
      * La vue partielle de la section active, ou null si rien ne correspond.
      */
     public function activeView(): ?string
