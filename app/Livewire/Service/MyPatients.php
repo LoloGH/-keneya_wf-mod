@@ -220,6 +220,10 @@ class MyPatients extends Component
 
         return view('livewire.service.my-patients', [
             'patients' => $patients,
+            // Calculee une fois pour la liste entiere : la capacite ne depend
+            // pas du patient, et la relire a chaque ligne interrogerait le
+            // type de personnel autant de fois qu'il y a de patients.
+            'peutOuvrirLeDme' => Auth::user()->hasCapability(StaffType::CAP_ACCESS_DME),
         ]);
     }
 }

@@ -11,9 +11,20 @@
         "keneya-workflow"
     ],
     "license": "proprietary",
+    "repositories": [
+        {
+            "//": "Module DME, monte depuis le dossier voisin ../keneya-dme_mod. Le chemin est relatif a la racine du projet, ce qui le rend vrai des deux cotes : sur la machine, ou le module est range a cote de ce depot, et dans le conteneur, ou docker-compose.yml le monte sur /var/www/keneya-dme_mod (soit ../keneya-dme_mod depuis /var/www/html).",
+            "type": "path",
+            "url": "../keneya-dme_mod",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
     "require": {
         "php": "^8.4",
         "barryvdh/laravel-dompdf": "^3.1",
+        "keneya/dme": "@dev",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.6",

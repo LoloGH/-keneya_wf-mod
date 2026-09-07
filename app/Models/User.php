@@ -12,11 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Keneya\Dme\Contracts\DmeUser;
+use Keneya\Dme\Models\Concerns\IsDmePractitioner;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements DmeUser
 {
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasRoles, IsDmePractitioner, Notifiable;
 
     protected $fillable = [
         'staff_type_id',
@@ -24,6 +26,17 @@ class User extends Authenticatable
         'email',
         'mobile',
         'password',
+        // Colonnes ajoutees a `users` par les migrations du module DME : le
+        // compte est le meme des deux cotes, l'annuaire des praticiens du
+        // dossier medical est cette table (v3.3.0, assemblage).
+        'matricule',
+        'first_name',
+        'last_name',
+        'title',
+        'speciality',
+        'phone',
+        'service_id',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -36,6 +49,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'is_on_duty' => 'boolean',
+            'on_duty_since' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -144,6 +161,33 @@ class User extends Authenticatable
     public function hasCapability(string $capability): bool
     {
         return (bool) $this->staffType()?->can($capability);
+    }
+
+    /**
+     * Ce compte peut-il ouvrir le dossier medical complet d'un patient
+     * (module keneya/dme) ?
+     *
+     * L'acces au dossier medical est une capacite comme les autres : elle se
+     * coche sur un type de personnel, dans /admin, et se lit ici. Le module,
+     * lui, ne decide de rien — il demande a l'hote, et c'est cette methode
+     * qui repond (voir DmeIntegrationServiceProvider).
+     */
+    public function canAccessDme(): bool
+    {
+        return $this->hasCapability(StaffType::CAP_ACCESS_DME);
+    }
+
+    /**
+     * Meme reponse, lisible comme un attribut : `$user->can_access_dme`.
+     *
+     * C'est la troisieme forme d'accord que HostAccessGate sait reconnaitre
+     * (`dme.access.attribute`). Elle sert de filet si le resolveur pose par
+     * l'hote venait a ne pas etre enregistre : la decision resterait la meme
+     * plutot que de tomber en refus muet.
+     */
+    public function getCanAccessDmeAttribute(): bool
+    {
+        return $this->canAccessDme();
     }
 
     public function schedules(): HasMany

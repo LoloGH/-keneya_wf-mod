@@ -10,6 +10,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
+            // Apres RoleSeeder : les permissions du dossier medical se
+            // rattachent aux roles que celui-ci vient de creer.
+            DmePermissionSeeder::class,
             SettingSeeder::class,
             ServiceSeeder::class,
             DemoStaffSeeder::class,

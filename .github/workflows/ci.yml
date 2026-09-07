@@ -33,10 +33,13 @@ jobs:
           --health-retries=12
 
     env:
-      # Ces variables priment sur celles de phpunit.xml : PHPUnit ne pose une
-      # `<env>` que si elle n'est pas deja definie. C'est ce qui permet a la
-      # meme suite de tourner sur SQLite en local et sur MariaDB ici, sans
-      # toucher a phpunit.xml.
+      # phpunit.xml fait desormais autorite sur l'environnement du processus
+      # (voir tests/bootstrap.php : sous Docker, `env_file` dirigeait la suite
+      # vers la base de travail de la pile). Ce drapeau est la porte de sortie
+      # prevue, et il faut la demander : il laisse passer les variables DB_*
+      # ci-dessous, pour que la meme suite soit validee contre le moteur
+      # reellement utilise a l'hopital.
+      KENEYA_TEST_DB_FROM_ENV: '1'
       DB_CONNECTION: mysql
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
@@ -44,8 +47,24 @@ jobs:
       DB_USERNAME: keneya
       DB_PASSWORD: keneya
 
+    defaults:
+      run:
+        working-directory: keneya_wf-mod
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: keneya_wf-mod
+
+      # Le module DME est une dependance Composer de type `path`, resolue en
+      # `../keneya-dme_mod`. Il faut donc le poser a cote du projet — sans lui,
+      # `composer install` n'a rien a installer et la CI echoue avant d'avoir
+      # rien teste.
+      - uses: actions/checkout@v4
+        with:
+          repository: LoloGH/-keneya-dme_mod
+          path: keneya-dme_mod
+          token: ${{ secrets.DME_MODULE_TOKEN || github.token }}
 
       - name: Installer PHP 8.4
         uses: shivammathur/setup-php@v2
@@ -59,15 +78,19 @@ jobs:
           # aussi la version du serveur de production (voir php8.4-fpm dans
           # docs/exploitation-demo.md).
           php-version: '8.4'
-          extensions: bcmath, intl, pcntl, pdo_mysql, zip, mbstring
+          # `gd` n'est declaree par aucun composer.json — dompdf ne le fait
+          # pas — mais son absence fait echouer en 500 tout rendu PDF portant
+          # un logo, une signature ou un tampon, ainsi que le QR code des
+          # documents du module DME.
+          extensions: bcmath, gd, intl, pcntl, pdo_mysql, zip, mbstring
           coverage: none
           tools: composer:v2
 
       - name: Cache des dependances Composer
         uses: actions/cache@v4
         with:
-          path: vendor
-          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('composer.lock') }}
+          path: keneya_wf-mod/vendor
+          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('keneya_wf-mod/composer.lock') }}
           restore-keys: composer-${{ runner.os }}-php8.4-
 
       - name: composer install

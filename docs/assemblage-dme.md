@@ -1,0 +1,187 @@
+# Assemblage : KƐNƐYA WorkFlow + module Dossier Médical Électronique
+
+Ce dépôt est une **copie de travail** de `keneya_workflow` dans laquelle le
+module `keneya/dme` est monté. Il est volontairement séparé du dépôt d'origine :
+rien n'y est reversé tant que l'ensemble n'a pas été validé.
+
+Le module vit dans un dossier voisin (`../keneya-dme_mod`) et est référencé par
+un dépôt Composer de type `path`. Il n'est donc pas copié dans ce dépôt : les
+deux se développent côte à côte.
+
+---
+
+## 1. Ce que l'assemblage ajoute
+
+| Question | Réponse retenue |
+|---|---|
+| Qui peut ouvrir un dossier médical ? | La capacité `can_access_dme`, cochée sur un type de personnel dans `/admin`. |
+| Par où y entre-t-on ? | L'action « Dossier medical complet » de l'onglet **Mes patients** de `/service`. Pas d'interface de premier niveau. |
+| Comment le module envoie-t-il un SMS ? | Par `SendSmsJob` de WorkFlow. Une seule file, une seule table `sms_messages`, un seul indicateur d'échecs. |
+| Qui est l'utilisateur, côté module ? | Le compte WorkFlow. Même table `users`, même session, même journal d'audit. |
+
+---
+
+## 2. Démarrage
+
+```bash
+docker compose up -d --build
+docker compose exec app composer install
+docker compose exec app php artisan migrate --seed --force
+docker compose exec app php artisan vendor:publish --tag=dme-config
+docker compose exec app php artisan vendor:publish --tag=dme-assets --force
+```
+
+L'application répond sur **http://localhost:8083**.
+
+Le port n'est pas anodin : `keneya_workflow` occupe le 8080 et
+`keneya-dme_app` (le module en autonome) le 8081. Les trois piles doivent
+pouvoir tourner en même temps sur le même poste. Pour la même raison, la base
+de cet assemblage est publiée sur le **3309** et ses volumes Docker portent des
+noms qui lui sont propres (`keneya_wf_mod_db`, `keneya_wf_mod_storage`) — un
+volume partagé aurait fait écrire cette pile dans la base de production de
+`keneya_workflow`, ce qui ne se voit qu'une fois le mal fait.
+
+`vendor:publish --tag=dme-assets` n'est pas facultatif : sans lui, les pages du
+module s'affichent sans feuille de style.
+
+### Le montage du module dans le conteneur
+
+`docker-compose.yml` monte `../keneya-dme_mod` sur `/var/www/keneya-dme_mod`, et
+c'est **ce chemin-là** — celui vu de l'intérieur du conteneur — que déclare le
+dépôt `path` de `composer.json`. Sans le montage, `composer install` échouerait
+dans le conteneur alors qu'il fonctionnerait sur la machine : c'est l'erreur
+classique de ce genre d'assemblage.
+
+L'image, elle, se construit sans le module : le `Dockerfile` pose un
+`composer.json` minimal à cette adresse le temps du build, et la découverte des
+paquets se refait au premier démarrage, une fois le vrai module en place.
+
+---
+
+## 3. Cohabitation des deux schémas
+
+Les migrations du module et celles de WorkFlow créent des tables dans **la même
+base**. Six noms entraient en collision frontale — `patients`, `services`,
+`appointments`, `prescriptions`, `hospitalizations`, `sms_messages` — et la
+liste se serait allongée à chaque évolution de l'un ou de l'autre.
+
+La règle posée dans le module est donc explicite :
+
+- **les tables que le module possède portent le préfixe `dme_`**
+  (`dme_patients`, `dme_consultations`, `dme_prescriptions`…) ;
+- **les tables qu'il partage avec son hôte gardent leur nom** : `users`,
+  `activity_log`, les tables de `spatie/laravel-permission` et
+  `personal_access_tokens`.
+
+Ce partage est le cœur de l'assemblage, pas un effet de bord :
+
+- `users` : le praticien du dossier médical **est** le compte WorkFlow. Les
+  migrations du module ajoutent à cette table les colonnes professionnelles
+  (`matricule`, `first_name`, `service_id`, `is_active`, `is_on_duty`…), une par
+  une et seulement si elles manquent.
+- `activity_log` : c'est ce qui fait qu'une consultation ouverte dans le module
+  apparaît dans le journal d'audit de `/admin`. Le module écrit sous le nom de
+  journal `medical`, WorkFlow sous `keneya`, et l'écran d'administration
+  restitue les deux (`Audit::LOG_NAMES`).
+- les rôles et permissions : `$user->can('prescriptions.create')` répond la même
+  chose des deux côtés. `DmePermissionSeeder` verse les permissions fines du
+  DME dans le RBAC de WorkFlow et les rattache aux rôles `admin`, `doctor` et
+  `receptionist`.
+
+Les clés étrangères des tables du module vers `users` sont conservées ; celles
+qui traverseraient la frontière dans l'autre sens n'existent pas.
+
+---
+
+## 4. Le modèle utilisateur
+
+Le module ne peut pas imposer sa classe `User` à son hôte, et il ne peut pas non
+plus manipuler une autre classe que celle que `Auth::user()` renvoie — sinon les
+comparaisons d'identité seraient fausses et le `causer_type` du journal d'audit
+divergerait.
+
+Trois pièces règlent la question :
+
+1. `config('dme.models.user')` désigne le modèle en vigueur ; ici
+   `App\Models\User`.
+2. `Keneya\Dme\Contracts\DmeUser` dit ce que le module attend de ce modèle. Les
+   policies du module typent ce contrat, jamais une classe précise.
+3. `Keneya\Dme\Models\Concerns\IsDmePractitioner` le remplit : relations du
+   dossier médical, garde, nom d'affichage, compte actif. `App\Models\User`
+   utilise ce trait.
+
+---
+
+## 5. Les SMS
+
+`App\Services\Dme\WorkflowSmsDispatcher` implémente `SmsDispatcherContract` en
+appelant `SendSmsJob::dispatch(...)`. La liaison est posée par
+`DmeIntegrationServiceProvider`, déclaré dans `bootstrap/providers.php` : les
+fournisseurs de l'application sont enregistrés **après** ceux des paquets, donc
+cette liaison remplace le repli interne du module (`QueuedSmsDispatcher`).
+
+Ce n'est pas seulement une question d'aiguillage. Le module constate lui-même
+que sa file interne n'est plus l'implémentation retenue et, en conséquence,
+n'enregistre ni ses commandes de suivi d'acheminement ni la tâche planifiée qui
+les appelle. On peut le vérifier :
+
+```bash
+docker compose exec app php artisan schedule:list   # keneya:duty-periods:sync toutes les 5 min
+docker compose exec app php artisan list keneya     # aucune commande keneya:sms:*
+```
+
+Le contexte transmis par le module (`SmsContext`) est décodé pour rattacher la
+ligne `sms_messages` à l'enregistrement du DME qui l'a déclenchée, exactement
+comme un SMS émis par WorkFlow.
+
+---
+
+## 6. Tâches planifiées
+
+Le conteneur `scheduler` déjà en place (`php artisan schedule:work`) couvre
+l'hôte **et** le module : `keneya:duty-periods:sync` y apparaît toutes les cinq
+minutes. Aucun conteneur supplémentaire n'est nécessaire.
+
+---
+
+## 7. Tests
+
+```bash
+docker compose exec app php artisan test
+```
+
+Deux corrections ont été nécessaires pour que cette commande veuille dire
+quelque chose :
+
+- **`ext-gd`** manquait dans l'image. Aucun `composer.json` ne la déclare —
+  dompdf ne le fait pas — et son absence ne se voyait qu'à l'exécution : toute
+  ordonnance portant un logo, une signature ou un tampon échouait en 500. Le
+  module en a besoin pour les mêmes raisons, plus le QR code de ses documents.
+- **`tests/bootstrap.php`**. `docker-compose.yml` injecte le `.env` de
+  l'application dans l'environnement du conteneur (`env_file`), PHP le recopie
+  dans `$_SERVER`, et c'est `$_SERVER` que Laravel consulte en premier. Les
+  `<env>` de `phpunit.xml`, qui n'écrivent que dans `putenv()` et `$_ENV`, ne
+  faisaient pas le poids : **la suite tournait sur la base de travail de la
+  pile**, qu'un `RefreshDatabase` reconstruit de zéro à chaque exécution. Le
+  fichier d'amorçage aligne `$_SERVER` sur ce que déclare `phpunit.xml`.
+
+`tests/Feature/DmeIntegrationTest.php` couvre les jointures que ni WorkFlow ni
+le module ne peuvent vérifier seuls : la capacité d'accès, l'absence de seconde
+authentification, la création du dossier au premier accès, le chemin des SMS et
+le journal d'audit commun.
+
+La suite du module se lance de son côté, depuis son propre dépôt :
+
+```bash
+composer test
+```
+
+---
+
+## 8. Ce qui reste à décider
+
+Le module expose ses propres écrans d'administration des comptes et des rôles
+(`/dme/utilisateurs`, `/dme/parametres`). Ils fonctionnent, mais ils agissent
+sur les mêmes comptes que `/admin` sans en connaître les règles — type de
+personnel, rattachement au service, rôle cloisonné. Tant que la question n'est
+pas tranchée, ils ne devraient être ouverts qu'à un administrateur averti.

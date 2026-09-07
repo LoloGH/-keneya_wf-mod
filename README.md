@@ -1,6 +1,12 @@
 # KƐNƐYA WorkFlow
 
-[![CI](https://github.com/LoloGH/keneya_workflow/actions/workflows/ci.yml/badge.svg)](https://github.com/LoloGH/keneya_workflow/actions/workflows/ci.yml)
+[![CI](https://github.com/LoloGH/-keneya_wf-mod/actions/workflows/ci.yml/badge.svg)](https://github.com/LoloGH/-keneya_wf-mod/actions/workflows/ci.yml)
+
+> **Ce dépôt est la copie d'assemblage** de `keneya_workflow` avec le module
+> Dossier Médical Électronique `keneya/dme` monté dedans. Il tourne sur le port
+> **8083**, en parallèle des deux projets d'origine, et rien n'est reversé dans
+> `keneya_workflow` tant que l'ensemble n'a pas été validé.
+> Voir **[docs/assemblage-dme.md](docs/assemblage-dme.md)**.
 
 Gestion de file d'attente hospitalière avec renvoi inter-services et **dossier
 patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kayes**
@@ -35,6 +41,7 @@ patient unique**, développée par AXESs pour l'**Hôpital Fousseyni Daou de Kay
 18. [Vérification d'un déploiement](#18-vérification-dun-déploiement)
 19. [Tests](#19-tests)
 20. [Organisation du code](#20-organisation-du-code)
+21. [Module Dossier Médical Électronique](#21-module-dossier-médical-électronique)
 
 ---
 
@@ -1449,7 +1456,7 @@ php artisan test                          # sans Docker
 docker compose exec app php artisan test  # avec Docker
 ```
 
-**281 tests, 972 assertions.** La suite couvre :
+**559 tests, 1938 assertions**, module DME assemblé compris. La suite couvre :
 
 | Fichier | Objet |
 |---|---|
@@ -1491,10 +1498,18 @@ docker compose exec app php artisan test  # avec Docker
 | `LoginScreenTest` | Contrat du formulaire de connexion, scène et carte, erreurs et limitation de tentatives. |
 | `AcceptanceScenarioTest` | Le scénario d'acceptation de bout en bout, dans l'ordre. |
 | `SmsGatewayTest` | Format international, passerelle désactivée ou injoignable. |
+| `DmeIntegrationTest` | Montage du module DME : la capacité `can_access_dme` fait apparaître l'action et l'URL directe obéit à la même règle, l'entrée dans le module ne redemande jamais de mot de passe, un patient sans dossier médical en obtient un au premier accès (et un seul), un SMS du module part par `SendSmsJob`, une action du module se lit dans le journal de `/admin`. |
 
 Les tests tournent sur SQLite en mémoire et n'envoient jamais de SMS. La suite
-a également été passée **contre MariaDB 10.11** - 281 tests au vert - et les
-37 migrations ont été vérifiées **dans les deux sens** sur les deux moteurs.
+a également été passée **contre MariaDB 10.11** et les migrations ont été
+vérifiées **dans les deux sens** sur les deux moteurs.
+
+`tests/bootstrap.php` n'est pas décoratif : sous Docker, `env_file` injecte le
+`.env` de l'application dans l'environnement du conteneur, PHP le recopie dans
+`$_SERVER`, et c'est `$_SERVER` que Laravel consulte en premier. Les `<env>` de
+`phpunit.xml` ne faisaient donc pas le poids et la suite tournait sur la base de
+travail de la pile, qu'un `RefreshDatabase` reconstruit de zéro. Le fichier
+d'amorçage remet `phpunit.xml` en position d'autorité.
 
 ## 20. Organisation du code
 
@@ -1541,6 +1556,36 @@ app/
 
 L'interface est intégralement en français, y compris les messages de
 validation et d'erreur.
+
+---
+
+## 21. Module Dossier Médical Électronique
+
+Ce dépôt monte le module `keneya/dme` — antécédents, consultations, ordonnances,
+laboratoire, imagerie, hospitalisation — dans WorkFlow. Le module vit dans un
+dossier voisin (`../keneya-dme_mod`) et est référencé par un dépôt Composer de
+type `path` ; il n'est pas copié ici.
+
+Ce que l'assemblage établit, en une phrase chacun :
+
+- **Qui entre** : la capacité `can_access_dme`, cochée sur un type de personnel
+  dans `/admin`. Disponible pour le rôle `doctor` et pour tout type générique.
+- **Par où** : l'action « Dossier medical complet » de l'onglet **Mes patients**
+  de `/service`. Pas d'interface de premier niveau, pas de seconde
+  authentification.
+- **Quel patient** : `PatientIdentifierResolver` relie le `patient_code` de
+  WorkFlow (système `keneya_workflow`) au dossier du module, et le crée au
+  premier accès s'il n'existe pas.
+- **Quels SMS** : `App\Services\Dme\WorkflowSmsDispatcher` remet tout à
+  `SendSmsJob`. Une seule file, une seule table `sms_messages`.
+- **Quel journal** : le module écrit dans le même `activity_log`, sous le nom de
+  journal `medical`, et l'écran d'audit de `/admin` restitue les deux.
+- **Quelles tables** : celles que le module possède portent le préfixe `dme_` ;
+  celles qu'il partage avec l'hôte (`users`, `activity_log`, rôles et
+  permissions) gardent leur nom.
+
+Le détail — démarrage, ports, montage Docker, modèle utilisateur, tâches
+planifiées — est dans **[docs/assemblage-dme.md](docs/assemblage-dme.md)**.
 
 ---
 

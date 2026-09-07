@@ -53,6 +53,16 @@ class StaffType extends Model
     public const CAP_REGISTER_VISITOR = 'can_register_visitor';
 
     /**
+     * Ouverture du dossier medical complet, porte par le module keneya/dme
+     * (v3.3.0). Distincte de CAP_VIEW_DOSSIER, qui n'ouvre que le dossier
+     * WorkFlow — passages, renvois, pieces jointes. Celle-ci donne acces a
+     * l'antecedent medical, aux consultations, aux ordonnances et aux
+     * examens : elle se coche a part, et pour les seuls comptes qui en ont
+     * l'usage clinique.
+     */
+    public const CAP_ACCESS_DME = 'can_access_dme';
+
+    /**
      * Libelle de chaque capacite et section qu'elle fait apparaitre.
      *
      * C'est cette table qui alimente l'apercu montre a l'admin au moment de
@@ -114,6 +124,10 @@ class StaffType extends Model
             'label' => 'Enregistrer un visiteur',
             'section' => 'Visiteur',
         ],
+        self::CAP_ACCESS_DME => [
+            'label' => 'Ouvrir le dossier medical complet (DME)',
+            'section' => 'Dossier medical complet (depuis « Mes patients »)',
+        ],
     ];
 
     /**
@@ -148,6 +162,7 @@ class StaffType extends Model
                 self::CAP_SCHEDULE_APPOINTMENT,
                 self::CAP_ADMIT_HOSPITALIZATION,
                 self::CAP_CARE_TASKS,
+                self::CAP_ACCESS_DME,
             ],
         ],
         Roles::RECEPTIONIST => [

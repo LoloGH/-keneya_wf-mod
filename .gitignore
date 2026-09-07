@@ -19,3 +19,9 @@ yarn-error.log
 /.zed
 /backups
 /database/database.sqlite
+
+# Ressources statiques du module DME, recopiees par
+# `php artisan vendor:publish --tag=dme-assets --force`. Elles sont derivees
+# du module et se regenerent a chaque installation : les versionner ici ferait
+# deux sources pour un meme fichier.
+/public/vendor

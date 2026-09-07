@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\Caisse\CaisseReceiptController;
 use App\Http\Controllers\CaisseController;
+use App\Http\Controllers\DmeRecordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Portal\PatientPortalController;
 use App\Http\Controllers\Portal\PortalDownloadController;
@@ -121,6 +122,25 @@ Route::middleware(['auth', 'role.scope:staff'])->group(function () {
 
     Route::get('/staff/{slug}/ticket/{visit}', StaffPrintTicketController::class)
         ->name('staff.ticket');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Dossier medical complet (module keneya/dme, v3.3.0)
+|--------------------------------------------------------------------------
+|
+| Une seule route, et c'est un passage : elle relie le patient WorkFlow a son
+| dossier du DME puis redirige vers le module, sous la session deja ouverte.
+|
+| Volontairement hors des groupes `role.scope` : l'acces au dossier medical
+| est une capacite de type de personnel, pas un role. Un medecin comme un
+| type generique peuvent la porter, et le controleur verifie la capacite
+| elle-meme — un compte sans elle est renvoye vers son espace.
+|
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/dossier-medical/{patient}', DmeRecordController::class)
+        ->name('dossier-medical.ouvrir');
 });
 
 // Affichage public en salle d'attente (moniteur mural, sans connexion).

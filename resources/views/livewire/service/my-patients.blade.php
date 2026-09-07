@@ -57,6 +57,19 @@
                                 Envoyer le lien de mes documents
                             </button>
                         @endif
+
+                        {{-- Point d'entree du module DME (v3.3.0). Un lien et
+                             non un bouton Livewire : on quitte /service pour
+                             une autre partie de l'application, sous la meme
+                             session. Le controleur revoit la meme capacite,
+                             pour qu'une URL tapee a la main ne contourne pas
+                             ce que l'interface cache deja. --}}
+                        @if ($peutOuvrirLeDme)
+                            <a class="btn btn--secondary"
+                               href="{{ route('dossier-medical.ouvrir', $patient) }}">
+                                Dossier medical complet
+                            </a>
+                        @endif
                     </div>
 
                     @if ($appointmentPatientId === $patient->id)

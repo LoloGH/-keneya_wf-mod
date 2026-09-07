@@ -58,7 +58,9 @@ class ActivityLogViewer extends Component
     {
         $activities = Activity::query()
             ->with('causer')
-            ->where('log_name', Audit::LOG_NAME)
+            // Le journal de WorkFlow et celui du module DME, dans une seule
+            // liste : c'est le meme etablissement et le meme personnel.
+            ->whereIn('log_name', Audit::LOG_NAMES)
             ->when($this->causerId, fn ($query) => $query->where('causer_id', $this->causerId))
             ->when($this->event !== '', fn ($query) => $query->where('event', $this->event))
             ->when($this->from !== '', fn ($query) => $query->whereDate('created_at', '>=', $this->from))
@@ -69,7 +71,7 @@ class ActivityLogViewer extends Component
         // Seuls les utilisateurs ayant reellement produit une trace sont
         // proposes au filtre.
         $causerIds = Activity::query()
-            ->where('log_name', Audit::LOG_NAME)
+            ->whereIn('log_name', Audit::LOG_NAMES)
             ->whereNotNull('causer_id')
             ->distinct()
             ->pluck('causer_id');

@@ -17,6 +17,42 @@ final class Audit
 {
     public const LOG_NAME = 'keneya';
 
+    /**
+     * Journal du module Dossier Medical Electronique (v3.3.0).
+     *
+     * Le module ecrit dans la meme table `activity_log`, sous son propre nom
+     * de journal. Les deux cohabitent a dessein : l'administration de
+     * l'hopital doit pouvoir relire, au meme endroit, qui a ouvert un dossier
+     * medical et qui a cloture un passage. Deux ecrans separes auraient
+     * garanti que le second ne soit jamais lu.
+     */
+    public const MEDICAL_LOG_NAME = 'medical';
+
+    /**
+     * Les journaux que l'ecran d'audit de /admin restitue.
+     *
+     * @var array<int, string>
+     */
+    public const LOG_NAMES = [self::LOG_NAME, self::MEDICAL_LOG_NAME];
+
+    // ------------------------------------------------------------------
+    // Evenements ecrits par le module DME. Les noms viennent du module et
+    // restent en anglais : ce sont des valeurs deja en base, on ne les
+    // renomme pas — seul leur libelle d'affichage est traduit ci-dessous.
+    // ------------------------------------------------------------------
+
+    /** Consultation d'un dossier medical (trace a chaque ouverture). */
+    public const EVENT_DME_VIEWED = 'viewed';
+
+    /** Tentative d'acces refusee a l'interieur du dossier medical. */
+    public const EVENT_DME_DENIED = 'denied';
+
+    /** Telechargement d'un document medical. */
+    public const EVENT_DME_DOWNLOADED = 'downloaded';
+
+    /** Acces au module refuse : l'hote ne l'a pas accorde. */
+    public const EVENT_DME_ACCESS_DENIED = 'dme_access_denied';
+
     public const EVENT_LOGIN = 'connexion';
 
     public const EVENT_LOGOUT = 'deconnexion';
@@ -219,6 +255,10 @@ final class Audit
         self::EVENT_CREATED => 'Creation',
         self::EVENT_UPDATED => 'Modification',
         self::EVENT_DELETED => 'Suppression',
+        self::EVENT_DME_VIEWED => 'Consultation du dossier medical',
+        self::EVENT_DME_DENIED => 'Acces refuse dans le dossier medical',
+        self::EVENT_DME_DOWNLOADED => 'Telechargement d\'un document medical',
+        self::EVENT_DME_ACCESS_DENIED => 'Acces au dossier medical refuse',
     ];
 
     /**
