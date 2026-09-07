@@ -8,6 +8,13 @@ Le module vit dans un dossier voisin (`../keneya-dme_mod`) et est référencé p
 un dépôt Composer de type `path`. Il n'est donc pas copié dans ce dépôt : les
 deux se développent côte à côte.
 
+**La version du module qu'exige cet assemblage est la branche
+`assemblage-workflow` de [`LoloGH/-keneya-dme_mod`](https://github.com/LoloGH/-keneya-dme_mod/tree/assemblage-workflow)**,
+pas encore `main`. C'est elle qui porte le préfixe `dme_` sur les tables du
+module et la traduction de ses rôles ; sans elle, les deux schémas entrent en
+collision. La CI la cible explicitement (`.github/workflows/ci.yml`) — à
+remettre sur `main` une fois la fusion faite là-bas.
+
 ---
 
 ## 1. Ce que l'assemblage ajoute

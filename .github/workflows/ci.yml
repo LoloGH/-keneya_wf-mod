@@ -63,6 +63,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: LoloGH/-keneya-dme_mod
+          # La branche que cet assemblage exige : elle porte le prefixe `dme_`
+          # sur les tables du module et la traduction de ses roles. Tant
+          # qu'elle n'est pas fusionnee dans `main` la-bas, cloner la branche
+          # par defaut donnerait un module qui entre en collision avec les
+          # tables de WorkFlow — a remettre sur `main` une fois la fusion faite.
+          ref: assemblage-workflow
           path: keneya-dme_mod
           token: ${{ secrets.DME_MODULE_TOKEN || github.token }}
 
