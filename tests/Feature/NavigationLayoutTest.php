@@ -87,19 +87,30 @@ class NavigationLayoutTest extends TestCase
             ->test(VerticalTabNav::class, ['sections' => $this->sections(), 'active' => 'enfant-a'])
             ->assertSet('active', 'enfant-a')
             ->assertSet('expanded', ['groupe'])
-            ->assertSee('Enfant A');
+            ->assertSee('Enfant A')
+            // Deplie : le sous-menu est rendu visible, sans style de masquage.
+            ->assertDontSee('id="grp-groupe" x-show="ouvert" style="display: none;"', false);
     }
 
-    public function test_un_groupe_se_deplie_et_se_replie(): void
+    /**
+     * Le depliage d'un groupe se fait desormais entierement dans le navigateur.
+     *
+     * Le serveur ne decide plus que de l'etat de depart : il rend toujours les
+     * sous-sections, et masque celles d'un groupe ferme par un style en ligne
+     * qu'Alpine reprend ensuite a son compte. C'est ce contrat-la que ce test
+     * verrouille — le comportement au clic, lui, n'existe plus cote PHP.
+     */
+    public function test_un_groupe_ferme_rend_ses_sous_sections_masquees(): void
     {
-        $component = Livewire::actingAs($this->makeAdmin())
-            ->test(VerticalTabNav::class, ['sections' => $this->sections()]);
-
-        $component->assertDontSee('Enfant A')
-            ->call('toggleGroup', 'groupe')
+        Livewire::actingAs($this->makeAdmin())
+            ->test(VerticalTabNav::class, ['sections' => $this->sections()])
+            ->assertSet('expanded', [])
+            // Le libelle est bien dans le document : c'est ce qui permet a
+            // Alpine de l'afficher sans rien demander au serveur.
             ->assertSee('Enfant A')
-            ->call('toggleGroup', 'groupe')
-            ->assertDontSee('Enfant A');
+            // Mais le groupe part ferme, et son etat initial est celui-la.
+            ->assertSee('x-data="{ ouvert: false }"', false)
+            ->assertSee('style="display: none;"', false);
     }
 
     public function test_le_contexte_est_transmis_a_la_section_active(): void

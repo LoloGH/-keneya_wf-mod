@@ -46,8 +46,13 @@ class VerticalTabNav extends Component
     public array $context = [];
 
     /**
-     * Groupes deplies. Un groupe contenant la section active s'ouvre de
-     * lui-meme : on ne cache jamais a l'utilisateur ou il se trouve.
+     * Groupes deplies au chargement. Un groupe contenant la section active
+     * s'ouvre de lui-meme : on ne cache jamais a l'utilisateur ou il se trouve.
+     *
+     * C'est un etat de depart, pas l'etat courant : une fois la page affichee,
+     * l'ouverture et la fermeture des groupes se font entierement dans le
+     * navigateur. Deplier un menu n'a pas a passer par le serveur, et sur une
+     * liaison lente le sous-menu apparaissait avec un temps de retard.
      *
      * @var array<int, string>
      */
@@ -79,17 +84,6 @@ class VerticalTabNav extends Component
                 $this->expanded[] = $group;
             }
         }
-    }
-
-    public function toggleGroup(string $key): void
-    {
-        if (in_array($key, $this->expanded, true)) {
-            $this->expanded = array_values(array_diff($this->expanded, [$key]));
-
-            return;
-        }
-
-        $this->expanded[] = $key;
     }
 
     /**
