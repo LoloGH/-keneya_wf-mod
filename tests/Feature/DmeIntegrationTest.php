@@ -150,6 +150,27 @@ class DmeIntegrationTest extends TestCase
         $this->actingAs($admin)->get(route('dme.audit.index'))->assertSuccessful();
     }
 
+    /**
+     * Retirer un dossier du DME est une prerogative de l'administrateur.
+     *
+     * Le module distingue deux gestes : archiver, qui range sans rien
+     * detruire, et supprimer, qui detruit le dossier et tout son contenu
+     * clinique. Le second est porte par une permission a part, `patients.purge`,
+     * que la correspondance de roles ne donne qu'a l'administrateur de
+     * WorkFlow. Un medecin n'a ni l'une ni l'autre.
+     */
+    public function test_seul_l_administrateur_peut_retirer_un_dossier_du_module(): void
+    {
+        [$medecin] = $this->medecinEtSonPatient(avecDme: true);
+        $admin = $this->makeAdmin();
+
+        $this->assertTrue($admin->can('patients.delete'), "L'admin doit pouvoir archiver.");
+        $this->assertTrue($admin->can('patients.purge'), "L'admin doit pouvoir supprimer definitivement.");
+
+        $this->assertFalse($medecin->can('patients.delete'));
+        $this->assertFalse($medecin->can('patients.purge'));
+    }
+
     public function test_l_administrateur_ouvre_le_dossier_medical_depuis_son_interface(): void
     {
         [, $patient] = $this->medecinEtSonPatient(avecDme: true);

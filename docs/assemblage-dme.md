@@ -227,6 +227,28 @@ administrer, il faudrait réduire ses permissions DME à `users.manage`,
 `settings.manage`, `roles.manage`, `audit.view` et `sms.view` dans
 `DmePermissionSeeder`, et retirer le lien de `patient-directory.blade.php`.
 
+### Retirer un dossier du DME
+
+Le module distingue deux gestes, et l'écart entre eux est le sujet :
+
+- **Archiver** (`patients.delete`) range un dossier : il sort de la liste des
+  patients et n'est plus modifiable, mais reste entièrement consultable et se
+  restaure. Rien n'est détruit.
+- **Supprimer** (`patients.purge`) détruit le dossier et tout son contenu
+  clinique. Le geste exige un dossier **déjà archivé**, le numéro retapé à
+  l'identique et un motif. Seule l'entrée du journal d'audit survit.
+
+`DmePermissionSeeder` ne donne `patients.purge` qu'à l'administrateur : un
+médecin ne peut ni archiver ni supprimer.
+
+**La suppression d'un dossier patient dans WorkFlow ne touche pas au DME** —
+décision prise, pas oubli. Le dossier médical est une archive indépendante qui
+survit à la file d'attente. Conséquence à connaître : sa liaison
+`dme_patient_identifiers` devient orpheline, et un patient réenregistré sous un
+nouveau `patient_code` recevra un second dossier médical. Le premier se
+retrouve en filtrant la liste des patients du module sur « Archivé », ou par
+son numéro.
+
 Reste un point non tranché : les écrans de comptes et de rôles du module
 agissent sur les mêmes comptes que `/admin` sans en connaître les règles —
 type de personnel, rattachement au service, rôle cloisonné. Créer un compte
