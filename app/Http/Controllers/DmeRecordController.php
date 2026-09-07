@@ -32,12 +32,15 @@ class DmeRecordController extends Controller
         $user = Auth::user();
 
         // Refus lisible plutot qu'un 403 : dans un hopital, personne ne doit
-        // rester devant une page d'erreur technique. Meme regle que le
-        // cloisonnement des roles (EnsureRoleScope).
+        // rester devant une page d'erreur technique. Meme regle, et meme cle
+        // de session, que le cloisonnement des roles (EnsureRoleScope) : la
+        // cle generique `error` est la seule que la mise en page affiche dans
+        // toutes les interfaces. Une cle propre a /service laisserait le
+        // message invisible partout ailleurs.
         if (! $user->canAccessDme()) {
             return redirect()
                 ->to($user->homeUrl() ?? route('home'))
-                ->with('service.error', "L'acces au dossier medical complet n'est pas active pour votre compte.");
+                ->with('error', "L'acces au dossier medical complet n'est pas active pour votre compte.");
         }
 
         $dossier = $resolver->resolve(

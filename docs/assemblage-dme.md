@@ -202,10 +202,33 @@ composer test
 
 ---
 
-## 8. Ce qui reste à décider
+## 8. Qui administre le module
 
-Le module expose ses propres écrans d'administration des comptes et des rôles
-(`/dme/utilisateurs`, `/dme/parametres`). Ils fonctionnent, mais ils agissent
-sur les mêmes comptes que `/admin` sans en connaître les règles — type de
-personnel, rattachement au service, rôle cloisonné. Tant que la question n'est
-pas tranchée, ils ne devraient être ouverts qu'à un administrateur averti.
+Le module a trois écrans d'administration, tous sous `/dme` :
+
+| Écran | URL | Permission |
+|---|---|---|
+| Paramètres, rôles et permissions | `/dme/parametres` | `settings.manage`, `roles.manage` |
+| Comptes du DME | `/dme/utilisateurs` | `users.manage` |
+| Journal d'audit médical | `/dme/audit` | `audit.view` |
+
+C'est **l'administrateur de WorkFlow** qui les tient, et il entre dans le
+module de droit : `User::canAccessDme()` répond oui pour le rôle `admin` sans
+passer par la case à cocher. Ce n'est pas une faveur, c'est une nécessité — il
+n'a aucun type de personnel, la case `can_access_dme` n'existe donc nulle part
+pour lui dans `/admin`, et il serait le seul compte à ne jamais pouvoir
+l'obtenir. Le module resterait sans administrateur.
+
+Il a également l'action « Dossier medical complet » dans `/admin` → Patients,
+au même titre qu'un médecin dans « Mes patients ». C'est une décision assumée :
+un compte administratif accède ainsi à l'antécédent médical, aux ordonnances et
+aux examens de chaque patient. Pour l'en écarter tout en le laissant
+administrer, il faudrait réduire ses permissions DME à `users.manage`,
+`settings.manage`, `roles.manage`, `audit.view` et `sms.view` dans
+`DmePermissionSeeder`, et retirer le lien de `patient-directory.blade.php`.
+
+Reste un point non tranché : les écrans de comptes et de rôles du module
+agissent sur les mêmes comptes que `/admin` sans en connaître les règles —
+type de personnel, rattachement au service, rôle cloisonné. Créer un compte
+depuis `/dme/utilisateurs` produit un utilisateur que WorkFlow ne sait pas
+placer.

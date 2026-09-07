@@ -73,6 +73,20 @@
                     <button type="button" class="btn btn--ghost" wire:click="startAttachment">
                         Ajouter une piece jointe
                     </button>
+
+                    {{-- Point d'entree du module DME (v3.3.0), le meme que
+                         celui de « Mes patients » : un lien, parce qu'on
+                         quitte /admin pour une autre partie de l'application,
+                         sous la meme session. Le controleur revoit la capacite
+                         d'acces, pour qu'une URL tapee a la main ne contourne
+                         pas ce que l'interface cache deja. --}}
+                    @if ($peutOuvrirLeDme)
+                        <a class="btn btn--secondary"
+                           href="{{ route('dossier-medical.ouvrir', $openPatient) }}">
+                            Dossier medical complet
+                        </a>
+                    @endif
+
                     <button type="button" class="btn btn--ghost" wire:click="closeRecord">Fermer</button>
                 </div>
             </div>

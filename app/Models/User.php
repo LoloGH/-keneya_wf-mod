@@ -174,6 +174,15 @@ class User extends Authenticatable implements DmeUser
      */
     public function canAccessDme(): bool
     {
+        // L'administrateur de l'etablissement l'a toujours, sans passer par la
+        // case a cocher : il n'a aucun type de personnel — la case n'existe
+        // donc nulle part dans /admin, et il serait le seul a ne jamais
+        // pouvoir l'obtenir. Or c'est lui qui administre le module : ses
+        // parametres, ses roles, ses comptes et son journal d'audit.
+        if ($this->hasRole(Roles::ADMIN)) {
+            return true;
+        }
+
         return $this->hasCapability(StaffType::CAP_ACCESS_DME);
     }
 

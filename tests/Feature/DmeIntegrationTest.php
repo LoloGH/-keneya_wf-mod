@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Livewire\Admin\ActivityLogViewer;
+use App\Livewire\Admin\PatientDirectory;
 use App\Livewire\Service\MyPatients;
 use App\Models\Patient;
 use App\Models\PatientHistory;
@@ -124,6 +125,44 @@ class DmeIntegrationTest extends TestCase
         // La porte du module (`dme.access`) rend le meme verdict que
         // l'interface : c'est HostAccessGate qui interroge WorkFlow.
         $this->actingAs($medecin)->get(route('dme.home'))->assertForbidden();
+    }
+
+    /**
+     * L'administrateur entre toujours, et par sa propre interface.
+     *
+     * Il n'a aucun type de personnel : la case `can_access_dme` n'existe donc
+     * nulle part pour lui dans /admin, et il serait le seul compte a ne jamais
+     * pouvoir l'obtenir. Or c'est lui qui administre le module — parametres,
+     * roles, comptes, journal d'audit. Il l'a donc de droit.
+     */
+    public function test_l_administrateur_entre_dans_le_module_sans_case_a_cocher(): void
+    {
+        $admin = $this->makeAdmin();
+
+        $this->assertTrue($admin->canAccessDme());
+
+        // `dme.home` redirige vers le tableau de bord : ce qui compte ici est
+        // qu'il ne soit plus refuse a la porte.
+        $this->actingAs($admin)->get(route('dme.home'))->assertRedirect(route('dme.dashboard'));
+
+        $this->actingAs($admin)->get(route('dme.settings.index'))->assertSuccessful();
+        $this->actingAs($admin)->get(route('dme.users.index'))->assertSuccessful();
+        $this->actingAs($admin)->get(route('dme.audit.index'))->assertSuccessful();
+    }
+
+    public function test_l_administrateur_ouvre_le_dossier_medical_depuis_son_interface(): void
+    {
+        [, $patient] = $this->medecinEtSonPatient(avecDme: true);
+        $admin = $this->makeAdmin();
+
+        Livewire::actingAs($admin)
+            ->test(PatientDirectory::class)
+            ->call('openRecord', $patient->getKey())
+            ->assertSee('Dossier medical complet');
+
+        $this->actingAs($admin)
+            ->get(route('dossier-medical.ouvrir', $patient))
+            ->assertRedirect(route('dme.patients.show', DmePatient::firstOrFail()));
     }
 
     // -------------------------------------------- 3. Pas de seconde session

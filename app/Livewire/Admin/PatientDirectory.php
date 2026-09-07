@@ -197,6 +197,7 @@ class PatientDirectory extends Component
             'openPatient' => $openPatient,
             'episodes' => $frise['episodes'],
             'orphans' => $frise['orphans'],
+            'peutOuvrirLeDme' => Auth::user()->canAccessDme(),
         ]);
     }
 }
