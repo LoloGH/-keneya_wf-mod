@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use App\Support\Roles;
 
 /*
 |--------------------------------------------------------------------------
@@ -161,6 +162,29 @@ return [
         // session, meme ligne. Le trait IsDmePractitioner, ajoute a ce modele,
         // lui apporte les relations et les reponses attendues par le module.
         'user' => User::class,
+    ],
+
+    /*
+    |----------------------------------------------------------------------
+    | Correspondance des roles avec ceux de WorkFlow
+    |----------------------------------------------------------------------
+    |
+    | Le module raisonne en metiers (medecin, infirmier, laboratoire),
+    | WorkFlow en interfaces (admin, doctor, receptionist, cashier). Ce
+    | tableau traduit l'un dans l'autre partout ou le module cherche des
+    | praticiens : la liste des medecins d'un rendez-vous, le medecin
+    | traitant d'un dossier, les soignants a qui confier un soin.
+    |
+    | Les roles du module qui n'ont pas d'equivalent parmi les quatre roles
+    | fixes de WorkFlow — infirmier, laboratoire, radiologie, pharmacien —
+    | ne sont pas declares : ils relevent des types de personnel generiques,
+    | qui ne portent aucun role Spatie. Le module rend alors une liste vide,
+    | et non une erreur.
+    */
+    'roles' => [
+        'administrateur' => Roles::ADMIN,
+        'medecin' => Roles::DOCTOR,
+        'reception' => Roles::RECEPTIONIST,
     ],
 
     /*

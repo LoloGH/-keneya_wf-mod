@@ -21,6 +21,7 @@ use Keneya\Dme\Models\Consultation;
 use Keneya\Dme\Models\Patient as DmePatient;
 use Keneya\Dme\Sms\SmsContext;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -151,6 +152,70 @@ class DmeIntegrationTest extends TestCase
             'causer_id' => $medecin->getKey(),
             'patient_id' => $dossier->getKey(),
         ]);
+    }
+
+    /**
+     * Les ecrans du module s'ouvrent tous sous un compte WorkFlow.
+     *
+     * Ce test n'existe pas pour verifier ce que chaque page affiche — le
+     * module a sa propre suite pour cela — mais pour attraper la famille
+     * d'erreurs que l'assemblage introduit, et qu'aucun des deux projets ne
+     * voit seul : une table renommee referencee en dur quelque part, un role
+     * du DME qui n'existe pas dans le vocabulaire de WorkFlow. Les deux se
+     * traduisent par un 500, et les deux sont deja arrives.
+     *
+     * @return array<string, array{0: string}>
+     */
+    public static function ecransDuModule(): array
+    {
+        return [
+            'accueil' => ['dme.home'],
+            'tableau de bord' => ['dme.dashboard'],
+            'patients' => ['dme.patients.index'],
+            'nouveau patient' => ['dme.patients.create'],
+            'consultations' => ['dme.consultations.index'],
+            'rendez-vous' => ['dme.appointments.index'],
+            'ordonnances' => ['dme.prescriptions.index'],
+            'laboratoire' => ['dme.laboratory.index'],
+            'imagerie' => ['dme.imaging.index'],
+            'hospitalisations' => ['dme.hospitalizations.index'],
+            'documents' => ['dme.documents.index'],
+            'notifications' => ['dme.notifications.index'],
+            'recherche' => ['dme.search'],
+        ];
+    }
+
+    #[DataProvider('ecransDuModule')]
+    public function test_les_ecrans_du_module_s_ouvrent_sous_un_compte_workflow(string $route): void
+    {
+        [$medecin] = $this->medecinEtSonPatient(avecDme: true);
+
+        $reponse = $this->actingAs($medecin)->get(route($route));
+
+        // Une page, une redirection interne ou un refus motive sont tous des
+        // reponses ; une erreur serveur n'en est pas une. On ne juge donc pas
+        // le code exact — les permissions du role peuvent legitimement fermer
+        // un ecran — mais on refuse le 500.
+        $this->assertLessThan(
+            500,
+            $reponse->getStatusCode(),
+            "L'ecran {$route} a repondu ".$reponse->getStatusCode().'.',
+        );
+
+        // Et jamais un renvoi vers la page de connexion : la session de
+        // WorkFlow doit suffire.
+        $this->assertNotSame(route('login'), $reponse->headers->get('Location'));
+    }
+
+    public function test_le_dossier_d_un_patient_s_ouvre_et_se_modifie(): void
+    {
+        [$medecin, $patient] = $this->medecinEtSonPatient(avecDme: true);
+        $this->actingAs($medecin)->get(route('dossier-medical.ouvrir', $patient));
+
+        $dossier = DmePatient::firstOrFail();
+
+        $this->actingAs($medecin)->get(route('dme.patients.show', $dossier))->assertSuccessful();
+        $this->actingAs($medecin)->get(route('dme.patients.edit', $dossier))->assertSuccessful();
     }
 
     // ------------------------------------- 4. Creation du dossier au besoin

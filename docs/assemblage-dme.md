@@ -44,6 +44,23 @@ volume partagé aurait fait écrire cette pile dans la base de production de
 `vendor:publish --tag=dme-assets` n'est pas facultatif : sans lui, les pages du
 module s'affichent sans feuille de style.
 
+### Après avoir modifié le module
+
+```bash
+docker compose restart app scheduler queue-worker && docker compose restart web
+```
+
+L'image règle `opcache.validate_timestamps = 0` : PHP-FPM ne relit jamais un
+fichier déjà compilé. C'est le bon réglage en production, mais le module est
+monté en volume et se modifie donc à chaud — sans ce redémarrage, l'application
+continue de servir l'ancien code pendant qu'`artisan test`, qui est un autre
+processus, voit déjà le nouveau. On croit alors avoir corrigé un bug qui
+s'affiche toujours à l'écran.
+
+`web` est redémarré ensuite parce que Nginx résout l'adresse d'`app` une fois
+pour toutes : si `app` redémarre seul, il répond 502 jusqu'à ce qu'on le
+relance.
+
 ### Le montage du module dans le conteneur
 
 `docker-compose.yml` monte `../keneya-dme_mod` sur `/var/www/keneya-dme_mod`, et
