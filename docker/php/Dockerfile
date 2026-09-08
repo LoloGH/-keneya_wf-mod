@@ -35,6 +35,16 @@ RUN apk add --no-cache \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/keneya.ini
 
+# Le code est monte depuis l'hote, et le proprietaire des fichiers vus par le
+# conteneur n'est pas celui qui y execute git. Git refuse alors le depot
+# (« dubious ownership ») et tout ce qui s'appuie sur lui echoue — au premier
+# rang `pint --dirty`, qui repond « only available when using Git » et laisse
+# croire que git est absent alors qu'il est installe. Les deux chemins sont
+# declares surs une fois pour toutes, dans l'image : sans cela, chacun doit le
+# redecouvrir sur son poste.
+RUN git config --system --add safe.directory /var/www/html \
+    && git config --system --add safe.directory /var/www/keneya-dme_mod
+
 WORKDIR /var/www/html
 
 # Le module DME est declare en depot `path` dans composer.json, a une adresse

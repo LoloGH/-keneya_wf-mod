@@ -68,6 +68,25 @@ s'affiche toujours à l'écran.
 pour toutes : si `app` redémarre seul, il répond 502 jusqu'à ce qu'on le
 relance.
 
+### Lancer la suite du module
+
+```bash
+docker compose run --rm dme composer install     # une seule fois
+docker compose run --rm dme ./vendor/bin/phpunit
+```
+
+La suite de l'hôte traverse le module, mais toujours avec WorkFlow derrière.
+Celle du module le vérifie **seul** : sans hôte pour fournir un utilisateur,
+des rôles, une signature ou des coordonnées d'établissement, chaque point
+d'accroche doit se rabattre proprement sur son comportement par défaut. Un
+câblage manquant passe la première suite et échoue la seconde.
+
+Le service `dme` monte le module **en écriture**, contrairement aux trois
+services qui servent l'application : composer, PHPUnit et Pint écrivent tous,
+alors qu'une pile qui répond à des requêtes HTTP n'a aucune raison de pouvoir
+réécrire le code d'un de ses paquets. Son profil `tools` le tient hors de
+`docker compose up`.
+
 ### Le montage du module dans le conteneur
 
 `docker-compose.yml` monte `../keneya-dme_mod` sur `/var/www/keneya-dme_mod`, et

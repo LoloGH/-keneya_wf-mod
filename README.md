@@ -1456,6 +1456,25 @@ php artisan test                          # sans Docker
 docker compose exec app php artisan test  # avec Docker
 ```
 
+Il y a **deux** suites, et il faut les deux. Celle ci-dessus est celle de
+l'hôte : elle traverse le module de bout en bout, mais toujours avec WorkFlow
+derrière. Le module a la sienne, qui le vérifie **seul** — sans hôte pour lui
+fournir un utilisateur, des rôles, une signature ou des coordonnées
+d'établissement. Un point d'accroche mal câblé passe la première et échoue la
+seconde.
+
+```bash
+docker compose run --rm dme composer install     # une seule fois
+docker compose run --rm dme ./vendor/bin/phpunit # 247 tests du module
+```
+
+Le service `dme` existe pour cela seul. Les trois services qui servent
+l'application montent le module **en lecture seule** — une pile qui répond à des
+requêtes HTTP n'a aucune raison de pouvoir réécrire le code d'un de ses paquets
+— alors que composer, PHPUnit et Pint écrivent tous. Le profil `tools` le tient
+hors de `docker compose up` : il ne démarre qu'à la demande, le temps d'une
+commande.
+
 **559 tests, 1938 assertions**, module DME assemblé compris. La suite couvre :
 
 | Fichier | Objet |

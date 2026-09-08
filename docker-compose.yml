@@ -117,6 +117,41 @@ services:
     networks:
       - keneya
 
+  # Outillage du module DME : ses tests, son formateur, son composer.
+  #
+  # Les trois services qui servent l'application montent `../keneya-dme_mod` en
+  # lecture seule, et c'est voulu : une pile qui repond a des requetes HTTP n'a
+  # aucune raison de pouvoir reecrire le code d'un de ses paquets. Mais le
+  # module reste un depot de travail, dont la suite de tests doit pouvoir se
+  # lancer — or PHPUnit ecrit, composer ecrit, Pint ecrit.
+  #
+  # D'ou ce service, qui monte le meme repertoire en ecriture et ne demarre
+  # jamais tout seul : le profil `tools` le tient hors de `docker compose up`.
+  # Il ne sert que de `docker compose run`.
+  #
+  #   docker compose run --rm dme composer install   # une fois, pour les
+  #                                                  # dependances de dev
+  #   docker compose run --rm dme ./vendor/bin/phpunit
+  #   docker compose run --rm dme ./vendor/bin/pint
+  #
+  # `user: "0:0"` : composer et PHPUnit creent des repertoires dans `vendor/`,
+  # ce que l'utilisateur `www-data` de l'image ne peut pas faire sur un montage
+  # venant de l'hote.
+  dme:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: keneya-wf-mod-app
+    profiles: ["tools"]
+    user: "0:0"
+    working_dir: /var/www/keneya-dme_mod
+    environment:
+      COMPOSER_ALLOW_SUPERUSER: 1
+    volumes:
+      - ../keneya-dme_mod:/var/www/keneya-dme_mod
+    networks:
+      - keneya
+
   db:
     image: mariadb:11.4
     restart: unless-stopped
