@@ -23,6 +23,12 @@
         $peut(StaffType::CAP_RECORD_CONSULTATION)
             ? ['key' => 'consultation-medicale', 'icon' => 'soins', 'label' => 'Consultation', 'view' => 'sections.service.medical-consultation']
             : null,
+        // Antecedents et allergies partagent un ecran mais deux capacites :
+        // l'onglet apparait des que l'une des deux est cochee, et l'ecran ne
+        // montre alors que la moitie qui revient au compte connecte.
+        ($peut(StaffType::CAP_RECORD_HISTORY) || $peut(StaffType::CAP_RECORD_ALLERGIES))
+            ? ['key' => 'antecedents', 'icon' => 'document', 'label' => 'Antecedents et allergies', 'view' => 'sections.service.medical-background']
+            : null,
         ['key' => 'renvois', 'icon' => 'services', 'label' => 'Renvois', 'children' => [
             ['key' => 'renvois-entrants', 'icon' => 'services', 'label' => 'Renvois en attente', 'view' => 'sections.service.incoming'],
             ['key' => 'renvois-sortants', 'icon' => 'services', 'label' => 'Mes renvois', 'view' => 'sections.service.outgoing'],

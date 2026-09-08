@@ -73,6 +73,18 @@ class StaffType extends Model
     public const CAP_RECORD_CONSULTATION = 'can_record_consultation';
 
     /**
+     * Consigner un antecedent au dossier medical (v3.3.1).
+     *
+     * Une capacite par formulaire, et non une seule pour tout le dossier : un
+     * hopital peut vouloir qu'une infirmiere releve les allergies sans qu'elle
+     * redige des consultations. Le decoupage des droits suit celui des ecrans.
+     */
+    public const CAP_RECORD_HISTORY = 'can_record_history';
+
+    /** Consigner une allergie au dossier medical (v3.3.1). */
+    public const CAP_RECORD_ALLERGIES = 'can_record_allergies';
+
+    /**
      * Libelle de chaque capacite et section qu'elle fait apparaitre.
      *
      * C'est cette table qui alimente l'apercu montre a l'admin au moment de
@@ -142,6 +154,14 @@ class StaffType extends Model
             'label' => 'Rediger une consultation medicale',
             'section' => 'Consultation — motif, constantes, examen, diagnostics',
         ],
+        self::CAP_RECORD_HISTORY => [
+            'label' => 'Consigner un antecedent',
+            'section' => 'Antecedents — personnels, chirurgicaux, familiaux',
+        ],
+        self::CAP_RECORD_ALLERGIES => [
+            'label' => 'Consigner une allergie',
+            'section' => 'Allergies — allergene, reaction, severite',
+        ],
     ];
 
     /**
@@ -178,6 +198,8 @@ class StaffType extends Model
                 self::CAP_CARE_TASKS,
                 self::CAP_ACCESS_DME,
                 self::CAP_RECORD_CONSULTATION,
+                self::CAP_RECORD_HISTORY,
+                self::CAP_RECORD_ALLERGIES,
             ],
         ],
         Roles::RECEPTIONIST => [

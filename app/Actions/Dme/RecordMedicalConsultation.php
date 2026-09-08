@@ -2,6 +2,7 @@
 
 namespace App\Actions\Dme;
 
+use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
 use App\Models\PatientHistory;
 use App\Models\Visit;
@@ -10,9 +11,7 @@ use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use Keneya\Dme\Models\ClinicalNote;
 use Keneya\Dme\Models\Consultation;
-use Keneya\Dme\Models\Patient as DossierMedical;
 use Keneya\Dme\Models\Service as ServiceDme;
-use Keneya\Dme\Patients\PatientIdentifierResolver;
 
 /**
  * Consultation medicale redigee depuis /service (v3.3.1).
@@ -34,10 +33,9 @@ use Keneya\Dme\Patients\PatientIdentifierResolver;
  */
 class RecordMedicalConsultation
 {
-    public function __construct(
-        private readonly PatientIdentifierResolver $resolver,
-        private readonly PatientHistoryRecorder $history,
-    ) {}
+    use ResolvesMedicalRecord;
+
+    public function __construct(private readonly PatientHistoryRecorder $history) {}
 
     /**
      * @param  array{
@@ -100,31 +98,6 @@ class RecordMedicalConsultation
         );
 
         return $consultation;
-    }
-
-    /**
-     * Le dossier medical du patient, cree au besoin.
-     *
-     * Meme porte d'entree que l'action « Dossier medical complet » : la
-     * liaison passe par la table d'identifiants externes du module, jamais par
-     * un rapprochement sur le nom. Un patient consulte pour la premiere fois
-     * obtient donc son dossier ici, sans que personne ait a y penser.
-     */
-    private function dossierMedical(Visit $visit): DossierMedical
-    {
-        $patient = $visit->patient;
-
-        return $this->resolver->resolve(
-            system: 'keneya_workflow',
-            value: (string) $patient->patient_code,
-            attributes: [
-                'name' => $patient->name,
-                'sex' => $patient->gender,
-                'age' => $patient->age,
-                'phone' => $patient->mobile,
-                'label' => 'Dossier KEneYa WorkFlow',
-            ],
-        );
     }
 
     /**

@@ -173,6 +173,18 @@ final class Audit
      */
     public const EVENT_MEDICAL_CONSULTATION = 'consultation_medicale';
 
+    /** Antecedent consigne au dossier medical (v3.3.1). */
+    public const EVENT_MEDICAL_BACKGROUND = 'antecedent_consigne';
+
+    /**
+     * Allergie consignee, resolue ou refutee (v3.3.1).
+     *
+     * Journalisee comme une action a part : c'est elle que le module lit pour
+     * signaler un conflit au moment de prescrire, et savoir qui l'a saisie ou
+     * ecartee peut compter.
+     */
+    public const EVENT_ALLERGY_RECORDED = 'allergie_consignee';
+
     public const EVENT_ATTACHMENT_ADDED = 'piece_jointe_ajoutee';
 
     public const EVENT_VISITOR_REGISTERED = 'visiteur_enregistre';
@@ -254,6 +266,8 @@ final class Audit
         self::EVENT_PRICE_OVERRIDDEN => 'Derogation au tarif',
         self::EVENT_CONCLUSION_RECORDED => 'Conclusion de consultation',
         self::EVENT_MEDICAL_CONSULTATION => 'Consultation medicale (dossier medical)',
+        self::EVENT_MEDICAL_BACKGROUND => 'Antecedent consigne au dossier medical',
+        self::EVENT_ALLERGY_RECORDED => 'Allergie consignee au dossier medical',
         self::EVENT_ATTACHMENT_ADDED => 'Ajout d\'une piece jointe',
         self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
         self::EVENT_BROADCAST_SENT => 'Diffusion groupee de SMS',
