@@ -3,10 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\RecordsActivity;
+use App\Support\Dme\PatientProjection;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Keneya\Dme\Models\Patient as DossierMedical;
+use Keneya\Dme\Models\Prescription as OrdonnanceMedicale;
 
 /**
  * L'identite permanente d'un patient.
@@ -85,9 +89,49 @@ class Patient extends Model
         return $this->hasMany(Payment::class);
     }
 
+    /**
+     * Ordonnances anterieures a la v3.3.1, restees dans la table de WorkFlow.
+     *
+     * Plus rien ne s'y ecrit : depuis la fusion des deux ordonnances, tout
+     * part dans le dossier medical. La relation subsiste pour la suppression
+     * d'un dossier, qui doit continuer d'emporter ces lignes.
+     */
     public function prescriptions(): HasMany
     {
         return $this->hasMany(Prescription::class);
+    }
+
+    /**
+     * Le dossier medical de ce patient, s'il en a un (v3.3.1).
+     *
+     * Nul tant qu'aucun acte n'a ete pose : le dossier nait au premier
+     * formulaire du DME, jamais a l'enregistrement a l'accueil. Le lien passe
+     * par la table d'identifiants externes du module, jamais par un
+     * rapprochement sur le nom.
+     */
+    public function dossierMedical(): ?DossierMedical
+    {
+        return PatientProjection::find($this);
+    }
+
+    /**
+     * Ses ordonnances, telles qu'elles vivent desormais : dans le dossier
+     * medical, une seule table pour les deux interfaces.
+     *
+     * @return Collection<int, OrdonnanceMedicale>
+     */
+    public function ordonnances(): Collection
+    {
+        $dossier = $this->dossierMedical();
+
+        if ($dossier === null) {
+            return OrdonnanceMedicale::query()->whereRaw('1 = 0')->get();
+        }
+
+        return $dossier->prescriptions()
+            ->with(['doctor', 'items'])
+            ->orderByDesc('id')
+            ->get();
     }
 
     public function appointments(): HasMany

@@ -15,26 +15,33 @@
     // le squelette du role et ne se retirent pas.
     $peut = fn (string $capacite) => auth()->user()->hasCapability($capacite);
 
-    $sections = array_values(array_filter([
-        ['key' => 'file', 'icon' => 'file', 'label' => "File d'attente", 'view' => 'sections.service.queue'],
-        // Consultation medicale (v3.3.1) : le formulaire est ici, la donnee
-        // part au dossier medical. Place juste apres la file, dans l'ordre ou
-        // le medecin travaille — il appelle, puis il consulte.
+    // Dossier medical (v3.3.1) : les ecrans qui ecrivent dans le DME sont
+    // regroupes sous une seule entree. Chacun garde sa capacite — un type
+    // de personnel peut n'en recevoir qu'une — et le groupe disparait si
+    // le compte n'en porte aucune. Sans ce regroupement, la barre du
+    // medecin passait a onze entrees de premier niveau.
+    $sousDossierMedical = array_values(array_filter([
         $peut(StaffType::CAP_RECORD_CONSULTATION)
             ? ['key' => 'consultation-medicale', 'icon' => 'soins', 'label' => 'Consultation', 'view' => 'sections.service.medical-consultation']
             : null,
         // Antecedents et allergies partagent un ecran mais deux capacites :
-        // l'onglet apparait des que l'une des deux est cochee, et l'ecran ne
-        // montre alors que la moitie qui revient au compte connecte.
+        // l'entree apparait des que l'une des deux est cochee, et l'ecran
+        // ne montre alors que la moitie qui revient au compte connecte.
         ($peut(StaffType::CAP_RECORD_HISTORY) || $peut(StaffType::CAP_RECORD_ALLERGIES))
             ? ['key' => 'antecedents', 'icon' => 'document', 'label' => 'Antecedents et allergies', 'view' => 'sections.service.medical-background']
             : null,
-        // Traitements, laboratoire, imagerie et documents : quatre capacites,
-        // un ecran. Il apparait des que l'une d'elles est cochee, et ne montre
-        // que les blocs qui reviennent au compte connecte.
+        // Traitements, laboratoire, imagerie et documents : quatre
+        // capacites, un ecran, meme principe.
         ($peut(StaffType::CAP_RECORD_MEDICATIONS) || $peut(StaffType::CAP_ORDER_LABORATORY)
             || $peut(StaffType::CAP_ORDER_IMAGING) || $peut(StaffType::CAP_RECORD_DOCUMENTS))
             ? ['key' => 'examens', 'icon' => 'soins', 'label' => 'Traitements et examens', 'view' => 'sections.service.medical-orders']
+            : null,
+    ]));
+
+    $sections = array_values(array_filter([
+        ['key' => 'file', 'icon' => 'file', 'label' => "File d'attente", 'view' => 'sections.service.queue'],
+        $sousDossierMedical !== []
+            ? ['key' => 'dossier-medical', 'icon' => 'document', 'label' => 'Dossier medical', 'children' => $sousDossierMedical]
             : null,
         ['key' => 'renvois', 'icon' => 'services', 'label' => 'Renvois', 'children' => [
             ['key' => 'renvois-entrants', 'icon' => 'services', 'label' => 'Renvois en attente', 'view' => 'sections.service.incoming'],

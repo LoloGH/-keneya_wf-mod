@@ -2,18 +2,19 @@
 
 namespace Tests\Feature;
 
-use App\Actions\CreatePrescription;
+use App\Actions\Dme\CreateMedicalPrescription;
 use App\Livewire\Portal\PatientPortal;
 use App\Livewire\Service\ConsultationActions;
 use App\Models\Doctor;
 use App\Models\Patient;
-use App\Models\Prescription;
+use App\Models\Prescription as OrdonnanceHeritee;
 use App\Models\Service;
 use App\Models\Visit;
 use App\Services\SmsGateway;
 use App\Services\SmsSendResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
+use Keneya\Dme\Models\Prescription;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -136,15 +137,15 @@ class PrescriptionLinesTest extends TestCase
             ->call('savePrescription')
             ->assertHasNoErrors();
 
-        $lignes = Prescription::firstOrFail()->lignes();
+        $lignes = Prescription::firstOrFail()->items()->orderBy('position')->get();
 
         $this->assertCount(2, $lignes);
-        $this->assertSame('Paracetamol 500 mg', $lignes[0]['medicament']);
-        $this->assertSame('5 jours', $lignes[0]['duree']);
-        $this->assertSame('Amoxicilline 1 g', $lignes[1]['medicament']);
-        // La duree n'a pas ete saisie : elle vaut « non precise », pas chaine
-        // vide, pour que l'imprime laisse la case blanche.
-        $this->assertNull($lignes[1]['duree']);
+        $this->assertSame('Paracetamol 500 mg', $lignes[0]->medication_name);
+        $this->assertSame('5 jours', $lignes[0]->duration);
+        $this->assertSame('Amoxicilline 1 g', $lignes[1]->medication_name);
+        // La duree n'a pas ete saisie : elle reste nulle, pas chaine vide,
+        // pour que l'imprime laisse la case blanche.
+        $this->assertNull($lignes[1]->duration);
     }
 
     public function test_les_lignes_ouvertes_mais_non_remplies_sont_ecartees(): void
@@ -163,7 +164,7 @@ class PrescriptionLinesTest extends TestCase
             ->call('savePrescription')
             ->assertHasNoErrors();
 
-        $this->assertCount(1, Prescription::firstOrFail()->lignes());
+        $this->assertSame(1, Prescription::firstOrFail()->items()->count());
     }
 
     public function test_une_posologie_sans_medicament_n_ordonne_rien(): void
@@ -203,7 +204,7 @@ class PrescriptionLinesTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('au moins un medicament');
 
-        app(CreatePrescription::class)->execute($visit, $doctor, [['posologie' => 'matin']]);
+        app(CreateMedicalPrescription::class)->execute($visit, $doctor, [['posologie' => 'matin']]);
     }
 
     // ------------------------------------------------------- La relecture
@@ -212,8 +213,10 @@ class PrescriptionLinesTest extends TestCase
     {
         [, $doctor, $visit] = $this->contexte();
 
-        // Ecrite avant la v3.2.6 : un seul bloc de texte, sans colonne.
-        $ancienne = Prescription::create([
+        // Ecrite avant la v3.2.6 : un seul bloc de texte, sans colonne, dans
+        // la table heritee de WorkFlow (v3.3.1 : plus rien ne s'y ecrit, mais
+        // la reprise doit continuer de savoir la relire).
+        $ancienne = OrdonnanceHeritee::create([
             'patient_id' => $visit->patient_id,
             'visit_id' => $visit->getKey(),
             'doctor_id' => $doctor->getKey(),
@@ -233,7 +236,7 @@ class PrescriptionLinesTest extends TestCase
         $patient = Patient::factory()->create(['name' => 'Moussa Keita']);
         $visit = $this->makeVisit($service, [], $patient);
 
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [
+        $prescription = app(CreateMedicalPrescription::class)->execute($visit, $doctor, [
             ['medicament' => 'Paracetamol 500 mg', 'posologie' => 'matin et soir', 'duree' => '5 jours'],
             ['medicament' => 'Amoxicilline 1 g'],
         ]);
@@ -242,8 +245,8 @@ class PrescriptionLinesTest extends TestCase
             ->get(route('service.prescription.print', $prescription))
             ->assertOk()
             ->assertSeeInOrder(['Paracetamol 500 mg', 'matin et soir', '5 jours', 'Amoxicilline 1 g'])
-            ->assertSee('Ordonnance medicale')
-            ->assertSee('Cachet de l\'etablissement', escape: false);
+            ->assertSee('Ordonnance')
+            ->assertSee('Cachet de l\'établissement', escape: false);
     }
 
     public function test_le_portail_patient_affiche_les_lignes(): void
@@ -252,7 +255,7 @@ class PrescriptionLinesTest extends TestCase
         $patient = Patient::factory()->create();
         $visit = $this->makeVisit($service, [], $patient);
 
-        app(CreatePrescription::class)->execute($visit, $doctor, [
+        app(CreateMedicalPrescription::class)->execute($visit, $doctor, [
             ['medicament' => 'Paracetamol 500 mg', 'posologie' => 'matin et soir'],
         ]);
 

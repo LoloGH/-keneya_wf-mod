@@ -5,9 +5,10 @@ namespace App\Services;
 use App\Models\Attachment;
 use App\Models\Patient;
 use App\Models\PatientHistory;
-use App\Models\Prescription;
 use App\Models\Visit;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
+use Keneya\Dme\Models\Prescription;
 
 /**
  * Frise chronologique unifiee d'un dossier patient (v3.2, point 3).
@@ -65,22 +66,12 @@ class PatientTimeline
             ->orderBy('id')
             ->get();
 
-        $prescriptions = $this->prescriptionsByRank($patient);
-        $seen = [];
+        $prescriptions = $this->prescriptionsById($history);
 
         // `toBase()` : une fois transformees en tableaux, ces lignes ne sont
         // plus des modeles — une Collection Eloquent essaierait de les
         // dedoublonner par cle primaire a la fusion.
-        return $history->toBase()->map(function (PatientHistory $entry) use (&$seen, $prescriptions): array {
-            $prescription = null;
-
-            if ($entry->type === PatientHistory::TYPE_PRESCRIPTION) {
-                $visitKey = (int) $entry->visit_id;
-                $rank = $seen[$visitKey] ?? 0;
-                $seen[$visitKey] = $rank + 1;
-                $prescription = $prescriptions[$visitKey][$rank] ?? null;
-            }
-
+        return $history->toBase()->map(function (PatientHistory $entry) use ($prescriptions): array {
             return [
                 'kind' => 'history',
                 'at' => $entry->created_at,
@@ -92,31 +83,39 @@ class PatientTimeline
                 'service' => $entry->service,
                 'doctor' => $entry->doctor,
                 'attachments' => $entry->attachments,
-                'prescription' => $prescription,
+                'prescription' => $prescriptions[(int) $entry->dme_prescription_id] ?? null,
             ];
         });
     }
 
     /**
-     * Ordonnances rangees par passage puis par ordre de creation.
+     * Les ordonnances que ces lignes d'historique designent, par identifiant.
      *
-     * `patient_history` ne porte pas de `prescription_id` — la consigne etait
-     * de corriger l'affichage, pas le schema. CreatePrescription ecrit
-     * l'ordonnance puis son entree d'historique dans la meme transaction :
-     * au sein d'un passage, la n-ieme entree « ordonnance » correspond donc a
-     * la n-ieme ordonnance.
+     * Jusqu'a la v3.3.1, `patient_history` ne portait pas de reference et la
+     * frise appariait la n-ieme entree « ordonnance » d'un passage avec la
+     * n-ieme ordonnance — un rapprochement par rang, exact tant que rien ne
+     * manquait. La colonne `dme_prescription_id` a remplace ce calcul : la
+     * ligne dit desormais laquelle.
      *
-     * @return array<int, array<int, Prescription>>
+     * Une reference orpheline — le dossier medical purge, par exemple — se
+     * lit comme une absence d'ordonnance, ce que la frise sait deja afficher.
+     *
+     * @param  EloquentCollection<int, PatientHistory>  $history
+     * @return array<int, Prescription>
      */
-    private function prescriptionsByRank(Patient $patient): array
+    private function prescriptionsById(EloquentCollection $history): array
     {
+        $ids = $history->pluck('dme_prescription_id')->filter()->unique()->all();
+
+        if ($ids === []) {
+            return [];
+        }
+
         return Prescription::query()
-            ->with('doctor.user')
-            ->where('patient_id', $patient->getKey())
-            ->orderBy('id')
+            ->with(['doctor', 'items'])
+            ->whereKey($ids)
             ->get()
-            ->groupBy(fn (Prescription $prescription) => (int) $prescription->visit_id)
-            ->map(fn (Collection $group) => $group->values()->all())
+            ->keyBy(fn (Prescription $prescription) => (int) $prescription->getKey())
             ->all();
     }
 

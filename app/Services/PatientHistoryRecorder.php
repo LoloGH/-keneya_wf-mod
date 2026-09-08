@@ -31,6 +31,7 @@ class PatientHistoryRecorder
         ?int $serviceId = null,
         Doctor|StaffMember|null $doctor = null,
         ?Referral $referral = null,
+        ?int $dmePrescriptionId = null,
     ): PatientHistory {
         $agent = $doctor ? Caregiver::of($doctor) : null;
 
@@ -42,6 +43,7 @@ class PatientHistoryRecorder
             'doctor_id' => $agent?->doctorId(),
             'staff_member_id' => $agent?->staffMemberId(),
             'referral_id' => $referral?->getKey(),
+            'dme_prescription_id' => $dmePrescriptionId,
             'description' => $description,
         ]);
     }

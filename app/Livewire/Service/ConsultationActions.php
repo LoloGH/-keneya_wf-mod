@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Service;
 
-use App\Actions\CreatePrescription;
+use App\Actions\Dme\CreateMedicalPrescription;
 use App\Actions\RecordConsultationConclusion;
 use App\Actions\ScheduleAppointment;
 use App\Livewire\Concerns\RequiresCapability;
@@ -144,7 +144,15 @@ class ConsultationActions extends Component
         $this->resetValidation();
     }
 
-    public function savePrescription(CreatePrescription $action): void
+    /**
+     * L'ordonnance part dans le dossier medical (v3.3.1).
+     *
+     * L'ecran ne bouge pas — c'est toujours ici que le medecin ecrit — mais ce
+     * qu'il enregistre atterrit desormais dans `dme_prescriptions`, table
+     * unique des deux interfaces. Le PDF y gagne la mise en forme du dossier
+     * medical sans rien perdre de la signature et des cachets.
+     */
+    public function savePrescription(CreateMedicalPrescription $action): void
     {
         $this->assertCapability(StaffType::CAP_PRESCRIBE);
 
@@ -171,7 +179,7 @@ class ConsultationActions extends Component
         session()->flash('service.status', sprintf(
             'Ordonnance enregistree pour %s : %d ligne(s).',
             $visit->patient->name,
-            count($prescription->lignes()),
+            $prescription->items()->count(),
         ));
 
         $this->prescriptionLines = [self::LIGNE_VIDE];

@@ -3,19 +3,19 @@
 namespace Tests\Feature;
 
 use App\Actions\CheckInAppointment;
-use App\Actions\CreatePrescription;
+use App\Actions\Dme\CreateMedicalPrescription;
 use App\Livewire\Reception\TicketCashier;
 use App\Livewire\Reception\TodayAppointments;
 use App\Livewire\Service\ConsultationActions;
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\PatientHistory;
-use App\Models\Prescription;
 use App\Models\Service;
 use App\Models\Visit;
 use App\Services\SmsGateway;
 use App\Services\SmsSendResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Keneya\Dme\Models\Prescription;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -92,8 +92,10 @@ class CashPrescriptionAppointmentTest extends TestCase
 
         $prescription = Prescription::firstOrFail();
 
-        $this->assertSame($doctor->getKey(), $prescription->doctor_id);
-        $this->assertSame($visit->getKey(), $prescription->visit_id);
+        // L'ordonnance vit dans le dossier medical (v3.3.1) : elle designe le
+        // compte du prescripteur, et se rattache au patient, non au passage.
+        $this->assertSame($doctor->user_id, $prescription->doctor_id);
+        $this->assertSame($visit->patient->dossierMedical()->getKey(), $prescription->patient_id);
 
         $this->assertDatabaseHas('patient_history', [
             'visit_id' => $visit->getKey(),
@@ -113,7 +115,7 @@ class CashPrescriptionAppointmentTest extends TestCase
         $confrere = $this->makeDoctor($service);
         $visit = $this->makeVisit($service, ['status' => Visit::STATUS_CALLED]);
 
-        $prescription = app(CreatePrescription::class)
+        $prescription = app(CreateMedicalPrescription::class)
             ->execute($visit, $auteur, [['medicament' => 'Repos et hydratation']]);
 
         $this->actingAs($confrere->user)

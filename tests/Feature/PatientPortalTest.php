@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Dme\CreateMedicalPrescription;
 use App\Actions\SendPortalLink;
 use App\Livewire\Portal\PatientPortal;
 use App\Models\Appointment;
 use App\Models\Attachment;
 use App\Models\Patient;
 use App\Models\PortalAccessAttempt;
-use App\Models\Prescription;
 use App\Models\Service;
 use App\Services\SmsGateway;
 use App\Services\SmsSendResult;
@@ -59,11 +59,10 @@ class PatientPortalTest extends TestCase
         $doctor = $this->makeDoctor($service);
         $visit = $this->makeVisit($service, [], $patient);
 
-        Prescription::create([
-            'patient_id' => $patient->getKey(),
-            'visit_id' => $visit->getKey(),
-            'doctor_id' => $doctor->getKey(),
-            'content' => 'Paracetamol 500 mg, trois fois par jour.',
+        // L'ordonnance du portail vient du dossier medical (v3.3.1) : le
+        // patient lit celle que son medecin a signee, pas une copie.
+        app(CreateMedicalPrescription::class)->execute($visit, $doctor, [
+            ['medicament' => 'Paracetamol 500 mg', 'posologie' => 'trois fois par jour'],
         ]);
 
         Appointment::create([
@@ -89,7 +88,8 @@ class PatientPortalTest extends TestCase
             ->call('unlock')
             ->assertHasNoErrors()
             ->assertSee('Fatoumata Sidibe')
-            ->assertSee('Paracetamol 500 mg, trois fois par jour.')
+            ->assertSee('Paracetamol 500 mg')
+            ->assertSee('trois fois par jour')
             ->assertSee('echographie.pdf')
             ->assertSee('Cardiologie');
     }

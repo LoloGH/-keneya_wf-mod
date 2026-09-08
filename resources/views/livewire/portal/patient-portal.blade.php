@@ -60,12 +60,12 @@
                     @foreach ($prescriptions as $ordonnance)
                         <li class="referrals__item">
                             <p class="referrals__meta">
-                                {{ $ordonnance->created_at->format('d/m/Y') }}
-                                — {{ $ordonnance->doctor?->name() }}
+                                {{ $ordonnance->issued_on?->format('d/m/Y') }}
+                                — {{ $ordonnance->doctor?->displayName() }}
                             </p>
                             <ol class="ordo-lu">
-                                @foreach ($ordonnance->lignes() as $ligne)
-                                    <li>{{ \App\Models\Prescription::ligneEnTexte($ligne) }}</li>
+                                @foreach ($ordonnance->items as $ligne)
+                                    <li>{{ $ligne->medication_name }}@if ($ligne->posology()) — {{ $ligne->posology() }}@endif</li>
                                 @endforeach
                             </ol>
 

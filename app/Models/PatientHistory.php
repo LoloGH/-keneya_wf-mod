@@ -86,6 +86,8 @@ class PatientHistory extends Model
         'doctor_id',
         'staff_member_id',
         'referral_id',
+        // L'ordonnance du dossier medical que cette ligne designe (v3.3.1).
+        'dme_prescription_id',
         'description',
     ];
 

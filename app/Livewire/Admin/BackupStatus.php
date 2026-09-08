@@ -4,10 +4,10 @@ namespace App\Livewire\Admin;
 
 use App\Models\Attachment;
 use App\Models\Patient;
-use App\Models\Prescription;
 use App\Models\Visit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\File;
+use Keneya\Dme\Models\Prescription;
 use Livewire\Component;
 
 /**

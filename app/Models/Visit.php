@@ -132,6 +132,14 @@ class Visit extends Model
         return $this->hasMany(Payment::class);
     }
 
+    /**
+     * Ordonnances anterieures a la v3.3.1, restees dans la table de WorkFlow.
+     *
+     * Plus rien ne s'y ecrit depuis la fusion des deux ordonnances : une
+     * ordonnance nouvelle part dans le dossier medical, ou elle est rattachee
+     * au patient et non au passage. La relation subsiste pour la reprise et
+     * pour la suppression d'un dossier.
+     */
     public function prescriptions(): HasMany
     {
         return $this->hasMany(Prescription::class);

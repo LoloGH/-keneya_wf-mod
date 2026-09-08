@@ -60,6 +60,46 @@ class DemoReset extends Command
         'job_batches',
         'failed_jobs',
         'attachments',
+
+        // Le dossier medical (v3.3.1). Depuis que les formulaires de WorkFlow
+        // ecrivent dans le DME — ordonnance comprise — une remise a zero qui
+        // s'arreterait aux tables de WorkFlow laisserait les dossiers
+        // medicaux d'une demonstration precedente, rattaches a des patients
+        // qui n'existent plus. Les tables de catalogue et de configuration du
+        // module (`dme_app_settings`, `dme_sms_templates`, `dme_services`) en
+        // sont volontairement absentes : elles ne portent pas de donnees de
+        // patient. `Schema::hasTable` protege l'installation sans module.
+        'dme_prescription_items',
+        'dme_prescriptions',
+        'dme_lab_results',
+        'dme_lab_order_items',
+        'dme_lab_orders',
+        'dme_imaging_reports',
+        'dme_imaging_orders',
+        'dme_medical_documents',
+        'dme_hospitalization_events',
+        'dme_hospitalizations',
+        'dme_care_orders',
+        'dme_nursing_notes',
+        'dme_clinical_notes',
+        'dme_diagnoses',
+        'dme_vital_signs',
+        'dme_consultations',
+        'dme_appointments',
+        'dme_medications',
+        'dme_allergies',
+        'dme_chronic_conditions',
+        'dme_medical_histories',
+        'dme_emergency_contacts',
+        'dme_notifications',
+        'dme_sms_messages',
+        'dme_patient_identifiers',
+        'dme_patients',
+        // Les numeros metier repartent de zero avec les dossiers qu'ils
+        // numerotaient : sinon la demonstration suivante commencerait a
+        // PAT-2026-000148.
+        'dme_identifier_sequences',
+
         'care_tasks',
         'hospitalizations',
         'handoff_notes',

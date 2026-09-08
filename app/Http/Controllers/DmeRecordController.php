@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
+use App\Support\Dme\PatientProjection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Keneya\Dme\Patients\PatientIdentifierResolver;
 
 /**
  * Passage de « Mes patients » au dossier medical complet (v3.3.0).
@@ -27,7 +27,7 @@ use Keneya\Dme\Patients\PatientIdentifierResolver;
  */
 class DmeRecordController extends Controller
 {
-    public function __invoke(Patient $patient, PatientIdentifierResolver $resolver): RedirectResponse
+    public function __invoke(Patient $patient): RedirectResponse
     {
         $user = Auth::user();
 
@@ -43,17 +43,7 @@ class DmeRecordController extends Controller
                 ->with('error', "L'acces au dossier medical complet n'est pas active pour votre compte.");
         }
 
-        $dossier = $resolver->resolve(
-            system: 'keneya_workflow',
-            value: (string) $patient->patient_code,
-            attributes: [
-                'name' => $patient->name,
-                'sex' => $patient->gender,
-                'age' => $patient->age,
-                'phone' => $patient->mobile,
-                'label' => 'Dossier KEneYa WorkFlow',
-            ],
-        );
+        $dossier = PatientProjection::resolve($patient);
 
         return redirect()->route('dme.patients.show', $dossier);
     }

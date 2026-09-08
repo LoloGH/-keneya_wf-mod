@@ -2,20 +2,21 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Dme\CreateMedicalPrescription;
 use App\Actions\StoreSignatureImage;
 use App\Livewire\Admin\HospitalSettings;
 use App\Livewire\Shared\ProfileCard;
 use App\Models\Doctor;
-use App\Models\Prescription;
 use App\Models\Service;
 use App\Models\Setting;
 use App\Models\Visit;
 use App\Support\Audit;
-use App\Support\PrescriptionPdfData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
+use Keneya\Dme\Dme;
+use Keneya\Dme\Models\Prescription;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
@@ -38,13 +39,14 @@ class PrescriptionSignatureTest extends TestCase
         Storage::fake('signatures');
     }
 
+    /**
+     * L'ordonnance vit dans le dossier medical depuis la v3.3.1 : c'est ce
+     * document-la qui porte la signature et les cachets.
+     */
     private function makePrescription(Doctor $doctor, Visit $visit): Prescription
     {
-        return Prescription::create([
-            'patient_id' => $visit->patient_id,
-            'visit_id' => $visit->getKey(),
-            'doctor_id' => $doctor->getKey(),
-            'content' => 'Paracetamol 500 mg, 3 fois par jour, 5 jours.',
+        return app(CreateMedicalPrescription::class)->execute($visit, $doctor, [
+            ['medicament' => 'Paracetamol 500 mg', 'posologie' => '3 fois par jour', 'duree' => '5 jours'],
         ]);
     }
 
@@ -61,11 +63,11 @@ class PrescriptionSignatureTest extends TestCase
         $visit = $this->makeVisit($service);
         $ordonnance = $this->makePrescription($medecin, $visit);
 
-        $donnees = PrescriptionPdfData::for($ordonnance->fresh(['patient', 'doctor.user', 'visit.service']));
+        $signatures = Dme::signaturesFor($ordonnance);
 
-        $this->assertNull($donnees['doctorSignature']);
-        $this->assertNull($donnees['doctorStamp']);
-        $this->assertNull($donnees['hospitalStamp']);
+        $this->assertNull($signatures['doctorSignature']);
+        $this->assertNull($signatures['doctorStamp']);
+        $this->assertNull($signatures['facilityStamp']);
 
         $this->actingAs($medecin->user)
             ->get(route('service.prescription.pdf', $ordonnance))
@@ -86,10 +88,10 @@ class PrescriptionSignatureTest extends TestCase
         $visit = $this->makeVisit($service);
         $ordonnance = $this->makePrescription($medecin, $visit);
 
-        $donnees = PrescriptionPdfData::for($ordonnance);
+        $signatures = Dme::signaturesFor($ordonnance);
 
-        $this->assertNull($donnees['doctorSignature']);
-        $this->assertNull($donnees['hospitalStamp']);
+        $this->assertNull($signatures['doctorSignature']);
+        $this->assertNull($signatures['facilityStamp']);
 
         $this->actingAs($medecin->user)
             ->get(route('service.prescription.pdf', $ordonnance))
@@ -108,11 +110,13 @@ class PrescriptionSignatureTest extends TestCase
         $medecin = $this->makeDoctor($service);
         $ordonnance = $this->makePrescription($medecin, $this->makeVisit($service));
 
-        $donnees = PrescriptionPdfData::for($ordonnance);
+        $this->assertNotNull($ordonnance);
 
-        $this->assertSame('Quartier Legal Segou, Kayes', $donnees['hospitalAddress']);
-        $this->assertSame('+223 21 52 00 00', $donnees['hospitalPhone']);
-        $this->assertSame('contact@hfd.ml', $donnees['hospitalEmail']);
+        $etablissement = Dme::facility();
+
+        $this->assertSame('Quartier Legal Segou, Kayes', $etablissement['address']);
+        $this->assertSame('+223 21 52 00 00', $etablissement['phone']);
+        $this->assertSame('contact@hfd.ml', $etablissement['email']);
     }
 
     public function test_l_administration_enregistre_les_coordonnees(): void
@@ -127,6 +131,75 @@ class PrescriptionSignatureTest extends TestCase
             ->assertHasNoErrors();
 
         $this->assertSame('contact@hfd.ml', Setting::get(Setting::HOSPITAL_EMAIL));
+    }
+
+    // --------------------------------------------- La fusion des deux ordonnances
+
+    /**
+     * Le coeur du §4 du chantier v3.3.1 : l'ordonnance prend la forme du
+     * dossier medical, et garde la fonction que WorkFlow avait seul —
+     * signature du prescripteur, son cachet, celui de l'etablissement.
+     */
+    public function test_l_imprime_porte_la_signature_le_cachet_du_medecin_et_celui_de_l_hopital(): void
+    {
+        $service = Service::factory()->create();
+        $medecin = $this->makeDoctor($service);
+
+        $depot = app(StoreSignatureImage::class);
+        $depot->forDoctorSignature(UploadedFile::fake()->image('signature.png'), $medecin);
+        $depot->forDoctorStamp(UploadedFile::fake()->image('tampon.png'), $medecin->fresh());
+        $depot->forHospitalStamp(UploadedFile::fake()->image('etablissement.png'));
+
+        $medecin->refresh();
+        $ordonnance = $this->makePrescription($medecin, $this->makeVisit($service));
+
+        $signatures = Dme::signaturesFor($ordonnance);
+
+        $this->assertNotNull($signatures['doctorSignature']);
+        $this->assertNotNull($signatures['doctorStamp']);
+        $this->assertNotNull($signatures['facilityStamp']);
+
+        // Les images doivent atteindre le papier : dompdf lit le disque, le
+        // navigateur ne le peut pas, et l'imprime est ce que le medecin
+        // signe. Chacune des trois doit donc figurer, encodee, sur la page
+        // imprimable — pas seulement etre trouvee sur le disque.
+        $rendu = $this->actingAs($medecin->user)
+            ->get(route('service.prescription.print', $ordonnance))
+            ->assertOk()
+            ->getContent();
+
+        foreach ($signatures as $role => $chemin) {
+            $this->assertStringContainsString(
+                'data:image/png;base64,'.base64_encode((string) file_get_contents($chemin)),
+                $rendu,
+                "L'image « {$role} » manque a l'ordonnance imprimable.",
+            );
+        }
+
+        $this->actingAs($medecin->user)
+            ->get(route('service.prescription.pdf', $ordonnance))
+            ->assertOk();
+    }
+
+    /**
+     * Un medecin rattache a deux services n'a depose ses images que sur une
+     * fiche : l'ordonnance, qui ne designe que son compte, doit tout de meme
+     * les retrouver.
+     */
+    public function test_la_signature_se_retrouve_quel_que_soit_le_rattachement(): void
+    {
+        $premier = Service::factory()->create();
+        $second = Service::factory()->create();
+
+        $medecin = $this->makeDoctor($premier);
+        $autreFiche = Doctor::create(['user_id' => $medecin->user_id, 'service_id' => $second->getKey()]);
+
+        app(StoreSignatureImage::class)
+            ->forDoctorSignature(UploadedFile::fake()->image('signature.png'), $autreFiche);
+
+        $ordonnance = $this->makePrescription($medecin, $this->makeVisit($premier));
+
+        $this->assertNotNull(Dme::signaturesFor($ordonnance)['doctorSignature']);
     }
 
     // --------------------------------------------- Depot et securite

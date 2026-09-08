@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Doctor;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\Dme\WorkflowSmsDispatcher;
 use Illuminate\Support\ServiceProvider;
@@ -52,5 +54,59 @@ class DmeIntegrationServiceProvider extends ServiceProvider
         Dme::authorizeAccessUsing(
             fn ($user) => $user instanceof User && $user->canAccessDme()
         );
+
+        Dme::signaturesUsing(fn ($sujet) => $this->signatures($sujet));
+
+        // L'en-tete des documents du module doit porter les coordonnees
+        // saisies dans /admin, non celles du fichier de configuration : c'est
+        // la que l'etablissement les tient a jour. Le module appelle ceci au
+        // rendu, jamais a l'amorcage — aucune requete ajoutee par page.
+        Dme::facilityUsing(fn () => [
+            'name' => hospital_name(),
+            'address' => Setting::get(Setting::HOSPITAL_ADDRESS),
+            'phone' => Setting::get(Setting::HOSPITAL_PHONE),
+            'email' => Setting::get(Setting::HOSPITAL_EMAIL),
+            'logo' => $this->monogrammeImprime(),
+        ]);
+    }
+
+    /**
+     * Le monogramme qui figurait deja en tete des documents imprimes.
+     *
+     * Un chemin absolu, comme la signature et les cachets : dompdf lit le
+     * disque, et le module se charge d'encoder l'image quand il rend le
+     * document pour un navigateur.
+     */
+    private function monogrammeImprime(): ?string
+    {
+        $chemin = public_path('images/keneya-icone-impression.png');
+
+        return is_file($chemin) ? $chemin : null;
+    }
+
+    /**
+     * Signature du prescripteur et cachets, pour un document du module.
+     *
+     * C'est l'autre moitie de la fusion decidee au §4 du chantier v3.3.1 :
+     * l'ordonnance prend la forme du dossier medical, et la fonction que
+     * WorkFlow avait seul — apposer la signature du medecin, son cachet et
+     * celui de l'etablissement. Le module ne sait rien de tout cela ; il
+     * demande, WorkFlow repond depuis ses propres tables.
+     *
+     * Le document designe un compte (`users`), la signature est deposee sur
+     * une fiche `doctors` : {@see User::ficheSignataire()} fait le pont.
+     *
+     * @return array<string, ?string>
+     */
+    private function signatures(mixed $sujet): array
+    {
+        $auteur = $sujet?->doctor ?? null;
+        $fiche = $auteur instanceof User ? $auteur->ficheSignataire() : null;
+
+        return [
+            'doctorSignature' => $fiche?->signatureFile(),
+            'doctorStamp' => $fiche?->stampFile(),
+            'facilityStamp' => Doctor::fichierExistant(Setting::get(Setting::HOSPITAL_STAMP_PATH)),
+        ];
     }
 }

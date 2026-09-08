@@ -77,9 +77,9 @@ class PatientPortal extends Component
             'attachments' => $unlocked
                 ? $patient->attachments()->orderByDesc('id')->get()
                 : collect(),
-            'prescriptions' => $unlocked
-                ? $patient->prescriptions()->with('doctor.user')->orderByDesc('id')->get()
-                : collect(),
+            // Les ordonnances viennent du dossier medical depuis la v3.3.1 :
+            // le patient lit celle que son medecin a signee, pas une copie.
+            'prescriptions' => $unlocked ? $patient->ordonnances() : collect(),
             'appointments' => $unlocked
                 ? $patient->appointments()
                     ->with(['service', 'doctor.user'])

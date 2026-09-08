@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
-use App\Models\Prescription;
-use App\Support\PrescriptionPdfData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Storage;
+use Keneya\Dme\Models\Prescription;
+use Keneya\Dme\Services\Documents\PdfGenerator;
 
 /**
  * Vues imprimables cote /admin (v3.2, point 3).
@@ -30,14 +30,13 @@ class PrintableController extends Controller
         ]);
     }
 
-    public function prescription(Prescription $prescription): View
+    /**
+     * L'ordonnance du dossier medical, rendue en HTML pour l'impression
+     * navigateur (v3.3.1). Meme composition que le PDF : l'admin, le medecin
+     * et le patient lisent le meme document sous le meme numero.
+     */
+    public function prescription(Prescription $prescription, PdfGenerator $pdfs): View
     {
-        $prescription->load(['patient', 'doctor.user', 'visit.service']);
-
-        return view('print.prescription', PrescriptionPdfData::for($prescription) + [
-            // Le telechargement PDF passe par la route du medecin, inaccessible
-            // a l'admin : la vue imprimable se suffit a elle-meme ici.
-            'pdfUrl' => null,
-        ]);
+        return $pdfs->prescriptionView($prescription);
     }
 }

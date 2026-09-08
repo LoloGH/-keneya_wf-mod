@@ -306,9 +306,11 @@ class MedicalConsultationTest extends TestCase
 
         $dossier = DossierMedical::firstOrFail();
 
-        // Le resolveur du module coupe le nom complet et normalise le sexe.
-        $this->assertSame('Aminata', $dossier->last_name);
-        $this->assertSame('Traore', $dossier->first_name);
+        // Le nom de WorkFlow part entier (v3.3.1) : le laisser couper au
+        // premier espace reordonnerait le patient en « Traore Aminata » sur
+        // l'ordonnance imprimee et sur chaque document du dossier.
+        $this->assertSame('Aminata Traore', $dossier->last_name);
+        $this->assertSame('Aminata Traore', $dossier->fullName());
         $this->assertSame('female', $dossier->sex);
         $this->assertSame('76000000', $dossier->phone);
     }

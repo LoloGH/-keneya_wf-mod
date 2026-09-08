@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Actions\CreatePrescription;
+use App\Actions\Dme\CreateMedicalPrescription;
 use App\Models\Service;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\View\ComponentAttributeBag;
+use Keneya\Dme\Dme;
 use Tests\TestCase;
 
 /**
@@ -189,25 +190,28 @@ class BrandLogoTest extends TestCase
         $doctor = $this->makeDoctor($service);
         $visit = $this->makeVisit($service);
 
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [
+        $prescription = app(CreateMedicalPrescription::class)->execute($visit, $doctor, [
             ['medicament' => 'Paracetamol 500 mg'],
         ]);
 
         $this->actingAs($doctor->user)
             ->get(route('service.prescription.print', $prescription))
             ->assertOk()
-            ->assertSee('images/keneya-icone-impression.png', escape: false);
+            ->assertSee('data:image/png;base64,', escape: false);
     }
 
     /**
-     * Dans le PDF, dompdf lit l'image sur le disque : c'est un chemin de
-     * fichier qui doit figurer dans le gabarit, pas une URL.
+     * Depuis la v3.3.1, l'ordonnance imprimee et l'ordonnance PDF sortent du
+     * meme gabarit, celui du dossier medical. dompdf lit le disque, le
+     * navigateur ne le peut pas : le monogramme est donc transmis encode,
+     * seule forme que les deux rendus savent lire.
      */
-    public function test_le_gabarit_pdf_pointe_vers_un_fichier_du_disque(): void
+    public function test_le_monogramme_est_transmis_au_gabarit_commun(): void
     {
-        $gabarit = file_get_contents(resource_path('views/pdf/prescription.blade.php'));
-
-        $this->assertStringContainsString("public_path('images/keneya-icone-impression.png')", $gabarit);
+        $this->assertSame(
+            public_path('images/keneya-icone-impression.png'),
+            Dme::facility()['logo'] ?? null,
+        );
     }
 
     /**
@@ -235,7 +239,7 @@ class BrandLogoTest extends TestCase
         $doctor = $this->makeDoctor($service);
         $visit = $this->makeVisit($service);
 
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [
+        $prescription = app(CreateMedicalPrescription::class)->execute($visit, $doctor, [
             ['medicament' => 'Paracetamol 500 mg'],
         ]);
 

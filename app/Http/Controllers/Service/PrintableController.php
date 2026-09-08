@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
-use App\Models\Prescription;
-use App\Support\PrescriptionPdfData;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Keneya\Dme\Models\Prescription;
+use Keneya\Dme\Services\Documents\PdfGenerator;
 
 /**
  * Vues imprimables d'une piece jointe ou d'une ordonnance (v3.2, point 3).
@@ -30,18 +30,20 @@ class PrintableController extends Controller
         ]);
     }
 
-    public function prescription(Request $request, Prescription $prescription): View
+    /**
+     * Le meme document que le PDF, rendu en HTML (v3.3.1) : le patient doit
+     * voir l'ordonnance de son medecin, quel que soit le rendu.
+     */
+    public function prescription(Request $request, Prescription $prescription, PdfGenerator $pdfs): View
     {
-        $doctorIds = $request->user()->doctors()->pluck('id');
+        // L'ordonnance designe un compte, non plus une fiche de service.
+        abort_unless(
+            (int) $prescription->doctor_id === (int) $request->user()->getKey(),
+            403,
+            "Cette ordonnance n'est pas la votre.",
+        );
 
-        abort_unless($doctorIds->contains($prescription->doctor_id), 403, "Cette ordonnance n'est pas la votre.");
-
-        $prescription->load(['patient', 'doctor.user', 'visit.service']);
-
-        // Le meme jeu de donnees que le PDF : en-tete complet, tampons,
-        // signature. C'est la raison d'etre de PrescriptionPdfData — le patient
-        // doit voir la meme ordonnance que son medecin, quel que soit le rendu.
-        return view('print.prescription', PrescriptionPdfData::for($prescription));
+        return $pdfs->prescriptionView($prescription);
     }
 
     private function assertDoctorMayRead(Request $request, Attachment $attachment): void

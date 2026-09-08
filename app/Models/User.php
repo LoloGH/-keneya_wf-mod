@@ -95,6 +95,25 @@ class User extends Authenticatable implements DmeUser
     }
 
     /**
+     * La fiche medecin qui porte la signature de cette personne (v3.3.1).
+     *
+     * La signature et le cachet sont deposes sur une fiche `doctors`, alors
+     * qu'une ordonnance du dossier medical ne designe que le compte. Un
+     * medecin rattache a deux services a deux fiches, et n'a en general
+     * depose ses images que sur l'une : on retient donc celle qui porte
+     * quelque chose, et le rattachement principal a defaut. Signer d'une
+     * fiche plutot que d'une autre ne change pas qui signe.
+     */
+    public function ficheSignataire(): ?Doctor
+    {
+        return $this->doctors()
+            ->where(function ($requete) {
+                $requete->whereNotNull('signature_path')->orWhereNotNull('stamp_path');
+            })
+            ->first() ?? $this->doctor;
+    }
+
+    /**
      * Le rattachement de ce medecin au service donne, ou null s'il n'y est pas
      * rattache. C'est le seul point d'entree utilise par l'interface /service :
      * un medecin ne peut agir que dans un service qui lui appartient.

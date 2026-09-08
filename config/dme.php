@@ -83,6 +83,10 @@ return [
         'directory' => 'medical-documents',
         'max_size_kb' => 20480,
         'allowed_mimes' => ['pdf', 'jpg', 'jpeg', 'png', 'dcm', 'txt'],
+
+        // Les ordonnances editees ici sont remises a de vrais patients : le
+        // pied de page du module ne doit pas les annoncer comme fictives.
+        'demo_notice' => false,
     ],
 
     /*

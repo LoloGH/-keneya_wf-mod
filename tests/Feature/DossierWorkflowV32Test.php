@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Actions\BulkCreateSchedule;
-use App\Actions\CreatePrescription;
+use App\Actions\Dme\CreateMedicalPrescription;
 use App\Actions\RecordConsultationConclusion;
 use App\Actions\RegisterVisitor;
 use App\Actions\StoreAttachment;
@@ -305,7 +305,7 @@ class DossierWorkflowV32Test extends TestCase
         );
 
         $this->travelTo(now()->setTime(10, 0));
-        app(CreatePrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
+        app(CreateMedicalPrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
 
         $this->travelTo(now()->setTime(11, 0));
         app(StoreAttachment::class)->executeForPatient(
@@ -324,7 +324,7 @@ class DossierWorkflowV32Test extends TestCase
 
         // Les trois natures d'evenement sont dans la meme liste, dans l'ordre.
         $consultation = mb_strpos($rendu, 'Consultation du matin.');
-        $ordonnance = mb_strpos($rendu, 'Ordonnance etablie');
+        $ordonnance = mb_strpos($rendu, 'etablie par');
         $piece = mb_strpos($rendu, 'scanner.pdf');
 
         $this->assertNotFalse($consultation);
@@ -348,7 +348,7 @@ class DossierWorkflowV32Test extends TestCase
         $patient = Patient::factory()->create();
         $visit = $this->makeVisit($service, [], $patient);
 
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
+        $prescription = app(CreateMedicalPrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
 
         $piece = app(StoreAttachment::class)->executeForPatient(
             UploadedFile::fake()->create('scanner.pdf', 30, 'application/pdf'),
@@ -371,7 +371,7 @@ class DossierWorkflowV32Test extends TestCase
         $patient = Patient::factory()->create(['name' => 'Moussa Keita']);
         $visit = $this->makeVisit($service, [], $patient);
 
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g', 'posologie' => 'matin et soir']]);
+        $prescription = app(CreateMedicalPrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g', 'posologie' => 'matin et soir']]);
 
         $this->actingAs($doctor->user)
             ->get(route('service.prescription.print', $prescription))
@@ -382,7 +382,9 @@ class DossierWorkflowV32Test extends TestCase
             // sont plus un seul bloc de texte.
             ->assertSee('Amoxicilline 1 g')
             ->assertSee('matin et soir')
-            ->assertSee('Signature du medecin')
+            // Depuis la v3.3.1, l'imprime et le PDF sortent du meme gabarit,
+            // celui du dossier medical : le libelle vient de la.
+            ->assertSee('Signature et cachet du prescripteur')
             ->assertSee('window.print()', escape: false);
     }
 
@@ -395,7 +397,7 @@ class DossierWorkflowV32Test extends TestCase
         $intrus = $this->makeDoctor($autre);
 
         $visit = $this->makeVisit($service);
-        $prescription = app(CreatePrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
+        $prescription = app(CreateMedicalPrescription::class)->execute($visit, $doctor, [['medicament' => 'Amoxicilline 1 g']]);
 
         $this->actingAs($intrus->user)
             ->get(route('service.prescription.print', $prescription))
