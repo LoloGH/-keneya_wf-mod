@@ -164,6 +164,15 @@ final class Audit
 
     public const EVENT_CONCLUSION_RECORDED = 'conclusion_redigee';
 
+    /**
+     * Consultation medicale redigee depuis /service (v3.3.1).
+     *
+     * Distincte de la conclusion : celle-ci est un acte du dossier medical,
+     * avec son numero, ses constantes et ses diagnostics. Le journal n'en
+     * porte que la reference — le contenu clinique reste au DME.
+     */
+    public const EVENT_MEDICAL_CONSULTATION = 'consultation_medicale';
+
     public const EVENT_ATTACHMENT_ADDED = 'piece_jointe_ajoutee';
 
     public const EVENT_VISITOR_REGISTERED = 'visiteur_enregistre';
@@ -244,6 +253,7 @@ final class Audit
         self::EVENT_PAYMENT_CONFIRMED => 'Confirmation de paiement',
         self::EVENT_PRICE_OVERRIDDEN => 'Derogation au tarif',
         self::EVENT_CONCLUSION_RECORDED => 'Conclusion de consultation',
+        self::EVENT_MEDICAL_CONSULTATION => 'Consultation medicale (dossier medical)',
         self::EVENT_ATTACHMENT_ADDED => 'Ajout d\'une piece jointe',
         self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
         self::EVENT_BROADCAST_SENT => 'Diffusion groupee de SMS',

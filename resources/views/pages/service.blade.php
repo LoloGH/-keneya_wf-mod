@@ -17,6 +17,12 @@
 
     $sections = array_values(array_filter([
         ['key' => 'file', 'icon' => 'file', 'label' => "File d'attente", 'view' => 'sections.service.queue'],
+        // Consultation medicale (v3.3.1) : le formulaire est ici, la donnee
+        // part au dossier medical. Place juste apres la file, dans l'ordre ou
+        // le medecin travaille — il appelle, puis il consulte.
+        $peut(StaffType::CAP_RECORD_CONSULTATION)
+            ? ['key' => 'consultation-medicale', 'icon' => 'soins', 'label' => 'Consultation', 'view' => 'sections.service.medical-consultation']
+            : null,
         ['key' => 'renvois', 'icon' => 'services', 'label' => 'Renvois', 'children' => [
             ['key' => 'renvois-entrants', 'icon' => 'services', 'label' => 'Renvois en attente', 'view' => 'sections.service.incoming'],
             ['key' => 'renvois-sortants', 'icon' => 'services', 'label' => 'Mes renvois', 'view' => 'sections.service.outgoing'],

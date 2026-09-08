@@ -63,6 +63,16 @@ class StaffType extends Model
     public const CAP_ACCESS_DME = 'can_access_dme';
 
     /**
+     * Rediger une consultation medicale (v3.3.1).
+     *
+     * Le formulaire vit dans /service mais ecrit dans le dossier medical, pas
+     * dans WorkFlow. Capacite distincte de CAP_ACCESS_DME : lire un dossier et
+     * y ecrire un acte ne sont pas le meme droit, et tout medecin qui consulte
+     * un dossier n'a pas vocation a le remplir.
+     */
+    public const CAP_RECORD_CONSULTATION = 'can_record_consultation';
+
+    /**
      * Libelle de chaque capacite et section qu'elle fait apparaitre.
      *
      * C'est cette table qui alimente l'apercu montre a l'admin au moment de
@@ -128,6 +138,10 @@ class StaffType extends Model
             'label' => 'Ouvrir le dossier medical complet (DME)',
             'section' => 'Dossier medical complet (depuis « Mes patients »)',
         ],
+        self::CAP_RECORD_CONSULTATION => [
+            'label' => 'Rediger une consultation medicale',
+            'section' => 'Consultation — motif, constantes, examen, diagnostics',
+        ],
     ];
 
     /**
@@ -163,6 +177,7 @@ class StaffType extends Model
                 self::CAP_ADMIT_HOSPITALIZATION,
                 self::CAP_CARE_TASKS,
                 self::CAP_ACCESS_DME,
+                self::CAP_RECORD_CONSULTATION,
             ],
         ],
         Roles::RECEPTIONIST => [
