@@ -29,6 +29,13 @@
         ($peut(StaffType::CAP_RECORD_HISTORY) || $peut(StaffType::CAP_RECORD_ALLERGIES))
             ? ['key' => 'antecedents', 'icon' => 'document', 'label' => 'Antecedents et allergies', 'view' => 'sections.service.medical-background']
             : null,
+        // Traitements, laboratoire, imagerie et documents : quatre capacites,
+        // un ecran. Il apparait des que l'une d'elles est cochee, et ne montre
+        // que les blocs qui reviennent au compte connecte.
+        ($peut(StaffType::CAP_RECORD_MEDICATIONS) || $peut(StaffType::CAP_ORDER_LABORATORY)
+            || $peut(StaffType::CAP_ORDER_IMAGING) || $peut(StaffType::CAP_RECORD_DOCUMENTS))
+            ? ['key' => 'examens', 'icon' => 'soins', 'label' => 'Traitements et examens', 'view' => 'sections.service.medical-orders']
+            : null,
         ['key' => 'renvois', 'icon' => 'services', 'label' => 'Renvois', 'children' => [
             ['key' => 'renvois-entrants', 'icon' => 'services', 'label' => 'Renvois en attente', 'view' => 'sections.service.incoming'],
             ['key' => 'renvois-sortants', 'icon' => 'services', 'label' => 'Mes renvois', 'view' => 'sections.service.outgoing'],

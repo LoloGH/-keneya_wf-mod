@@ -84,6 +84,18 @@ class StaffType extends Model
     /** Consigner une allergie au dossier medical (v3.3.1). */
     public const CAP_RECORD_ALLERGIES = 'can_record_allergies';
 
+    /** Consigner un traitement habituel au dossier medical (v3.3.1). */
+    public const CAP_RECORD_MEDICATIONS = 'can_record_medications';
+
+    /** Demander un examen biologique au dossier medical (v3.3.1). */
+    public const CAP_ORDER_LABORATORY = 'can_order_laboratory';
+
+    /** Demander un examen d'imagerie au dossier medical (v3.3.1). */
+    public const CAP_ORDER_IMAGING = 'can_order_imaging';
+
+    /** Verser un document au dossier medical (v3.3.1). */
+    public const CAP_RECORD_DOCUMENTS = 'can_record_documents';
+
     /**
      * Libelle de chaque capacite et section qu'elle fait apparaitre.
      *
@@ -162,6 +174,22 @@ class StaffType extends Model
             'label' => 'Consigner une allergie',
             'section' => 'Allergies — allergene, reaction, severite',
         ],
+        self::CAP_RECORD_MEDICATIONS => [
+            'label' => 'Consigner un traitement habituel',
+            'section' => 'Traitements — ce que le patient prend deja',
+        ],
+        self::CAP_ORDER_LABORATORY => [
+            'label' => 'Demander un examen biologique',
+            'section' => 'Laboratoire — demande d\'analyses',
+        ],
+        self::CAP_ORDER_IMAGING => [
+            'label' => 'Demander un examen d\'imagerie',
+            'section' => 'Imagerie — echographie, radiographie, scanner',
+        ],
+        self::CAP_RECORD_DOCUMENTS => [
+            'label' => 'Verser un document au dossier medical',
+            'section' => 'Documents — comptes rendus et resultats',
+        ],
     ];
 
     /**
@@ -200,6 +228,10 @@ class StaffType extends Model
                 self::CAP_RECORD_CONSULTATION,
                 self::CAP_RECORD_HISTORY,
                 self::CAP_RECORD_ALLERGIES,
+                self::CAP_RECORD_MEDICATIONS,
+                self::CAP_ORDER_LABORATORY,
+                self::CAP_ORDER_IMAGING,
+                self::CAP_RECORD_DOCUMENTS,
             ],
         ],
         Roles::RECEPTIONIST => [

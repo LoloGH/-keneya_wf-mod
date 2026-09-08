@@ -75,7 +75,11 @@ return [
     | tout téléchargement passe par une route contrôlée (§42).
     */
     'documents' => [
-        'disk' => 'local',
+        // Le meme disque que les pieces jointes de WorkFlow. Les deux gardent
+        // leurs tables — l'operationnel et le dossier medical ne sont ni le
+        // meme objet ni les memes droits — mais les fichiers n'ont aucune
+        // raison d'etre stockes deux fois, ni sauvegardes deux fois.
+        'disk' => env('DME_DOCUMENTS_DISK', 'local'),
         'directory' => 'medical-documents',
         'max_size_kb' => 20480,
         'allowed_mimes' => ['pdf', 'jpg', 'jpeg', 'png', 'dcm', 'txt'],

@@ -185,6 +185,18 @@ final class Audit
      */
     public const EVENT_ALLERGY_RECORDED = 'allergie_consignee';
 
+    /** Traitement habituel consigne, suspendu ou arrete (v3.3.1). */
+    public const EVENT_MEDICATION_RECORDED = 'traitement_consigne';
+
+    /** Demande d'examen biologique posee au dossier medical (v3.3.1). */
+    public const EVENT_LAB_ORDERED = 'analyse_demandee';
+
+    /** Demande d'imagerie posee au dossier medical (v3.3.1). */
+    public const EVENT_IMAGING_ORDERED = 'imagerie_demandee';
+
+    /** Document verse au dossier medical (v3.3.1). */
+    public const EVENT_MEDICAL_DOCUMENT = 'document_medical_verse';
+
     public const EVENT_ATTACHMENT_ADDED = 'piece_jointe_ajoutee';
 
     public const EVENT_VISITOR_REGISTERED = 'visiteur_enregistre';
@@ -268,6 +280,10 @@ final class Audit
         self::EVENT_MEDICAL_CONSULTATION => 'Consultation medicale (dossier medical)',
         self::EVENT_MEDICAL_BACKGROUND => 'Antecedent consigne au dossier medical',
         self::EVENT_ALLERGY_RECORDED => 'Allergie consignee au dossier medical',
+        self::EVENT_MEDICATION_RECORDED => 'Traitement consigne au dossier medical',
+        self::EVENT_LAB_ORDERED => 'Examen biologique demande',
+        self::EVENT_IMAGING_ORDERED => 'Examen d\'imagerie demande',
+        self::EVENT_MEDICAL_DOCUMENT => 'Document verse au dossier medical',
         self::EVENT_ATTACHMENT_ADDED => 'Ajout d\'une piece jointe',
         self::EVENT_VISITOR_REGISTERED => 'Enregistrement d\'un visiteur',
         self::EVENT_BROADCAST_SENT => 'Diffusion groupee de SMS',
