@@ -154,8 +154,8 @@ class StaffType extends Model
             'section' => 'Prescription de soins (dans « Patients hospitalises »)',
         ],
         self::CAP_PRESCRIBE => [
-            'label' => 'Rediger une ordonnance et une conclusion',
-            'section' => 'Fin de consultation',
+            'label' => 'Rediger une ordonnance',
+            'section' => 'Fin de consultation : ordonnance, rendez-vous, pathologie',
         ],
         self::CAP_SCHEDULE_APPOINTMENT => [
             'label' => 'Donner un rendez-vous',

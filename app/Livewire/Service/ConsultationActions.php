@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Service;
 
+use App\Actions\AssignVisitPathology;
 use App\Actions\Dme\CreateMedicalPrescription;
-use App\Actions\RecordConsultationConclusion;
 use App\Actions\ScheduleAppointment;
 use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
@@ -18,8 +18,14 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
- * Fin de consultation, au service : conclusion, ordonnance et prochain
- * rendez-vous.
+ * Fin de consultation, au service : ordonnance, prochain rendez-vous et
+ * pathologie du passage.
+ *
+ * La conclusion ne s'ecrit plus ici (v3.3.1). Elle est passee au dossier
+ * medical, sous « Dossier medical > Consultation », avec le motif, les
+ * constantes, l'examen et les diagnostics : c'est une donnee de sante, et
+ * deux champs pour un meme geste etaient surtout une occasion de se tromper
+ * de place. Ce qui s'ecrivait ici n'atteignait jamais le dossier.
  *
  * Aucune fonction de caisse ici : dans cet hopital les medecins n'encaissent
  * jamais, tout passe par le role `cashier` et l'interface /caisse.
@@ -34,12 +40,10 @@ class ConsultationActions extends Component
 
     public ?int $visitId = null;
 
-    /** Onglet actif : conclusion, ordonnance ou rendez-vous. */
-    public string $tab = 'conclusion';
+    /** Onglet actif : pathologie, ordonnance ou rendez-vous. */
+    public string $tab = 'ordonnance';
 
-    public string $conclusion = '';
-
-    /** Pathologie notee avec la conclusion. Facultative, jamais bloquante. */
+    /** Pathologie notee sur le passage. Facultative, jamais bloquante. */
     public ?int $pathologyId = null;
 
     /**
@@ -73,47 +77,51 @@ class ConsultationActions extends Component
 
     protected function resetServiceState(): void
     {
-        $this->reset(['visitId', 'conclusion', 'appointmentAt']);
+        $this->reset(['visitId', 'appointmentAt']);
         $this->prescriptionLines = [self::LIGNE_VIDE];
         $this->resetValidation();
     }
 
     public function selectTab(string $tab): void
     {
-        $this->tab = in_array($tab, ['conclusion', 'ordonnance', 'rendez-vous'], true) ? $tab : 'conclusion';
+        $this->tab = in_array($tab, ['conclusion', 'ordonnance', 'rendez-vous'], true) ? $tab : 'ordonnance';
         $this->resetValidation();
     }
 
     /**
-     * Conclusion de la prise en charge : distincte de l'ordonnance, qui reste
-     * dediee aux medicaments.
+     * La pathologie notee sur le passage (v3.3.1).
+     *
+     * Ce qui reste de l'ancien formulaire de conclusion. La conclusion
+     * elle-meme est passee au dossier medical, ou est sa place : c'est une
+     * donnee de sante, et elle s'ecrit desormais sous « Dossier medical >
+     * Consultation », avec le motif, les constantes et les diagnostics.
+     *
+     * La pathologie, elle, ne sert pas au soin mais au fonctionnement de
+     * l'etablissement : s'adresser plus tard a un groupe de patients par SMS.
+     * Elle serait partie avec la conclusion si l'on n'y avait pas pris garde,
+     * et la diffusion aurait perdu sa seule source.
      */
-    public function recordConclusion(RecordConsultationConclusion $action): void
+    public function recordPathology(AssignVisitPathology $action): void
     {
         $this->assertCapability(StaffType::CAP_PRESCRIBE);
 
         $this->validate([
             'visitId' => ['required', 'integer', 'exists:visits,id'],
-            'conclusion' => ['required', 'string', 'min:3', 'max:5000'],
-            // `nullable` et rien d'autre : la pathologie ne doit jamais
-            // empecher une conclusion d'etre enregistree (v3.2.9, point 1).
             'pathologyId' => ['nullable', 'integer', 'exists:pathologies,id'],
         ], attributes: [
             'visitId' => 'patient',
-            'conclusion' => 'conclusion',
             'pathologyId' => 'pathologie',
         ]);
 
         $visit = $this->visitInThisService();
 
-        $action->execute($visit, $this->currentAgent(), $this->conclusion, $this->pathologyId);
+        $action->execute($visit, $this->pathologyId);
 
         session()->flash('service.status', sprintf(
-            'Conclusion enregistree pour %s.',
+            'Pathologie notee pour %s.',
             $visit->patient->name,
         ));
 
-        $this->reset(['conclusion', 'pathologyId']);
         $this->dispatch('file-mise-a-jour');
     }
 

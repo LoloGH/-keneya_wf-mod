@@ -22,32 +22,34 @@
              verifie, mais le bouton et son formulaire etaient restes ici,
              sans methode derriere. --}}
         <div class="tabs" role="tablist">
-            <button type="button" role="tab" class="tabs__tab @if ($tab === 'conclusion') tabs__tab--active @endif"
-                    wire:click="selectTab('conclusion')">Conclusion</button>
             <button type="button" role="tab" class="tabs__tab @if ($tab === 'ordonnance') tabs__tab--active @endif"
                     wire:click="selectTab('ordonnance')">Ordonnance</button>
+            <button type="button" role="tab" class="tabs__tab @if ($tab === 'conclusion') tabs__tab--active @endif"
+                    wire:click="selectTab('conclusion')">Pathologie</button>
             <button type="button" role="tab" class="tabs__tab @if ($tab === 'rendez-vous') tabs__tab--active @endif"
                     wire:click="selectTab('rendez-vous')">Rendez-vous</button>
         </div>
 
         @if ($tab === 'conclusion')
-            {{-- Ce panneau manquait : `recordConclusion()` existait dans le
-                 composant depuis la v3.2 point 5, mais aucune vue ne
-                 l'atteignait. --}}
-            <form wire:submit="recordConclusion" class="form">
-                <div class="field">
-                    <label for="consultation-conclusion">Conclusion de la prise en charge</label>
-                    <textarea id="consultation-conclusion" rows="5" wire:model="conclusion"
-                              placeholder="Ce que vous retenez de cette consultation : constat, orientation, suites a donner."></textarea>
-                    @error('conclusion') <p class="field__error">{{ $message }}</p> @enderror
-                </div>
+            {{-- La conclusion ne s'ecrit plus ici (v3.3.1) : elle est passee au
+                 dossier medical, avec le motif, les constantes, l'examen et
+                 les diagnostics. Deux champs pour un meme geste etaient
+                 surtout une occasion de se tromper de place, et ce qui
+                 s'ecrivait ici n'atteignait jamais le dossier. --}}
+            <p class="notice">
+                La conclusion de la consultation s'ecrit desormais dans
+                <strong>Dossier medical &rsaquo; Consultation</strong>, avec le motif,
+                les constantes et les diagnostics. Elle y reste au dossier du patient.
+            </p>
 
-                {{-- Pathologie : facultative, et elle ne conditionne jamais
-                     l'enregistrement (v3.2.9, point 1). Elle sert a pouvoir
-                     s'adresser plus tard a ce groupe de patients. --}}
+            {{-- La pathologie, elle, reste ici : elle ne sert pas au soin mais
+                 au fonctionnement de l'etablissement, s'adresser plus tard a un
+                 groupe de patients par SMS. Facultative, et elle ne conditionne
+                 rien (v3.2.9, point 1). --}}
+            <form wire:submit="recordPathology" class="form">
                 <div class="field">
                     <label for="consultation-pathologie">
-                        Pathologie <span class="field__hint">(facultatif)</span>
+                        Pathologie du passage <span class="field__hint">(facultatif)</span>
                     </label>
                     <select id="consultation-pathologie" wire:model="pathologyId">
                         <option value="">Non precisee</option>
@@ -55,11 +57,14 @@
                             <option value="{{ $pathologie->id }}">{{ $pathologie->name }}</option>
                         @endforeach
                     </select>
+                    <p class="hint">
+                        Sert a s'adresser plus tard a ce groupe de patients. Sans effet sur le soin.
+                    </p>
                     @error('pathologyId') <p class="field__error">{{ $message }}</p> @enderror
                 </div>
 
                 <button type="submit" class="btn btn--primary" wire:loading.attr="disabled">
-                    Enregistrer la conclusion
+                    Noter la pathologie
                 </button>
             </form>
 

@@ -4,13 +4,11 @@ namespace Tests\Feature;
 
 use App\Actions\BulkCreateSchedule;
 use App\Actions\Dme\CreateMedicalPrescription;
-use App\Actions\RecordConsultationConclusion;
 use App\Actions\RegisterVisitor;
 use App\Actions\StoreAttachment;
 use App\Livewire\Admin\BulkScheduleForm;
 use App\Livewire\Admin\PatientDirectory;
 use App\Livewire\Reception\VisitorRegistrationForm;
-use App\Livewire\Service\ConsultationActions;
 use App\Livewire\Service\MyAppointments;
 use App\Livewire\Service\MyPatients;
 use App\Livewire\Service\PatientRecordPanel;
@@ -460,47 +458,9 @@ class DossierWorkflowV32Test extends TestCase
             ->assertDontSee('Fatoumata Sidibe');
     }
 
-    // ------------------------------- Point 5 : conclusion de consultation
-
-    public function test_la_conclusion_est_une_entree_d_historique(): void
-    {
-        $service = Service::factory()->create();
-        $doctor = $this->makeDoctor($service);
-        $visit = $this->makeVisit($service, ['status' => Visit::STATUS_CALLED]);
-
-        app(RecordConsultationConclusion::class)->execute(
-            $visit,
-            $doctor,
-            'Angine virale, evolution favorable attendue sous 5 jours.',
-        );
-
-        $this->assertDatabaseHas('patient_history', [
-            'visit_id' => $visit->getKey(),
-            'type' => PatientHistory::TYPE_CONSULTATION_CONCLUSION,
-            'description' => 'Angine virale, evolution favorable attendue sous 5 jours.',
-        ]);
-
-        // Distincte de l'ordonnance : aucune ligne `prescriptions` creee.
-        $this->assertSame(0, \DB::table('prescriptions')->count());
-    }
-
-    public function test_le_medecin_redige_la_conclusion_depuis_sa_consultation(): void
-    {
-        $service = Service::factory()->create();
-        $doctor = $this->makeDoctor($service);
-        $visit = $this->makeVisit($service, ['status' => Visit::STATUS_CALLED]);
-
-        Livewire::actingAs($doctor->user)
-            ->test(ConsultationActions::class, ['serviceId' => $service->getKey()])
-            ->set('visitId', $visit->getKey())
-            ->call('selectTab', 'conclusion')
-            ->set('conclusion', 'Angine virale.')
-            ->call('recordConclusion')
-            ->assertHasNoErrors();
-
-        $this->assertDatabaseHas('patient_history', [
-            'visit_id' => $visit->getKey(),
-            'type' => PatientHistory::TYPE_CONSULTATION_CONCLUSION,
-        ]);
-    }
+    // ------------------------- Point 5 : la conclusion a quitte WorkFlow
+    //
+    // Elle est passee au dossier medical en v3.3.1, et ce qui reste de
+    // l'ecran, la pathologie du passage, se verifie dans
+    // ConsultationConclusionTest : un sujet, un fichier.
 }
