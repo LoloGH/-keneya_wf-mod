@@ -128,6 +128,41 @@ class DmeIntegrationTest extends TestCase
     }
 
     /**
+     * On entre dans le module depuis WorkFlow : on doit pouvoir en ressortir
+     * (v3.3.1).
+     *
+     * Sans ce lien, la seule issue etait le bouton « precedent » du
+     * navigateur — ou la deconnexion, ce qui est pire. L'adresse depend du
+     * role : le module ne peut pas la deviner, il la demande a l'hote.
+     */
+    public function test_le_module_offre_une_porte_de_retour_vers_workflow(): void
+    {
+        [$medecin, $patient] = $this->medecinEtSonPatient(avecDme: true);
+
+        $this->actingAs($medecin)->get(route('dossier-medical.ouvrir', $patient));
+
+        $this->actingAs($medecin)
+            ->get(route('dme.dashboard'))
+            ->assertOk()
+            ->assertSee('Retour a '.config('keneya.name'))
+            ->assertSee(route('service.home'), escape: false);
+    }
+
+    /**
+     * Chacun repart vers son propre espace : l'administrateur n'a rien a
+     * faire dans la file d'un service.
+     */
+    public function test_la_porte_de_retour_mene_a_l_espace_du_role(): void
+    {
+        $admin = $this->makeAdmin();
+
+        $this->actingAs($admin)
+            ->get(route('dme.dashboard'))
+            ->assertOk()
+            ->assertSee(route('admin.home'), escape: false);
+    }
+
+    /**
      * L'administrateur entre toujours, et par sa propre interface.
      *
      * Il n'a aucun type de personnel : la case `can_access_dme` n'existe donc

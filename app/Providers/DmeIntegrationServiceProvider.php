@@ -61,6 +61,15 @@ class DmeIntegrationServiceProvider extends ServiceProvider
         // saisies dans /admin, non celles du fichier de configuration : c'est
         // la que l'etablissement les tient a jour. Le module appelle ceci au
         // rendu, jamais a l'amorcage — aucune requete ajoutee par page.
+        // La porte de sortie du module (v3.3.1). On y entre depuis « Mes
+        // patients » ; sans ce lien, on n'en ressort que par le bouton
+        // « precedent » du navigateur — ou par la deconnexion, ce qui est
+        // pire. L'adresse depend du role, que le module ne connait pas.
+        Dme::returnLinkUsing(fn ($user) => $user instanceof User ? [
+            'label' => 'Retour a '.config('keneya.name'),
+            'url' => $user->homeUrl() ?? route('home'),
+        ] : null);
+
         Dme::facilityUsing(fn () => [
             'name' => hospital_name(),
             'address' => Setting::get(Setting::HOSPITAL_ADDRESS),
