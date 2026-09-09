@@ -44,7 +44,7 @@
         <p class="ticket__amount">{{ $payment->formattedAmount() }}</p>
 
         <table class="rows">
-            <tr><th>Dossier</th><td>{{ $payment->patient->patient_code }}</td></tr>
+            <tr><th>N&deg; patient</th><td>{{ $payment->patient->patient_code }}</td></tr>
             <tr><th>Nom</th><td>{{ $payment->patient->name }}</td></tr>
             {{-- L'acte facture, nomme (v3.2.8, point 3) : un recu qui ne dit
                  pas ce qui a ete paye fait perdre au catalogue une bonne part

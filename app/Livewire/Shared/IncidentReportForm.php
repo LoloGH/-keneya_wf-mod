@@ -44,7 +44,7 @@ class IncidentReportForm extends Component
             'serviceId' => ['nullable', 'integer', 'exists:services,id'],
             'content' => ['required', 'string', 'min:10', 'max:2000'],
         ], attributes: [
-            'patientCode' => 'dossier concerne',
+            'patientCode' => 'patient concerne',
             'serviceId' => 'service',
             'content' => 'constat',
         ]);

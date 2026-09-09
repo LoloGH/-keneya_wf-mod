@@ -13,7 +13,7 @@
     @if ($patient)
         <aside class="card record">
         <div class="card__head">
-            <h2 class="card__title">Dossier {{ $patient->patient_code }}</h2>
+            <h2 class="card__title">Patient {{ $patient->patient_code }}</h2>
             <button type="button" class="btn btn--ghost" wire:click="close">Fermer</button>
         </div>
 

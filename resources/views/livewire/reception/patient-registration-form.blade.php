@@ -1,5 +1,5 @@
 <x-card title="Enregistrer un patient" icon="ajouter">
-    <p class="hint">Pour un patient qui n'est jamais venu. Un nouveau dossier sera cree.</p>
+    <p class="hint">Pour un patient qui n'est jamais venu. Un nouvel identifiant lui sera attribue.</p>
 
     {{-- Doublon probable (v3.2.8, point 1).
          Interrompt la creation tant que la receptionniste n'a pas tranche :
@@ -199,7 +199,7 @@
 
     @if ($lastRegistered)
         <div class="ticket" role="status">
-            <p class="ticket__label">Dossier</p>
+            <p class="ticket__label">N&deg; patient</p>
             <p class="ticket__code">{{ $lastRegistered['patient_code'] }}</p>
             <p class="ticket__meta">
                 {{ $lastRegistered['name'] }} - {{ $lastRegistered['service'] }},

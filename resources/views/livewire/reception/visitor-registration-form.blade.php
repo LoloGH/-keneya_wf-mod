@@ -50,7 +50,7 @@
                 </p>
             @else
                 <input id="visitor-patient" type="search" wire:model.live.debounce.400ms="patientSearch"
-                       placeholder="Nom ou numero de dossier du patient...">
+                       placeholder="Nom ou N&deg; du patient...">
 
                 @if ($matches->isNotEmpty())
                     <ul class="lookup">

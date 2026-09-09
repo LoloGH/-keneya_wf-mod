@@ -25,7 +25,7 @@
             <div class="btn-row">
                 @if ($type->can(\App\Models\StaffType::CAP_VIEW_DOSSIER))
                     <button type="button" class="btn btn--ghost"
-                            wire:click="showRecord({{ $visit->patient_id }})">Dossier</button>
+                            wire:click="showRecord({{ $visit->patient_id }})">Patient</button>
                 @endif
 
                 @if ($type->can(\App\Models\StaffType::CAP_SEND_REFERRAL))

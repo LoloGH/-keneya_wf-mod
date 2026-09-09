@@ -128,7 +128,7 @@ class PatientLookup extends Component
         ]);
 
         session()->flash('reception.success', sprintf(
-            'Dossier %s corrige. Le numero de dossier, lui, ne change jamais.',
+            'Patient %s corrige. Son identifiant, lui, ne change jamais.',
             $patient->patient_code,
         ));
 

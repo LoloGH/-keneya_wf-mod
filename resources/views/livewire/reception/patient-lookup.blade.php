@@ -1,8 +1,8 @@
 <x-card class="cardcard--accent" title="Le patient est-il deja venu ?" icon="recherche">
-    <p class="hint">Cherchez avant d'enregistrer : un patient deja connu garde son numero de dossier a vie.</p>
+    <p class="hint">Cherchez avant d'enregistrer : un patient deja connu garde son identifiant a vie.</p>
 
     <div class="field">
-        <label for="lookup-search">Numero de dossier, nom ou telephone</label>
+        <label for="lookup-search">N&deg; patient, nom ou telephone</label>
         <input id="lookup-search" type="search" wire:model.live.debounce.400ms="search"
                placeholder="HFD-00001, Sekou Diarra, 76445566...">
     </div>
@@ -10,7 +10,7 @@
     @if (trim($search) !== '' && $matches->isEmpty())
         <p class="empty">
             Aucun dossier ne correspond. Utilisez le formulaire « Enregistrer un patient » ci-dessous
-            pour creer un nouveau dossier.
+            pour enregistrer un nouveau patient.
         </p>
     @endif
 
@@ -39,7 +39,7 @@
 
             <dl class="record__identity">
                 <div><dt>Nom</dt><dd>{{ $selected->name }}</dd></div>
-                <div><dt>Dossier</dt><dd class="mono">{{ $selected->patient_code }}</dd></div>
+                <div><dt>N&deg; patient</dt><dd class="mono">{{ $selected->patient_code }}</dd></div>
                 <div><dt>Age</dt><dd>{{ $selected->age }} ans</dd></div>
                 <div><dt>Sexe</dt><dd>{{ $selected->gender }}</dd></div>
                 <div><dt>Telephone</dt><dd>{{ $selected->mobile }}</dd></div>
@@ -54,11 +54,11 @@
                  serait d'ouvrir un second dossier pour la meme personne, ce
                  que tout le reste du produit s'emploie a empecher.
 
-                 Cinq champs, et le numero de dossier n'en fait pas partie. --}}
+                 Cinq champs, et l'identifiant du patient n'en fait pas partie. --}}
             @if ($correctingPatientId === $selected->id)
                 <form wire:submit="saveCorrection" class="form lookup__correction">
                     <p class="hint">
-                        Le numero de dossier {{ $selected->patient_code }} ne change pas :
+                        L'identifiant {{ $selected->patient_code }} ne change pas :
                         on corrige une identite, on n'en cree pas une seconde.
                     </p>
 

@@ -8,7 +8,7 @@
         <div class="field">
             <label for="my-patients-search">Rechercher</label>
             <input id="my-patients-search" type="search" wire:model.live.debounce.400ms="search"
-                   placeholder="Nom ou numero de dossier...">
+                   placeholder="Nom ou N&deg; patient...">
         </div>
 
         <label class="field field--inline">

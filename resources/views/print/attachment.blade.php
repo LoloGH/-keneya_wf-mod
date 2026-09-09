@@ -40,7 +40,7 @@
             <h1>{{ $hospitalName }}</h1>
             <p>
                 {{ $attachment->original_name }} -
-                dossier {{ $attachment->patient->patient_code }} -
+                patient {{ $attachment->patient->patient_code }} -
                 {{ $attachment->created_at->format('d/m/Y H:i') }}
             </p>
             </div>

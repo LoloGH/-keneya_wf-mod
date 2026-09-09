@@ -29,7 +29,7 @@
                 <h1 class="card__title">Documents de {{ $patient->name }}</h1>
                 <button type="button" class="btn btn--ghost" wire:click="lock">Masquer</button>
             </div>
-            <p class="hint mono">Dossier {{ $patient->patient_code }}</p>
+            <p class="hint mono">N&deg; patient {{ $patient->patient_code }}</p>
         </section>
 
         <section class="card">

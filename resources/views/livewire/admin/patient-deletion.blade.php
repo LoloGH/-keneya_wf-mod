@@ -11,7 +11,7 @@
     <div class="field">
         <label for="deletion-search">Rechercher le dossier</label>
         <input id="deletion-search" type="search" wire:model.live.debounce.400ms="search"
-               placeholder="Numero de dossier, nom ou telephone...">
+               placeholder="N&deg; patient, nom ou telephone...">
     </div>
 
     @if ($matches->isNotEmpty() && ! $selected)
@@ -36,7 +36,7 @@
             <h3 class="card__subtitle">Confirmer la suppression de {{ $selected->name }}</h3>
 
             <dl class="record__identity">
-                <div><dt>Dossier</dt><dd class="mono">{{ $selected->patient_code }}</dd></div>
+                <div><dt>N&deg; patient</dt><dd class="mono">{{ $selected->patient_code }}</dd></div>
                 <div><dt>Passages</dt><dd>{{ $selected->visits_count }}</dd></div>
                 <div><dt>Pieces jointes</dt><dd>{{ $selected->attachments_count }}</dd></div>
                 <div><dt>Ordonnances</dt><dd>{{ $selected->prescriptions_count }}</dd></div>
@@ -46,7 +46,7 @@
             <form wire:submit="delete" class="form">
                 <div class="field">
                     <label for="deletion-confirm">
-                        Retapez le numero de dossier <strong class="mono">{{ $selected->patient_code }}</strong>
+                        Retapez l&rsquo;identifiant patient <strong class="mono">{{ $selected->patient_code }}</strong>
                     </label>
                     <input id="deletion-confirm" type="text" wire:model="confirmation" autocomplete="off">
                     @error('confirmation') <p class="field__error">{{ $message }}</p> @enderror

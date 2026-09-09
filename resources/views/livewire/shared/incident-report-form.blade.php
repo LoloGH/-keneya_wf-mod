@@ -8,7 +8,7 @@
     <form wire:submit="submit" class="form">
         <div class="field-row">
             <div class="field">
-                <label for="constat-dossier">Dossier concerne <span class="field__hint">(facultatif)</span></label>
+                <label for="constat-dossier">Patient concerne <span class="field__hint">(facultatif)</span></label>
                 <input id="constat-dossier" type="text" wire:model="patientCode" placeholder="HFD-00042" autocomplete="off">
                 @error('patientCode') <p class="field__error">{{ $message }}</p> @enderror
             </div>

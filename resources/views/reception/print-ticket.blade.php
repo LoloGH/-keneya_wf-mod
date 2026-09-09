@@ -95,7 +95,7 @@
             <p class="ticket__service">{{ $visit->service->name }}</p>
 
             <table class="ticket__rows">
-                <tr><th>Dossier</th><td>{{ $visit->patient->patient_code }}</td></tr>
+                <tr><th>N&deg; patient</th><td>{{ $visit->patient->patient_code }}</td></tr>
                 <tr><th>Nom</th><td>{{ $visit->patient->name }}</td></tr>
                 @if ($visit->pendingNextService)
                     <tr><th>Puis</th><td>{{ $visit->pendingNextService->name }}</td></tr>

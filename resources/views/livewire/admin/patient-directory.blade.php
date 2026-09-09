@@ -4,7 +4,7 @@
         <div class="field">
             <label for="patients-search">Rechercher</label>
             <input id="patients-search" type="search" wire:model.live.debounce.400ms="search"
-                   placeholder="Nom, dossier, numero papier, telephone...">
+                   placeholder="Nom, N&deg; patient, numero papier, telephone...">
         </div>
 
         <div class="field">
@@ -22,7 +22,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Dossier</th><th>Nom</th><th>Age</th>
+                    <th>N&deg; patient</th><th>Nom</th><th>Age</th>
                     <th>Dernier passage</th><th>Statut</th><th>Enregistre le</th><th></th>
                 </tr>
             </thead>
@@ -61,7 +61,7 @@
     @if ($openPatient)
         <div class="record">
             <div class="card__head">
-                <h3 class="card__subtitle">Dossier {{ $openPatient->patient_code }} - {{ $openPatient->name }}</h3>
+                <h3 class="card__subtitle">Patient {{ $openPatient->patient_code }} - {{ $openPatient->name }}</h3>
                 <div class="btn-row">
                     {{-- Sondage a la demande (v3.2.9, point 3) : sans attendre
                          la cloture ni le delai automatique. --}}

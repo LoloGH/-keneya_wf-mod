@@ -36,7 +36,7 @@
                 </label>
                 <input id="diffusion-recherche" type="search" autocomplete="off"
                        wire:model.live.debounce.400ms="search"
-                       placeholder="{{ $targetType === BroadcastMessage::TARGET_STAFF ? 'Nom' : 'Nom ou code de dossier' }}">
+                       placeholder="{{ $targetType === BroadcastMessage::TARGET_STAFF ? 'Nom' : 'Nom ou N&deg; patient' }}">
             </div>
 
             @if ($staffResults->isNotEmpty() || $patientResults->isNotEmpty())

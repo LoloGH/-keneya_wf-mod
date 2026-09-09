@@ -180,7 +180,7 @@ class PatientRegistrationForm extends Component
             Audit::log(
                 Audit::EVENT_DUPLICATE_OVERRIDDEN,
                 sprintf(
-                    'Dossier %s cree pour %s malgre %d dossier(s) existant(s) proposes : %s.',
+                    'Patient %s enregistre pour %s malgre %d dossier(s) existant(s) propose(s) : %s.',
                     $visit->patient->patient_code,
                     $visit->patient->name,
                     count($this->duplicateCandidates),

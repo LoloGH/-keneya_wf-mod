@@ -15,7 +15,7 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Dossier</th><th>Nom</th><th>Service</th>
+                        <th>N&deg; patient</th><th>Nom</th><th>Service</th>
                         <th>Ticket</th><th>Statut</th><th>Heure</th><th></th>
                     </tr>
                 </thead>
