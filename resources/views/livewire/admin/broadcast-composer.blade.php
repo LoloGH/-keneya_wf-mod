@@ -79,14 +79,14 @@
             <div class="field">
                 <label for="diffusion-service">Service traverse</label>
                 <select id="diffusion-service" wire:model.live="serviceId">
-                    <option value="">— Choisir un service —</option>
+                    <option value="">Choisir un service</option>
                     @foreach ($services as $service)
                         <option value="{{ $service->id }}">{{ $service->name }}</option>
                     @endforeach
                 </select>
                 <p class="hint">
                     Tout patient passe par ce service, y compris lors d'un
-                    passage deja clos — pas seulement ceux qui y attendent
+                    passage deja clos : pas seulement ceux qui y attendent
                     aujourd'hui.
                 </p>
                 @error('serviceId') <p class="field__error">{{ $message }}</p> @enderror
@@ -97,7 +97,7 @@
             <div class="field">
                 <label for="diffusion-pathologie">Pathologie <span class="field__hint">(facultatif)</span></label>
                 <select id="diffusion-pathologie" wire:model.live="pathologyId">
-                    <option value="">— Toutes —</option>
+                    <option value="">Toutes</option>
                     @foreach ($pathologies as $pathologie)
                         <option value="{{ $pathologie->id }}">{{ $pathologie->name }}</option>
                     @endforeach
@@ -132,7 +132,7 @@
 
             <button type="button" class="btn btn--primary" wire:click="send" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="send">Envoyer a {{ $previewCount }} destinataire(s)</span>
-                <span wire:loading wire:target="send">Mise en file…</span>
+                <span wire:loading wire:target="send">Mise en file...</span>
             </button>
         @endif
     @endif
@@ -148,7 +148,7 @@
                     @foreach ($recent as $diffusion)
                         <tr>
                             <td class="mono">{{ $diffusion->created_at->format('d/m/Y H:i') }}</td>
-                            <td>{{ $diffusion->sentBy?->name ?? '—' }}</td>
+                            <td>{{ $diffusion->sentBy?->name ?? '-' }}</td>
                             <td>{{ $diffusion->targetLabel() }}</td>
                             <td class="mono">{{ $diffusion->recipient_count }}</td>
                             <td class="sms-body">{{ \Illuminate\Support\Str::limit($diffusion->content, 80) }}</td>

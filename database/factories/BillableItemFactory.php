@@ -20,7 +20,7 @@ class BillableItemFactory extends Factory
         return [
             'name' => $this->faker->randomElement([
                 'Echographie abdominale',
-                'Analyse — glycemie',
+                'Analyse, glycemie',
                 'Radiographie thoracique',
                 'Appendicectomie',
             ]),

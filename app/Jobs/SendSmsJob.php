@@ -17,7 +17,7 @@ use Throwable;
  * Envoi d'un SMS en arriere-plan (v3.2.8, file d'attente SMS).
  *
  * Avant : l'agent d'accueil enregistrait un patient, et l'ecran restait fige
- * le temps que la passerelle reponde — quelques secondes par patient, sur un
+ * le temps que la passerelle reponde, quelques secondes par patient, sur un
  * telephone Android que Doze peut avoir endormi. L'acte metier est desormais
  * termine des que la ligne `sms_messages` est ecrite ; c'est le worker qui
  * attend la passerelle, et lui seul.
@@ -67,8 +67,8 @@ class SendSmsJob implements ShouldQueue
         ]);
 
         // `afterCommit` : quand l'envoi est declenche depuis une transaction,
-        // le worker ne doit pas ramasser le job avant que la ligne de trace —
-        // ecrite dans la meme transaction — soit visible pour lui.
+        // le worker ne doit pas ramasser le job avant que la ligne de trace,
+        // ecrite dans la meme transaction, soit visible pour lui.
         dispatch(new self($message->getKey()))->afterCommit();
 
         return $message;
@@ -79,7 +79,7 @@ class SendSmsJob implements ShouldQueue
         $message = SmsMessage::find($this->smsMessageId);
 
         // La trace a disparu (purge, dossier supprime) : plus rien a envoyer,
-        // et surtout rien a tracer — on sort sans echouer le job.
+        // et surtout rien a tracer, on sort sans echouer le job.
         if (! $message) {
             return;
         }
@@ -114,8 +114,8 @@ class SendSmsJob implements ShouldQueue
 
         // Echec passager : le job repart en file avec l'attente prevue.
         //
-        // `release()` plutot qu'une exception levee : sous le pilote `sync` —
-        // celui des tests et de bien des postes de developpement — une
+        // `release()` plutot qu'une exception levee : sous le pilote `sync`,
+        // celui des tests et de bien des postes de developpement, une
         // exception remonterait jusqu'a l'action metier appelante, et un SMS
         // non parti recasserait l'enregistrement que cette file est justement
         // censee proteger. `release()` tient cette promesse quel que soit le

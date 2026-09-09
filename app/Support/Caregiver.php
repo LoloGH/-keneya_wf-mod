@@ -12,7 +12,7 @@ use App\Models\User;
  * Les colonnes `*_doctor_id` restent reservees aux vrais medecins : un
  * infirmier cree par l'admin ne doit pas apparaitre comme praticien dans un
  * dossier. Ce petit objet evite pour autant de dupliquer chaque Action en deux
- * versions — il traduit une fois pour toutes « qui agit » vers le bon couple de
+ * versions : il traduit une fois pour toutes « qui agit » vers le bon couple de
  * colonnes.
  */
 final class Caregiver

@@ -17,7 +17,7 @@ use Livewire\WithFileUploads;
  * Le nom affiche en haut a droite de chaque interface vit en base, pas dans le
  * code : le produit doit pouvoir servir ailleurs qu'a HFD sans redeploiement.
  * Les coordonnees de l'en-tete d'ordonnance suivent la meme regle, et le
- * tampon institutionnel se gere ici et nulle part ailleurs — un medecin ne
+ * tampon institutionnel se gere ici et nulle part ailleurs : un medecin ne
  * doit pas pouvoir remplacer le cachet de l'hopital depuis son profil.
  */
 class HospitalSettings extends Component

@@ -50,7 +50,7 @@ class SendVisitorFeedbackLinks extends Command
             // numero est marque comme traite sans qu'on tente quoi que ce soit :
             // il ne doit ni faire echouer l'execution, ni etre reexamine a
             // chaque passage. Il reste compte, et ce compte est visible dans
-            // /admin — le cas serait invisible autrement.
+            // /admin : le cas serait invisible autrement.
             if (blank($visitor->mobile)) {
                 $sansNumero++;
             } else {

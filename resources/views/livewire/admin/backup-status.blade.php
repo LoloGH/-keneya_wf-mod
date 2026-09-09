@@ -1,7 +1,7 @@
 {{-- Sauvegarde : une page de constat, pas un bouton.
 
      Une sauvegarde declenchee depuis le navigateur ecrirait son archive dans
-     le conteneur applicatif — c'est-a-dire a l'endroit meme qu'elle est censee
+     le conteneur applicatif : c'est-a-dire a l'endroit meme qu'elle est censee
      proteger, et qui disparait avec lui. Ce que cette page peut faire, en
      revanche, c'est dire ce qui est en jeu. --}}
 @php
@@ -45,16 +45,16 @@
             </div>
             <div class="chiffres__bloc">
                 <span class="chiffres__valeur mono">{{ number_format($piecesJointes, 0, ',', ' ') }}</span>
-                <span class="chiffres__libelle">pieces jointes — {{ $format($poidsPieces) }}</span>
+                <span class="chiffres__libelle">pieces jointes - {{ $format($poidsPieces) }}</span>
             </div>
             {{-- Une absence n'est pas une valeur : le dossier des signatures
                  n'existe qu'au premier depot, et afficher « dossier absent »
                  en gros chiffre a cote de vrais nombres se lit comme une
                  anomalie alors que c'est un etat normal. --}}
             <div class="chiffres__bloc">
-                <span class="chiffres__valeur mono">{{ $poidsSignatures === null ? '—' : $format($poidsSignatures) }}</span>
+                <span class="chiffres__valeur mono">{{ $poidsSignatures === null ? '-' : $format($poidsSignatures) }}</span>
                 <span class="chiffres__libelle">
-                    signatures et tampons{{ $poidsSignatures === null ? ' — aucun depose a ce jour' : '' }}
+                    signatures et tampons{{ $poidsSignatures === null ? ', aucun depose a ce jour' : '' }}
                 </span>
             </div>
         </div>

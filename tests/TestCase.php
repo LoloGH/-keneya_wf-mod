@@ -19,7 +19,7 @@ abstract class TestCase extends BaseTestCase
 {
     /**
      * Cree les quatre roles cloisonnes, comme le fait RoleSeeder au deploiement.
-     * A appeler dans les tests ou c'est le code applicatif — et non le test —
+     * A appeler dans les tests ou c'est le code applicatif, et non le test,
      * qui attribue un role.
      */
     protected function seedRoles(): void

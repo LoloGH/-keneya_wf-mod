@@ -12,7 +12,7 @@ use Livewire\Component;
  * Cloche de notification, partagee par les cinq interfaces (v3.2.3, point 2).
  *
  * `wire:poll` a dix secondes, comme le reste de l'application : pas de
- * WebSocket dans cette version, pour la meme raison qu'ailleurs — une
+ * WebSocket dans cette version, pour la meme raison qu'ailleurs, une
  * dependance de plus a faire tourner sur le VPS pour un gain que l'usage n'a
  * pas encore reclame.
  *

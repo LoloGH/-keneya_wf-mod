@@ -6,7 +6,7 @@
 
      Les navigateurs refusent de lire un son tant que la page n'a recu aucune
      interaction. Le personnel s'etant deja connecte, la condition est remplie
-     en pratique ; `catch` couvre le cas contraire — une cloche muette vaut
+     en pratique ; `catch` couvre le cas contraire : une cloche muette vaut
      mieux qu'une erreur JavaScript dans la console d'un poste de soins. --}}
 <div class="bell" wire:poll.{{ config('keneya.poll_interval') }}="refresh"
      x-data="{

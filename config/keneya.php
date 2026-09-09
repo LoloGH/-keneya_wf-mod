@@ -10,8 +10,8 @@ return [
     | Le nom affiche dans l'interface et dans les SMS. C'est le seul endroit du
     | projet, avec .env.example, ou figure le caractere « E » ouvert du nom du
     | produit : il s'agit d'une chaine d'affichage, pas d'un identifiant.
-    | Tous les identifiants techniques — paquet Composer, base de donnees,
-    | namespaces, images et volumes Docker — s'ecrivent « keneya-workflow » en
+    | Tous les identifiants techniques, paquet Composer, base de donnees,
+    | namespaces, images et volumes Docker, s'ecrivent « keneya-workflow » en
     | ASCII pur.
     |
     | Le prefixe de code sert a construire les identifiants de dossier

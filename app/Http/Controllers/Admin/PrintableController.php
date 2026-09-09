@@ -14,7 +14,7 @@ use Keneya\Dme\Services\Documents\PdfGenerator;
  *
  * Meme rendu que cote medecin, mais sur des URL propres au role : aucune
  * adresse n'est partagee entre deux interfaces. L'admin a acces a tout
- * dossier, il n'y a donc pas de restriction par service ici — seul le
+ * dossier, il n'y a donc pas de restriction par service ici : seul le
  * cloisonnement de role, applique par la route, decide.
  */
 class PrintableController extends Controller

@@ -39,7 +39,7 @@ class AttachmentTest extends TestCase
 
     /**
      * Depuis la v3.3.1, le compte rendu d'un renvoi part au **dossier medical**
-     * du patient, ou il restera — et non en piece jointe du renvoi, qui n'est
+     * du patient, ou il restera, et non en piece jointe du renvoi, qui n'est
      * qu'un mouvement du parcours. Le prescripteur lit la conclusion dans sa
      * frise ; le fichier, lui, appartient au dossier.
      *

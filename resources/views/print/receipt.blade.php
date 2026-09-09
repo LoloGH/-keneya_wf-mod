@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reçu — {{ $hospitalName }}</title>
+    <title>Reçu - {{ $hospitalName }}</title>
     <style>
         body { margin: 0; padding: 12px; font-family: "DejaVu Sans", system-ui, sans-serif; background: #f1f5f9;
                color: #1e293b; display: flex; flex-direction: column; align-items: center; gap: 14px; }
@@ -48,8 +48,8 @@
             <tr><th>Nom</th><td>{{ $payment->patient->name }}</td></tr>
             {{-- L'acte facture, nomme (v3.2.8, point 3) : un recu qui ne dit
                  pas ce qui a ete paye fait perdre au catalogue une bonne part
-                 de son interet. A defaut d'acte — encaissements anterieurs au
-                 catalogue — on retombe sur le type d'encaissement. --}}
+                 de son interet. A defaut d'acte, encaissements anterieurs au
+                 catalogue, on retombe sur le type d'encaissement. --}}
             <tr><th>Objet</th><td>{{ $payment->subjectLabel() }}</td></tr>
             @if ($payment->billableItem)
                 <tr><th>Tarif</th><td>{{ $payment->billableItem->formattedPrice() }}</td></tr>

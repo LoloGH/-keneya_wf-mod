@@ -21,7 +21,7 @@ use Livewire\WithFileUploads;
  *
  * Meme Action que cote medecin : le compte rendu part au dossier medical du
  * patient, la demande d'examen cesse d'etre en attente, et le patient repart
- * dans la file du prescripteur — sans repasser par la caisse.
+ * dans la file du prescripteur, sans repasser par la caisse.
  *
  * C'est ici qu'arrive le technicien du plateau technique : le renvoi lui
  * montre ce qu'on lui demande (v3.3.1), et il verse son compte rendu au

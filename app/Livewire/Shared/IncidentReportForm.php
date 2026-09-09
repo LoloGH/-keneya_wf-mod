@@ -16,7 +16,7 @@ use Livewire\Component;
  *
  * Present dans les quatre interfaces metier, sous la meme forme : un constat se
  * redige la ou l'on travaille, pas dans une cinquieme application. Le patient
- * concerne est facultatif — un constat peut porter sur une observation
+ * concerne est facultatif : un constat peut porter sur une observation
  * generale, sans viser personne.
  */
 class IncidentReportForm extends Component

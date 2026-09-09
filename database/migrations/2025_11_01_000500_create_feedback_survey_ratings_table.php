@@ -26,11 +26,11 @@ return new class extends Migration
 
             // Nul quand l'etape n'identifie personne : l'accueil et la caisse
             // ne consignent pas quel agent a servi. La note porte alors sur le
-            // poste, ce qui reste exploitable — mieux vaut une note sans
+            // poste, ce qui reste exploitable : mieux vaut une note sans
             // destinataire qu'une note attribuee au hasard.
             $table->foreignId('user_id')->nullable()->constrained();
 
-            $table->string('post_label'); // « Accueil », « Medecine Generale — Dr X »...
+            $table->string('post_label'); // « Accueil », « Medecine Generale : Dr X »...
             $table->unsignedTinyInteger('rating');
             $table->text('comment')->nullable();
             $table->timestamps();

@@ -4,7 +4,7 @@
     Il vit dans les gabarits (app, portail, salle d'attente), et non dans les
     pages : toute page ajoutee plus tard en herite sans qu'on ait a y penser.
 
-    Volontairement absent des documents imprimes — ticket, ordonnance, recu :
+    Volontairement absent des documents imprimes, ticket, ordonnance, recu :
     ce sont des pieces medicales ou comptables, dont l'en-tete est celui de
     l'etablissement, pas celui de l'editeur.
 --}}

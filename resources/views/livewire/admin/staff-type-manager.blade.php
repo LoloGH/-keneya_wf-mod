@@ -9,14 +9,14 @@
         <div class="form form--inline-wrap">
             <div class="field">
                 <label for="staff-type-name">Nom du type</label>
-                <input id="staff-type-name" type="text" wire:model="name" placeholder="Infirmier, Sage-femme…">
+                <input id="staff-type-name" type="text" wire:model="name" placeholder="Infirmier, Sage-femme...">
                 @error('name') <p class="field__error">{{ $message }}</p> @enderror
             </div>
 
             <div class="field">
                 <label for="staff-type-role">Interface</label>
                 <select id="staff-type-role" wire:model.live="matched_role">
-                    <option value="">Interface dediee (/staff/…)</option>
+                    <option value="">Interface dediee (/staff/...)</option>
                     @foreach ($this->reusableRoles() as $role => $label)
                         <option value="{{ $role }}">Reutiliser l'interface « {{ $label }} »</option>
                     @endforeach

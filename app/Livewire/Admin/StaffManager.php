@@ -27,14 +27,14 @@ use Livewire\Component;
 /**
  * Gestion de tout le personnel (v3.2.3, points 2 et 3).
  *
- * Cette section remplace les trois formulaires separes — « Medecins »,
- * « Receptionnistes », « Interfaces dediees » — qui presentaient chacun un
+ * Cette section remplace les trois formulaires separes, « Medecins »,
+ * « Receptionnistes », « Interfaces dediees », qui presentaient chacun un
  * sous-ensemble des types de personnel. L'admin choisissait un type parmi ceux
  * que la section voulait bien montrer, ce qui rendait un Caissier impossible a
  * creer et un service de caisse impossible a choisir.
  *
  * Ici les deux menus refletent les tables : tous les `staff_types`, tous les
- * services. C'est le type choisi qui decide de la suite — son `matched_role`
+ * services. C'est le type choisi qui decide de la suite, son `matched_role`
  * designe a la fois le role Spatie synchronise et la table de rattachement :
  *
  *   doctor       -> doctors       (service et telephone)
@@ -95,7 +95,7 @@ class StaffManager extends Component
     /**
      * Un service n'a de sens que pour qui exerce dans un service : un medecin
      * et le personnel generique. La receptionniste et le caissier n'y sont pas
-     * rattaches — l'accueil et les caisses ne sont pas leur service, ce sont
+     * rattaches : l'accueil et les caisses ne sont pas leur service, ce sont
      * leurs interfaces.
      */
     public function needsService(): bool
@@ -300,7 +300,7 @@ class StaffManager extends Component
                     '%s cree comme %s au service %s.',
                     $user->name,
                     $type->name,
-                    $member->service()->first()?->name ?? '—',
+                    $member->service()->first()?->name ?? '-',
                 ),
             ],
         };
@@ -388,7 +388,7 @@ class StaffManager extends Component
      * Les soins programmes sont les seules donnees filtrees par le planning :
      * sans creneau couvrant l'heure, la liste est vide. L'ecran de l'agent le
      * dit deja, mais l'administrateur qui cree le compte n'avait aucun signal
-     * — d'ou des « l'infirmier ne voit rien » dont la cause etait, en realite,
+     * : d'ou des « l'infirmier ne voit rien » dont la cause etait, en realite,
      * un planning jamais publie ou une capacite jamais cochee.
      */
     private function alertePlanning(?User $user, ?int $serviceId): ?string

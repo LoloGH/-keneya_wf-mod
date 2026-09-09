@@ -16,7 +16,7 @@
         <div class="field">
             <label for="tarif-service">Service <span class="field__hint">(facultatif)</span></label>
             <select id="tarif-service" wire:model="service_id">
-                <option value="">— Tarif generique —</option>
+                <option value="">Tarif generique</option>
                 @foreach ($services as $service)
                     <option value="{{ $service->id }}">{{ $service->name }}</option>
                 @endforeach
@@ -83,7 +83,7 @@
         <div class="field">
             <label for="tarif-ticket">Tarif du ticket</label>
             <select id="tarif-ticket" wire:model="ticketItemId">
-                <option value="">— Aucun —</option>
+                <option value="">Aucun</option>
                 @foreach ($ticketChoices as $choix)
                     <option value="{{ $choix->id }}">{{ $choix->label() }}</option>
                 @endforeach

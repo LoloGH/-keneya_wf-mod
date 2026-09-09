@@ -62,7 +62,7 @@ return [
     ],
 
     /*
-    | Pagination par défaut des listes (§58 — performance).
+    | Pagination par défaut des listes (§58 : performance).
     */
     'pagination' => [
         'default' => 15,
@@ -76,8 +76,8 @@ return [
     */
     'documents' => [
         // Le meme disque que les pieces jointes de WorkFlow. Les deux gardent
-        // leurs tables — l'operationnel et le dossier medical ne sont ni le
-        // meme objet ni les memes droits — mais les fichiers n'ont aucune
+        // leurs tables, l'operationnel et le dossier medical ne sont ni le
+        // meme objet ni les memes droits, mais les fichiers n'ont aucune
         // raison d'etre stockes deux fois, ni sauvegardes deux fois.
         'disk' => env('DME_DOCUMENTS_DISK', 'local'),
         'directory' => 'medical-documents',
@@ -154,8 +154,8 @@ return [
     |
     | Le module partage la table `users` avec son hôte : c'est le même
     | compte, la même session, la même ligne en base. Le modèle qui la
-    | représente doit donc être celui de l'hôte — celui que `Auth::user()`
-    | renvoie — sinon le module manipulerait, pour une même personne, des
+    | représente doit donc être celui de l'hôte, celui que `Auth::user()`
+    | renvoie, sinon le module manipulerait, pour une même personne, des
     | objets d'une autre classe que ceux de la session en cours.
     |
     | Ce modèle doit satisfaire Keneya\Dme\Contracts\DmeUser, ce que le
@@ -184,7 +184,7 @@ return [
     | traitant d'un dossier, les soignants a qui confier un soin.
     |
     | Les roles du module qui n'ont pas d'equivalent parmi les quatre roles
-    | fixes de WorkFlow — infirmier, laboratoire, radiologie, pharmacien —
+    | fixes de WorkFlow, infirmier, laboratoire, radiologie, pharmacien,
     | ne sont pas declares : ils relevent des types de personnel generiques,
     | qui ne portent aucun role Spatie. Le module rend alors une liste vide,
     | et non une erreur.
@@ -254,7 +254,7 @@ return [
     | aucune :
     |
     |   queued : file d'attente interne du module (persistance, passerelle,
-    |            historique) — comportement autonome historique ;
+    |            historique), comportement autonome historique ;
     |   log    : journalise le message sans jamais l'émettre.
     |
     | Monté dans Keneya Workflow, l'hôte liera sa propre implémentation au
@@ -307,7 +307,7 @@ return [
         'gateways' => [
 
             /*
-            | SMSGate — passerelle de production.
+            | SMSGate : passerelle de production.
             |
             | Deux modes d'exploitation, tous deux couverts par cette
             | configuration :

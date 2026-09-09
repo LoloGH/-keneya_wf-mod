@@ -11,7 +11,7 @@
     <div class="field">
         <label for="deletion-search">Rechercher le dossier</label>
         <input id="deletion-search" type="search" wire:model.live.debounce.400ms="search"
-               placeholder="Numero de dossier, nom ou telephone…">
+               placeholder="Numero de dossier, nom ou telephone...">
     </div>
 
     @if ($matches->isNotEmpty() && ! $selected)
@@ -21,7 +21,7 @@
                     <span class="lookup__identity">
                         <strong>{{ $match->name }}</strong>
                         <span class="mono">{{ $match->patient_code }}</span>
-                        <span>{{ $match->age }} ans — {{ $match->mobile }}</span>
+                        <span>{{ $match->age }} ans - {{ $match->mobile }}</span>
                     </span>
                     <button type="button" class="btn btn--ghost" wire:click="select({{ $match->id }})">
                         Selectionner
@@ -55,7 +55,7 @@
                 <div class="field">
                     <label for="deletion-reason">Motif de la suppression</label>
                     <textarea id="deletion-reason" rows="3" wire:model="reason"
-                              placeholder="Doublon avec un autre dossier, demande du patient…"></textarea>
+                              placeholder="Doublon avec un autre dossier, demande du patient..."></textarea>
                     @error('reason') <p class="field__error">{{ $message }}</p> @enderror
                 </div>
 

@@ -110,7 +110,7 @@ Route::middleware(['auth', 'role.scope:'.Roles::DOCTOR])->group(function () {
 |--------------------------------------------------------------------------
 |
 | UNE seule route, jamais une route par type : le slug est une valeur lue en
-| base, pas un chemin declare a la volee — sans quoi `route:cache` ne verrait
+| base, pas un chemin declare a la volee, sans quoi `route:cache` ne verrait
 | rien en production.
 |
 | `role.scope:staff` compare le type du compte connecte au slug demande, avec
@@ -135,7 +135,7 @@ Route::middleware(['auth', 'role.scope:staff'])->group(function () {
 | Volontairement hors des groupes `role.scope` : l'acces au dossier medical
 | est une capacite de type de personnel, pas un role. Un medecin comme un
 | type generique peuvent la porter, et le controleur verifie la capacite
-| elle-meme — un compte sans elle est renvoye vers son espace.
+| elle-meme : un compte sans elle est renvoye vers son espace.
 |
 */
 Route::middleware('auth')->group(function () {
@@ -176,7 +176,7 @@ Route::middleware('throttle:10,1')->group(function () {
 |
 | Publique elle aussi, mais sans code a quatre chiffres : un visiteur n'a pas
 | de dossier medical a proteger, et rien de medical ne s'affiche ici. Seul le
-| jeton de l'URL — un UUID, jamais le `visitor_code` ni l'id — tient lieu
+| jeton de l'URL, un UUID, jamais le `visitor_code` ni l'id, tient lieu
 | d'adresse.
 |
 | Le `throttle` est plus large que celui du portail patient, la page etant

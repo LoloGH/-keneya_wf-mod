@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Schema;
  * /admin, qui decide si un renvoi vers ce service passe par la Caisse Services.
  *
  * `slug` n'est pas cosmetique : trois types restent structurants pour
- * l'application — c'est par lui que le code reconnait une caisse (interface
+ * l'application, c'est par lui que le code reconnait une caisse (interface
  * /caisse, exclusion des destinations) sans dependre d'un libelle que l'admin
  * peut renommer. Les types crees ensuite n'ont, eux, aucun comportement code.
  */

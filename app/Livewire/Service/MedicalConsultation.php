@@ -19,16 +19,16 @@ use Livewire\Component;
  *
  * Le formulaire porte l'apparence de WorkFlow et la structure du dossier
  * medical : motif, histoire de la maladie, constantes, examen par appareil,
- * diagnostics, conduite a tenir. Ce qui est saisi ici atterrit dans le DME —
- * `dme_consultations` et ses tables filles — et nulle part ailleurs.
+ * diagnostics, conduite a tenir. Ce qui est saisi ici atterrit dans le DME,
+ * `dme_consultations` et ses tables filles, et nulle part ailleurs.
  *
  * Le medecin ne quitte donc jamais son interface pour tenir le dossier
  * medical, et la donnee de sante ne transite pas par WorkFlow. C'etait le
  * point de depart du v3.3.1 : deplacer le lieu de saisie plutot que recopier
  * une donnee pauvre dans une structure riche.
  *
- * Meme selecteur de patient que « Fin de consultation » — les patients appeles
- * de la file du jour — pour que les deux onglets parlent du meme patient au
+ * Meme selecteur de patient que « Fin de consultation », les patients appeles
+ * de la file du jour, pour que les deux onglets parlent du meme patient au
  * meme moment, sans que le medecin ait a se demander lequel des deux fait foi.
  */
 class MedicalConsultation extends Component

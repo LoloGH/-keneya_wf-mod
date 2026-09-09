@@ -28,8 +28,8 @@ use Tests\TestCase;
  * reinstalle sans qu'on le voie :
  *
  *  - **Fuseau horaire** : ecarte, et le test ci-dessous le montre plutot que
- *    de l'affirmer. `Africa/Bamako` vaut UTC+00:00 toute l'annee — le Mali n'a
- *    pas d'heure d'ete — donc un decalage base/affichage y est arithmetiquement
+ *    de l'affirmer. `Africa/Bamako` vaut UTC+00:00 toute l'annee, le Mali n'a
+ *    pas d'heure d'ete, donc un decalage base/affichage y est arithmetiquement
  *    impossible. Les bornes n'en sont pas moins verrouillees ici : c'est la
  *    zone qui ne peut pas deriver, pas le code qui la lit.
  *  - **Contournement des evenements de modele** : ecarte. Les six chemins qui
@@ -76,7 +76,7 @@ class OnDutyBoundaryTest extends TestCase
     }
 
     /**
-     * Le defaut trouve : un « 22h – 06h » ne rendait de garde a aucune heure,
+     * Le defaut trouve : un « 22h - 06h » ne rendait de garde a aucune heure,
      * ni le soir ni au petit matin. Dans un hopital qui tourne la nuit, cela
      * suffisait a faire taire un declencheur passe une certaine heure.
      */

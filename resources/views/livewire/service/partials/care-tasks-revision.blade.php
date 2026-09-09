@@ -20,18 +20,18 @@
                     @class(['is-cancelled' => $task->isCancelled()])>
                     <td class="mono">{{ $task->scheduled_at->format('d/m H:i') }}</td>
                     <td>{{ $task->type->name }}</td>
-                    <td>{{ $task->instructions ?: '—' }}</td>
+                    <td>{{ $task->instructions ?: '-' }}</td>
                     <td>
                         {{ $task->statusLabel() }}
                         @if ($task->isCancelled())
                             <span class="field__hint">
-                                — {{ $task->cancellation_reason }}
+                                - {{ $task->cancellation_reason }}
                                 ({{ $task->cancelledBy?->name }})
                             </span>
                         @elseif ($task->isDone())
-                            <span class="field__hint">— {{ $task->completedBy?->name }}</span>
+                            <span class="field__hint">- {{ $task->completedBy?->name }}</span>
                         @elseif ($task->assignedTo)
-                            <span class="field__hint">— confie a {{ $task->assignedTo->name }}</span>
+                            <span class="field__hint">, confie a {{ $task->assignedTo->name }}</span>
                         @endif
                     </td>
                     <td>
@@ -71,7 +71,7 @@
                                     <div class="field">
                                         <label for="revise-assign-{{ $task->id }}">Confier a</label>
                                         <select id="revise-assign-{{ $task->id }}" wire:model="reviseAssignedToUserId">
-                                            <option value="">— Personnel de garde —</option>
+                                            <option value="">Personnel de garde</option>
                                             @foreach ($carers as $carer)
                                                 <option value="{{ $carer->id }}">{{ $carer->name }}</option>
                                             @endforeach
@@ -108,7 +108,7 @@
                                     </label>
                                     <input id="cancel-reason-{{ $task->id }}" type="text"
                                            wire:model="cancellationReason"
-                                           placeholder="Erreur de saisie, prescription arretee…">
+                                           placeholder="Erreur de saisie, prescription arretee...">
                                     @error('cancellationReason') <p class="field__error">{{ $message }}</p> @enderror
                                 </div>
 

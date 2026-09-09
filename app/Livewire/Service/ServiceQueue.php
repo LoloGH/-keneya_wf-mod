@@ -167,7 +167,7 @@ class ServiceQueue extends Component
 
     /**
      * Cloture de l'episode de soins. Bloquee tant qu'un renvoi attend son
-     * resultat — le message le dit explicitement plutot que de griser un
+     * resultat : le message le dit explicitement plutot que de griser un
      * bouton sans expliquer pourquoi.
      */
     public function closeVisit(int $visitId, CloseVisit $action): void

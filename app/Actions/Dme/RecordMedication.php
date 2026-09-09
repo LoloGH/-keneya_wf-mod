@@ -13,7 +13,7 @@ use Keneya\Dme\Models\Medication;
  * Traitement habituel consigne au dossier medical (v3.3.1).
  *
  * A ne pas confondre avec l'ordonnance : celle-ci prescrit pour la fois
- * presente, celui-la note ce que le patient prend deja — un antihypertenseur
+ * presente, celui-la note ce que le patient prend deja, un antihypertenseur
  * suivi depuis des annees, un traitement commence ailleurs. Le module tient
  * les deux dans des tables distinctes, et c'est la bonne separation : on ne
  * represcrit pas un traitement au long cours a chaque venue.

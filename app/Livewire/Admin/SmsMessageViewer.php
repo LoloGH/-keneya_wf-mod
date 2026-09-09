@@ -11,8 +11,8 @@ use Livewire\WithPagination;
  * Section « SMS » de l'administration (v3.2.8).
  *
  * Lecture seule, comme le journal d'audit : on constate, on ne retouche pas.
- * Ce qui manquait n'etait pas la donnee — les echecs etaient deja ecrits dans
- * `storage/logs` — mais un endroit ou quelqu'un les regarde. D'ou le compteur
+ * Ce qui manquait n'etait pas la donnee, les echecs etaient deja ecrits dans
+ * `storage/logs`, mais un endroit ou quelqu'un les regarde. D'ou le compteur
  * d'echecs en tete : il se voit sans ouvrir la liste.
  */
 class SmsMessageViewer extends Component

@@ -16,7 +16,7 @@ use InvalidArgumentException;
  *
  * Meme regle d'acces que les soins : le personnel de garde sur le service, quel
  * que soit son type. Ni le medecin admettant ni un infirmier nommement designe
- * n'ont de privilege ici — c'est precisement l'equipe qui change qui a besoin
+ * n'ont de privilege ici : c'est precisement l'equipe qui change qui a besoin
  * d'ecrire et de lire ces notes.
  */
 class AddHandoffNote

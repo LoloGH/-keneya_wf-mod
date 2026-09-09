@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Rattache un composant a un service du compte connecte, et refuse tout autre
- * service — y compris si l'identifiant est force cote client.
+ * service : y compris si l'identifiant est force cote client.
  *
  * Deux rattachements valent : la fiche `doctors` d'un medecin, et la fiche
  * `staff_members` d'un type de personnel a interface dediee. Les memes ecrans
@@ -20,7 +20,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  *
  * Les colonnes `*_doctor_id` de WorkFlow restent pour autant reservees aux
  * vrais medecins : c'est {@see Caregiver} qui traduit « qui agit » vers le bon
- * couple de colonnes. Un composant qui a besoin d'un medecin — et il en reste —
+ * couple de colonnes. Un composant qui a besoin d'un medecin, et il en reste,
  * appelle `currentDoctor()`, qui refuse net les autres.
  */
 trait ScopedToOwnService

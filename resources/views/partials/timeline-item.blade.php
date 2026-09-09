@@ -3,7 +3,7 @@
 
     Les URL de telechargement et d'impression different d'un role a l'autre :
     elles sont donc passees en parametre, jamais codees en dur ici. Passer une
-    route a null suffit a masquer l'action pour un role qui n'y a pas droit —
+    route a null suffit a masquer l'action pour un role qui n'y a pas droit :
     y compris $attachmentRoute, auquel cas la piece est nommee sans etre
     telechargeable (lecture seule).
 
@@ -26,7 +26,7 @@
     @if ($item['service'] || $item['doctor'])
         <p class="timeline__meta">
             {{ $item['service']?->name }}
-            @if ($item['doctor']) — {{ $item['doctor']->name() }} @endif
+            @if ($item['doctor']) - {{ $item['doctor']->name() }} @endif
         </p>
     @endif
 

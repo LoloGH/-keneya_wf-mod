@@ -20,7 +20,7 @@ use Illuminate\Support\Collection;
  * compte des tickets.** Une moyenne sur deux notes n'est pas une performance,
  * c'est un hasard : chaque ligne rend donc son effectif, et `EFFECTIF_FIABLE`
  * dit a partir de quand la moyenne merite d'etre lue. Les vues s'en servent
- * pour le signaler — jamais pour cacher la ligne, ce qui reviendrait a choisir
+ * pour le signaler : jamais pour cacher la ligne, ce qui reviendrait a choisir
  * a la place du lecteur.
  */
 class FeedbackStatistics
@@ -154,7 +154,7 @@ class FeedbackStatistics
 
                 return [
                     'nom' => $agent?->name ?? 'Compte supprime',
-                    'role' => $agent?->roleLabel() ?? '—',
+                    'role' => $agent?->roleLabel() ?? '-',
                     'notes' => $notes,
                     'moyenne' => round((float) $ligne->moyenne, 2),
                     'fiable' => $notes >= self::EFFECTIF_FIABLE,
@@ -169,7 +169,7 @@ class FeedbackStatistics
     /**
      * Les postes les plus notes, tous agents confondus.
      *
-     * `post_label` porte le libelle vu par le patient (« Caisse », « Medecin —
+     * `post_label` porte le libelle vu par le patient (« Caisse », « Medecin :
      * Dr X »). Il repond a une autre question que `parAgent` : non pas qui,
      * mais quelle etape du parcours pese sur la satisfaction.
      *

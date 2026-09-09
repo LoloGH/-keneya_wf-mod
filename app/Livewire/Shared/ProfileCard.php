@@ -16,7 +16,7 @@ use Livewire\WithFileUploads;
  *
  * Remplace l'icone de deconnexion isolee : elle etait la seule action du coin
  * superieur droit, ce qui n'y laissait aucune place pour changer son mot de
- * passe — la seule chose qu'un agent ait besoin de faire sur son propre compte.
+ * passe, la seule chose qu'un agent ait besoin de faire sur son propre compte.
  */
 class ProfileCard extends Component
 {
@@ -29,7 +29,7 @@ class ProfileCard extends Component
      *
      * Ils vivent dans la carte de profil, a cote du changement de mot de
      * passe : ce sont les deux seules choses qu'un agent gere sur son propre
-     * compte. Le tampon de l'etablissement, lui, n'est pas ici — il est
+     * compte. Le tampon de l'etablissement, lui, n'est pas ici : il est
      * institutionnel et se regle depuis /admin.
      */
     public bool $editingSignature = false;
@@ -55,7 +55,7 @@ class ProfileCard extends Component
         return [
             'current_password' => ['required', 'string'],
             // Regles minimales de complexite : huit caracteres, lettres et
-            // chiffres. Rien de plus severe — un mot de passe impossible a
+            // chiffres. Rien de plus severe : un mot de passe impossible a
             // retenir finit ecrit sur un papier colle a l'ecran.
             'password' => ['required', 'string', 'confirmed', Password::min(8)->letters()->numbers()],
         ];

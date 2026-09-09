@@ -68,7 +68,7 @@ class BillableItem extends Model
 
     public function label(): string
     {
-        return sprintf('%s — %s', $this->name, $this->formattedPrice());
+        return sprintf('%s - %s', $this->name, $this->formattedPrice());
     }
 
     public static function auditLabel(): string

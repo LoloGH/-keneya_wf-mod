@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Schema;
  * explicite n'est donc necessaire.
  *
  * Ce qui manquait est d'un autre ordre : ce qu'une equipe a besoin de dire a la
- * suivante et qu'aucune colonne ne capture — « il a mal dormi », « la famille
+ * suivante et qu'aucune colonne ne capture, « il a mal dormi », « la famille
  * doit passer ce matin ». Du texte libre, date et signe.
  */
 return new class extends Migration

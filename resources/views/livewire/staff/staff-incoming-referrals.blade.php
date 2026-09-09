@@ -4,8 +4,8 @@
         <article class="referrals__item">
             <p class="referrals__meta">
                 <strong>{{ $referral->patient->name }}</strong>
-                <span class="mono">{{ $referral->patient->patient_code }}</span>
-                — envoye par {{ $referral->prescriberName() }} ({{ $referral->fromService->name }})
+                <span class="mono">{{ $referral->patient->patient_code }}</span> :
+                envoye par {{ $referral->prescriberName() }} ({{ $referral->fromService->name }})
             </p>
             <p class="referrals__result">{{ $referral->instructions }}</p>
 
@@ -20,7 +20,7 @@
                     </div>
 
                     {{-- Le compte rendu part au dossier medical du patient, ou
-                         il restera — et non en piece jointe d'un renvoi, qui
+                         il restera, et non en piece jointe d'un renvoi, qui
                          n'est qu'un mouvement du parcours (v3.3.1). --}}
                     <div class="field">
                         <label for="staff-titre-{{ $referral->id }}">
@@ -39,7 +39,7 @@
                         <input id="staff-files-{{ $referral->id }}" type="file" multiple
                                accept=".pdf,.jpg,.jpeg,.png" wire:model="files">
                         @error('files.*') <p class="field__error">{{ $message }}</p> @enderror
-                        <p class="hint" wire:loading wire:target="files">Televersement en cours…</p>
+                        <p class="hint" wire:loading wire:target="files">Televersement en cours...</p>
                     </div>
 
                     <div class="btn-row">

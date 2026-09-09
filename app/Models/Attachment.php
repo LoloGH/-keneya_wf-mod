@@ -92,7 +92,7 @@ class Attachment extends Model
      * Cette piece se regarde-t-elle dans le navigateur, sans telechargement ?
      *
      * Obliger a telecharger pour lire laisse une copie du dossier sur chaque
-     * poste qui l'a consultee — dans un hopital, sur des postes partages.
+     * poste qui l'a consultee : dans un hopital, sur des postes partages.
      */
     public function isPreviewable(): bool
     {

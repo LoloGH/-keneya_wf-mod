@@ -11,12 +11,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  *
  * Elle l'etait toujours en telechargement. Un compte rendu se **regarde** :
  * obliger a le telecharger pour le lire laisse une copie du dossier sur chaque
- * poste qui l'a consulte — dans un hopital, sur des postes partages. Un PDF ou
+ * poste qui l'a consulte, dans un hopital, sur des postes partages. Un PDF ou
  * une image s'affiche donc dans le navigateur, et le telechargement reste
  * offert a qui en a vraiment besoin (`?telecharger=1`).
  *
- * Trois routes servent les pieces jointes — medecin, administration, portail
- * patient — avec chacune ses propres controles d'acces. La reponse, elle, doit
+ * Trois routes servent les pieces jointes, medecin, administration, portail
+ * patient, avec chacune ses propres controles d'acces. La reponse, elle, doit
  * etre la meme partout : la voici en un seul endroit, pour qu'un durcissement
  * d'en-tete ne s'applique pas a deux roles sur trois.
  */

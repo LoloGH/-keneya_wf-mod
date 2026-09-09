@@ -188,7 +188,7 @@ class AuditSettingsScheduleTest extends TestCase
      * En revanche, une fin anterieure au debut n'est plus une erreur depuis la
      * v3.2.8 : elle designe un creneau de nuit, que l'hopital pratique. La
      * regle precedente le refusait, ce qui obligeait a couper une garde de nuit
-     * en deux lignes — et un « 22h – 06h » saisi malgre tout ne rendait de
+     * en deux lignes, et un « 22h - 06h » saisi malgre tout ne rendait de
      * garde a aucune heure (voir OnDutyBoundaryTest).
      */
     public function test_un_creneau_de_nuit_est_desormais_accepte(): void
@@ -235,8 +235,8 @@ class AuditSettingsScheduleTest extends TestCase
 
         Livewire::actingAs($mien->user)
             ->test(MySchedule::class)
-            ->assertSee('08:00 – 12:00', escape: false)
-            ->assertDontSee('15:00 – 19:00');
+            ->assertSee('08:00 - 12:00', escape: false)
+            ->assertDontSee('15:00 - 19:00');
     }
 
     public function test_la_receptionniste_voit_aussi_son_planning(): void
@@ -251,6 +251,6 @@ class AuditSettingsScheduleTest extends TestCase
 
         Livewire::actingAs($receptionist)
             ->test(MySchedule::class)
-            ->assertSee('07:30 – 13:30', escape: false);
+            ->assertSee('07:30 - 13:30', escape: false);
     }
 }

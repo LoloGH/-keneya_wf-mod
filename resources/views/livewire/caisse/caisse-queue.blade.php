@@ -4,7 +4,7 @@
             <span class="cash-total">Encaisse aujourd'hui : <strong>{{ number_format($todayTotal, 0, ',', ' ') }} FCFA</strong></span>
             <button type="button" class="btn btn--primary" wire:click="callNext" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="callNext">Appeler le suivant</span>
-                <span wire:loading wire:target="callNext">Appel…</span>
+                <span wire:loading wire:target="callNext">Appel...</span>
             </button>
         </div>
     </x-slot:actions>
@@ -47,8 +47,8 @@
                     <li class="referral-form">
                         <form wire:submit="confirmAndRoute" class="form">
                             <p class="referral-form__title">
-                                {{ $visit->patient->name }} — orientation vers
-                                {{ $visit->pendingNextService?->name ?? '—' }}
+                                {{ $visit->patient->name }}, orientation vers
+                                {{ $visit->pendingNextService?->name ?? '-' }}
                             </p>
 
                             @if ($actes[$visit->id] ?? null)
@@ -121,7 +121,7 @@
             @foreach ($todayPayments as $payment)
                 <li>
                     <strong>{{ $payment->formattedAmount() }}</strong>
-                    — {{ $payment->patient->name }}
+                    - {{ $payment->patient->name }}
                     <span>{{ $payment->subjectLabel() }}</span>
                     @if ($payment->service) <span>({{ $payment->service->name }})</span> @endif
                     @if ($payment->isOverridden())

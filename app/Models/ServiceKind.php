@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
  * Type de service, administrable depuis /admin (v3.2.1, point 10).
  *
  * Trois types sont poses a l'installation et restent structurants pour
- * l'application — c'est leur `slug`, jamais leur libelle, que le code
+ * l'application : c'est leur `slug`, jamais leur libelle, que le code
  * interroge. Tout type cree ensuite par l'admin n'a aucun comportement code :
  * il ne fait que porter son nom et son indicateur de peage.
  */
@@ -28,7 +28,7 @@ class ServiceKind extends Model
 
     /**
      * L'accueil (v3.2.5). Comme la caisse, c'est un poste de travail reel,
-     * avec ses heures et son personnel — mais ce n'est pas une destination de
+     * avec ses heures et son personnel, mais ce n'est pas une destination de
      * soins : on n'y envoie pas un patient se faire consulter.
      */
     public const SLUG_RECEPTION = 'reception';

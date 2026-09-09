@@ -3,7 +3,7 @@
     <div class="field">
         <label for="visits-search" class="sr-only">Rechercher</label>
         <input id="visits-search" type="search" wire:model.live.debounce.400ms="search"
-               placeholder="Rechercher un nom, un code, un telephone…">
+               placeholder="Rechercher un nom, un code, un telephone...">
     </div>
 
     <h3 class="card__subtitle">Patients ({{ $visits->count() }})</h3>
@@ -55,9 +55,9 @@
                         <tr>
                             <td class="mono">{{ $visitor->visitor_code }}</td>
                             <td>{{ $visitor->name }}</td>
-                            <td>{{ $visitor->patient?->name ?? '—' }}</td>
+                            <td>{{ $visitor->patient?->name ?? '-' }}</td>
                             <td>{{ $visitor->service->name }}</td>
-                            <td class="mono">{{ $visitor->token ?? '—' }}</td>
+                            <td class="mono">{{ $visitor->token ?? '-' }}</td>
                             <td>{{ $visitor->created_at->format('H:i') }}</td>
                             <td>
                                 <a href="{{ route('reception.ticket.visitor', $visitor) }}" target="_blank"

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Un passage — un episode de soins.
+ * Un passage : un episode de soins.
  *
  * `patients` porte l'identite permanente (un patient_code a vie) ; `visits`
  * porte le passage. Un patient qui revient six mois plus tard pour une autre
@@ -64,7 +64,7 @@ class Visit extends Model
      * La file du jour d'un service.
      *
      * Une visite rejoint une file au moment ou son `service_id` et son `token`
-     * sont ecrits — a l'ouverture, puis a chaque renvoi. `updated_at` marque
+     * sont ecrits : a l'ouverture, puis a chaque renvoi. `updated_at` marque
      * donc son entree dans la file courante.
      *
      * Les files repartent a 1 chaque matin : ce scope est le seul endroit qui

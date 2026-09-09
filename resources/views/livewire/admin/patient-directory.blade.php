@@ -4,7 +4,7 @@
         <div class="field">
             <label for="patients-search">Rechercher</label>
             <input id="patients-search" type="search" wire:model.live.debounce.400ms="search"
-                   placeholder="Nom, dossier, numero papier, telephone…">
+                   placeholder="Nom, dossier, numero papier, telephone...">
         </div>
 
         <div class="field">
@@ -32,14 +32,14 @@
                         <td class="mono">{{ $patient->patient_code }}</td>
                         <td>{{ $patient->name }}</td>
                         <td>{{ $patient->age }}</td>
-                        <td>{{ $patient->latestVisit?->service?->name ?? '—' }}</td>
+                        <td>{{ $patient->latestVisit?->service?->name ?? '-' }}</td>
                         <td>
                             @if ($patient->latestVisit)
                                 <span class="badge badge--{{ $patient->latestVisit->status }}">
                                     {{ $patient->latestVisit->statusLabel() }}
                                 </span>
                             @else
-                                —
+                                -
                             @endif
                         </td>
                         <td>{{ $patient->created_at->format('d/m/Y H:i') }}</td>
@@ -61,7 +61,7 @@
     @if ($openPatient)
         <div class="record">
             <div class="card__head">
-                <h3 class="card__subtitle">Dossier {{ $openPatient->patient_code }} — {{ $openPatient->name }}</h3>
+                <h3 class="card__subtitle">Dossier {{ $openPatient->patient_code }} - {{ $openPatient->name }}</h3>
                 <div class="btn-row">
                     {{-- Sondage a la demande (v3.2.9, point 3) : sans attendre
                          la cloture ni le delai automatique. --}}
@@ -107,7 +107,7 @@
                     <div class="btn-row">
                         <button type="submit" class="btn btn--primary" wire:loading.attr="disabled">
                             <span wire:loading.remove wire:target="files,saveAttachment">Enregistrer</span>
-                            <span wire:loading wire:target="files,saveAttachment">Televersement…</span>
+                            <span wire:loading wire:target="files,saveAttachment">Televersement...</span>
                         </button>
                         <button type="button" class="btn btn--ghost" wire:click="cancelAttachment">Annuler</button>
                     </div>
@@ -136,7 +136,7 @@
                         <time>
                             {{ $episode['visit']->opened_at?->format('d/m/Y') }}
                             @if ($episode['visit']->closed_at)
-                                → {{ $episode['visit']->closed_at->format('d/m/Y') }}
+                                -> {{ $episode['visit']->closed_at->format('d/m/Y') }}
                             @endif
                         </time>
                     </header>

@@ -253,8 +253,8 @@ class FeedbackSurveyStepsTest extends TestCase
         // ce passage est clos.
         $composant->assertSet('type', FeedbackEntry::TYPE_COMPLAINT);
 
-        // Et une seconde tentative forgee — deux onglets ouverts, un lien SMS
-        // reclique — n'ecrit rien de plus.
+        // Et une seconde tentative forgee, deux onglets ouverts, un lien SMS
+        // reclique, n'ecrit rien de plus.
         $composant->set('type', FeedbackEntry::TYPE_SURVEY)
             ->set('ratingCare', 1)
             ->call('submit');

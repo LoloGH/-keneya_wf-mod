@@ -43,9 +43,9 @@
                 <div class="field">
                     <label for="visiteur-care">Votre accueil</label>
                     <select id="visiteur-care" wire:model="ratingCare">
-                        <option value="">— Choisir une note —</option>
+                        <option value="">Choisir une note</option>
                         @foreach ([5 => 'Tres satisfait', 4 => 'Satisfait', 3 => 'Correct', 2 => 'Peu satisfait', 1 => 'Pas satisfait'] as $note => $libelle)
-                            <option value="{{ $note }}">{{ $note }} — {{ $libelle }}</option>
+                            <option value="{{ $note }}">{{ $note }} - {{ $libelle }}</option>
                         @endforeach
                     </select>
                     @error('ratingCare') <p class="field__error">{{ $message }}</p> @enderror
@@ -54,9 +54,9 @@
                 <div class="field">
                     <label for="visiteur-staff">Le personnel rencontre</label>
                     <select id="visiteur-staff" wire:model="ratingStaff">
-                        <option value="">— Choisir une note —</option>
+                        <option value="">Choisir une note</option>
                         @foreach ([5 => 'Tres satisfait', 4 => 'Satisfait', 3 => 'Correct', 2 => 'Peu satisfait', 1 => 'Pas satisfait'] as $note => $libelle)
-                            <option value="{{ $note }}">{{ $note }} — {{ $libelle }}</option>
+                            <option value="{{ $note }}">{{ $note }} - {{ $libelle }}</option>
                         @endforeach
                     </select>
                     @error('ratingStaff') <p class="field__error">{{ $message }}</p> @enderror

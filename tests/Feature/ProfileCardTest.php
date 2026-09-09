@@ -56,7 +56,7 @@ class ProfileCardTest extends TestCase
     public function test_le_service_ne_s_affiche_pas_pour_qui_n_en_a_pas(): void
     {
         // Une receptionniste n'est rattachee a aucun service : une ligne
-        // « Service : — » n'apprendrait rien.
+        // « Service : - » n'apprendrait rien.
         Livewire::actingAs($this->makeReceptionist())
             ->test(ProfileCard::class)
             ->call('toggle')

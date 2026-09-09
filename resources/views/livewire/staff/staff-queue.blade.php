@@ -1,9 +1,9 @@
-<x-card title="File d'attente — {{ $service->name }}" icon="file" :poll="config('keneya.poll_interval')">
+<x-card title="File d'attente - {{ $service->name }}" icon="file" :poll="config('keneya.poll_interval')">
     <x-slot:actions>
         @if ($type->can(\App\Models\StaffType::CAP_QUEUE))
             <button type="button" class="btn btn--primary" wire:click="callNext" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="callNext">Appeler le suivant</span>
-                <span wire:loading wire:target="callNext">Appel…</span>
+                <span wire:loading wire:target="callNext">Appel...</span>
             </button>
         @endif
     </x-slot:actions>
@@ -51,7 +51,7 @@
                 <div class="field">
                     <label for="staff-to-service">Service destinataire</label>
                     <select id="staff-to-service" wire:model.live="toServiceId">
-                        <option value="">— Choisir —</option>
+                        <option value="">Choisir</option>
                         @foreach ($otherServices as $autre)
                             <option value="{{ $autre->id }}">{{ $autre->name }}</option>
                         @endforeach
@@ -65,7 +65,7 @@
                     <div class="field">
                         <label for="staff-acte">Acte demande</label>
                         <select id="staff-acte" wire:model="billableItemId">
-                            <option value="">— Aucun acte facturable —</option>
+                            <option value="">Aucun acte facturable</option>
                             @foreach ($actes as $acte)
                                 <option value="{{ $acte->id }}">{{ $acte->label() }}</option>
                             @endforeach

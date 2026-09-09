@@ -22,7 +22,7 @@ use Keneya\Dme\Models\ImagingOrder;
  *     l'examen resterait « compte rendu non redige » alors que le resultat
  *     existe ;
  *  2. les fichiers sont verses au **dossier medical**, rattaches a la demande
- *     qu'ils documentent — sinon la fiche de l'examen les ignore ;
+ *     qu'ils documentent : sinon la fiche de l'examen les ignore ;
  *  3. la demande passe de « demandee » a rendue, pour qu'elle cesse
  *     d'apparaitre comme en attente dans le dossier ;
  *  4. le renvoi est clos, ce qui **ramene le patient** dans la file du
@@ -77,7 +77,7 @@ class CompleteExaminationReferral
     /**
      * Le compte rendu prend la nature de la demande : un resultat de
      * laboratoire ne se classe pas avec une echographie. Sans demande
-     * attachee — un renvoi ordinaire — le document est simplement importe.
+     * attachee, un renvoi ordinaire, le document est simplement importe.
      */
     private function typeDeDocument(Referral $referral): string
     {
@@ -98,7 +98,7 @@ class CompleteExaminationReferral
      * statut de redaction propres. On respecte leur vocabulaire plutot que
      * d'en imposer un troisieme.
      *
-     * Une demande introuvable — dossier purge, module remonte — n'interrompt
+     * Une demande introuvable, dossier purge, module remonte, n'interrompt
      * rien : le patient doit revenir chez son medecin quoi qu'il arrive.
      */
     private function rendLaDemande(
@@ -132,7 +132,7 @@ class CompleteExaminationReferral
      * `findings` et `conclusion` recoivent le meme texte : le technicien saisit
      * une conclusion unique depuis WorkFlow, et le gabarit du module n'affiche
      * que les champs remplis. Les distinguer demanderait deux zones de saisie
-     * la ou une suffit — le radiologue qui veut detailler dispose du formulaire
+     * la ou une suffit : le radiologue qui veut detailler dispose du formulaire
      * complet dans le module.
      */
     private function ecritLeCompteRendu(

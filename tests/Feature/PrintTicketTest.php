@@ -16,7 +16,7 @@ use Tests\TestCase;
 /**
  * Point 9 du v3.2 : ticket imprimable, patient et visiteur.
  *
- * Le contenu n'est pas le meme des deux cotes — on verifie donc les champs
+ * Le contenu n'est pas le meme des deux cotes : on verifie donc les champs
  * attendus de chacun, et l'absence de ceux qui n'ont rien a y faire.
  */
 class PrintTicketTest extends TestCase

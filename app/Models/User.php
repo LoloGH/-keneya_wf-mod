@@ -78,7 +78,7 @@ class User extends Authenticatable implements DmeUser
      * Le numero auquel joindre cette personne par SMS (v3.2.9, point 1).
      *
      * `users.mobile` d'abord : c'est le numero de la personne, quel que soit
-     * son role. A defaut, celui de sa fiche medecin — les numeros saisis avant
+     * son role. A defaut, celui de sa fiche medecin : les numeros saisis avant
      * l'existence de cette colonne continuent ainsi de servir, sans ressaisie.
      * Nul si l'on ne sait pas la joindre : mieux vaut zero destinataire qu'un
      * envoi dans le vide.
@@ -150,7 +150,7 @@ class User extends Authenticatable implements DmeUser
      *  1. le rattachement explicite (`users.staff_type_id`), choisi par l'admin
      *     quand plusieurs types partagent le meme role ;
      *  2. le type du personnel generique, porte par `staff_members` ;
-     *  3. a defaut, le type d'origine du role — de sorte qu'un compte cree
+     *  3. a defaut, le type d'origine du role : de sorte qu'un compte cree
      *     avant le v3.2.2, ou par un seeder, ait toujours un type.
      */
     public function staffType(): ?StaffType
@@ -188,13 +188,13 @@ class User extends Authenticatable implements DmeUser
      *
      * L'acces au dossier medical est une capacite comme les autres : elle se
      * coche sur un type de personnel, dans /admin, et se lit ici. Le module,
-     * lui, ne decide de rien — il demande a l'hote, et c'est cette methode
+     * lui, ne decide de rien : il demande a l'hote, et c'est cette methode
      * qui repond (voir DmeIntegrationServiceProvider).
      */
     public function canAccessDme(): bool
     {
         // L'administrateur de l'etablissement l'a toujours, sans passer par la
-        // case a cocher : il n'a aucun type de personnel — la case n'existe
+        // case a cocher : il n'a aucun type de personnel, la case n'existe
         // donc nulle part dans /admin, et il serait le seul a ne jamais
         // pouvoir l'obtenir. Or c'est lui qui administre le module : ses
         // parametres, ses roles, ses comptes et son journal d'audit.
@@ -243,7 +243,7 @@ class User extends Authenticatable implements DmeUser
     public function isOnDutyFor(int $serviceId, ?Carbon $moment = null): bool
     {
         // Une seule regle de garde dans l'application : elle vit dans
-        // OnDutyRoster, qui repond aussi a la question inverse — qui est de
+        // OnDutyRoster, qui repond aussi a la question inverse, qui est de
         // garde sur ce service ?
         return app(OnDutyRoster::class)->isOnDuty($this, $serviceId, $moment);
     }
@@ -257,7 +257,7 @@ class User extends Authenticatable implements DmeUser
      * table de rattachement (v3.2.4).
      *
      * Les plannings interrogeaient les roles Spatie : un type de personnel sans
-     * role — un infirmier, un brancardier — n'en porte aucun, il etait donc
+     * role, un infirmier, un brancardier, n'en porte aucun, il etait donc
      * introuvable dans les menus, et personne ne pouvait lui poser de creneau.
      * Or c'est le planning qui decide de sa garde, donc de tout ce qu'il voit.
      *

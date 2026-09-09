@@ -21,7 +21,7 @@ use Tests\TestCase;
  * Retour d'un renvoi complete (v3.2.1, correctif prioritaire).
  *
  * Le resultat s'affichait bien chez le prescripteur, mais le patient restait
- * dans la file du service destinataire — bloque la-bas indefiniment. Ces tests
+ * dans la file du service destinataire : bloque la-bas indefiniment. Ces tests
  * verrouillent le retour effectif dans la file du prescripteur, et le fait
  * qu'il ne repasse jamais par la caisse.
  */
@@ -88,11 +88,11 @@ class ReferralReturnTest extends TestCase
 
         $visit->refresh();
 
-        // Ni file de caisse, ni destination en attente de paiement…
+        // Ni file de caisse, ni destination en attente de paiement...
         $this->assertSame($consultation->getKey(), $visit->service_id);
         $this->assertNull($visit->pending_next_service_id);
         $this->assertFalse($visit->awaitsPayment());
-        // …ni second encaissement.
+        // ...ni second encaissement.
         $this->assertSame($encaissementsAvant, \DB::table('payments')->count());
     }
 

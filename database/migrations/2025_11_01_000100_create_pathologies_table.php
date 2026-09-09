@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Catalogue de pathologies (v3.2.9, point 1).
  *
  * Volontairement pauvre : un nom, rien d'autre. Il sert a regrouper des
- * patients pour une diffusion — « tous ceux suivis pour du diabete » — et non
+ * patients pour une diffusion, « tous ceux suivis pour du diabete », et non
  * a coder un diagnostic. Un vrai codage medical (CIM-10) serait un autre
  * sujet, avec d'autres exigences.
  *

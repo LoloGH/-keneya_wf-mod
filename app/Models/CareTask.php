@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * La recurrence est resolue a la creation, pas a la lecture : « toutes les 8h
  * pendant 3 jours » produit neuf lignes. Chaque administration doit pouvoir
- * etre marquee faite ou manquee separement — une regle de recurrence calculee
+ * etre marquee faite ou manquee separement : une regle de recurrence calculee
  * a la volee ne le permettrait pas.
  */
 class CareTask extends Model
@@ -28,7 +28,7 @@ class CareTask extends Model
 
     /**
      * Soin annule (v3.2.3, point 4) : il reste au dossier, mais ne compte plus
-     * — ni comme reste a faire, ni comme soin administre.
+     *, ni comme reste a faire, ni comme soin administre.
      */
     public const STATUS_CANCELLED = 'cancelled';
 
@@ -118,7 +118,7 @@ class CareTask extends Model
      * Les soins qui comptent : tout sauf les annules.
      *
      * Un soin annule reste lisible au dossier, mais il ne doit apparaitre dans
-     * aucun total — sinon annuler reviendrait a maquiller les chiffres sans
+     * aucun total : sinon annuler reviendrait a maquiller les chiffres sans
      * les corriger.
      *
      * @param  Builder<self>  $query

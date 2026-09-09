@@ -3,7 +3,7 @@
      Pas de graphique, et c'est le bon choix plutot qu'une facilite : dix
      services et une poignee d'agents sont autant de classes qui portent chacune
      un sens. La forme juste est alors un tableau, avec une jauge par ligne pour
-     comparer d'un coup d'oeil — un histogramme de dix barres nommees n'ajouterait
+     comparer d'un coup d'oeil : un histogramme de dix barres nommees n'ajouterait
      que du decor.
 
      La jauge encode la note par sa LONGUEUR, jamais par sa couleur. Peindre en
@@ -32,7 +32,7 @@
         <div class="chiffres">
             <div class="chiffres__bloc">
                 <span class="chiffres__valeur mono">
-                    {{ $entete['note_globale'] === null ? '—' : number_format($entete['note_globale'], 2, ',', ' ') }}
+                    {{ $entete['note_globale'] === null ? '-' : number_format($entete['note_globale'], 2, ',', ' ') }}
                 </span>
                 <span class="chiffres__libelle">note moyenne du parcours, sur 5</span>
             </div>
@@ -165,7 +165,7 @@
         <p class="hint">
             La meme matiere, lue autrement : non pas qui, mais quelle etape pese
             sur la satisfaction. Un accueil mal note partout ne designe personne
-            en particulier — il designe l'accueil.
+            en particulier : il designe l'accueil.
         </p>
 
         @if ($postes->isEmpty())

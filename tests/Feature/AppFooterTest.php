@@ -36,7 +36,7 @@ class AppFooterTest extends TestCase
     /**
      * La version affichee doit venir du fichier `VERSION`, et de nulle part
      * ailleurs : une version affichee qui contredirait le depot serait pire que
-     * pas de version du tout — et c'est ce meme fichier que le tag Git suit.
+     * pas de version du tout, et c'est ce meme fichier que le tag Git suit.
      */
     public function test_la_version_affichee_est_celle_du_fichier_version(): void
     {

@@ -70,13 +70,13 @@ class FeedbackJourney
     }
 
     /**
-     * « Medecine Generale — Dr Traore » quand on sait qui, « Accueil » quand
+     * « Medecine Generale : Dr Traore » quand on sait qui, « Accueil » quand
      * seul le poste est connu.
      */
     private function libelle(?string $service, ?string $agent): string
     {
         if ($service !== null && $agent !== null) {
-            return $service.' — '.$agent;
+            return $service.'-'.$agent;
         }
 
         return $service ?? (string) $agent;

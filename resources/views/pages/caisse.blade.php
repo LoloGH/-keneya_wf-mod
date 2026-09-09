@@ -30,7 +30,7 @@
         ->all();
 @endphp
 
-<x-layouts.app :title="'Caisse — '.config('keneya.name')">
+<x-layouts.app :title="'Caisse - '.config('keneya.name')">
     @if (session('caisse.status'))
         <div class="alert alert--success" role="status">{{ session('caisse.status') }}</div>
     @endif

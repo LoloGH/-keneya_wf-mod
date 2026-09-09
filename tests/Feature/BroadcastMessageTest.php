@@ -138,7 +138,7 @@ class BroadcastMessageTest extends TestCase
     /**
      * La verification demandee : un envoi « a tous » traite la selection par
      * lots. 600 patients depassent la taille de lot (500), ce qui force
-     * plusieurs passages — un `get()` unique passerait aussi ce test, mais
+     * plusieurs passages : un `get()` unique passerait aussi ce test, mais
      * seul le parcours par lots le passe sans charger la table entiere.
      */
     public function test_un_envoi_a_tous_les_patients_traite_la_selection_par_lots(): void

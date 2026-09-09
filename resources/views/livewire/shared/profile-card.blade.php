@@ -1,14 +1,14 @@
 {{-- Carte de profil (v3.2.3, point 3).
 
      Elle remplace l'icone de deconnexion isolee : la deconnexion y est
-     toujours, avec ce qui lui manquait — savoir de quel compte il s'agit, et
+     toujours, avec ce qui lui manquait, savoir de quel compte il s'agit, et
      pouvoir en changer le mot de passe. --}}
 <div class="profil" @keydown.escape.window="$wire.close()">
 
     <button type="button" class="profil__avatar" wire:click="toggle"
             data-testid="profile-card"
             aria-haspopup="true" aria-expanded="{{ $open ? 'true' : 'false' }}"
-            aria-label="Mon compte — {{ $user?->name }}" title="Mon compte">
+            aria-label="Mon compte - {{ $user?->name }}" title="Mon compte">
         {{ $initials }}
     </button>
 
@@ -20,7 +20,7 @@
                 <span class="profil__avatar profil__avatar--large" aria-hidden="true">{{ $initials }}</span>
                 <span class="profil__who">
                     <strong>{{ $user?->name }}</strong>
-                    <span class="profil__role">{{ $roleLabel ?: '—' }}</span>
+                    <span class="profil__role">{{ $roleLabel ?: '-' }}</span>
                 </span>
                 <button type="button" class="alert__dismiss" wire:click="close"
                         aria-label="Fermer" title="Fermer">&times;</button>
@@ -49,7 +49,7 @@
             {{-- Signature et tampon (v3.2.9, point 2) : offerts au seul
                  medecin, puisque ce sont les elements qu'il appose sur ses
                  ordonnances. Le tampon de l'etablissement, lui, se regle dans
-                 /admin — il n'appartient a personne en particulier. --}}
+                 /admin : il n'appartient a personne en particulier. --}}
             @if ($isDoctor && $editingSignature)
                 <form wire:submit="saveSignature" class="form profil__form">
                     <div class="field">

@@ -13,8 +13,8 @@ use Livewire\Component;
  * Recherche prealable a l'enregistrement (addendum v3).
  *
  * Un patient deja connu ne doit jamais recevoir un second `patient_code` :
- * on retrouve son identite, la receptionniste la confirme visuellement — pour
- * eviter toute confusion entre homonymes — puis on ouvre un nouvel episode
+ * on retrouve son identite, la receptionniste la confirme visuellement, pour
+ * eviter toute confusion entre homonymes, puis on ouvre un nouvel episode
  * sous le meme identifiant.
  */
 class PatientLookup extends Component
@@ -65,7 +65,7 @@ class PatientLookup extends Component
         $visit = $action->execute($patient, (int) $this->serviceId, $this->reason ?: null);
 
         session()->flash('reception.success', sprintf(
-            'Nouvel episode ouvert pour %s (dossier %s) — ticket n° %d au service %s.',
+            'Nouvel episode ouvert pour %s (dossier %s) : ticket n° %d au service %s.',
             $patient->name,
             $patient->patient_code,
             $visit->token,

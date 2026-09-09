@@ -91,7 +91,7 @@ class Payment extends Model
 
     /**
      * Ce que le patient a paye, nomme : l'acte du catalogue s'il y en a un,
-     * sinon le type d'encaissement — les encaissements anterieurs au catalogue
+     * sinon le type d'encaissement, les encaissements anterieurs au catalogue
      * n'ont rien de plus precis a montrer.
      */
     public function subjectLabel(): string

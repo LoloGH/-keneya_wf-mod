@@ -32,7 +32,7 @@ class Setting extends Model
     /**
      * Complements d'en-tete apparus avec la refonte visuelle : site, horaires
      * d'ouverture et devise. Ils suivent la meme regle que l'adresse et le
-     * telephone — en base, jamais dans le gabarit. Aucune migration : la table
+     * telephone : en base, jamais dans le gabarit. Aucune migration : la table
      * est un simple couple cle/valeur.
      */
     public const HOSPITAL_WEBSITE = 'hospital_website';

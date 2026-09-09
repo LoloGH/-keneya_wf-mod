@@ -135,7 +135,7 @@ class BrandLogoTest extends TestCase
         // Avant la refonte, le nom du produit etait volontairement absent de la
         // barre. La maquette de reference le remet, en second sous celui de
         // l'etablissement : c'est l'hopital que l'agent doit reconnaitre, mais
-        // le produit doit rester identifiable — notamment pour une demonstration
+        // le produit doit rester identifiable, notamment pour une demonstration
         // commerciale, ou personne ne sait encore comment le logiciel s'appelle.
         $response = $this->actingAs($this->makeAdmin())->get('/admin');
 

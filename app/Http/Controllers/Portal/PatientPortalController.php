@@ -11,7 +11,7 @@ use Illuminate\Contracts\View\View;
  *
  * Aucune authentification : le lien lui-meme, porteur d'un UUID, tient lieu
  * d'adresse. Rien n'est affiche tant que le code a quatre chiffres n'a pas ete
- * valide — c'est le composant Livewire qui s'en charge.
+ * valide : c'est le composant Livewire qui s'en charge.
  */
 class PatientPortalController extends Controller
 {

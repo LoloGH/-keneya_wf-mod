@@ -47,7 +47,7 @@ class ReceptionInterfaceTest extends TestCase
         $form = Livewire::actingAs($this->makeReceptionist())->test(PatientRegistrationForm::class);
 
         // Un numero distinct par patient : depuis la v3.2.8, trois personnes
-        // partageant un meme telephone declenchent — a juste titre — la
+        // partageant un meme telephone declenchent, a juste titre, la
         // detection de doublon, ce que ce test ne cherche pas a mesurer.
         foreach ([
             [$urgences, 'Patient A', '76000001'],
@@ -139,7 +139,7 @@ class ReceptionInterfaceTest extends TestCase
 
     /**
      * Les files repartent a 1 chaque matin. Un patient de la veille ne doit
-     * donc plus apparaitre dans la file du jour — sinon son numero entrerait
+     * donc plus apparaitre dans la file du jour : sinon son numero entrerait
      * en collision avec un ticket reattribue aujourd'hui.
      */
     public function test_la_file_du_jour_ignore_les_patients_de_la_veille(): void

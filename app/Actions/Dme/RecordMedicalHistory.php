@@ -12,8 +12,8 @@ use Keneya\Dme\Models\MedicalHistory;
 /**
  * Antecedent consigne au dossier medical depuis /service (v3.3.1).
  *
- * Le module tient les cinq categories dans une table unique — personnels,
- * chirurgicaux, familiaux, gyneco-obstetriques, facteurs de risque — et les
+ * Le module tient les cinq categories dans une table unique, personnels,
+ * chirurgicaux, familiaux, gyneco-obstetriques, facteurs de risque, et les
  * champs qui n'ont de sens que pour l'une d'elles restent nuls pour les
  * autres : le lien de parente pour un antecedent familial, l'etablissement
  * pour un antecedent chirurgical.

@@ -215,7 +215,7 @@ class MyPatients extends Component
 
     /**
      * Envoi du lien « mes documents » par SMS (v3.2, point 7), sur demande
-     * explicite du medecin — jamais automatiquement.
+     * explicite du medecin : jamais automatiquement.
      */
     public function sendPortalLink(int $patientId, SendPortalLink $action): void
     {

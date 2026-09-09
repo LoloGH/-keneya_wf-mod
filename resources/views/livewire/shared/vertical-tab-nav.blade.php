@@ -31,7 +31,7 @@
             if (this.large()) {
                 // Sur grand ecran, seul un geste NE la barre elle-meme la
                 // replie : ailleurs dans la page, un glissement horizontal
-                // appartient au contenu — a un tableau large, par exemple.
+                // appartient au contenu, a un tableau large, par exemple.
                 if (! e.target.closest?.('.tabnav')) return;
             } else if (! this.drawer && e.clientX >= 40) {
                 // Tiroir ferme : le geste qui l'ouvre part du bord gauche de
@@ -103,7 +103,7 @@
                      (« ETABLISSEMENT », « GESTION », « SYSTEME »). C'est une
                      simple cle facultative : l'arbre de sections garde
                      exactement la meme forme, et une interface qui n'en pose
-                     aucune — /caisse et ses trois sections — n'affiche aucun
+                     aucune, /caisse et ses trois sections, n'affiche aucun
                      intitule plutot qu'un decoupage qui n'apprendrait rien. --}}
                 @if (($section['famille'] ?? null) && $section['famille'] !== $familleRendue)
                     @php $familleRendue = $section['famille']; @endphp
@@ -116,7 +116,7 @@
                      Avant, deplier « Personnel » etait un aller-retour serveur :
                      on cliquait, et le sous-menu apparaissait un instant plus
                      tard. Alpine le fait maintenant sans reseau, et le serveur
-                     ne donne plus que l'etat de depart — celui qui garantit que
+                     ne donne plus que l'etat de depart : celui qui garantit que
                      le groupe de la section courante s'ouvre au chargement. --}}
                 <li class="tabnav__item" wire:key="sec-{{ $section['key'] }}"
                     @if ($isGroup) x-data="{ ouvert: {{ $open ? 'true' : 'false' }} }" @endif>
@@ -172,7 +172,7 @@
     </nav>
 
     {{-- Un seul panneau rendu a la fois : les sections inactives ne sont pas
-         seulement masquees, elles ne sont pas montees — pas de wire:poll qui
+         seulement masquees, elles ne sont pas montees, pas de wire:poll qui
          continuerait a tourner dans le vide. --}}
     <section class="workspace__panel" aria-live="polite"
              wire:loading.attr="aria-busy" wire:target="select">

@@ -17,14 +17,14 @@
                 <h3 class="board__service-name">{{ $row['service']->name }}</h3>
 
                 <p class="board__current-label">En cours</p>
-                <p class="board__current">{{ $row['current'] ?? '—' }}</p>
+                <p class="board__current">{{ $row['current'] ?? '-' }}</p>
 
                 <p class="board__next-label">Suivants ({{ $row['waiting_count'] }} en attente)</p>
                 <p class="board__next">
                     @forelse ($row['next'] as $token)
                         <span class="board__next-token">{{ $token }}</span>
                     @empty
-                        <span class="board__next-token board__next-token--empty">—</span>
+                        <span class="board__next-token board__next-token--empty">-</span>
                     @endforelse
                 </p>
 
@@ -34,7 +34,7 @@
                             <li>
                                 <span class="mono">{{ $visiteur->token }}</span>
                                 visiteur
-                                @if ($visiteur->patient) — {{ $visiteur->patient->name }} @endif
+                                @if ($visiteur->patient) - {{ $visiteur->patient->name }} @endif
                             </li>
                         @endforeach
                     </ul>

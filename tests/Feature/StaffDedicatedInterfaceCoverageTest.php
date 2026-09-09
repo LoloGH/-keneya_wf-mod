@@ -57,7 +57,7 @@ class StaffDedicatedInterfaceCoverageTest extends TestCase
 
     /**
      * Un type generique portant toutes les capacites, et la personne qui
-     * l'exerce — le cas de la capture d'ecran qui a revele le defaut.
+     * l'exerce : le cas de la capture d'ecran qui a revele le defaut.
      *
      * @return array{0: StaffType, 1: User, 2: Service}
      */
@@ -128,7 +128,7 @@ class StaffDedicatedInterfaceCoverageTest extends TestCase
     /**
      * Le filet : aucune capacite ne doit rester sans effet sur l'interface.
      *
-     * On coche tout, puis on decoche une capacite a la fois — la page doit
+     * On coche tout, puis on decoche une capacite a la fois : la page doit
      * changer. Une capacite dont le retrait ne change rien est une case qui
      * ment a l'administrateur.
      */
@@ -157,7 +157,7 @@ class StaffDedicatedInterfaceCoverageTest extends TestCase
 
     /**
      * Le coeur de la consigne : ce que saisit un personnel autorise atterrit
-     * dans le dossier medical, comme pour un medecin — et sans qu'il ait les
+     * dans le dossier medical, comme pour un medecin, et sans qu'il ait les
      * droits d'ouvrir le DME.
      */
     public function test_un_personnel_generique_redige_une_consultation_dans_le_dme(): void
@@ -318,7 +318,7 @@ class StaffDedicatedInterfaceCoverageTest extends TestCase
 
     /**
      * Prescrire un soin est un acte attribuable (v3.3.1) : un poste dedie qui
-     * porte la capacite prescrit, et le soin est signe par lui — jamais par un
+     * porte la capacite prescrit, et le soin est signe par lui, jamais par un
      * medecin invente.
      */
     public function test_un_personnel_generique_prescrit_des_soins(): void

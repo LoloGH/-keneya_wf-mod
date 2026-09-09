@@ -24,16 +24,16 @@
                                 <span class="mono">{{ $candidat['patient_code'] }}</span>
                             </p>
                             <p class="doublon__detail">
-                                {{ $candidat['age'] }} ans — {{ $candidat['mobile'] }}
-                                @if ($candidat['profession']) — {{ $candidat['profession'] }} @endif
-                                @if ($candidat['last_visit']) — derniere venue le {{ $candidat['last_visit'] }} @endif
+                                {{ $candidat['age'] }} ans - {{ $candidat['mobile'] }}
+                                @if ($candidat['profession']) - {{ $candidat['profession'] }} @endif
+                                @if ($candidat['last_visit']), derniere venue le {{ $candidat['last_visit'] }} @endif
                             </p>
                         </div>
 
                         <button type="button" class="btn btn--primary"
                                 wire:click="openEpisodeForExisting({{ $candidat['id'] }})"
                                 wire:loading.attr="disabled">
-                            C'est la meme personne — ouvrir un nouvel episode
+                            C'est la meme personne, ouvrir un nouvel episode
                         </button>
                     </li>
                 @endforeach
@@ -42,7 +42,7 @@
             <div class="btn-row">
                 <button type="button" class="btn btn--secondary" wire:click="createAnyway"
                         wire:loading.attr="disabled">
-                    C'est une personne differente — creer quand meme un dossier
+                    C'est une personne differente, creer quand meme un dossier
                 </button>
                 <button type="button" class="btn btn--ghost" wire:click="dismissDuplicates">
                     Revenir a la saisie
@@ -89,7 +89,7 @@
                 <div class="field field--wide">
                     <label for="patient-profession">Profession</label>
                     <input id="patient-profession" type="text" wire:model="profession"
-                           placeholder="cultivateur, enseignante…">
+                           placeholder="cultivateur, enseignante...">
                     @error('profession') <p class="field__error">{{ $message }}</p> @enderror
                 </div>
             </div>
@@ -118,7 +118,7 @@
                 <div class="field">
                     <label for="patient-service">Service</label>
                     <select id="patient-service" wire:model="service_id">
-                        <option value="">— Choisir un service —</option>
+                        <option value="">Choisir un service</option>
                         @foreach ($services as $service)
                             <option value="{{ $service->id }}">{{ $service->name }}</option>
                         @endforeach
@@ -140,7 +140,7 @@
                     Note pour le service <span class="field__hint">(facultatif)</span>
                 </label>
                 <textarea id="patient-note" rows="2" wire:model="note"
-                          placeholder="Malentendant, accompagne par sa fille, vient de Kita…"></textarea>
+                          placeholder="Malentendant, accompagne par sa fille, vient de Kita..."></textarea>
                 @error('note') <p class="field__error">{{ $message }}</p> @enderror
             </div>
         </fieldset>
@@ -159,7 +159,7 @@
                     <div class="field">
                         <label for="companion-relation-{{ $index }}">Lien</label>
                         <input id="companion-relation-{{ $index }}" type="text"
-                               wire:model="companions.{{ $index }}.relation" placeholder="epoux, mere…">
+                               wire:model="companions.{{ $index }}.relation" placeholder="epoux, mere...">
                     </div>
                     <div class="field">
                         <label for="companion-phone-{{ $index }}">Telephone</label>
@@ -178,7 +178,7 @@
 
         <button type="submit" class="btn btn--primary btn--block" wire:loading.attr="disabled">
             <span wire:loading.remove wire:target="save">Enregistrer le patient</span>
-            <span wire:loading wire:target="save">Enregistrement…</span>
+            <span wire:loading wire:target="save">Enregistrement...</span>
         </button>
     </form>
 
@@ -187,7 +187,7 @@
             <p class="ticket__label">Dossier</p>
             <p class="ticket__code">{{ $lastRegistered['patient_code'] }}</p>
             <p class="ticket__meta">
-                {{ $lastRegistered['name'] }} — {{ $lastRegistered['service'] }},
+                {{ $lastRegistered['name'] }} - {{ $lastRegistered['service'] }},
                 ticket n° {{ $lastRegistered['token'] }}
             </p>
             @if ($lastRegistered['pending'])

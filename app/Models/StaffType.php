@@ -47,8 +47,8 @@ class StaffType extends Model
      *
      * Distincte de CAP_CARE_TASKS, qui execute, et de
      * CAP_ADMIT_HOSPITALIZATION, qui admet : prescrire un traitement n'est ni
-     * l'un ni l'autre. Le droit etait jusqu'ici implicite — il venait avec
-     * l'hospitalisation — ce qui empechait un etablissement de dissocier les
+     * l'un ni l'autre. Le droit etait jusqu'ici implicite, il venait avec
+     * l'hospitalisation, ce qui empechait un etablissement de dissocier les
      * deux actes.
      */
     public const CAP_PRESCRIBE_CARE = 'can_prescribe_care';
@@ -66,7 +66,7 @@ class StaffType extends Model
     /**
      * Ouverture du dossier medical complet, porte par le module keneya/dme
      * (v3.3.0). Distincte de CAP_VIEW_DOSSIER, qui n'ouvre que le dossier
-     * WorkFlow — passages, renvois, pieces jointes. Celle-ci donne acces a
+     * WorkFlow : passages, renvois, pieces jointes. Celle-ci donne acces a
      * l'antecedent medical, aux consultations, aux ordonnances et aux
      * examens : elle se coche a part, et pour les seuls comptes qui en ont
      * l'usage clinique.
@@ -119,7 +119,7 @@ class StaffType extends Model
     public const CAPABILITIES = [
         self::CAP_QUEUE => [
             'label' => 'File d\'attente du service',
-            'section' => 'File d\'attente — appeler le patient suivant',
+            'section' => 'File d\'attente, appeler le patient suivant',
         ],
         self::CAP_SEND_REFERRAL => [
             'label' => 'Envoyer un patient vers un autre service',
@@ -179,31 +179,31 @@ class StaffType extends Model
         ],
         self::CAP_RECORD_CONSULTATION => [
             'label' => 'Rediger une consultation medicale',
-            'section' => 'Consultation — motif, constantes, examen, diagnostics',
+            'section' => 'Consultation, motif, constantes, examen, diagnostics',
         ],
         self::CAP_RECORD_HISTORY => [
             'label' => 'Consigner un antecedent',
-            'section' => 'Antecedents — personnels, chirurgicaux, familiaux',
+            'section' => 'Antecedents, personnels, chirurgicaux, familiaux',
         ],
         self::CAP_RECORD_ALLERGIES => [
             'label' => 'Consigner une allergie',
-            'section' => 'Allergies — allergene, reaction, severite',
+            'section' => 'Allergies, allergene, reaction, severite',
         ],
         self::CAP_RECORD_MEDICATIONS => [
             'label' => 'Consigner un traitement habituel',
-            'section' => 'Traitements — ce que le patient prend deja',
+            'section' => 'Traitements, ce que le patient prend deja',
         ],
         self::CAP_ORDER_LABORATORY => [
             'label' => 'Demander un examen biologique',
-            'section' => 'Laboratoire — demande d\'analyses',
+            'section' => 'Laboratoire, demande d\'analyses',
         ],
         self::CAP_ORDER_IMAGING => [
             'label' => 'Demander un examen d\'imagerie',
-            'section' => 'Imagerie — echographie, radiographie, scanner',
+            'section' => 'Imagerie, echographie, radiographie, scanner',
         ],
         self::CAP_RECORD_DOCUMENTS => [
             'label' => 'Verser un document au dossier medical',
-            'section' => 'Documents — comptes rendus et resultats',
+            'section' => 'Documents, comptes rendus et resultats',
         ],
     ];
 
@@ -211,7 +211,7 @@ class StaffType extends Model
      * Ce que chaque role code exige, et ce qu'il permet de moduler (v3.2.2).
      *
      * Les capacites **obligatoires** font le role : les decocher laisserait une
-     * interface amputee de ce qui la definit — un medecin sans file d'attente
+     * interface amputee de ce qui la definit, un medecin sans file d'attente
      * n'est plus un medecin. Elles vivent ici, dans le code, et non en base :
      * une regle qui tient l'application debout ne se modifie pas depuis un
      * formulaire.
@@ -303,7 +303,7 @@ class StaffType extends Model
     /**
      * Les capacites que l'admin peut cocher ou decocher sur ce type.
      *
-     * Pour un type sans role, c'est tout le catalogue — rien n'y est impose.
+     * Pour un type sans role, c'est tout le catalogue : rien n'y est impose.
      *
      * @return array<int, string>
      */

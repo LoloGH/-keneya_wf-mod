@@ -170,7 +170,7 @@ class HospitalizationTest extends TestCase
             $this->assertStringContainsString('pleine', $e->getMessage());
         }
 
-        // Avec confirmation : admis malgre tout — une urgence depasse parfois
+        // Avec confirmation : admis malgre tout, une urgence depasse parfois
         // la capacite nominale, un blocage strict serait dangereux.
         $hospitalisation = app(AdmitPatient::class)->execute($suivant, $doctor, $room, overCapacityConfirmed: true);
 
@@ -457,12 +457,12 @@ class HospitalizationTest extends TestCase
         $task = CareTask::firstOrFail();
         $this->assertSame($designe->getKey(), $task->assigned_to_user_id);
 
-        // Le collegue de garde voit la tache…
+        // Le collegue de garde voit la tache...
         Livewire::actingAs($collegue)
             ->test(StaffCareTasks::class)
             ->assertSee('Injection');
 
-        // …et peut la prendre en charge : un soin ne reste pas bloque parce
+        // ...et peut la prendre en charge : un soin ne reste pas bloque parce
         // que la personne designee est absente.
         app(CompleteCareTask::class)->execute($task, $collegue);
 

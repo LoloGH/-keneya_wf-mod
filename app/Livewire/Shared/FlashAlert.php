@@ -11,7 +11,7 @@ use Livewire\Component;
  *
  * Les messages etaient poses en session et affiches par le gabarit de page :
  * ils n'apparaissaient donc qu'au chargement complet suivant, jamais apres une
- * action Livewire. Un refus de suppression restait invisible — l'administrateur
+ * action Livewire. Un refus de suppression restait invisible : l'administrateur
  * cliquait, et rien ne se passait.
  *
  * Ce composant ecoute un evenement et se re-rend seul. Les composants

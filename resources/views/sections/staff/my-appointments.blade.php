@@ -4,7 +4,7 @@
     Les composants sont partages, pas recopies : un correctif porte sur les
     deux interfaces, et un echographiste voit exactement le formulaire que
     voit un medecin. Ce qui differe, c'est la capacite qui l'a fait
-    apparaitre — et la colonne signee en base, medecin ou personnel.
+    apparaitre, et la colonne signee en base, medecin ou personnel.
 --}}
 <div class="pile">
     <x-page-header

@@ -67,7 +67,7 @@ class DuplicatePatientTest extends TestCase
 
     /**
      * Le telephone est le champ le plus fiable : il doit suffire, meme quand le
-     * nom est ecrit autrement — c'est le cas le plus courant en pratique.
+     * nom est ecrit autrement, c'est le cas le plus courant en pratique.
      */
     public function test_un_nom_orthographie_autrement_est_rattrape_par_le_telephone(): void
     {
@@ -165,8 +165,8 @@ class DuplicatePatientTest extends TestCase
     }
 
     /**
-     * « C'est une personne differente » : la creation aboutit — on n'empeche
-     * pas la receptionniste — mais la decision est inscrite au journal, avec le
+     * « C'est une personne differente » : la creation aboutit, on n'empeche
+     * pas la receptionniste, mais la decision est inscrite au journal, avec le
      * dossier qui lui avait ete propose.
      */
     public function test_forcer_la_creation_est_possible_et_journalise(): void

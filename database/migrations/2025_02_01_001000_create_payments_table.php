@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
  *
  * La caisse n'est volontairement pas un service de la table `services` : un
  * paiement n'a ni file d'attente ni renvoi. C'est une section des interfaces
- * existantes — « Caisse Ticket » a l'accueil, « Caisse Services » au service.
+ * existantes : « Caisse Ticket » a l'accueil, « Caisse Services » au service.
  *
  * Montants en FCFA, sans decimales (confirme dans l'addendum v3).
  */

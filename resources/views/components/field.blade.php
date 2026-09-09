@@ -16,7 +16,7 @@
 
          <x-field name="hospital-phone" label="Telephone" optionnel error="hospitalPhone"
                   hint="Indicatif compris">
-             …
+             ...
          </x-field> --}}
 @props([
     'name',

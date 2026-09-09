@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Troisieme type de service : la caisse (v3.2, point 6).
  *
- * Les deux caisses sont des services a part entiere — meme file, meme token,
+ * Les deux caisses sont des services a part entiere : meme file, meme token,
  * meme « Appeler le suivant ». Colonne `string` plutot qu'enum modifie : les
  * valeurs sont validees par l'application (constantes de App\Models\Service),
  * et etendre un enum en place se comporte differemment selon MariaDB et SQLite.

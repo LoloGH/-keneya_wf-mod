@@ -18,7 +18,7 @@ use Livewire\Component;
  * Enregistrement d'un patient inconnu : cree son identite permanente et son
  * premier passage.
  *
- * Pour un patient deja venu, c'est PatientLookup qu'il faut utiliser — cet
+ * Pour un patient deja venu, c'est PatientLookup qu'il faut utiliser : cet
  * ecran cree toujours un nouveau `patient_code`.
  */
 class PatientRegistrationForm extends Component
@@ -41,7 +41,7 @@ class PatientRegistrationForm extends Component
 
     public string $reason = '';
 
-    /** Mot de l'accueil au service : « malentendant », « vient de loin »… */
+    /** Mot de l'accueil au service : « malentendant », « vient de loin »... */
     public string $note = '';
 
     /**
@@ -155,8 +155,8 @@ class PatientRegistrationForm extends Component
 
         $visit = $register->execute($data, $data['companions'] ?? []);
 
-        // Creation forcee malgre une correspondance : on ne l'empeche pas — la
-        // receptionniste a la personne devant elle — mais on trace qui a decide
+        // Creation forcee malgre une correspondance : on ne l'empeche pas, la
+        // receptionniste a la personne devant elle, mais on trace qui a decide
         // quoi, et face a quel dossier propose.
         if ($this->forceCreation && $this->duplicateCandidates !== []) {
             Audit::log(
@@ -193,7 +193,7 @@ class PatientRegistrationForm extends Component
         $this->dispatch('patient-enregistre');
 
         session()->flash('reception.success', sprintf(
-            'Patient %s enregistre — dossier %s, ticket n° %d au service %s.',
+            'Patient %s enregistre : dossier %s, ticket n° %d au service %s.',
             $visit->patient->name,
             $visit->patient->patient_code,
             $visit->token,
@@ -203,7 +203,7 @@ class PatientRegistrationForm extends Component
 
     /**
      * « C'est la meme personne » : on ouvre un nouvel episode sur le dossier
-     * existant, par le mecanisme de reprise deja en place — aucun second
+     * existant, par le mecanisme de reprise deja en place, aucun second
      * `patient_code` n'est genere.
      */
     public function openEpisodeForExisting(int $patientId, OpenNewEpisode $action): void
@@ -229,7 +229,7 @@ class PatientRegistrationForm extends Component
         $this->dispatch('patient-enregistre');
 
         session()->flash('reception.success', sprintf(
-            'Nouvel episode ouvert sur le dossier existant %s (%s) — ticket n° %d au service %s.',
+            'Nouvel episode ouvert sur le dossier existant %s (%s) : ticket n° %d au service %s.',
             $patient->patient_code,
             $patient->name,
             $visit->token,
@@ -256,7 +256,7 @@ class PatientRegistrationForm extends Component
     }
 
     /**
-     * Envoi du lien « mes documents », sur demande explicite — jamais
+     * Envoi du lien « mes documents », sur demande explicite : jamais
      * automatiquement a chaque evenement du dossier.
      */
     public function sendPortalLink(SendPortalLink $action): void

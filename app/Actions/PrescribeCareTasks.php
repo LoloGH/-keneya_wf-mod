@@ -21,7 +21,7 @@ use InvalidArgumentException;
  * Meme principe que la creation groupee de planning : la recurrence est
  * resolue **a la creation**, pas a la lecture. « Toutes les 8 heures pendant
  * 3 jours » produit neuf lignes, chacune marquable individuellement comme
- * faite ou manquee — ce qu'une regle calculee a la volee ne permettrait pas.
+ * faite ou manquee : ce qu'une regle calculee a la volee ne permettrait pas.
  */
 class PrescribeCareTasks
 {

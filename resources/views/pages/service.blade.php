@@ -7,7 +7,7 @@
     use App\Models\StaffType;
 
     // Arborescence propre a l'espace service. « Renvois » regroupe les deux
-    // panneaux qui vont par paire — ce qu'on recoit et ce qu'on a envoye.
+    // panneaux qui vont par paire : ce qu'on recoit et ce qu'on a envoye.
     //
     // Depuis le v3.2.2, les sections optionnelles dependent des capacites du
     // type de personnel du medecin connecte : meme mecanique que pour
@@ -16,8 +16,8 @@
     $peut = fn (string $capacite) => auth()->user()->hasCapability($capacite);
 
     // Dossier medical (v3.3.1) : les ecrans qui ecrivent dans le DME sont
-    // regroupes sous une seule entree. Chacun garde sa capacite — un type
-    // de personnel peut n'en recevoir qu'une — et le groupe disparait si
+    // regroupes sous une seule entree. Chacun garde sa capacite, un type
+    // de personnel peut n'en recevoir qu'une, et le groupe disparait si
     // le compte n'en porte aucune. Sans ce regroupement, la barre du
     // medecin passait a onze entrees de premier niveau.
     $sousDossierMedical = array_values(array_filter([
@@ -64,7 +64,7 @@
     ]));
 @endphp
 
-<x-layouts.app :title="'Service — '.config('keneya.name')">
+<x-layouts.app :title="'Service - '.config('keneya.name')">
     {{-- A droite de la barre : le service du medecin plutot que son role. --}}
     <x-slot:context>{{ $assignment?->service?->name ?? \App\Support\Roles::label(auth()->user()->scopedRole()) }}</x-slot:context>
 
@@ -84,7 +84,7 @@
 
         {{-- Le selecteur reste hors des onglets : il change le contexte de
              toutes les sections a la fois. Il n'apparait que pour un medecin
-             rattache a plusieurs services — pour les autres, la barre affiche
+             rattache a plusieurs services : pour les autres, la barre affiche
              deja le nom du service. --}}
         @if ($assignments->count() > 1)
             <div class="service-head">

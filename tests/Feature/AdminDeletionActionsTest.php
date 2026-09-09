@@ -43,7 +43,7 @@ use Tests\TestCase;
  *
  * Elle n'est jamais masquee : un bouton qui disparait sans explication laisse
  * l'administrateur devant une case vide. Le refus vient du serveur, avec sa
- * raison — ces tests verrouillent les deux moities de cette regle.
+ * raison : ces tests verrouillent les deux moities de cette regle.
  */
 class AdminDeletionActionsTest extends TestCase
 {
@@ -301,7 +301,7 @@ class AdminDeletionActionsTest extends TestCase
      * Constate en administration : « 500 SERVER ERROR » a la suppression d'un
      * personnel, sans un mot d'explication.
      *
-     * Une notification est la propriete du compte — c'est sa cloche — mais
+     * Une notification est la propriete du compte, c'est sa cloche, mais
      * `staff_notifications.user_id` est une cle etrangere en RESTRICT, et rien
      * ne la vidait. Tout compte ayant recu ne serait-ce qu'une notification
      * refusait donc d'etre supprime : c'est-a-dire, en pratique, tout compte
@@ -330,7 +330,7 @@ class AdminDeletionActionsTest extends TestCase
     /**
      * Toutes les traces qui retiennent un compte disent lesquelles.
      *
-     * Le refus lui-meme n'est pas le defaut — il est voulu, et documente le
+     * Le refus lui-meme n'est pas le defaut : il est voulu, et documente le
      * parcours des patients. Ce qui l'etait, c'est qu'une bonne moitie des
      * colonnes concernees n'etait pas listee : la base refusait alors la
      * suppression a la toute derniere seconde, en 500, la ou l'admin aurait
@@ -368,7 +368,7 @@ class AdminDeletionActionsTest extends TestCase
 
     /**
      * Le strict minimum pour qu'une ligne de cette table existe et designe ce
-     * compte. Les colonnes obligatoires seulement — le contenu n'a aucune
+     * compte. Les colonnes obligatoires seulement : le contenu n'a aucune
      * importance pour ce que ce test verifie.
      *
      * @return array<string, mixed>

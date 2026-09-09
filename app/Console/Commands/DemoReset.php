@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
  * Cette commande est volontairement reservee a la ligne de commande : aucune
  * route ne l'expose, et elle refuse de s'executer hors console. Un appel via
  * Artisan::call() depuis une requete HTTP est donc rejete, ce qui evite qu'un
- * declenchement accidentel — ou malveillant — vide la base pendant une
+ * declenchement accidentel, ou malveillant, vide la base pendant une
  * demonstration.
  *
  * Le VPS de demonstration ne contient que des donnees fictives : c'est la
@@ -62,7 +62,7 @@ class DemoReset extends Command
         'attachments',
 
         // Le dossier medical (v3.3.1). Depuis que les formulaires de WorkFlow
-        // ecrivent dans le DME — ordonnance comprise — une remise a zero qui
+        // ecrivent dans le DME, ordonnance comprise, une remise a zero qui
         // s'arreterait aux tables de WorkFlow laisserait les dossiers
         // medicaux d'une demonstration precedente, rattaches a des patients
         // qui n'existent plus. Les tables de catalogue et de configuration du
@@ -135,7 +135,7 @@ class DemoReset extends Command
      */
     private const TABLES_CONFIGURATION = [
         // Catalogue saisi en demonstration, susceptible de porter le
-        // vocabulaire d'un prospect precedent — comme `rooms`.
+        // vocabulaire d'un prospect precedent : comme `rooms`.
         'pathologies',
         'schedules',
         'rooms',

@@ -17,7 +17,7 @@ use Illuminate\Support\Collection;
  *
  * Un seul point d'ecriture, comme PatientHistoryRecorder pour le dossier : les
  * declencheurs disent ce qui vient d'arriver, c'est ici qu'on decide qui est
- * concerne — et le ciblage passe toujours par OnDutyRoster, jamais par une
+ * concerne, et le ciblage passe toujours par OnDutyRoster, jamais par une
  * requete ecrite sur place. Precisement par `aPrevenir()`, qui retombe sur le
  * personnel rattache quand aucun creneau n'est saisi ; `for()` reste reservee
  * a la question des droits, ou l'elargir serait une faute.
@@ -33,7 +33,7 @@ class StaffNotifier
      * Un patient ou un visiteur vient d'entrer dans une file.
      *
      * Le personnel de garde d'abord ; a defaut, celui qui est rattache au
-     * service. Un planning vide ne doit pas valoir silence — c'est ce qu'il
+     * service. Un planning vide ne doit pas valoir silence : c'est ce qu'il
      * valait, et la cloche restait muette sur toutes les interfaces sans que
      * rien ne l'explique.
      */
@@ -106,7 +106,7 @@ class StaffNotifier
 
     /**
      * Un planning vient d'etre publie : les personnes concernees par les
-     * lignes creees, qu'elles soient de garde ou non — c'est justement leurs
+     * lignes creees, qu'elles soient de garde ou non, c'est justement leurs
      * heures a venir qu'on leur annonce.
      *
      * @param  Collection<int, Schedule>|array<int, Schedule>  $schedules
@@ -158,7 +158,7 @@ class StaffNotifier
                 'type' => $type,
                 'title' => $title,
                 // Le lien mene a l'interface du destinataire : la navigation
-                // interne est en onglets, sans URL propre par section — mieux
+                // interne est en onglets, sans URL propre par section, mieux
                 // vaut un lien juste qu'un lien precis mais faux.
                 'link' => $user->homeUrl(),
                 'created_at' => now(),

@@ -6,7 +6,7 @@
     declinaisons servies ici en sont tirees (voir le README, § Logo).
 
     - variant="color" : bleu nuit et vert, pour les fonds clairs.
-    - variant="light" : la meme image declinee pour les fonds sombres — barre de
+    - variant="light" : la meme image declinee pour les fonds sombres, barre de
       navigation, decor de la page de connexion, moniteur de salle d'attente.
 
     Le mot-symbole (« KƐNƐYA WORKFLOW ») n'apparait qu'avec `lockup` ; ailleurs

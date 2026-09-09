@@ -88,7 +88,7 @@ class BroadcastRecipients
             ->where('mobile', '!=', '')
             // Passe par ce service : on interroge `patient_history`, qui garde
             // la trace de chaque etape, et non `visits.service_id` qui ne
-            // porte que le service courant — un patient renvoye ailleurs
+            // porte que le service courant : un patient renvoye ailleurs
             // depuis la radiologie y est bien passe.
             ->when(
                 $target->type === BroadcastMessage::TARGET_PATIENT_GROUP && $target->serviceId,
@@ -107,7 +107,7 @@ class BroadcastRecipients
     }
 
     /**
-     * Le numero d'un destinataire nommement designe — membre du personnel ou
+     * Le numero d'un destinataire nommement designe : membre du personnel ou
      * patient. Nul si la personne n'a pas de telephone : on ne fabrique pas un
      * destinataire qui n'existe pas.
      */

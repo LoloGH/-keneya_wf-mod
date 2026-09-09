@@ -7,7 +7,7 @@
             <div class="field">
                 <label for="bulk-user">Membre du personnel</label>
                 <select id="bulk-user" wire:model="user_id">
-                    <option value="">— Choisir —</option>
+                    <option value="">Choisir</option>
                     @foreach ($staff as $membre)
                         <option value="{{ $membre->id }}">
                             {{ $membre->name }} ({{ $membre->roleLabel() }})
@@ -44,7 +44,7 @@
             <div class="field">
                 <label for="bulk-service">Service <span class="field__hint">(facultatif)</span></label>
                 <select id="bulk-service" wire:model="service_id">
-                    <option value="">— Aucun —</option>
+                    <option value="">Aucun</option>
                     @foreach ($services as $service)
                         <option value="{{ $service->id }}">{{ $service->name }}</option>
                     @endforeach
@@ -67,7 +67,7 @@
 
         <button type="submit" class="btn btn--primary" wire:loading.attr="disabled">
             <span wire:loading.remove wire:target="generate">Generer les creneaux</span>
-            <span wire:loading wire:target="generate">Generation…</span>
+            <span wire:loading wire:target="generate">Generation...</span>
         </button>
     </form>
 </x-card>

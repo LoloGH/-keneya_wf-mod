@@ -74,7 +74,7 @@ class PatientFeedbackForm extends Component
     /**
      * Les etapes reellement traversees, telles que le dossier les porte a cet
      * instant. Un sondage lance avant la cloture n'en montre donc qu'une
-     * partie — c'est le comportement voulu, pas un cas a part.
+     * partie : c'est le comportement voulu, pas un cas a part.
      *
      * @return Collection<int, array{key: string, label: string, user_id: ?int, service_id: ?int}>
      */

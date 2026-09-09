@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schema;
  * Jusqu'ici seuls les medecins etaient joignables : `doctors.phone` existait,
  * mais ni une receptionniste, ni un caissier, ni un personnel generique
  * n'avait de numero. L'envoi groupe vise « un membre du personnel », pas
- * seulement un medecin — il fallait donc porter le numero la ou se trouve la
+ * seulement un medecin : il fallait donc porter le numero la ou se trouve la
  * personne, sur son compte, et non sur l'une de ses tables de rattachement.
  *
  * `doctors.phone` reste en place et fait office de repli : les numeros deja

@@ -11,10 +11,10 @@
         <div class="field">
             <label for="mo-visit">Patient</label>
             <select id="mo-visit" wire:model.live="visitId">
-                <option value="">— Choisir un patient appele —</option>
+                <option value="">Choisir un patient appele</option>
                 @foreach ($visits as $visit)
                     <option value="{{ $visit->id }}">
-                        n° {{ $visit->token }} — {{ $visit->patient->name }} ({{ $visit->patient->patient_code }})
+                        n° {{ $visit->token }} - {{ $visit->patient->name }} ({{ $visit->patient->patient_code }})
                     </option>
                 @endforeach
             </select>
@@ -41,7 +41,7 @@
                                 <li class="my-patients__item">
                                     <strong>{{ $traitement->name }}</strong>
                                     @if ($traitement->dosage) <span>{{ $traitement->dosage }}</span> @endif
-                                    @if ($traitement->frequency) <span>— {{ $traitement->frequency }}</span> @endif
+                                    @if ($traitement->frequency) <span>- {{ $traitement->frequency }}</span> @endif
                                     <span class="badge badge--{{ $traitement->status === 'active' ? 'called' : 'closed' }}">
                                         {{ $medicationStatuses[$traitement->status] ?? $traitement->status }}
                                     </span>
@@ -84,7 +84,7 @@
                             <div class="field">
                                 <label for="mo-route">Voie <span class="field__hint">(facultatif)</span></label>
                                 <select id="mo-route" wire:model="route">
-                                    <option value="">— Non precisee —</option>
+                                    <option value="">Non precisee</option>
                                     @foreach ($medicationRoutes as $valeur => $libelle)
                                         <option value="{{ $valeur }}">{{ $libelle }}</option>
                                     @endforeach
@@ -148,7 +148,7 @@
                                 <li class="my-patients__item">
                                     <span class="mono">{{ $demande->order_number }}</span>
                                     <span>{{ $modalities[$demande->modality] ?? $demande->modality }}</span>
-                                    @if ($demande->body_site) <span>— {{ $demande->body_site }}</span> @endif
+                                    @if ($demande->body_site) <span>- {{ $demande->body_site }}</span> @endif
                                     <span class="badge">{{ $demande->statusLabel() }}</span>
                                     <time>{{ $demande->requested_at?->format('d/m/Y') }}</time>
                                 </li>
@@ -204,7 +204,7 @@
                             <label for="mo-doc-file">Fichier</label>
                             <input id="mo-doc-file" type="file" wire:model="document">
                             @error('document') <p class="field__error">{{ $message }}</p> @enderror
-                            <p class="hint" wire:loading wire:target="document">Televersement en cours…</p>
+                            <p class="hint" wire:loading wire:target="document">Televersement en cours...</p>
                         </div>
 
                         <div class="btn-row">

@@ -115,7 +115,7 @@ class PatientDeletionTest extends TestCase
         // suppression sur le serveur : `patient_history.referral_id` est une
         // cle etrangere en RESTRICT, or les renvois partaient avant elle. Un
         // dossier sans renvoi trace se supprimait, un dossier reellement
-        // utilise non — et la suite ne voyait rien.
+        // utilise non, et la suite ne voyait rien.
         app(PatientHistoryRecorder::class)->record(
             visit: $visit,
             type: PatientHistory::TYPE_REFERRAL_SENT,
@@ -176,7 +176,7 @@ class PatientDeletionTest extends TestCase
      * transaction ; celle-ci echouant plus loin, la base revenait en arriere
      * et le disque, lui, ne le pouvait pas. L'admin voyait une erreur, en
      * concluait que rien n'avait bouge, et le dossier avait perdu ses
-     * documents — definitivement, et sans que rien ne le signale.
+     * documents : definitivement, et sans que rien ne le signale.
      */
     public function test_une_suppression_qui_echoue_ne_detruit_aucun_fichier(): void
     {

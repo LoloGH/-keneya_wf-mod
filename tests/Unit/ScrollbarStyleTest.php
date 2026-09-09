@@ -53,7 +53,7 @@ class ScrollbarStyleTest extends TestCase
     {
         $css = $this->css();
 
-        // Exclusion deliberee. Un defilement vertical se devine — on fait
+        // Exclusion deliberee. Un defilement vertical se devine : on fait
         // tourner la molette. Un defilement horizontal, non : la barre y est
         // souvent le seul indice qu'une colonne continue a droite.
         $this->assertDoesNotMatchRegularExpression(

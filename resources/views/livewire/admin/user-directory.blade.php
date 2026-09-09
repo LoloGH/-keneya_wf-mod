@@ -6,7 +6,7 @@
         <div class="field-row">
             <x-field name="recherche-compte" label="Nom ou adresse e-mail" class="field--wide">
                 <input id="recherche-compte" type="search" wire:model.live.debounce.300ms="recherche"
-                       placeholder="Amadou, accueil@…">
+                       placeholder="Amadou, accueil@...">
             </x-field>
 
             <x-field name="filtre-role" label="Role">
@@ -40,7 +40,7 @@
                                 <th scope="row">{{ $compte->name }}</th>
                                 <td>{{ $compte->email }}</td>
                                 <td><span class="badge badge--neutral">{{ $compte->roleLabel() }}</span></td>
-                                <td class="mono">{{ $compte->created_at?->format('d/m/Y') ?? '—' }}</td>
+                                <td class="mono">{{ $compte->created_at?->format('d/m/Y') ?? '-' }}</td>
                             </tr>
                         @endforeach
                     </tbody>

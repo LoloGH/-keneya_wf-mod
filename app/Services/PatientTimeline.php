@@ -14,7 +14,7 @@ use Keneya\Dme\Models\Prescription;
  * Frise chronologique unifiee d'un dossier patient (v3.2, point 3).
  *
  * Consultations, renvois, ordonnances, conclusions, paiements et pieces
- * jointes forment une seule suite triee par date, decoupee par passage —
+ * jointes forment une seule suite triee par date, decoupee par passage :
  * jamais des blocs separes par nature de document. Un evenement ne peut donc
  * pas passer inapercu parce qu'il est range dans une autre liste.
  *
@@ -69,7 +69,7 @@ class PatientTimeline
         $prescriptions = $this->prescriptionsById($history);
 
         // `toBase()` : une fois transformees en tableaux, ces lignes ne sont
-        // plus des modeles — une Collection Eloquent essaierait de les
+        // plus des modeles, une Collection Eloquent essaierait de les
         // dedoublonner par cle primaire a la fusion.
         return $history->toBase()->map(function (PatientHistory $entry) use ($prescriptions): array {
             return [
@@ -93,11 +93,11 @@ class PatientTimeline
      *
      * Jusqu'a la v3.3.1, `patient_history` ne portait pas de reference et la
      * frise appariait la n-ieme entree « ordonnance » d'un passage avec la
-     * n-ieme ordonnance — un rapprochement par rang, exact tant que rien ne
+     * n-ieme ordonnance : un rapprochement par rang, exact tant que rien ne
      * manquait. La colonne `dme_prescription_id` a remplace ce calcul : la
      * ligne dit desormais laquelle.
      *
-     * Une reference orpheline — le dossier medical purge, par exemple — se
+     * Une reference orpheline, le dossier medical purge, par exemple, se
      * lit comme une absence d'ordonnance, ce que la frise sait deja afficher.
      *
      * @param  EloquentCollection<int, PatientHistory>  $history

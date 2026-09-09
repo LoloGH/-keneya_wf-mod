@@ -28,7 +28,7 @@ class BulkScheduleForm extends Component
 
     public string $to = '';
 
-    /** @var array<int, string> jours ISO coches, 1 = lundi … 7 = dimanche */
+    /** @var array<int, string> jours ISO coches, 1 = lundi ... 7 = dimanche */
     public array $weekdays = ['1', '2', '3', '4', '5'];
 
     public string $start_time = '08:00';
@@ -61,7 +61,7 @@ class BulkScheduleForm extends Component
             'weekdays.*' => ['integer', 'between:1,7'],
             'start_time' => ['required', 'date_format:H:i'],
             // Pas de `after:start_time` : une fin anterieure au debut designe
-            // un creneau de nuit (22h – 06h), que l'hopital pratique et que
+            // un creneau de nuit (22h - 06h), que l'hopital pratique et que
             // OnDutyRoster sait desormais lire. Seule l'egalite reste exclue,
             // un creneau de duree nulle ne voulant rien dire.
             'end_time' => ['required', 'date_format:H:i', 'different:start_time'],

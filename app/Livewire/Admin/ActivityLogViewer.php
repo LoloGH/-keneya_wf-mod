@@ -13,7 +13,7 @@ use Spatie\Activitylog\Models\Activity;
  * Journal d'audit (addendum v2, point 7).
  *
  * Lecture seule, sans exception : le composant n'expose aucune action de
- * modification ni de suppression, meme pour l'admin — un journal que l'on peut
+ * modification ni de suppression, meme pour l'admin, un journal que l'on peut
  * retoucher ne prouve rien.
  */
 class ActivityLogViewer extends Component

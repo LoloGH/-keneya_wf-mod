@@ -42,7 +42,7 @@
                     @foreach ($appointments as $rdv)
                         <li>
                             <strong>{{ $rdv->scheduled_at->format('d/m/Y a H:i') }}</strong>
-                            — {{ $rdv->service->name }}
+                            - {{ $rdv->service->name }}
                             <span>{{ $rdv->authorName() }}</span>
                         </li>
                     @endforeach
@@ -61,11 +61,11 @@
                         <li class="referrals__item">
                             <p class="referrals__meta">
                                 {{ $ordonnance->issued_on?->format('d/m/Y') }}
-                                — {{ $ordonnance->doctor?->displayName() }}
+                                - {{ $ordonnance->doctor?->displayName() }}
                             </p>
                             <ol class="ordo-lu">
                                 @foreach ($ordonnance->items as $ligne)
-                                    <li>{{ $ligne->medication_name }}@if ($ligne->posology()) — {{ $ligne->posology() }}@endif</li>
+                                    <li>{{ $ligne->medication_name }}@if ($ligne->posology()) - {{ $ligne->posology() }}@endif</li>
                                 @endforeach
                             </ol>
 
@@ -101,7 +101,7 @@
         </section>
 
         {{-- « Donner votre avis » (v3.2.8, point 4) : une section de ce portail
-             plutot qu'un second systeme d'acces — le patient est deja
+             plutot qu'un second systeme d'acces, le patient est deja
              identifie ici, par le lien et le code qu'il possede. --}}
         @livewire('portal.patient-feedback-form', ['patientId' => $patient->id], key('avis-'.$patient->id))
     @endif

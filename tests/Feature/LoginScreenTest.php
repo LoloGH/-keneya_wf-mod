@@ -61,7 +61,7 @@ class LoginScreenTest extends TestCase
         // texte au document. Le nom du produit reste accessible par
         // l'alternative du bloc de marque, seule image porteuse de sens.
         $this->assertStringContainsString(
-            'alt="'.config('keneya.name').' — Espace professionnel"',
+            'alt="'.config('keneya.name').' - Espace professionnel"',
             $response->getContent(),
         );
     }

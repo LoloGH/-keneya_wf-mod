@@ -21,7 +21,7 @@ use Tests\TestCase;
 /**
  * Point 7 du v3.2 : portail patient, lien permanent et code a quatre chiffres.
  *
- * Le lien ne perime jamais — c'est la demande. La securite repose donc sur un
+ * Le lien ne perime jamais : c'est la demande. La securite repose donc sur un
  * jeton non devinable et un verrouillage temporaire, et ces tests verifient
  * les deux plutot que de supposer qu'une seule couche suffit.
  */

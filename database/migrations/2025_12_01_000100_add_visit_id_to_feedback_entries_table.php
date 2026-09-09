@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
  *
  * Un sondage note UN passage, pas un patient en general. Sans ce lien, rien ne
  * permettait de savoir si l'avis deja donne portait sur la visite d'aujourd'hui
- * ou sur celle du mois dernier — et le portail reproposait donc indefiniment
+ * ou sur celle du mois dernier, et le portail reproposait donc indefiniment
  * « Noter mon passage » a quelqu'un qui venait de repondre.
  *
  * Nullable, et le restera : un constat redige par un agent peut ne viser aucun

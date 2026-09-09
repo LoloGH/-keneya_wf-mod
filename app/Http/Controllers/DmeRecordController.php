@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\Auth;
  * Le point d'entree du module n'est pas une interface de premier niveau :
  * c'est cette redirection, posee sur un patient deja affiche dans /service.
  * Le medecin y arrive avec sa session WorkFlow, et le module la reprend telle
- * quelle — il n'y a pas de seconde authentification, pas de second mot de
+ * quelle : il n'y a pas de seconde authentification, pas de second mot de
  * passe, pas de second annuaire de comptes.
  *
  * Ce que fait cette classe, et rien d'autre :
  *
- *   1. verifier que l'hote accorde bien l'acces au dossier medical — la meme
+ *   1. verifier que l'hote accorde bien l'acces au dossier medical : la meme
  *      capacite que celle qui fait apparaitre le bouton, pour qu'une URL
  *      tapee a la main ne contourne pas l'interface ;
  *   2. relier le patient WorkFlow a son dossier du DME, ou le creer si c'est

@@ -19,7 +19,7 @@ use InvalidArgumentException;
  * Un rattachement qui a laisse une trace dans un dossier patient n'est **pas**
  * supprimable : les colonnes `*_doctor_id` et `*_staff_member_id` sont ce qui
  * dit qui a pose quel acte. Les effacer reviendrait a rendre anonymes des
- * consultations, des renvois et des ordonnances deja signes — exactement ce
+ * consultations, des renvois et des ordonnances deja signes : exactement ce
  * que le journal du parcours est cense empecher.
  *
  * Ce qui reste supprimable, c'est donc l'erreur de saisie : un compte cree par
@@ -51,7 +51,7 @@ class DeleteStaffAccount
             // Depuis la v3.3.1, un poste dedie fixe des rendez-vous, admet et
             // prescrit : ses traces bloquent la suppression au meme titre que
             // celles d'un medecin. Sans ces trois lignes, la suppression
-            // n'echouerait pas poliment — elle heurterait une cle etrangere.
+            // n'echouerait pas poliment : elle heurterait une cle etrangere.
             ['appointments', 'staff_member_id', 'rendez-vous'],
             ['hospitalizations', 'admitted_by_staff_member_id', 'hospitalisation(s)'],
             ['care_tasks', 'prescribed_by_staff_member_id', 'soin(s) prescrit(s)'],
@@ -81,7 +81,7 @@ class DeleteStaffAccount
         // qui retienne un compte : partout ailleurs, une suppression laisse
         // simplement la colonne a nul. Un soin programme, lui, doit garder son
         // prescripteur. La table n'existe que si le module est monte, d'ou le
-        // garde-fou de blockers() — cette liste vaut dans les deux cas.
+        // garde-fou de blockers() : cette liste vaut dans les deux cas.
         ['dme_care_orders', 'prescriber_id', 'soin(s) programme(s) au dossier medical'],
     ];
 
@@ -98,7 +98,7 @@ class DeleteStaffAccount
         }
 
         // Ce rattachement est-il le dernier du compte ? Si oui, le compte part
-        // avec — sinon il resterait sans role, incapable d'atteindre la moindre
+        // avec : sinon il resterait sans role, incapable d'atteindre la moindre
         // interface.
         $dernier = $this->remainingMemberships($user, $membership) === 0;
 
@@ -129,7 +129,7 @@ class DeleteStaffAccount
                 // Le planning et la cloche sont la propriete du compte, pas
                 // du dossier patient : ils partent avec lui. Les notifications
                 // manquaient, et `staff_notifications.user_id` est une cle
-                // etrangere en RESTRICT — tout compte ayant recu ne serait-ce
+                // etrangere en RESTRICT : tout compte ayant recu ne serait-ce
                 // qu'une notification refusait donc d'etre supprime, avec un
                 // 500 pour toute explication.
                 $user->schedules()->delete();

@@ -16,7 +16,7 @@
         <div class="field">
             <label for="visitor-service">Service visite</label>
             <select id="visitor-service" wire:model="service_id">
-                <option value="">— Choisir un service —</option>
+                <option value="">Choisir un service</option>
                 @foreach ($services as $service)
                     <option value="{{ $service->id }}">{{ $service->name }}</option>
                 @endforeach
@@ -40,7 +40,7 @@
                 </p>
             @else
                 <input id="visitor-patient" type="search" wire:model.live.debounce.400ms="patientSearch"
-                       placeholder="Nom ou numero de dossier du patient…">
+                       placeholder="Nom ou numero de dossier du patient...">
 
                 @if ($matches->isNotEmpty())
                     <ul class="lookup">
@@ -68,7 +68,7 @@
 
         <button type="submit" class="btn btn--secondary btn--block" wire:loading.attr="disabled">
             <span wire:loading.remove wire:target="save">Enregistrer le visiteur</span>
-            <span wire:loading wire:target="save">Enregistrement…</span>
+            <span wire:loading wire:target="save">Enregistrement...</span>
         </button>
     </form>
 
@@ -77,7 +77,7 @@
             <p class="ticket__label">Fiche visiteur</p>
             <p class="ticket__code">{{ $lastRegistered['visitor_code'] }}</p>
             <p class="ticket__meta">
-                {{ $lastRegistered['name'] }} — {{ $lastRegistered['service'] }},
+                {{ $lastRegistered['name'] }} - {{ $lastRegistered['service'] }},
                 ticket n° {{ $lastRegistered['token'] }}
             </p>
             @if ($lastRegistered['visited'] ?? null)

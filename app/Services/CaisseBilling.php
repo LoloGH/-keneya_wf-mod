@@ -12,7 +12,7 @@ use App\Models\Visit;
  * Ce que le patient doit payer, et pourquoi (v3.2.8, point 3).
  *
  * Le caissier voyait un champ de montant vide et une destination : il devait
- * demander au patient — ou deviner — ce qui etait facture. L'acte choisi par le
+ * demander au patient, ou deviner, ce qui etait facture. L'acte choisi par le
  * medecin voyage desormais avec la visite, et c'est ici qu'on le retrouve, quel
  * que soit le chemin par lequel la visite est arrivee a la caisse.
  */

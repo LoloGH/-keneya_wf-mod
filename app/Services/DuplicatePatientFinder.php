@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * Rien ne verifiait, jusqu'ici, qu'un patient n'etait pas deja en base avant de
  * lui creer une identite : la meme personne pouvait repartir avec deux
- * `patient_code`, ce qui contredit la promesse centrale du produit — un
+ * `patient_code`, ce qui contredit la promesse centrale du produit, un
  * identifiant unique et permanent par patient.
  *
  * Deux passes, dans cet ordre :
- *  1. le numero de telephone, le champ le plus fiable — un nom se prononce et
+ *  1. le numero de telephone, le champ le plus fiable : un nom se prononce et
  *     s'ecrit de dix facons, un numero ne se negocie pas ;
  *  2. le nom associe a un age voisin, pour rattraper le patient qui a change
  *     de numero depuis sa derniere venue.
@@ -70,7 +70,7 @@ class DuplicatePatientFinder
 
     /**
      * Seconde passe : meme nom, age voisin. Volontairement plus large que la
-     * premiere — elle propose, elle ne tranche pas.
+     * premiere : elle propose, elle ne tranche pas.
      *
      * @return Collection<int, Patient>
      */

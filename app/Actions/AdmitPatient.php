@@ -19,7 +19,7 @@ use InvalidArgumentException;
  *
  * L'admission cloture la visite en cours : le patient quitte la file d'attente,
  * il n'attend plus un tour, il occupe un lit. Les deux ecritures sont dans la
- * meme transaction — un patient hospitalise qui resterait dans une file, ou
+ * meme transaction : un patient hospitalise qui resterait dans une file, ou
  * l'inverse, serait une incoherence visible au tableau d'affichage.
  *
  * Une salle pleine **n'empeche pas** l'admission : une urgence hospitaliere
@@ -33,7 +33,7 @@ class AdmitPatient
     /**
      * `$doctor` accepte aussi un membre du personnel generique : l'admission
      * est alors signee par `admitted_by_staff_member_id` (v3.3.1). Le controle
-     * de service ne change pas — on hospitalise dans son propre service, que
+     * de service ne change pas : on hospitalise dans son propre service, que
      * l'on soit medecin ou non.
      */
     public function execute(

@@ -10,7 +10,7 @@
 
     // Les sections affichees sont exactement celles que les capacites cochees
     // autorisent : aucune section vide pour une capacite desactivee, et aucune
-    // capacite cochee sans section — ce qui etait le defaut jusqu'a la v3.3.1,
+    // capacite cochee sans section, ce qui etait le defaut jusqu'a la v3.3.1,
     // ou quatorze des vingt et une capacites ne produisaient rien ici.
     $sections = [];
 
@@ -21,7 +21,7 @@
     // Dossier medical (v3.3.1). Les memes ecrans que /service, et le meme
     // regroupement : chacun garde sa capacite, le groupe disparait si le type
     // n'en porte aucune. Ce qui s'y saisit atterrit dans le DME, que le compte
-    // ait ou non le droit d'ouvrir le dossier complet — consigner un acte et
+    // ait ou non le droit d'ouvrir le dossier complet : consigner un acte et
     // lire un dossier ne sont pas le meme droit.
     $sousDossierMedical = $serviceId ? array_values(array_filter([
         $peut(StaffType::CAP_RECORD_CONSULTATION)
@@ -49,8 +49,8 @@
     }
 
     // « Patients hospitalises » sert deux capacites : admettre, et prescrire
-    // des soins. Elles se cochent separement — admettre un patient et lui
-    // prescrire un traitement ne sont pas la meme decision — mais elles
+    // des soins. Elles se cochent separement, admettre un patient et lui
+    // prescrire un traitement ne sont pas la meme decision, mais elles
     // s'exercent sur le meme ecran.
     if ($serviceId && ($peut(StaffType::CAP_ADMIT_HOSPITALIZATION) || $peut(StaffType::CAP_PRESCRIBE_CARE))) {
         $sections[] = ['key' => 'hospitalisation', 'icon' => 'lit', 'label' => 'Patients hospitalises', 'view' => 'sections.staff.hospitalizations'];
@@ -95,7 +95,7 @@
     $sections[] = ['key' => 'planning', 'icon' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.staff.schedule'];
 @endphp
 
-<x-layouts.app :title="$type->name.' — '.config('keneya.name')">
+<x-layouts.app :title="$type->name.'-'.config('keneya.name')">
     {{-- A droite de la barre : le service de rattachement plutot que le seul
          nom du type, comme dans /service. --}}
     <x-slot:context>

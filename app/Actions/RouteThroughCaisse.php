@@ -19,7 +19,7 @@ use App\Models\Service;
  *  - l'enregistrement a l'accueil passe toujours par la Caisse Ticket, c'est le
  *    ticket de consultation ;
  *  - un renvoi ne passe par la Caisse Services que si le type du service
- *    destinataire porte `requires_payment_gate` — un indicateur regle par
+ *    destinataire porte `requires_payment_gate`, un indicateur regle par
  *    l'admin (v3.2.1, point 10), plus une comparaison codee en dur sur
  *    « plateau technique ».
  *
@@ -58,7 +58,7 @@ class RouteThroughCaisse
     }
 
     /**
-     * Si la caisse attendue n'existe pas — deploiement qui n'en utilise pas —
+     * Si la caisse attendue n'existe pas, deploiement qui n'en utilise pas,
      * la destination reste directe plutot que de bloquer le patient.
      *
      * @return array{0: Service, 1: Service|null}

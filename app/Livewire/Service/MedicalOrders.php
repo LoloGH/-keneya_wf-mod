@@ -23,13 +23,13 @@ use Livewire\WithFileUploads;
 /**
  * Traitements, examens et documents du dossier medical, dans /service (v3.3.1).
  *
- * Deux formulaires derriere deux capacites — traitements habituels et
- * documents — sur un ecran commun : ils partagent le meme patient et le meme
+ * Deux formulaires derriere deux capacites, traitements habituels et
+ * documents, sur un ecran commun : ils partagent le meme patient et le meme
  * geste, completer le dossier pendant que le patient est la. Chacun reste
  * independant, et un type de personnel peut n'en recevoir qu'un seul.
  *
  * Les demandes d'examens, elles, ne se **posent** plus ici : elles s'y lisent
- * seulement. Demander un examen, c'est envoyer le patient le faire — le
+ * seulement. Demander un examen, c'est envoyer le patient le faire : le
  * formulaire vit donc dans le renvoi, ou il apparait des que la destination
  * realise des examens ({@see RequestsExamination}).
  * Les avoir separes laissait le technicien recevoir un patient sans savoir ce

@@ -27,7 +27,7 @@ class Service extends Model
      * C'est ce qui permet au formulaire de demande de s'afficher tout seul
      * quand le medecin choisit la destination du renvoi : l'echographie
      * appelle une demande d'imagerie, le laboratoire une demande d'analyses.
-     * Un nom de service ne se devine pas — l'administrateur le declare.
+     * Un nom de service ne se devine pas : l'administrateur le declare.
      */
     public const EXAM_LABORATORY = 'laboratory';
 
@@ -77,7 +77,7 @@ class Service extends Model
      * La caisse en est exclue : elle est une etape de routage decidee par
      * RouteThroughCaisse, jamais une destination qu'on choisit dans un
      * formulaire. C'est aussi ce qui empeche d'affecter un medecin a une
-     * caisse — les medecins n'encaissent jamais.
+     * caisse : les medecins n'encaissent jamais.
      *
      * @param  Builder<self>  $query
      */
@@ -143,7 +143,7 @@ class Service extends Model
 
     public function kindLabel(): string
     {
-        return $this->serviceKind?->name ?? '—';
+        return $this->serviceKind?->name ?? '-';
     }
 
     /**

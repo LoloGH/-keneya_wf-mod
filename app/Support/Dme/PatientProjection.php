@@ -9,8 +9,8 @@ use Keneya\Dme\Patients\PatientIdentifierResolver;
 /**
  * La projection d'un patient de WorkFlow vers son dossier medical (v3.3.1).
  *
- * Chaque formulaire du chantier commence par la meme question — quel dossier
- * du DME correspond a ce patient ? — et elle n'admet qu'une reponse : la table
+ * Chaque formulaire du chantier commence par la meme question, quel dossier
+ * du DME correspond a ce patient ?, et elle n'admet qu'une reponse : la table
  * d'identifiants externes du module, jamais un rapprochement sur le nom. Cette
  * classe tient cette reponse, et la forme des attributs projetes, en un seul
  * endroit : les formulaires, le bouton « Dossier medical complet », le portail

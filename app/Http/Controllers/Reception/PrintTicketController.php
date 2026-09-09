@@ -10,7 +10,7 @@ use Illuminate\Contracts\View\View;
 /**
  * Ticket imprimable, patient ou visiteur (v3.2, point 9).
  *
- * Rendu HTML avec un CSS d'impression, et `window.print()` cote navigateur —
+ * Rendu HTML avec un CSS d'impression, et `window.print()` cote navigateur,
  * pas de PDF cote serveur : l'imprimante est deja branchee au poste de la
  * receptionniste, autant s'en servir directement.
  */

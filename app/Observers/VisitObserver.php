@@ -11,7 +11,7 @@ use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
  * (v3.2.3, point 2).
  *
  * Un observateur plutot qu'un appel dans chaque action : un patient entre dans
- * une file par six chemins — enregistrement, nouvel episode, arrivee sur
+ * une file par six chemins, enregistrement, nouvel episode, arrivee sur
  * rendez-vous, sortie de caisse, renvoi envoye, retour d'un renvoi complete.
  * Les enumerer un a un aurait garanti d'en oublier un au prochain chemin
  * ajoute. Ce qui compte n'est pas comment la visite est arrivee la, c'est

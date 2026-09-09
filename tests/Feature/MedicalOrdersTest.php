@@ -151,8 +151,8 @@ class MedicalOrdersTest extends TestCase
     //
     // Les demandes d'analyses et d'imagerie ne se posent plus sur cet ecran :
     // demander un examen, c'est envoyer le patient le faire (v3.3.1). Le
-    // formulaire vit dans le renvoi, et son circuit complet — de la demande au
-    // compte rendu verse au dossier — est verifie par ExaminationReferralTest.
+    // formulaire vit dans le renvoi, et son circuit complet, de la demande au
+    // compte rendu verse au dossier, est verifie par ExaminationReferralTest.
 
     // ------------------------------------------------------------ Documents
 

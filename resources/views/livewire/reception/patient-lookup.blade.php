@@ -4,7 +4,7 @@
     <div class="field">
         <label for="lookup-search">Numero de dossier, nom ou telephone</label>
         <input id="lookup-search" type="search" wire:model.live.debounce.400ms="search"
-               placeholder="HFD-00001, Sekou Diarra, 76445566…">
+               placeholder="HFD-00001, Sekou Diarra, 76445566...">
     </div>
 
     @if (trim($search) !== '' && $matches->isEmpty())
@@ -21,7 +21,7 @@
                     <span class="lookup__identity">
                         <strong>{{ $match->name }}</strong>
                         <span class="mono">{{ $match->patient_code }}</span>
-                        <span>{{ $match->age }} ans — {{ $match->gender }} — {{ $match->mobile }}</span>
+                        <span>{{ $match->age }} ans - {{ $match->gender }} - {{ $match->mobile }}</span>
                     </span>
                     <button type="button" class="btn btn--secondary" wire:click="select({{ $match->id }})">
                         C'est ce patient
@@ -59,7 +59,7 @@
                 <div class="field">
                     <label for="lookup-service">Service pour ce nouveau passage</label>
                     <select id="lookup-service" wire:model="serviceId">
-                        <option value="">— Choisir un service —</option>
+                        <option value="">Choisir un service</option>
                         @foreach ($services as $service)
                             <option value="{{ $service->id }}">{{ $service->name }}</option>
                         @endforeach

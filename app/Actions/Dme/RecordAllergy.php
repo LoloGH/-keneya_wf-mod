@@ -18,7 +18,7 @@ use Keneya\Dme\Models\Allergy;
  * declenche aucune alerte la-bas.
  *
  * D'ou deux choix : la severite est demandee des la saisie plutot que laissee
- * a « inconnue », et une allergie ne se supprime pas — elle se refute. Le
+ * a « inconnue », et une allergie ne se supprime pas, elle se refute. Le
  * dossier garde ainsi la trace qu'elle a ete evoquee, et pourquoi elle a ete
  * ecartee, au lieu de faire disparaitre l'information.
  */
@@ -69,7 +69,7 @@ class RecordAllergy
      * Change le statut d'une allergie : resolue, ou refutee.
      *
      * Jamais de suppression. Une allergie evoquee puis ecartee est une
-     * information clinique en elle-meme — l'effacer reviendrait a laisser le
+     * information clinique en elle-meme : l'effacer reviendrait a laisser le
      * prochain medecin refaire le meme cheminement.
      */
     public function updateStatus(Visit $visit, Doctor|StaffMember $doctor, Allergy $allergie, string $statut): Allergy

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
  *
  * Depuis que l'ordonnance vit dans le dossier medical, la frise du parcours ne
  * peut plus la retrouver comme avant. Elle appariait une entree « ordonnance »
- * avec la n-ieme ordonnance du meme passage — un rapprochement par rang, que
+ * avec la n-ieme ordonnance du meme passage, un rapprochement par rang, que
  * son propre commentaire signalait comme un pis-aller assume : « la consigne
  * etait de corriger l'affichage, pas le schema ».
  *

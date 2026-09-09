@@ -26,7 +26,7 @@ class WorkflowSmsDispatcher implements SmsDispatcherContract
      * Remet un message a la file de WorkFlow.
      *
      * Un SMS manque ne doit jamais interrompre un acte medical : le contrat
-     * l'exige, et `SendSmsJob::dispatch()` s'y tient deja — il ecarte un
+     * l'exige, et `SendSmsJob::dispatch()` s'y tient deja, il ecarte un
      * numero vide sans lever, puis c'est le worker qui affronte la
      * passerelle. Rien n'est donc rattrape ici en dehors de la resolution du
      * contexte, qui est purement decorative.

@@ -15,7 +15,7 @@ use InvalidArgumentException;
  * « Orienter le patient » : le patient attendu se presente a l'accueil.
  *
  * Ouvre un nouveau passage sous son identite existante et le place directement
- * dans la file du service prevu — sans repasser par un enregistrement complet,
+ * dans la file du service prevu : sans repasser par un enregistrement complet,
  * puisqu'il est deja connu.
  */
 class CheckInAppointment

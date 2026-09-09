@@ -27,15 +27,15 @@
         <div class="field">
             <label for="staff-type">Type de personnel</label>
             <select id="staff-type" wire:model.live="staff_type_id">
-                <option value="">— Choisir un type —</option>
+                <option value="">Choisir un type</option>
                 @foreach ($staffTypes as $type)
                     {{-- Le role n'est rappele que s'il n'est pas deja le nom du
-                         type : « Caissier — Caissier » n'apprend rien. --}}
+                         type : « Caissier, Caissier » n'apprend rien. --}}
                     @php $role = \App\Support\Roles::label($type->matched_role); @endphp
                     @php
                         $suffixe = $type->matched_role
-                            ? ($role === $type->name ? '' : ' — '.$role)
-                            : ' — interface dediee';
+                            ? ($role === $type->name ? '' : '-'.$role)
+                            : ', interface dediee';
                     @endphp
                     <option value="{{ $type->id }}">
                         {{ $type->name }}{{ $suffixe }}
@@ -58,7 +58,7 @@
             <div class="field">
                 <label for="staff-service">Service</label>
                 <select id="staff-service" wire:model="service_id">
-                    <option value="">— Choisir un service —</option>
+                    <option value="">Choisir un service</option>
                     @foreach ($services as $service)
                         <option value="{{ $service->id }}">{{ $service->name }} ({{ $service->kindLabel() }})</option>
                     @endforeach
@@ -95,7 +95,7 @@
                         <td>{{ $ligne['user']->name }}</td>
                         <td>{{ $ligne['user']->email }}</td>
                         <td>
-                            {{ $ligne['type'] ?: '—' }}
+                            {{ $ligne['type'] ?: '-' }}
                             @if ($ligne['alerte'])
                                 {{-- Le compte est valide, mais il ne montrera
                                      rien : l'admin doit l'apprendre ici, pas
@@ -103,8 +103,8 @@
                                 <p class="field__error">{{ $ligne['alerte'] }}</p>
                             @endif
                         </td>
-                        <td>{{ $ligne['service'] ?: '—' }}</td>
-                        <td>{{ $ligne['phone'] ?: '—' }}</td>
+                        <td>{{ $ligne['service'] ?: '-' }}</td>
+                        <td>{{ $ligne['phone'] ?: '-' }}</td>
                         <td>
                             <div class="btn-row">
                                 <button type="button" class="btn btn--ghost"

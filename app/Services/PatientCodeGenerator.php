@@ -93,7 +93,7 @@ class PatientCodeGenerator
         }
 
         // Fin d'une serie a lettre : on passe a la lettre suivante. Apres Z,
-        // il n'y a plus de place — mieux vaut s'arreter net que de fabriquer
+        // il n'y a plus de place : mieux vaut s'arreter net que de fabriquer
         // un numero ambigu qui pourrait doublonner un dossier existant.
         if ($lettre === 'Z') {
             throw new \RuntimeException(

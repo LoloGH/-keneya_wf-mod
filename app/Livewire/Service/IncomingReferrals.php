@@ -22,7 +22,7 @@ use Livewire\WithFileUploads;
  * d'examen que le medecin a posee en envoyant le patient : le technicien lit
  * ce qu'on lui demande sans avoir a le deviner ni a ouvrir un autre ecran.
  *
- * Son compte rendu part au **dossier medical** du patient, ou il restera — et
+ * Son compte rendu part au **dossier medical** du patient, ou il restera, et
  * non en piece jointe d'un renvoi, qui n'est qu'un mouvement du parcours. La
  * demande cesse d'etre en attente, et le patient retourne dans la file du
  * medecin qui l'a envoye.

@@ -13,7 +13,7 @@ use Livewire\Component;
  * l'action « Orienter le patient ».
  *
  * A l'arrivee du patient, on ouvre directement un nouveau passage dans le
- * service prevu, sous son identite existante — pas de reenregistrement
+ * service prevu, sous son identite existante : pas de reenregistrement
  * complet pour quelqu'un que l'hopital connait deja.
  */
 class TodayAppointments extends Component
@@ -33,7 +33,7 @@ class TodayAppointments extends Component
         }
 
         session()->flash('reception.success', sprintf(
-            '%s (%s) oriente vers %s — ticket n° %d.',
+            '%s (%s) oriente vers %s : ticket n° %d.',
             $appointment->patient->name,
             $appointment->patient->patient_code,
             $visit->service->name,

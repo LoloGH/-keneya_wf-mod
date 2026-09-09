@@ -11,7 +11,7 @@ use InvalidArgumentException;
 /**
  * Envoi du lien « mes documents » par SMS (v3.2, point 7).
  *
- * Sur demande explicite depuis l'accueil ou le service — jamais automatique a
+ * Sur demande explicite depuis l'accueil ou le service, jamais automatique a
  * chaque evenement : le patient n'a pas a recevoir un SMS a chaque ligne
  * ajoutee a son dossier.
  */
@@ -30,7 +30,7 @@ class SendPortalLink
         }
 
         $message = SendSmsJob::dispatch($patient->mobile, sprintf(
-            '%s : consultez vos documents et rendez-vous ici %s — votre code personnel vous a ete remis a l\'accueil.',
+            '%s : consultez vos documents et rendez-vous ici %s, votre code personnel vous a ete remis a l\'accueil.',
             config('keneya.name'),
             route('portal.show', $patient->portal_token),
         ), $patient);

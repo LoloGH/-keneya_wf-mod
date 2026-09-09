@@ -1,7 +1,7 @@
 {{--
     La scene de l'ecran de connexion : le poste de travail du soignant.
 
-    Tout est dessine en SVG inline et anime en CSS — aucune image lourde, aucune
+    Tout est dessine en SVG inline et anime en CSS : aucune image lourde, aucune
     bibliotheque d'animation. Le serveur peut n'avoir aucune connectivite, et la
     scene reste nette sur un videoprojecteur comme sur une tablette.
 
@@ -56,7 +56,7 @@
 
              L'ordre de trace porte la profondeur : le pied de la lampe passe
              derriere l'ecran, le cone de lumiere se pose au-dessus de tout. La
-             moitie gauche du plateau reste libre — c'est la course du
+             moitie gauche du plateau reste libre : c'est la course du
              couvercle quand la mallette s'ouvre. --}}
         <g class="kw-set">
             <ellipse cx="470" cy="432" rx="300" ry="16" fill="#062535" opacity=".55" />

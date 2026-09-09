@@ -57,8 +57,8 @@ class Hospitalizations extends Component
 
     /**
      * Assignation nommee, facultative : le medecin peut designer quelqu'un dans
-     * un cas precis. Ce n'est jamais une restriction d'acces — voir
-     * StaffCareTasks — mais une priorite d'affichage.
+     * un cas precis. Ce n'est jamais une restriction d'acces, voir
+     * StaffCareTasks, mais une priorite d'affichage.
      */
     public ?int $careAssignedToUserId = null;
 
@@ -79,7 +79,7 @@ class Hospitalizations extends Component
 
     public ?int $reviseAssignedToUserId = null;
 
-    /** Soin en cours d'annulation, et son motif — jamais facultatif. */
+    /** Soin en cours d'annulation, et son motif : jamais facultatif. */
     public ?int $cancellingTaskId = null;
 
     public string $cancellationReason = '';
@@ -90,8 +90,8 @@ class Hospitalizations extends Component
      */
     /**
      * L'ecran sert deux capacites depuis la v3.3.1 : admettre un patient, et
-     * lui prescrire des soins. Elles se cochent separement — ce ne sont pas la
-     * meme decision — d'ou une porte d'entree qui accepte l'une ou l'autre.
+     * lui prescrire des soins. Elles se cochent separement, ce ne sont pas la
+     * meme decision, d'ou une porte d'entree qui accepte l'une ou l'autre.
      *
      * Chaque action garde la sienne : `admit()` exige l'hospitalisation,
      * `prescribe()` la prescription. Ouvrir l'ecran n'accorde rien.
@@ -401,14 +401,14 @@ class Hospitalizations extends Component
             'careTaskTypes' => CareTaskType::orderBy('name')->get(),
             // Prescrire un soin est un acte attribuable depuis la v3.3.1 :
             // sa propre capacite, distincte d'admettre et d'executer. Un
-            // compte qui ne la porte pas ne voit pas le bouton — mieux vaut
+            // compte qui ne la porte pas ne voit pas le bouton : mieux vaut
             // ne pas le montrer que le refuser au clic.
             'peutPrescrireDesSoins' => auth()->user()->hasCapability(StaffType::CAP_PRESCRIBE_CARE),
             // Admettre et faire sortir relevent de l'autre capacite : un
             // compte qui ne fait que prescrire lit l'ecran sans y admettre.
             'peutHospitaliser' => auth()->user()->hasCapability(StaffType::CAP_ADMIT_HOSPITALIZATION),
             // Les soins du sejour deplie : la liste complete, annules compris,
-            // parce que le dossier garde tout — c'est le decompte qui les
+            // parce que le dossier garde tout, c'est le decompte qui les
             // ignore, pas l'affichage.
             'careTasks' => $this->viewingCareTasksFor
                 ? CareTask::with(['type', 'assignedTo', 'completedBy', 'cancelledBy'])

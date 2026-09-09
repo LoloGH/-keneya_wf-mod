@@ -16,7 +16,7 @@ use Tests\TestCase;
  *
  * `recordConclusion()` existait dans le composant, mais aucune vue ne
  * l'atteignait : l'onglet affiche appelait `selectTab('caisse')`, valeur que
- * le composant n'accepte pas et qui retombait sur `conclusion` — un onglet
+ * le composant n'accepte pas et qui retombait sur `conclusion`, un onglet
  * sans panneau. La conclusion de consultation etait donc inaccessible, et
  * l'ecran s'ouvrait vide.
  *

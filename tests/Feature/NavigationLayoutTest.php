@@ -16,7 +16,7 @@ use Tests\TestCase;
 /**
  * Refonte de la navigation : barre de marque et onglets verticaux.
  *
- * Rien de fonctionnel ne change ici — ces tests verrouillent la presentation
+ * Rien de fonctionnel ne change ici : ces tests verrouillent la presentation
  * pour que le remaniement ne fasse pas disparaitre une section en silence.
  */
 class NavigationLayoutTest extends TestCase
@@ -58,7 +58,7 @@ class NavigationLayoutTest extends TestCase
             ->assertSet('active', 'enfant-b')
             // Les titres de carte passent depuis la refonte visuelle par le
             // composant <x-card>, donc par {{ }} : ils sont echappes comme les
-            // libelles de la barre. C'est aussi ce qu'on veut — un titre venu
+            // libelles de la barre. C'est aussi ce qu'on veut : un titre venu
             // de la base ne doit pas pouvoir injecter de balisage.
             ->assertSee("Journal d'audit")
             ->assertDontSee("Nom de l'etablissement");
@@ -206,7 +206,7 @@ class NavigationLayoutTest extends TestCase
      * Le serveur ne decide plus que de l'etat de depart : il rend toujours les
      * sous-sections, et masque celles d'un groupe ferme par un style en ligne
      * qu'Alpine reprend ensuite a son compte. C'est ce contrat-la que ce test
-     * verrouille — le comportement au clic, lui, n'existe plus cote PHP.
+     * verrouille : le comportement au clic, lui, n'existe plus cote PHP.
      */
     public function test_un_groupe_ferme_rend_ses_sous_sections_masquees(): void
     {

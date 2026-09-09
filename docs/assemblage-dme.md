@@ -12,7 +12,7 @@ deux se développent côte à côte.
 `assemblage-workflow` de [`LoloGH/-keneya-dme_mod`](https://github.com/LoloGH/-keneya-dme_mod/tree/assemblage-workflow)**,
 pas encore `main`. C'est elle qui porte le préfixe `dme_` sur les tables du
 module et la traduction de ses rôles ; sans elle, les deux schémas entrent en
-collision. La CI la cible explicitement (`.github/workflows/ci.yml`) — à
+collision. La CI la cible explicitement (`.github/workflows/ci.yml`) : à
 remettre sur `main` une fois la fusion faite là-bas.
 
 ---
@@ -44,7 +44,7 @@ Le port n'est pas anodin : `keneya_workflow` occupe le 8080 et
 `keneya-dme_app` (le module en autonome) le 8081. Les trois piles doivent
 pouvoir tourner en même temps sur le même poste. Pour la même raison, la base
 de cet assemblage est publiée sur le **3309** et ses volumes Docker portent des
-noms qui lui sont propres (`keneya_wf_mod_db`, `keneya_wf_mod_storage`) — un
+noms qui lui sont propres (`keneya_wf_mod_db`, `keneya_wf_mod_storage`) : un
 volume partagé aurait fait écrire cette pile dans la base de production de
 `keneya_workflow`, ce qui ne se voit qu'une fois le mal fait.
 
@@ -59,7 +59,7 @@ docker compose restart app scheduler queue-worker && docker compose restart web
 
 L'image règle `opcache.validate_timestamps = 0` : PHP-FPM ne relit jamais un
 fichier déjà compilé. C'est le bon réglage en production, mais le module est
-monté en volume et se modifie donc à chaud — sans ce redémarrage, l'application
+monté en volume et se modifie donc à chaud : sans ce redémarrage, l'application
 continue de servir l'ancien code pendant qu'`artisan test`, qui est un autre
 processus, voit déjà le nouveau. On croit alors avoir corrigé un bug qui
 s'affiche toujours à l'écran.
@@ -90,7 +90,7 @@ réécrire le code d'un de ses paquets. Son profil `tools` le tient hors de
 ### Le montage du module dans le conteneur
 
 `docker-compose.yml` monte `../keneya-dme_mod` sur `/var/www/keneya-dme_mod`, et
-c'est **ce chemin-là** — celui vu de l'intérieur du conteneur — que déclare le
+c'est **ce chemin-là**, celui vu de l'intérieur du conteneur, que déclare le
 dépôt `path` de `composer.json`. Sans le montage, `composer install` échouerait
 dans le conteneur alors qu'il fonctionnerait sur la machine : c'est l'erreur
 classique de ce genre d'assemblage.
@@ -104,14 +104,14 @@ paquets se refait au premier démarrage, une fois le vrai module en place.
 ## 3. Cohabitation des deux schémas
 
 Les migrations du module et celles de WorkFlow créent des tables dans **la même
-base**. Six noms entraient en collision frontale — `patients`, `services`,
-`appointments`, `prescriptions`, `hospitalizations`, `sms_messages` — et la
+base**. Six noms entraient en collision frontale - `patients`, `services`,
+`appointments`, `prescriptions`, `hospitalizations`, `sms_messages`, et la
 liste se serait allongée à chaque évolution de l'un ou de l'autre.
 
 La règle posée dans le module est donc explicite :
 
 - **les tables que le module possède portent le préfixe `dme_`**
-  (`dme_patients`, `dme_consultations`, `dme_prescriptions`…) ;
+  (`dme_patients`, `dme_consultations`, `dme_prescriptions`...) ;
 - **les tables qu'il partage avec son hôte gardent leur nom** : `users`,
   `activity_log`, les tables de `spatie/laravel-permission` et
   `personal_access_tokens`.
@@ -120,7 +120,7 @@ Ce partage est le cœur de l'assemblage, pas un effet de bord :
 
 - `users` : le praticien du dossier médical **est** le compte WorkFlow. Les
   migrations du module ajoutent à cette table les colonnes professionnelles
-  (`matricule`, `first_name`, `service_id`, `is_active`, `is_on_duty`…), une par
+  (`matricule`, `first_name`, `service_id`, `is_active`, `is_on_duty`...), une par
   une et seulement si elles manquent.
 - `activity_log` : c'est ce qui fait qu'une consultation ouverte dans le module
   apparaît dans le journal d'audit de `/admin`. Le module écrit sous le nom de
@@ -139,7 +139,7 @@ qui traverseraient la frontière dans l'autre sens n'existent pas.
 ## 4. Le modèle utilisateur
 
 Le module ne peut pas imposer sa classe `User` à son hôte, et il ne peut pas non
-plus manipuler une autre classe que celle que `Auth::user()` renvoie — sinon les
+plus manipuler une autre classe que celle que `Auth::user()` renvoie, sinon les
 comparaisons d'identité seraient fausses et le `causer_type` du journal d'audit
 divergerait.
 
@@ -196,8 +196,8 @@ docker compose exec app php artisan test
 Deux corrections ont été nécessaires pour que cette commande veuille dire
 quelque chose :
 
-- **`ext-gd`** manquait dans l'image. Aucun `composer.json` ne la déclare —
-  dompdf ne le fait pas — et son absence ne se voyait qu'à l'exécution : toute
+- **`ext-gd`** manquait dans l'image. Aucun `composer.json` ne la déclare -
+  dompdf ne le fait pas, et son absence ne se voyait qu'à l'exécution : toute
   ordonnance portant un logo, une signature ou un tampon échouait en 500. Le
   module en a besoin pour les mêmes raisons, plus le QR code de ses documents.
 - **`tests/bootstrap.php`**. `docker-compose.yml` injecte le `.env` de
@@ -233,12 +233,12 @@ Le module a trois écrans d'administration, tous sous `/dme` :
 
 C'est **l'administrateur de WorkFlow** qui les tient, et il entre dans le
 module de droit : `User::canAccessDme()` répond oui pour le rôle `admin` sans
-passer par la case à cocher. Ce n'est pas une faveur, c'est une nécessité — il
+passer par la case à cocher. Ce n'est pas une faveur, c'est une nécessité : il
 n'a aucun type de personnel, la case `can_access_dme` n'existe donc nulle part
 pour lui dans `/admin`, et il serait le seul compte à ne jamais pouvoir
 l'obtenir. Le module resterait sans administrateur.
 
-Il a également l'action « Dossier medical complet » dans `/admin` → Patients,
+Il a également l'action « Dossier medical complet » dans `/admin` -> Patients,
 au même titre qu'un médecin dans « Mes patients ». C'est une décision assumée :
 un compte administratif accède ainsi à l'antécédent médical, aux ordonnances et
 aux examens de chaque patient. Pour l'en écarter tout en le laissant
@@ -260,7 +260,7 @@ Le module distingue deux gestes, et l'écart entre eux est le sujet :
 `DmePermissionSeeder` ne donne `patients.purge` qu'à l'administrateur : un
 médecin ne peut ni archiver ni supprimer.
 
-**La suppression d'un dossier patient dans WorkFlow ne touche pas au DME** —
+**La suppression d'un dossier patient dans WorkFlow ne touche pas au DME** :
 décision prise, pas oubli. Le dossier médical est une archive indépendante qui
 survit à la file d'attente. Conséquence à connaître : sa liaison
 `dme_patient_identifiers` devient orpheline, et un patient réenregistré sous un
@@ -269,7 +269,7 @@ retrouve en filtrant la liste des patients du module sur « Archivé », ou par
 son numéro.
 
 Reste un point non tranché : les écrans de comptes et de rôles du module
-agissent sur les mêmes comptes que `/admin` sans en connaître les règles —
+agissent sur les mêmes comptes que `/admin` sans en connaître les règles,
 type de personnel, rattachement au service, rôle cloisonné. Créer un compte
 depuis `/dme/utilisateurs` produit un utilisateur que WorkFlow ne sait pas
 placer.

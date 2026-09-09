@@ -69,7 +69,7 @@
                             @elseif ($message->sent_at)
                                 Accepte le {{ $message->sent_at->format('d/m/Y H:i') }}
                             @else
-                                —
+                                -
                             @endif
                         </td>
                     </tr>

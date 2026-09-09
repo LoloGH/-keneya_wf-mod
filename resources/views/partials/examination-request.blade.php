@@ -4,7 +4,7 @@
 
     Elle n'apparait pas d'elle-meme : elle suit la destination choisie. Le
     medecin dit ou il envoie le patient, et l'application sait quoi lui
-    demander — l'echographie appelle une demande d'imagerie, le laboratoire une
+    demander : l'echographie appelle une demande d'imagerie, le laboratoire une
     demande d'analyses. C'est le service qui porte cette nature, declaree par
     l'administrateur dans « Services ».
 
@@ -82,7 +82,7 @@
                     Region examinee <span class="field__hint">(facultatif)</span>
                 </label>
                 <input type="text" id="region-{{ $suffixe }}" wire:model="examBodySite"
-                       placeholder="Abdomen, obstetricale…">
+                       placeholder="Abdomen, obstetricale...">
                 @error('examBodySite') <p class="field__error">{{ $message }}</p> @enderror
             </div>
         </div>

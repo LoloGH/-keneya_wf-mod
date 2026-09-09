@@ -158,7 +158,7 @@ class BillableItemTest extends TestCase
 
         // Un acte d'un autre service ne doit pas etre propose ici.
         BillableItem::factory()->create([
-            'name' => 'Analyse — glycemie',
+            'name' => 'Analyse, glycemie',
             'service_id' => Service::factory()->create(['name' => 'Laboratoire'])->getKey(),
         ]);
 
@@ -170,7 +170,7 @@ class BillableItemTest extends TestCase
             ->call('startReferral', $visit->getKey())
             ->set('toServiceId', $radiologie->getKey())
             ->assertSee('Echographie abdominale')
-            ->assertDontSee('Analyse — glycemie')
+            ->assertDontSee('Analyse, glycemie')
             ->set('billableItemId', $acte->getKey())
             ->set('instructions', 'Echographie a realiser.')
             ->call('sendReferral')
@@ -234,7 +234,7 @@ class BillableItemTest extends TestCase
     }
 
     /**
-     * Une derogation reste possible — un caissier a parfois de bonnes raisons —
+     * Une derogation reste possible, un caissier a parfois de bonnes raisons,
      * mais elle doit etre dite, et elle part au journal.
      */
     public function test_une_derogation_au_tarif_exige_un_motif_et_est_journalisee(): void
@@ -263,7 +263,7 @@ class BillableItemTest extends TestCase
 
         $this->assertSame(0, Payment::count());
 
-        // Avec motif, il passe — et laisse une trace.
+        // Avec motif, il passe, et laisse une trace.
         Livewire::actingAs($caissier)
             ->test(CaisseQueue::class, ['serviceId' => $ticket->getKey()])
             ->call('startPayment', $visit->getKey())

@@ -19,7 +19,7 @@ use InvalidArgumentException;
  * Operation sensible, donc encadree : l'admin doit retaper le `patient_code`
  * exact et fournir un motif. La suppression est reelle et en cascade.
  *
- * Elle n'est jamais tracee dans `patient_history` — cette table disparait avec
+ * Elle n'est jamais tracee dans `patient_history` : cette table disparait avec
  * le patient. Seul le journal d'audit la conserve, et lui survit puisqu'il ne
  * reference pas le patient par cle etrangere.
  */
@@ -60,7 +60,7 @@ class DeletePatientRecord
         // Les chemins sont releves maintenant, mais les fichiers ne partiront
         // qu'apres la transaction : le disque, lui, ne sait pas revenir en
         // arriere. Supprimes a l'interieur, ils etaient detruits meme quand la
-        // transaction echouait ensuite — l'admin voyait une erreur, croyait
+        // transaction echouait ensuite : l'admin voyait une erreur, croyait
         // que rien n'avait bouge, et le dossier avait perdu ses documents.
         $fichiers = $patient->attachments->pluck('path')->all();
 
@@ -68,7 +68,7 @@ class DeletePatientRecord
             // Ordre impose par les cles etrangeres, et il n'a rien d'un choix
             // de style : toutes ces contraintes sont en RESTRICT, la base
             // refuse donc de supprimer une ligne encore designee. Un seul
-            // deplacement dans cette liste, et la suppression echoue — sur
+            // deplacement dans cette liste, et la suppression echoue : sur
             // certains dossiers seulement, ce qui est le pire des cas.
             $patient->attachments()->delete();
             $patient->prescriptions()->delete();
@@ -91,20 +91,20 @@ class DeletePatientRecord
 
             // Ni un visiteur ni un retour ne sont des donnees du dossier : on
             // les detache plutot que de les detruire. Un retour porte sur un
-            // service et sur un moment, il garde son sens — et sa place dans
-            // les statistiques — une fois la personne effacee.
+            // service et sur un moment, il garde son sens, et sa place dans
+            // les statistiques, une fois la personne effacee.
             $patient->visitors()->update(['patient_id' => null]);
             FeedbackEntry::where('patient_id', $patient->getKey())->update(['patient_id' => null]);
 
             // `patient_history` est append-only et son observer refuse toute
-            // suppression — c'est ce qui garantit qu'on ne reecrit pas un
+            // suppression : c'est ce qui garantit qu'on ne reecrit pas un
             // parcours. La suppression complete d'un dossier est la seule
             // exception prevue, et elle passe donc sous le modele, en SQL
             // direct, plutot que d'affaiblir le garde-fou pour tout le monde.
             //
             // Elle part AVANT les renvois et les passages, parce qu'elle
             // designe les deux. Elle partait apres, et tout dossier portant un
-            // renvoi trace — c'est-a-dire tout dossier reellement utilise —
+            // renvoi trace, c'est-a-dire tout dossier reellement utilise,
             // refusait d'etre supprime.
             DB::table('patient_history')->where('patient_id', $patient->getKey())->delete();
 
@@ -115,7 +115,7 @@ class DeletePatientRecord
         });
 
         // La base a tenu : les fichiers peuvent partir. Si cette ligne echoue,
-        // il reste des fichiers que plus aucune ligne ne designe — inertes,
+        // il reste des fichiers que plus aucune ligne ne designe : inertes,
         // car tout acces passe par l'enregistrement. C'est le seul des deux
         // echecs possibles qui ne detruit rien.
         Storage::disk('attachments')->delete($fichiers);

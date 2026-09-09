@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Reglages modifiables sans redeploiement (addendum v2, point 6) — a commencer
+ * Reglages modifiables sans redeploiement (addendum v2, point 6) : a commencer
  * par le nom de l'etablissement, pour que le produit puisse servir ailleurs
  * qu'a HFD sans toucher au code.
  */

@@ -1,9 +1,9 @@
-<x-card title="File d'attente — {{ $service->name }}" icon="file" :poll="config('keneya.poll_interval')">
+<x-card title="File d'attente - {{ $service->name }}" icon="file" :poll="config('keneya.poll_interval')">
     <x-slot:actions>
 
         <button type="button" class="btn btn--primary" wire:click="callNext" wire:loading.attr="disabled">
             <span wire:loading.remove wire:target="callNext">Appeler le suivant</span>
-            <span wire:loading wire:target="callNext">Appel…</span>
+            <span wire:loading wire:target="callNext">Appel...</span>
         </button>
     </x-slot:actions>
 
@@ -20,7 +20,7 @@
                         <span class="queue__identity">
                             <strong>{{ $visit->patient->name }}</strong>
                             <span class="mono">{{ $visit->patient->patient_code }}</span>
-                            <span>{{ $visit->patient->age }} ans — {{ $visit->patient->gender }}</span>
+                            <span>{{ $visit->patient->age }} ans - {{ $visit->patient->gender }}</span>
                         </span>
                         <span class="badge badge--{{ $visit->status }}">{{ $visit->statusLabel() }}</span>
                     </button>
@@ -35,8 +35,8 @@
                             @if ($visit->status === \App\Models\Visit::STATUS_CALLED)
                                 @if ($pendingReferral)
                                     <span class="hint hint--blocking">
-                                        En attente du resultat de {{ $pendingReferral->toService->name ?? 'un renvoi' }}
-                                        — cloture impossible.
+                                        En attente du resultat de {{ $pendingReferral->toService->name ?? 'un renvoi' }},
+                                        cloture impossible.
                                     </span>
                                 @else
                                     <button type="button" class="btn btn--close"
@@ -58,7 +58,7 @@
                             <div class="field">
                                 <label for="to-service-{{ $visit->id }}">Service destinataire</label>
                                 <select id="to-service-{{ $visit->id }}" wire:model.live="toServiceId">
-                                    <option value="">— Choisir un service —</option>
+                                    <option value="">Choisir un service</option>
                                     @foreach ($otherServices as $other)
                                         <option value="{{ $other->id }}">
                                             {{ $other->name }}
@@ -74,12 +74,12 @@
                             {{-- L'acte precis, et non le service en general
                                  (v3.2.8, point 3) : c'est lui qui porte le
                                  tarif, et il voyage avec la visite jusqu'a la
-                                 caisse — le caissier n'aura plus a demander. --}}
+                                 caisse, le caissier n'aura plus a demander. --}}
                             @if ($actes->isNotEmpty())
                                 <div class="field">
                                     <label for="acte-{{ $visit->id }}">Acte demande</label>
                                     <select id="acte-{{ $visit->id }}" wire:model="billableItemId">
-                                        <option value="">— Aucun acte facturable —</option>
+                                        <option value="">Aucun acte facturable</option>
                                         @foreach ($actes as $acte)
                                             <option value="{{ $acte->id }}">{{ $acte->label() }}</option>
                                         @endforeach
@@ -106,7 +106,7 @@
                             <div class="field">
                                 <label for="instructions-{{ $visit->id }}">Instructions</label>
                                 <textarea id="instructions-{{ $visit->id }}" rows="3" wire:model="instructions"
-                                          placeholder="Examen demande, precisions cliniques…"></textarea>
+                                          placeholder="Examen demande, precisions cliniques..."></textarea>
                                 @error('instructions') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
 

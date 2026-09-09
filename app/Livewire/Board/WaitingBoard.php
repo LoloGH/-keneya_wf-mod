@@ -14,7 +14,7 @@ use Livewire\Component;
  * Patients et visiteurs partagent la meme sequence de numeros par service :
  * deux personnes ne voient jamais le meme numero affiche.
  *
- * Utilise a deux endroits — sur le moniteur public (/board, sans connexion) et
+ * Utilise a deux endroits : sur le moniteur public (/board, sans connexion) et
  * dans l'interface de la receptionniste, qui doit pouvoir le surveiller depuis
  * son poste. Ce n'est pas une interface « de role », d'ou l'absence de tout
  * controle de role ici.

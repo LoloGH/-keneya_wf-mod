@@ -15,8 +15,8 @@ use InvalidArgumentException;
 /**
  * Cloture d'un renvoi par le prescripteur (addendum v2, point 1).
  *
- * Une fois clos, le renvoi quitte le panneau « Resultats recus » — la boucle
- * est fermee — mais il reste visible dans l'historique du patient, qui n'est
+ * Une fois clos, le renvoi quitte le panneau « Resultats recus », la boucle
+ * est fermee, mais il reste visible dans l'historique du patient, qui n'est
  * jamais purge.
  */
 class CloseReferral
@@ -29,7 +29,7 @@ class CloseReferral
             throw new InvalidArgumentException('Seul un renvoi dont le resultat est arrive peut etre cloture.');
         }
 
-        // Seul l'auteur du renvoi ferme la boucle — medecin ou personnel
+        // Seul l'auteur du renvoi ferme la boucle : medecin ou personnel
         // generique, selon celui qui l'a envoye.
         $agent = Caregiver::of($closedBy);
         $auteur = $agent->doctorId() !== null

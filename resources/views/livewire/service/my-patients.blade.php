@@ -1,6 +1,6 @@
 <x-card title="Mes patients" icon="patient">
     <p class="hint">
-        Tous les patients que vous avez pris en charge, dossiers clotures compris —
+        Tous les patients que vous avez pris en charge, dossiers clotures compris -
         la cloture retire le patient de la file, jamais de votre historique.
     </p>
 
@@ -8,7 +8,7 @@
         <div class="field">
             <label for="my-patients-search">Rechercher</label>
             <input id="my-patients-search" type="search" wire:model.live.debounce.400ms="search"
-                   placeholder="Nom ou numero de dossier…">
+                   placeholder="Nom ou numero de dossier...">
         </div>
 
         <label class="field field--inline">
@@ -26,7 +26,7 @@
                     <button type="button" class="my-patients__identity" wire:click="showRecord({{ $patient->id }})">
                         <strong>{{ $patient->name }}</strong>
                         <span class="mono">{{ $patient->patient_code }}</span>
-                        <span>{{ $patient->age }} ans — {{ $patient->gender }}</span>
+                        <span>{{ $patient->age }} ans - {{ $patient->gender }}</span>
                     </button>
 
                     <ul class="my-patients__visits">
@@ -40,7 +40,7 @@
                     </ul>
 
                     {{-- Rendez-vous et pieces jointes depuis le dossier, pour
-                         tout patient de la liste — pas seulement celui qu'on
+                         tout patient de la liste : pas seulement celui qu'on
                          est en train de consulter. --}}
                     <div class="btn-row">
                         <button type="button" class="btn btn--secondary"
@@ -97,7 +97,7 @@
                                        accept=".pdf,.jpg,.jpeg,.png" wire:model="files">
                                 @error('files') <p class="field__error">{{ $message }}</p> @enderror
                                 @error('files.*') <p class="field__error">{{ $message }}</p> @enderror
-                                <p class="hint" wire:loading wire:target="files">Televersement en cours…</p>
+                                <p class="hint" wire:loading wire:target="files">Televersement en cours...</p>
                             </div>
                             <div class="btn-row">
                                 <button type="submit" class="btn btn--primary"

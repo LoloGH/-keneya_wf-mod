@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Schema;
  *
  * Jusqu'ici, un type adosse a `doctor`, `receptionist` ou `cashier` n'avait
  * aucune capacite : les quatre interfaces etaient figees. L'etablissement veut
- * pouvoir moduler ce que fait un medecin — prescrire, donner un rendez-vous,
- * hospitaliser — sans toucher au code.
+ * pouvoir moduler ce que fait un medecin, prescrire, donner un rendez-vous,
+ * hospitaliser, sans toucher au code.
  *
  * Deux precautions pour que la demo et le site en production ne bougent pas :
  *
@@ -57,8 +57,8 @@ return new class extends Migration
     /**
      * Rattache medecins, receptionnistes et caissiers au type de leur role.
      *
-     * On vise le type d'origine — le premier cree, celui que la migration du
-     * v3.2.1 a pose — et non un homonyme ajoute depuis par l'admin.
+     * On vise le type d'origine : le premier cree, celui que la migration du
+     * v3.2.1 a pose, et non un homonyme ajoute depuis par l'admin.
      */
     private function attachExistingAccounts(): void
     {

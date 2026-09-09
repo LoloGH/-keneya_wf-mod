@@ -60,9 +60,9 @@ class StaffTypeCapabilitiesTest extends TestCase
         $type->refresh();
 
         $this->assertNotNull($type->capabilities, 'Les capacites ne doivent plus etre effacees.');
-        // La capacite optionnelle compatible avec le role survit…
+        // La capacite optionnelle compatible avec le role survit...
         $this->assertTrue($type->can(StaffType::CAP_CARE_TASKS));
-        // …et les obligatoires du role sont posees.
+        // ...et les obligatoires du role sont posees.
         foreach ($type->requiredCapabilities() as $obligatoire) {
             $this->assertTrue($type->can($obligatoire));
         }
@@ -277,7 +277,7 @@ class StaffTypeCapabilitiesTest extends TestCase
     /**
      * L'ecran « Patients hospitalises » sert deux capacites depuis la v3.3.1 :
      * admettre, et prescrire des soins. Il ne disparait donc que si les deux
-     * sont decochees — et decocher la seule hospitalisation retire l'admission
+     * sont decochees, et decocher la seule hospitalisation retire l'admission
      * sans retirer l'ecran.
      */
     public function test_l_hospitalisation_se_retire_avec_ses_deux_capacites(): void
@@ -296,8 +296,8 @@ class StaffTypeCapabilitiesTest extends TestCase
     }
 
     /**
-     * Decocher la seule hospitalisation laisse l'ecran — le compte y prescrit
-     * encore — mais lui retire d'admettre, y compris sur appel direct.
+     * Decocher la seule hospitalisation laisse l'ecran, le compte y prescrit
+     * encore, mais lui retire d'admettre, y compris sur appel direct.
      */
     public function test_sans_l_hospitalisation_le_prescripteur_garde_l_ecran_mais_n_admet_plus(): void
     {

@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Schema;
  *
  * Le montant se saisissait librement a la caisse : rien ne disait ce que le
  * patient payait, ni ne garantissait que deux caissiers demandent la meme somme
- * pour le meme acte. Ce catalogue s'administre comme les autres — types de
- * service, types de personnel — et devient la source du montant.
+ * pour le meme acte. Ce catalogue s'administre comme les autres, types de
+ * service, types de personnel, et devient la source du montant.
  */
 return new class extends Migration
 {
@@ -18,7 +18,7 @@ return new class extends Migration
     {
         Schema::create('billable_items', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // « Ticket de consultation », « Echographie abdominale »…
+            $table->string('name'); // « Ticket de consultation », « Echographie abdominale »...
 
             // Vide pour un tarif generique, comme le ticket de consultation, qui
             // ne depend d'aucun plateau technique.

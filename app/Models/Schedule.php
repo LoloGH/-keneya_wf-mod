@@ -34,14 +34,14 @@ class Schedule extends Model
     }
 
     /**
-     * « 08:00 – 14:00 », sans les secondes stockees en base. Un creneau de nuit
-     * est annonce comme tel : « 22:00 – 06:00 (nuit) » se lit sans avoir a
+     * « 08:00 - 14:00 », sans les secondes stockees en base. Un creneau de nuit
+     * est annonce comme tel : « 22:00 - 06:00 (nuit) » se lit sans avoir a
      * remarquer que la fin precede le debut.
      */
     public function range(): string
     {
         return sprintf(
-            '%s – %s%s',
+            '%s - %s%s',
             substr((string) $this->start_time, 0, 5),
             substr((string) $this->end_time, 0, 5),
             $this->crossesMidnight() ? ' (nuit)' : '',

@@ -98,7 +98,7 @@ class RecordFeedback
 
         // `rating_staff` n'est plus saisi (v3.2.9, point 3) : il devient la
         // moyenne des notes par etape. La colonne est conservee plutot que
-        // supprimee — elle porte l'historique des sondages v3.2.8 et reste
+        // supprimee : elle porte l'historique des sondages v3.2.8 et reste
         // lue par l'administration.
         $attributes['rating_staff'] = $etapes !== []
             ? (int) round(collect($etapes)->avg('rating'))

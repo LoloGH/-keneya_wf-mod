@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Ancre la logique metier sur la visite (addendum v3).
  *
- * `referrals` et `patient_history` gardent `patient_id` — utile pour lire un
- * dossier complet d'un seul coup — mais la file d'attente, le renvoi et la
+ * `referrals` et `patient_history` gardent `patient_id`, utile pour lire un
+ * dossier complet d'un seul coup, mais la file d'attente, le renvoi et la
  * cloture s'appuient desormais sur `visit_id`.
  */
 return new class extends Migration

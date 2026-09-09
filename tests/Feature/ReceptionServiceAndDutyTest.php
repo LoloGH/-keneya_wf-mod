@@ -23,7 +23,7 @@ use Tests\TestCase;
  * L'accueil comme service, et le creneau sans service (v3.2.5).
  *
  * Deux symptomes d'une meme cause : une receptionniste n'avait aucun service a
- * designer sur son creneau, et un creneau muet ne rendait de garde pour rien —
+ * designer sur son creneau, et un creneau muet ne rendait de garde pour rien,
  * donc aucune notification ne partait.
  */
 class ReceptionServiceAndDutyTest extends TestCase

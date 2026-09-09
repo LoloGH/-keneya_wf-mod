@@ -16,7 +16,7 @@ use InvalidArgumentException;
  *
  * Distinct de la cloture d'un renvoi : ici c'est le passage entier du patient
  * qui se termine. La visite sort de la file active, mais son dossier reste
- * integralement consultable — le statut ne filtre jamais la lecture.
+ * integralement consultable : le statut ne filtre jamais la lecture.
  */
 class CloseVisit
 {

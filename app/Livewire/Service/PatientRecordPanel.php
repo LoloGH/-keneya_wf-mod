@@ -16,7 +16,7 @@ use Livewire\Component;
  *
  * L'historique est regroupe par visite : un patient deja venu doit laisser
  * voir son episode precedent distinctement du nouveau, sous le meme
- * `patient_code`. Un dossier cloture reste integralement lisible — la cloture
+ * `patient_code`. Un dossier cloture reste integralement lisible : la cloture
  * ne masque que la file d'attente, jamais la lecture.
  */
 class PatientRecordPanel extends Component

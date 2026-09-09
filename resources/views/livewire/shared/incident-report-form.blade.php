@@ -16,7 +16,7 @@
             <div class="field">
                 <label for="constat-service">Service <span class="field__hint">(facultatif)</span></label>
                 <select id="constat-service" wire:model="serviceId">
-                    <option value="">— Aucun —</option>
+                    <option value="">Aucun</option>
                     @foreach ($services as $service)
                         <option value="{{ $service->id }}">{{ $service->name }}</option>
                     @endforeach

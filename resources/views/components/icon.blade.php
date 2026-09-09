@@ -3,7 +3,7 @@
      Avant, chaque gabarit ecrivait ses propres <path> : vingt-huit SVG
      disperses, cinq epaisseurs de trait differentes, et rien pour empecher la
      prochaine page d'en inventer une sixieme. Le jeu vit desormais ici, et
-     nulle part ailleurs — c'est la seule facon de tenir dans la duree la regle
+     nulle part ailleurs : c'est la seule facon de tenir dans la duree la regle
      « un seul jeu d'icones sur toute l'application ».
 
      Toutes les icones sont en trait sur une grille de 24, epaisseur 1.75,

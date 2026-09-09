@@ -20,7 +20,7 @@ use InvalidArgumentException;
  * applique deja : un formulaire se contourne, pas une action.
  *
  * Le fichier atterrit sur le disque `attachments`, qui pointe vers
- * storage/app/attachments — donc sur le volume Docker `keneya_storage`,
+ * storage/app/attachments, donc sur le volume Docker `keneya_storage`,
  * persistant entre deux redeploiements. Jamais de stockage cloud : la
  * connectivite du site ne le permet pas.
  */
@@ -93,7 +93,7 @@ class StoreAttachment
     }
 
     /**
-     * L'enregistrement d'abord, le fichier ensuite — jamais l'inverse.
+     * L'enregistrement d'abord, le fichier ensuite : jamais l'inverse.
      *
      * Le disque ne sait pas revenir en arriere. Detruire le fichier en premier
      * laisse, si la suppression en base echoue, une piece jointe que le
@@ -110,7 +110,7 @@ class StoreAttachment
     }
 
     /**
-     * Type et taille sont verifies sur le fichier reellement recu — le nom
+     * Type et taille sont verifies sur le fichier reellement recu : le nom
      * d'origine et l'extension annoncee ne prouvent rien.
      */
     private function assertAcceptable(UploadedFile $file): void

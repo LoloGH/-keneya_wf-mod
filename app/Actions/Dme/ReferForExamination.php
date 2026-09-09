@@ -22,8 +22,8 @@ use InvalidArgumentException;
  * la demande dormait dans le dossier sans destinataire.
  *
  * Les deux ne font plus qu'un : la demande nait au moment du renvoi et voyage
- * avec le patient. Elle est posee dans le dossier medical — c'est la que vit
- * la donnee de sante — et le renvoi la designe, pour que l'ecran du technicien
+ * avec le patient. Elle est posee dans le dossier medical, c'est la que vit
+ * la donnee de sante, et le renvoi la designe, pour que l'ecran du technicien
  * la lui montre a l'arrivee.
  *
  * Une seule transaction : un renvoi sans sa demande enverrait le patient au

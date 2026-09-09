@@ -12,7 +12,7 @@ use Illuminate\Console\Command;
  *
  * Seul declencheur de notification qui ne repond pas a un geste humain : il
  * faut donc que quelque chose passe regulierement. C'est la premiere tache
- * planifiee reelle de l'application — voir le service `scheduler` du
+ * planifiee reelle de l'application : voir le service `scheduler` du
  * docker-compose, sans lequel cette commande ne s'executerait jamais.
  *
  * `reminder_sent_at` garantit un rappel et un seul : la commande repasse
@@ -38,7 +38,7 @@ class SendAppointmentReminders extends Command
         }
 
         // Fenetre : d'ici a `minutes` minutes. Un rendez-vous deja passe n'est
-        // pas rappele — le rappel arriverait apres le patient.
+        // pas rappele : le rappel arriverait apres le patient.
         $rendezVous = Appointment::with(['patient', 'doctor.user'])
             ->where('status', Appointment::STATUS_SCHEDULED)
             ->whereNull('reminder_sent_at')

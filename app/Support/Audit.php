@@ -38,7 +38,7 @@ final class Audit
     // ------------------------------------------------------------------
     // Evenements ecrits par le module DME. Les noms viennent du module et
     // restent en anglais : ce sont des valeurs deja en base, on ne les
-    // renomme pas — seul leur libelle d'affichage est traduit ci-dessous.
+    // renomme pas, seul leur libelle d'affichage est traduit ci-dessous.
     // ------------------------------------------------------------------
 
     /** Consultation d'un dossier medical (trace a chaque ouverture). */
@@ -59,7 +59,7 @@ final class Audit
 
     /**
      * Changement de mot de passe (v3.2.3, point 3). L'evenement est journalise,
-     * jamais le mot de passe — ni l'ancien, ni le nouveau.
+     * jamais le mot de passe : ni l'ancien, ni le nouveau.
      */
     public const EVENT_PASSWORD_CHANGED = 'mot_de_passe_change';
 
@@ -70,7 +70,7 @@ final class Audit
     /**
      * Creation d'un dossier malgre un doublon probable signale (v3.2.8, point 1).
      *
-     * On n'empeche pas la receptionniste de passer outre — elle voit la
+     * On n'empeche pas la receptionniste de passer outre : elle voit la
      * personne, pas nous. Mais la decision est tracee, pour qu'un doublon
      * eventuel reste explicable plutot que silencieux.
      */
@@ -158,7 +158,7 @@ final class Audit
      *
      * Un evenement a part, et non une propriete de l'encaissement ordinaire :
      * noyee parmi tous les paiements de la journee, une derogation serait
-     * introuvable — or c'est precisement ce qu'un gestionnaire veut retrouver.
+     * introuvable, or c'est precisement ce qu'un gestionnaire veut retrouver.
      */
     public const EVENT_PRICE_OVERRIDDEN = 'tarif_deroge';
 
@@ -169,7 +169,7 @@ final class Audit
      *
      * Distincte de la conclusion : celle-ci est un acte du dossier medical,
      * avec son numero, ses constantes et ses diagnostics. Le journal n'en
-     * porte que la reference — le contenu clinique reste au DME.
+     * porte que la reference : le contenu clinique reste au DME.
      */
     public const EVENT_MEDICAL_CONSULTATION = 'consultation_medicale';
 

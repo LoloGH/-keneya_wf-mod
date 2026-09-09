@@ -7,7 +7,7 @@ if (! function_exists('hospital_name')) {
     /**
      * Nom de l'etablissement, modifiable en base par l'admin.
      *
-     * Repli sur config/keneya.php tant qu'aucune valeur n'est enregistree —
+     * Repli sur config/keneya.php tant qu'aucune valeur n'est enregistree :
      * et aussi pendant les migrations, ou la table `settings` peut ne pas
      * encore exister.
      */

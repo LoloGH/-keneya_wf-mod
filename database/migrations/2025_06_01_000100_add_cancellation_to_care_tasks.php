@@ -44,7 +44,7 @@ return new class extends Migration
 
         // Sans ce rabattement, MariaDB refuse de retrecir l'enum (« Data
         // truncated for column 'status' »). Les soins annules deviennent des
-        // soins manques — la valeur la plus proche que l'enum sait porter :
+        // soins manques, la valeur la plus proche que l'enum sait porter :
         // une administration qui n'a pas eu lieu. On ne supprime aucune ligne.
         DB::table('care_tasks')
             ->where('status', CareTask::STATUS_CANCELLED)

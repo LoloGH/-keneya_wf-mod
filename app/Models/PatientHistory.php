@@ -43,7 +43,7 @@ class PatientHistory extends Model
     /** Sortie d'hospitalisation. */
     public const TYPE_HOSPITALIZATION_DISCHARGED = 'hospitalization_discharged';
 
-    /** Soin programme execute — sur la meme frise que le reste du dossier. */
+    /** Soin programme execute : sur la meme frise que le reste du dossier. */
     public const TYPE_CARE_TASK_COMPLETED = 'care_task_completed';
 
     /** Soin corrige apres coup (v3.2.3, point 4). */

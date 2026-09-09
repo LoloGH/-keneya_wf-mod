@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Schema;
  *
  * `staff_members` rattache une personne a son type et a son service, sur le
  * modele de `doctors` / `receptionists` / `cashiers`. Les types adosses a un
- * role continuent, eux, d'utiliser ces tables-la — rien n'est deplace.
+ * role continuent, eux, d'utiliser ces tables-la : rien n'est deplace.
  */
 return new class extends Migration
 {
@@ -40,7 +40,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('staff_type_id')->constrained();
-            // Le service ou la personne exerce, choisi a sa creation — meme
+            // Le service ou la personne exerce, choisi a sa creation, meme
             // logique que doctors.service_id.
             $table->foreignId('service_id')->nullable()->constrained();
             $table->timestamps();

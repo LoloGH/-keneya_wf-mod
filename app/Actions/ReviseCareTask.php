@@ -18,7 +18,7 @@ use InvalidArgumentException;
  *
  * Une prescription se corrige : mauvais dosage saisi, mauvaise heure, soin
  * arrete parce que l'etat du patient a change. Jusqu'ici la seule issue etait
- * de laisser la ligne fausse au dossier, ou de la supprimer en base — c'est-a-
+ * de laisser la ligne fausse au dossier, ou de la supprimer en base : c'est-a-
  * dire de reecrire l'histoire du patient sans laisser de trace.
  *
  * Ici rien n'est efface. Une correction est journalisee avec l'avant et
@@ -127,7 +127,7 @@ class ReviseCareTask
 
     /**
      * Qui peut corriger ou annuler : celui qui a prescrit, ou quelqu'un du meme
-     * service porteur de la capacite de prescription — celui qui tient le
+     * service porteur de la capacite de prescription, celui qui tient le
      * service en son absence.
      *
      * Depuis la v3.3.1, « celui qui a prescrit » n'est plus forcement un
@@ -194,11 +194,11 @@ class ReviseCareTask
     {
         return sprintf(
             '%s le %s%s%s',
-            $task->type?->name ?? CareTaskType::find($task->care_task_type_id)?->name ?? '—',
+            $task->type?->name ?? CareTaskType::find($task->care_task_type_id)?->name ?? '-',
             $task->scheduled_at->format('d/m/Y H:i'),
             filled($task->instructions) ? ', '.$task->instructions : '',
             $task->assigned_to_user_id
-                ? ', confie a '.(User::find($task->assigned_to_user_id)?->name ?? '—')
+                ? ', confie a '.(User::find($task->assigned_to_user_id)?->name ?? '-')
                 : '',
         );
     }

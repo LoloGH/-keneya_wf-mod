@@ -10,7 +10,7 @@
     Elle n'est jamais masquee, meme quand l'element n'est pas supprimable :
     une action qui disparait sans explication laisse l'administrateur devant
     une case vide, sans savoir si le droit lui manque ou si le bouton n'a
-    jamais existe. Le refus vient donc du serveur, avec sa raison — visible
+    jamais existe. Le refus vient donc du serveur, avec sa raison : visible
     aussi sur tablette, ou aucune infobulle ne s'affiche au survol.
 
     Icone seule pour ne pas alourdir des tableaux deja larges ; le libelle

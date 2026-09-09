@@ -17,7 +17,7 @@ use Livewire\Component;
  *
  * **Filtrage « de garde »** : la liste se limite aux services pour lesquels le
  * compte connecte a une ligne `schedules` couvrant l'heure actuelle. Pas
- * d'acces a l'ensemble des soins de l'hopital — uniquement ceux du service ou
+ * d'acces a l'ensemble des soins de l'hopital : uniquement ceux du service ou
  * l'on est effectivement present.
  *
  * L'assignation nommee par le medecin reste une **priorite d'affichage**, pas

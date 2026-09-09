@@ -124,11 +124,11 @@ class CaisseFlowTest extends TestCase
 
         $visit->refresh();
 
-        // La visite attend a la caisse…
+        // La visite attend a la caisse...
         $this->assertSame($caisseServices->getKey(), $visit->service_id);
         $this->assertSame($laboratoire->getKey(), $visit->pending_next_service_id);
 
-        // …mais le renvoi garde la destination medicale reelle : la caisse
+        // ...mais le renvoi garde la destination medicale reelle : la caisse
         // n'est qu'une etape de routage, jamais la destination du renvoi.
         $this->assertSame($laboratoire->getKey(), $referral->to_service_id);
     }
@@ -162,7 +162,7 @@ class CaisseFlowTest extends TestCase
         $depart = Service::factory()->create(['name' => 'Urgences']);
         $doctor = $this->makeDoctor($depart);
 
-        // Deux types tout neufs, l'un payant, l'autre non — aucun n'existe dans
+        // Deux types tout neufs, l'un payant, l'autre non, aucun n'existe dans
         // le code : seul l'indicateur coche par l'admin les distingue.
         $payant = ServiceKind::create([
             'name' => 'Imagerie',

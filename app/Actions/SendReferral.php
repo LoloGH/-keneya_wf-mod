@@ -79,7 +79,7 @@ class SendReferral
             // avant d'etre realise : la visite est routee vers la Caisse
             // Services, la vraie destination attendant dans
             // `pending_next_service_id`. La ligne `referrals` ci-dessus garde,
-            // elle, la destination metier reelle — la caisse n'est jamais la
+            // elle, la destination metier reelle : la caisse n'est jamais la
             // destination d'un renvoi au sens medical.
             [$file, $enAttente] = $this->routing->forReferral($toService);
 

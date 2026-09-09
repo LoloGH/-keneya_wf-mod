@@ -1,4 +1,4 @@
-<x-card title="Soins programmes — {{ $service->name }}" icon="soins" :poll="config('keneya.poll_interval')">
+<x-card title="Soins programmes - {{ $service->name }}" icon="soins" :poll="config('keneya.poll_interval')">
     <x-slot:actions>
         <label class="field--check">
             <input type="checkbox" wire:model.live="showDone">
@@ -25,7 +25,7 @@
                     <span>
                         {{ $task->hospitalization->patient->name }}
                         <span class="mono">{{ $task->hospitalization->patient->patient_code }}</span>
-                        @if ($task->hospitalization->room) — {{ $task->hospitalization->room->name }} @endif
+                        @if ($task->hospitalization->room) - {{ $task->hospitalization->room->name }} @endif
                     </span>
                     @if ($task->instructions)
                         <span class="hint">{{ $task->instructions }}</span>
@@ -33,8 +33,8 @@
                     @if ($task->assigned_to_user_id)
                         <span class="hint">
                             Confie a {{ $task->assignedTo?->name }}
-                            @if ($task->assigned_to_user_id !== $myUserId)
-                                — vous pouvez le prendre en charge s'il est indisponible
+                            @if ($task->assigned_to_user_id !== $myUserId),
+                                vous pouvez le prendre en charge s'il est indisponible
                             @endif
                         </span>
                     @endif

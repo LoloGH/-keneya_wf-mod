@@ -13,8 +13,8 @@ use InvalidArgumentException;
 /**
  * Execution d'un soin programme (v3.2.1, point 11).
  *
- * La tracabilite reelle vient d'ici — `completed_by_user_id` au moment du geste
- * — et non d'une assignation previsionnelle qui casserait au premier
+ * La tracabilite reelle vient d'ici, `completed_by_user_id` au moment du geste
+ *, et non d'une assignation previsionnelle qui casserait au premier
  * remplacement d'equipe.
  */
 class CompleteCareTask

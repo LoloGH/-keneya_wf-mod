@@ -15,8 +15,8 @@ use Tests\TestCase;
  * Qui recoit les notifications, et pourquoi elles n'arrivaient nulle part.
  *
  * Le ciblage passait par « qui est de garde », c'est-a-dire par le planning.
- * Sur une installation sans creneau saisi — l'etat de toute installation neuve,
- * et de bien des journees ensuite — cela donnait zero destinataire pour tous
+ * Sur une installation sans creneau saisi, l'etat de toute installation neuve,
+ * et de bien des journees ensuite, cela donnait zero destinataire pour tous
  * les services : la cloche restait vide sur chaque interface, le son ne partait
  * jamais, et rien n'expliquait pourquoi.
  *
@@ -35,7 +35,7 @@ class NotificationTargetingTest extends TestCase
 
         // Ces tests decrivent une garde en journee : leur creneau va de
         // now()-1h a now()+3h. Entre minuit et une heure, ce calcul enjambe
-        // deux dates — le creneau commence a 23:30 et finit a 03:30, ne
+        // deux dates, le creneau commence a 23:30 et finit a 03:30, ne
         // contient plus l'instant present, et personne n'est de garde. La
         // suite echouait alors une heure par nuit, sans que rien n'ait
         // change dans le code. L'horloge est donc posee a une heure ouvrable.
@@ -101,7 +101,7 @@ class NotificationTargetingTest extends TestCase
     {
         // Une receptionniste n'a aucun service de rattachement : son lien passe
         // uniquement par le planning. Sans creneau, l'Accueil restait donc
-        // muet — alors que c'est precisement la qu'un patient entre dans une
+        // muet, alors que c'est precisement la qu'un patient entre dans une
         // file. Le type du service porte l'information, par son slug.
         $accueil = Service::factory()->ofKind(
             ServiceKind::where('slug', ServiceKind::SLUG_RECEPTION)->firstOrFail()

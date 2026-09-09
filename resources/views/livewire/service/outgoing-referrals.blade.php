@@ -15,7 +15,7 @@
                     </button>
                     <p class="referrals__meta">
                         Vers {{ $referral->toService->name }}
-                        — {{ $referral->created_at->format('d/m/Y H:i') }}
+                        - {{ $referral->created_at->format('d/m/Y H:i') }}
                     </p>
                     <p class="referrals__instructions">{{ $referral->instructions }}</p>
                 </li>
@@ -40,10 +40,10 @@
                     <p class="referrals__meta">
                         {{ $referral->toService->name }}
                         @if ($referral->completedByDoctor)
-                            — {{ $referral->completedByDoctor->name() }}
+                            - {{ $referral->completedByDoctor->name() }}
                         @endif
                         @if ($referral->completed_at)
-                            — {{ $referral->completed_at->format('d/m/Y H:i') }}
+                            - {{ $referral->completed_at->format('d/m/Y H:i') }}
                         @endif
                     </p>
                     <p class="referrals__result">{{ $referral->result_text }}</p>

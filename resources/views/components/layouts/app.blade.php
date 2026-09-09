@@ -19,7 +19,7 @@
         <div class="app-header__brand">
             {{-- Variante couleur : la barre est blanche depuis la refonte. Le
                  nom de l'etablissement domine, celui du produit se lit dessous
-                 en second — c'est l'hopital que l'agent doit reconnaitre, pas
+                 en second : c'est l'hopital que l'agent doit reconnaitre, pas
                  le logiciel. --}}
             <x-brand-logo variant="color" class="app-header__logo" />
             <span class="app-header__identite">
@@ -30,7 +30,7 @@
 
         <div class="app-header__context">
             @auth
-                {{-- Le nom, puis le rôle — ou le service pour un medecin : les
+                {{-- Le nom, puis le rôle, ou le service pour un medecin : les
                      pages surchargent `context` quand il y a plus precis a
                      dire. Les deux lignes se rangent a droite, contre
                      l'avatar : c'est un bloc d'identite, pas deux etiquettes. --}}

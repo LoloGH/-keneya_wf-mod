@@ -19,7 +19,7 @@ use Livewire\Component;
 /**
  * Une file de caisse (v3.2, point 6).
  *
- * Le composant sert n'importe quel service de type caisse — « Caisse Ticket »
+ * Le composant sert n'importe quel service de type caisse : « Caisse Ticket »
  * et « Caisse Services » a l'installation, plus toute caisse ajoutee ensuite
  * par l'administrateur. Chacune est une section de la meme interface : un seul
  * role les voit toutes, ce n'est plus reparti entre accueil et service.

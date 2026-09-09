@@ -29,7 +29,7 @@ use Tests\TestCase;
 /**
  * Montage du module Dossier Medical Electronique dans WorkFlow (v3.3.0).
  *
- * Ces tests ne verifient pas le DME — il a sa propre suite — mais les six
+ * Ces tests ne verifient pas le DME, il a sa propre suite, mais les six
  * jointures entre les deux applications, celles qui n'existent qu'une fois
  * assemblees et que ni l'une ni l'autre ne couvre seule :
  *
@@ -53,8 +53,8 @@ class DmeIntegrationTest extends TestCase
     }
 
     /**
-     * Un medecin rattache a un service, dont le type de personnel porte — ou
-     * non — la capacite d'ouvrir le dossier medical.
+     * Un medecin rattache a un service, dont le type de personnel porte, ou
+     * non, la capacite d'ouvrir le dossier medical.
      *
      * @return array{0: User, 1: Patient}
      */
@@ -153,8 +153,8 @@ class DmeIntegrationTest extends TestCase
     /**
      * La mention de demonstration n'a rien a faire sur un dossier reel.
      *
-     * Elle reste par defaut dans le module — un jeu d'essai pris pour un vrai
-     * dossier serait plus grave que l'inverse — et l'exploitant la leve. Ici,
+     * Elle reste par defaut dans le module, un jeu d'essai pris pour un vrai
+     * dossier serait plus grave que l'inverse, et l'exploitant la leve. Ici,
      * l'assemblage la leve.
      */
     public function test_le_module_ne_dit_pas_que_les_donnees_sont_fictives(): void
@@ -171,7 +171,7 @@ class DmeIntegrationTest extends TestCase
      * (v3.3.1).
      *
      * Sans ce lien, la seule issue etait le bouton « precedent » du
-     * navigateur — ou la deconnexion, ce qui est pire. L'adresse depend du
+     * navigateur, ou la deconnexion, ce qui est pire. L'adresse depend du
      * role : le module ne peut pas la deviner, il la demande a l'hote.
      */
     public function test_le_module_offre_une_porte_de_retour_vers_workflow(): void
@@ -206,7 +206,7 @@ class DmeIntegrationTest extends TestCase
      *
      * Il n'a aucun type de personnel : la case `can_access_dme` n'existe donc
      * nulle part pour lui dans /admin, et il serait le seul compte a ne jamais
-     * pouvoir l'obtenir. Or c'est lui qui administre le module — parametres,
+     * pouvoir l'obtenir. Or c'est lui qui administre le module : parametres,
      * roles, comptes, journal d'audit. Il l'a donc de droit.
      */
     public function test_l_administrateur_entre_dans_le_module_sans_case_a_cocher(): void
@@ -291,8 +291,8 @@ class DmeIntegrationTest extends TestCase
     /**
      * Les ecrans du module s'ouvrent tous sous un compte WorkFlow.
      *
-     * Ce test n'existe pas pour verifier ce que chaque page affiche — le
-     * module a sa propre suite pour cela — mais pour attraper la famille
+     * Ce test n'existe pas pour verifier ce que chaque page affiche, le
+     * module a sa propre suite pour cela, mais pour attraper la famille
      * d'erreurs que l'assemblage introduit, et qu'aucun des deux projets ne
      * voit seul : une table renommee referencee en dur quelque part, un role
      * du DME qui n'existe pas dans le vocabulaire de WorkFlow. Les deux se
@@ -328,8 +328,8 @@ class DmeIntegrationTest extends TestCase
 
         // Une page, une redirection interne ou un refus motive sont tous des
         // reponses ; une erreur serveur n'en est pas une. On ne juge donc pas
-        // le code exact — les permissions du role peuvent legitimement fermer
-        // un ecran — mais on refuse le 500.
+        // le code exact, les permissions du role peuvent legitimement fermer
+        // un ecran, mais on refuse le 500.
         $this->assertLessThan(
             500,
             $reponse->getStatusCode(),
@@ -406,8 +406,8 @@ class DmeIntegrationTest extends TestCase
             (string) SmsContext::for(patient: $dossier),
         );
 
-        // La trace atterrit dans `sms_messages` de WorkFlow — la table que
-        // surveille la section « SMS » de /admin — et nulle part ailleurs.
+        // La trace atterrit dans `sms_messages` de WorkFlow, la table que
+        // surveille la section « SMS » de /admin, et nulle part ailleurs.
         // Le statut « envoye » n'est pas decoratif : seul SendSmsJob::handle()
         // l'ecrit, ce qui prouve que le message a bien traverse la file de
         // l'hote et non un envoi direct depuis le module.

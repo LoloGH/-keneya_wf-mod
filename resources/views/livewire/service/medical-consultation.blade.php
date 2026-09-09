@@ -10,10 +10,10 @@
         <div class="field">
             <label for="mc-visit">Patient</label>
             <select id="mc-visit" wire:model.live="visitId">
-                <option value="">— Choisir un patient appele —</option>
+                <option value="">Choisir un patient appele</option>
                 @foreach ($visits as $visit)
                     <option value="{{ $visit->id }}">
-                        n° {{ $visit->token }} — {{ $visit->patient->name }} ({{ $visit->patient->patient_code }})
+                        n° {{ $visit->token }} - {{ $visit->patient->name }} ({{ $visit->patient->patient_code }})
                     </option>
                 @endforeach
             </select>
@@ -215,7 +215,7 @@
                             wire:loading.attr="disabled" wire:target="save">
                         Enregistrer au dossier medical
                     </button>
-                    <p class="hint" wire:loading wire:target="save">Enregistrement en cours…</p>
+                    <p class="hint" wire:loading wire:target="save">Enregistrement en cours...</p>
                 </div>
             </form>
         @endif

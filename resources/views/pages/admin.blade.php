@@ -8,7 +8,7 @@
     // le type de personnel choisi decide du role et du rattachement.
     // Trois familles, comme la maquette de reference : ce que l'etablissement
     // EST, ce qu'on y GERE au quotidien, et ce qui releve du SYSTEME. La cle
-    // `famille` n'est qu'un intitule de reperage — l'arbre garde exactement la
+    // `famille` n'est qu'un intitule de reperage : l'arbre garde exactement la
     // meme forme, et les interfaces qui n'en posent aucune n'affichent aucun
     // decoupage.
     $sections = [
@@ -48,7 +48,7 @@
     ];
 @endphp
 
-<x-layouts.app :title="'Administration — '.config('keneya.name')">
+<x-layouts.app :title="'Administration - '.config('keneya.name')">
     {{-- Bandeau pilote par Livewire : un message emis pendant une action
          s'affiche immediatement, sans attendre un rechargement complet. --}}
     @livewire('shared.flash-alert', [], key('admin-flash'))

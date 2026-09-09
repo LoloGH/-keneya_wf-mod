@@ -115,7 +115,7 @@ class MedicalConsultationTest extends TestCase
         $visiteEtrangere = $this->makeVisit($autre, ['status' => Visit::STATUS_CALLED]);
 
         // Meme refus que « Fin de consultation » : la visite est introuvable
-        // hors du service du medecin, ce qui donne un 404 en HTTP — on ne
+        // hors du service du medecin, ce qui donne un 404 en HTTP, on ne
         // laisse pas deviner qu'elle existe ailleurs.
         $this->expectException(ModelNotFoundException::class);
 

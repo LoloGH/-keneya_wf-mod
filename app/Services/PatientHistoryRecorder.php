@@ -13,15 +13,15 @@ use App\Support\Caregiver;
  * Unique point d'ecriture du journal `patient_history`, qui est append-only :
  * on n'y insere que des lignes, on ne les modifie jamais.
  *
- * Chaque ligne est ancree sur une visite — c'est ce qui permet de distinguer
- * deux passages du meme patient — tout en gardant `patient_id` pour lire un
+ * Chaque ligne est ancree sur une visite, c'est ce qui permet de distinguer
+ * deux passages du meme patient, tout en gardant `patient_id` pour lire un
  * dossier complet d'une seule requete.
  */
 class PatientHistoryRecorder
 {
     /**
      * `$doctor` accepte aussi un membre du personnel generique : la ligne est
-     * alors signee par `staff_member_id`, jamais par `doctor_id` — on ne
+     * alors signee par `staff_member_id`, jamais par `doctor_id`, on ne
      * fabrique pas de faux medecins dans le dossier.
      */
     public function record(

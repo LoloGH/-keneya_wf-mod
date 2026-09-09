@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
  * Masquer une section suffit a la retirer de la vue, jamais a la rendre
  * inatteignable : un composant Livewire s'appelle sans passer par le menu. Les
  * actions dont la capacite peut etre decochee le verifient donc ici, sur le
- * type du compte connecte — la meme lecture que celle qui pilote l'affichage,
+ * type du compte connecte : la meme lecture que celle qui pilote l'affichage,
  * pas une seconde regle a tenir a jour.
  */
 trait RequiresCapability

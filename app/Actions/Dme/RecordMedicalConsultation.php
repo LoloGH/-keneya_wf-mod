@@ -21,15 +21,15 @@ use Keneya\Dme\Models\Service as ServiceDme;
  * constantes, examen par appareil et diagnostics atterrissent dans
  * `dme_consultations` et ses tables filles, jamais dans le dossier WorkFlow.
  *
- * C'est le sens de tout le chantier v3.3.1 — deplacer le point de saisie
+ * C'est le sens de tout le chantier v3.3.1 : deplacer le point de saisie
  * plutot que recopier apres coup. Une donnee de sante nait dans le dossier
  * medical, une seule fois, sans correspondance approximative entre un texte
  * libre et une structure.
  *
  * WorkFlow ne garde qu'un renvoi vers l'acte : une ligne de `patient_history`
  * qui dit qu'une consultation existe et sous quel numero. Elle ne porte aucun
- * contenu clinique — ce serait precisement la fuite que le cloisonnement
- * cherche a empecher — mais sans elle, la frise du parcours resterait muette
+ * contenu clinique, ce serait precisement la fuite que le cloisonnement
+ * cherche a empecher, mais sans elle, la frise du parcours resterait muette
  * sur le passage le plus important de la journee du patient.
  */
 class RecordMedicalConsultation
@@ -107,7 +107,7 @@ class RecordMedicalConsultation
      * Rapprochement par le nom, et jamais de creation : les deux applications
      * tiennent chacune leur liste de services, et fabriquer ici un service du
      * DME au vu d'un nom rendrait la correspondance encore plus incertaine.
-     * A defaut, la consultation reste sans service — c'est une information de
+     * A defaut, la consultation reste sans service : c'est une information de
      * moins, pas une information fausse.
      */
     private function serviceDme(Visit $visit): ?int

@@ -10,10 +10,10 @@
         <div class="field">
             <label for="mb-visit">Patient</label>
             <select id="mb-visit" wire:model.live="visitId">
-                <option value="">— Choisir un patient appele —</option>
+                <option value="">Choisir un patient appele</option>
                 @foreach ($visits as $visit)
                     <option value="{{ $visit->id }}">
-                        n° {{ $visit->token }} — {{ $visit->patient->name }} ({{ $visit->patient->patient_code }})
+                        n° {{ $visit->token }} - {{ $visit->patient->name }} ({{ $visit->patient->patient_code }})
                     </option>
                 @endforeach
             </select>
@@ -44,7 +44,7 @@
                                         <span class="hint">{{ $allergie->status === 'refuted' ? 'Refutee' : 'Resolue' }}</span>
                                     @endif
                                     @if ($allergie->reaction)
-                                        <span>— {{ $allergie->reaction }}</span>
+                                        <span>- {{ $allergie->reaction }}</span>
                                     @endif
 
                                     @if ($allergie->status === 'active')
@@ -69,14 +69,14 @@
                             <div class="field">
                                 <label for="mb-allergen">Allergene</label>
                                 <input id="mb-allergen" type="text" wire:model="allergen"
-                                       placeholder="Penicilline, arachide…">
+                                       placeholder="Penicilline, arachide...">
                                 @error('allergen') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
 
                             <div class="field">
                                 <label for="mb-allergen-type">Type <span class="field__hint">(facultatif)</span></label>
                                 <select id="mb-allergen-type" wire:model="allergenType">
-                                    <option value="">— Non precise —</option>
+                                    <option value="">Non precise</option>
                                     @foreach ($allergenTypes as $valeur => $libelle)
                                         <option value="{{ $valeur }}">{{ $libelle }}</option>
                                     @endforeach
@@ -97,7 +97,7 @@
                             <div class="field">
                                 <label for="mb-reaction">Reaction <span class="field__hint">(facultatif)</span></label>
                                 <input id="mb-reaction" type="text" wire:model="reaction"
-                                       placeholder="Urticaire, oedeme, choc…">
+                                       placeholder="Urticaire, oedeme, choc...">
                                 @error('reaction') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
                         </div>
@@ -132,8 +132,8 @@
                                     <span class="badge">{{ $categories[$antecedent->category] ?? $antecedent->category }}</span>
                                     <strong>{{ $antecedent->label }}</strong>
                                     @if ($antecedent->year) <time>{{ $antecedent->year }}</time> @endif
-                                    @if ($antecedent->relative) <span>— {{ $antecedent->relative }}</span> @endif
-                                    @if ($antecedent->facility) <span>— {{ $antecedent->facility }}</span> @endif
+                                    @if ($antecedent->relative) <span>- {{ $antecedent->relative }}</span> @endif
+                                    @if ($antecedent->facility) <span>- {{ $antecedent->facility }}</span> @endif
                                 </li>
                             @endforeach
                         </ul>
@@ -154,7 +154,7 @@
                             <div class="field field--wide">
                                 <label for="mb-label">Antecedent</label>
                                 <input id="mb-label" type="text" wire:model="label"
-                                       placeholder="Hypertension arterielle, appendicectomie…">
+                                       placeholder="Hypertension arterielle, appendicectomie...">
                                 @error('label') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
 
@@ -169,7 +169,7 @@
                             @if ($category === 'family')
                                 <div class="field">
                                     <label for="mb-relative">Lien de parente</label>
-                                    <input id="mb-relative" type="text" wire:model="relative" placeholder="Mere, frere…">
+                                    <input id="mb-relative" type="text" wire:model="relative" placeholder="Mere, frere...">
                                     @error('relative') <p class="field__error">{{ $message }}</p> @enderror
                                 </div>
                             @endif

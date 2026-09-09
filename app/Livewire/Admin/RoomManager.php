@@ -90,7 +90,7 @@ class RoomManager extends Component
     }
 
     /**
-     * Une salle qui heberge encore quelqu'un n'est pas supprimable — meme
+     * Une salle qui heberge encore quelqu'un n'est pas supprimable : meme
      * garde-fou que pour un service ou un type.
      */
     public function delete(int $roomId): void

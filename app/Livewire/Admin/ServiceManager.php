@@ -27,7 +27,7 @@ class ServiceManager extends Component
     /**
      * Ce que realise un plateau technique : des analyses, de l'imagerie, ou
      * rien (v3.3.1). C'est ce qui fait apparaitre le bon formulaire de demande
-     * quand un medecin y envoie un patient — un nom de service ne se devine
+     * quand un medecin y envoie un patient : un nom de service ne se devine
      * pas, l'etablissement le declare.
      */
     public ?string $exam_kind = null;

@@ -14,7 +14,7 @@
                         <tr @class(['schedule--today' => $schedule->date->isToday()])>
                             <td>{{ $schedule->date->translatedFormat('D d/m/Y') }}</td>
                             <td class="mono">{{ $schedule->range() }}</td>
-                            <td>{{ $schedule->service?->name ?? '—' }}</td>
+                            <td>{{ $schedule->service?->name ?? '-' }}</td>
                         </tr>
                     @endforeach
                 </tbody>

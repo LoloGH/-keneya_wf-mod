@@ -15,7 +15,7 @@ use Livewire\Component;
  * comportement porte par un type est `requires_payment_gate` : un renvoi vers un
  * service de ce type passe par la Caisse Services avant realisation.
  *
- * Les trois types d'origine sont modifiables — leur libelle, leur peage — mais
+ * Les trois types d'origine sont modifiables, leur libelle, leur peage, mais
  * pas supprimables : du code s'appuie sur leur slug.
  */
 class ServiceKindManager extends Component

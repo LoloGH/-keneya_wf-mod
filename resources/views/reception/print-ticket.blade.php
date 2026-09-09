@@ -3,14 +3,14 @@
 
     Une page autonome : ni barre de navigation, ni navigation verticale, rien
     d'autre que le ticket. Le format s'adapte de l'imprimante thermique
-    (58-80 mm) au A4 — aucune mesure ne suppose un format de papier precis.
+    (58-80 mm) au A4 : aucune mesure ne suppose un format de papier precis.
 --}}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ticket — {{ $hospitalName }}</title>
+    <title>Ticket - {{ $hospitalName }}</title>
     <style>
         :root { --encre: #1e293b; --gris: #64748b; }
 
@@ -112,7 +112,7 @@
             <p class="ticket__foot">A conserver pour consulter vos documents en ligne.</p>
         @else
             <p class="ticket__kind">Ticket visiteur</p>
-            <p class="ticket__token">{{ $visitor->token ?? '—' }}</p>
+            <p class="ticket__token">{{ $visitor->token ?? '-' }}</p>
             <p class="ticket__service">{{ $visitor->service->name }}</p>
 
             <table class="ticket__rows">

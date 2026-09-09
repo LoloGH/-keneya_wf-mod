@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Catalogue des types de soins (v3.2.1, point 11).
  *
  * Administrable comme les types de service et de personnel : la liste
- * « serum, injection, pansement… » s'enrichira, elle n'a pas sa place figee
+ * « serum, injection, pansement... » s'enrichira, elle n'a pas sa place figee
  * dans le code.
  */
 class CareTaskType extends Model

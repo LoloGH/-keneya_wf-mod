@@ -8,7 +8,7 @@ use Tests\TestCase;
 /**
  * Rythme de rafraichissement des ecrans de travail (v3.2.5).
  *
- * Trois ecrans portaient leur propre intervalle en dur — 10 s, 15 s, 30 s. Un
+ * Trois ecrans portaient leur propre intervalle en dur : 10 s, 15 s, 30 s. Un
  * soin prescrit mettait donc jusqu'a trente secondes a apparaitre chez
  * l'infirmier, et la notification arrivait bien avant la tache annoncee.
  */
@@ -52,8 +52,8 @@ class PollIntervalTest extends TestCase
             $source = file_get_contents(resource_path('views/'.$vue.'.blade.php'));
 
             // Deux ecritures sont legitimes depuis la refonte visuelle :
-            // `wire:poll.{{ … }}` sur une balise HTML ordinaire, et la
-            // propriete `:poll` sur le composant <x-card> — une interpolation
+            // `wire:poll.{{ ... }}` sur une balise HTML ordinaire, et la
+            // propriete `:poll` sur le composant <x-card>, une interpolation
             // dans un NOM d'attribut ne compile pas sur un composant. Ce qui
             // compte est identique dans les deux cas : l'intervalle vient de la
             // configuration, jamais de la vue.

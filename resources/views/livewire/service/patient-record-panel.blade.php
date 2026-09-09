@@ -12,9 +12,9 @@
             <div><dt>Nom</dt><dd>{{ $patient->name }}</dd></div>
             <div><dt>Age</dt><dd>{{ $patient->age }} ans</dd></div>
             <div><dt>Sexe</dt><dd>{{ $patient->gender }}</dd></div>
-            <div><dt>Profession</dt><dd>{{ $patient->profession ?: '—' }}</dd></div>
+            <div><dt>Profession</dt><dd>{{ $patient->profession ?: '-' }}</dd></div>
             <div><dt>Telephone</dt><dd>{{ $patient->mobile }}</dd></div>
-            <div><dt>Dossier papier</dt><dd>{{ $patient->crno ?: '—' }}</dd></div>
+            <div><dt>Dossier papier</dt><dd>{{ $patient->crno ?: '-' }}</dd></div>
             <div><dt>Passages</dt><dd>{{ $patient->visits->count() }}</dd></div>
         </dl>
 
@@ -51,7 +51,7 @@
                     <time>
                         {{ $episode['visit']->opened_at?->format('d/m/Y') }}
                         @if ($episode['visit']->closed_at)
-                            → {{ $episode['visit']->closed_at->format('d/m/Y') }}
+                            -> {{ $episode['visit']->closed_at->format('d/m/Y') }}
                         @endif
                     </time>
                 </header>

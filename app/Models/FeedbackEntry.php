@@ -111,7 +111,7 @@ class FeedbackEntry extends Model
      *
      * La regle vit ici, et non dans les deux formulaires : le portail patient
      * et la page du visiteur doivent la lire de la meme facon, et une action
-     * qui ecrit doit pouvoir la verifier avant d'ecrire — un formulaire se
+     * qui ecrit doit pouvoir la verifier avant d'ecrire, un formulaire se
      * contourne, pas une regle de modele.
      */
     public static function sondageDejaDepose(?Visit $visite): bool

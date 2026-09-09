@@ -1,4 +1,4 @@
-{{-- Etablissement — la page de reference du systeme visuel.
+{{-- Etablissement : la page de reference du systeme visuel.
 
      C'est ici que les composants partages sont mis a l'epreuve les premiers :
      en-tete de page avec fil d'ariane, cartes a badge d'icone, champs

@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Schema;
  * Ouvre le parcours de soin aux types de personnel generiques (v3.2.1, point 10).
  *
  * Jusqu'ici, seul un `doctors` pouvait envoyer un renvoi, en saisir le resultat
- * ou signer une ligne d'historique. Un type cree par l'admin — infirmier,
- * sage-femme, technicien — n'a pas de ligne `doctors` et se serait heurte a des
+ * ou signer une ligne d'historique. Un type cree par l'admin, infirmier,
+ * sage-femme, technicien, n'a pas de ligne `doctors` et se serait heurte a des
  * cles etrangeres.
  *
  * On n'elargit pas `doctors` a tout le personnel : ce serait fabriquer de faux

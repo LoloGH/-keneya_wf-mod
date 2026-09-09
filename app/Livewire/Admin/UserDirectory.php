@@ -12,7 +12,7 @@ use Livewire\WithPagination;
  * Annuaire des comptes (refonte visuelle, groupe « Systeme »).
  *
  * A ne pas confondre avec « Personnels », qui gere les personnes : leur type,
- * leur service, leur planning. Cette section-ci regarde les COMPTES — qui peut
+ * leur service, leur planning. Cette section-ci regarde les COMPTES : qui peut
  * se connecter, sous quel role, et depuis quand. Les deux repondent a des
  * questions differentes : « qui travaille en echographie ? » d'un cote, « qui
  * a acces a l'administration ? » de l'autre.

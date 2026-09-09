@@ -38,7 +38,7 @@ class VerticalTabNav extends Component
     public string $active = '';
 
     /**
-     * Donnees transmises a la vue de la section active — par exemple le
+     * Donnees transmises a la vue de la section active : par exemple le
      * service courant du medecin dans /service.
      *
      * @var array<string, mixed>
@@ -103,7 +103,7 @@ class VerticalTabNav extends Component
      * intermediaire du fil d'Ariane, qui porte un intitule de famille
      * (« Etablissement », « Gestion », « Systeme »).
      *
-     * Une famille n'est pas une page — c'est un intitule de reperage dans la
+     * Une famille n'est pas une page : c'est un intitule de reperage dans la
      * barre laterale. Cliquer dessus mene donc a sa premiere section, ce que
      * ferait la barre elle-meme. A defaut de famille, on accepte le libelle
      * d'une section : un fil peut nommer une section parente plutot qu'une
@@ -153,8 +153,8 @@ class VerticalTabNav extends Component
      * Donnees passees a la vue de la section active : le contexte commun a
      * l'interface, complete par celui que la section porte elle-meme.
      *
-     * Une interface peut ainsi repeter la meme vue pour plusieurs entites —
-     * une section par caisse, par exemple — sans avoir besoin d'une vue
+     * Une interface peut ainsi repeter la meme vue pour plusieurs entites,
+     * une section par caisse, par exemple, sans avoir besoin d'une vue
      * partielle par entite.
      *
      * @return array<string, mixed>

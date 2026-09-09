@@ -28,7 +28,7 @@ use Livewire\Component;
  * Ce sont les seules donnees du dossier qui appartiennent au patient plutot
  * qu'a un passage : un antecedent chirurgical vaut pour toute la vie du
  * dossier. Le patient se choisit malgre tout dans la file du jour, comme
- * partout ailleurs dans /service — on ne consigne pas un antecedent pour
+ * partout ailleurs dans /service : on ne consigne pas un antecedent pour
  * quelqu'un qui n'est pas devant soi.
  */
 class MedicalBackground extends Component
@@ -45,10 +45,10 @@ class MedicalBackground extends Component
 
     public string $year = '';
 
-    /** Lien de parente — antecedents familiaux seulement. */
+    /** Lien de parente : antecedents familiaux seulement. */
     public string $relative = '';
 
-    /** Etablissement — antecedents chirurgicaux seulement. */
+    /** Etablissement : antecedents chirurgicaux seulement. */
     public string $facility = '';
 
     public string $comment = '';

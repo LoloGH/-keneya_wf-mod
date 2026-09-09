@@ -19,7 +19,7 @@ use Tests\TestCase;
 /**
  * File d'attente SMS (v3.2.8).
  *
- * Le point verifie ici n'est pas « le SMS part » — il partait deja — mais
+ * Le point verifie ici n'est pas « le SMS part », il partait deja, mais
  * « l'acte metier ne l'attend plus », et « un echec laisse une trace que
  * quelqu'un voit ».
  */
@@ -70,7 +70,7 @@ class SmsQueueTest extends TestCase
     /**
      * Passerelle volontairement injoignable : l'enregistrement doit aboutir
      * exactement comme si elle repondait. C'est la verification demandee avant
-     * livraison — et elle ne se deduit pas du simple remplacement de l'appel.
+     * livraison, et elle ne se deduit pas du simple remplacement de l'appel.
      */
     public function test_un_enregistrement_aboutit_meme_passerelle_indisponible(): void
     {

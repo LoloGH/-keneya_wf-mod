@@ -87,7 +87,7 @@ class FeedbackModuleTest extends TestCase
 
     /**
      * Un visiteur sans numero ne doit ni faire echouer l'execution, ni empecher
-     * les autres d'etre servis — et il doit rester comptabilise.
+     * les autres d'etre servis, et il doit rester comptabilise.
      */
     public function test_un_visiteur_sans_numero_n_interrompt_pas_les_autres_et_est_compte(): void
     {

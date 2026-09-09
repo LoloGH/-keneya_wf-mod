@@ -2,7 +2,7 @@
     <p class="hint">
         Etiquettes posees a la conclusion d'une consultation, toujours
         facultatives. Elles servent a s'adresser plus tard a un groupe de
-        patients — elles ne codent pas un diagnostic.
+        patients : elles ne codent pas un diagnostic.
     </p>
 
     <form wire:submit="save" class="form form--inline-wrap">

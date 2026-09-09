@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Schema;
  *
  * Deux ajouts pour recoudre cela :
  *
- *  - `services.exam_kind` dit ce que realise un service — des analyses, de
+ *  - `services.exam_kind` dit ce que realise un service : des analyses, de
  *    l'imagerie, ou rien. C'est ce qui permet au formulaire de demande de
  *    s'afficher tout seul quand le medecin choisit l'echographie. Un nom de
  *    service ne se devine pas : l'administrateur le declare.

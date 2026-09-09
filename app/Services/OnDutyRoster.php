@@ -26,12 +26,12 @@ use Illuminate\Support\Carbon;
  * facultatif, et il l'est pour lire son propre planning. Mais un creneau muet
  * ne rendait de garde pour *aucun* service : ni notification, ni soin visible,
  * sans que rien ne le dise. Un tel creneau vaut desormais pour les services de
- * rattachement de la personne — un medecin de Medecine Generale planifie « 08h
+ * rattachement de la personne : un medecin de Medecine Generale planifie « 08h
  * a 14h, aucun service » est de garde a Medecine Generale, ce qui est la seule
  * lecture raisonnable.
  *
  * Une receptionniste ou un caissier n'ont pas de service de rattachement : leur
- * creneau doit nommer le service (Accueil, Caisse Ticket…). C'est precisement
+ * creneau doit nommer le service (Accueil, Caisse Ticket...). C'est precisement
  * ce pour quoi l'accueil est devenu un service.
  */
 class OnDutyRoster
@@ -67,7 +67,7 @@ class OnDutyRoster
     /**
      * Qui prevenir pour ce service.
      *
-     * Le personnel de garde d'abord — c'est la bonne reponse quand le planning
+     * Le personnel de garde d'abord : c'est la bonne reponse quand le planning
      * est tenu. Mais un planning vide ne doit pas valoir silence : sans aucun
      * creneau saisi, ce qui est l'etat de toute installation neuve et de bien
      * des journees ensuite, personne n'etait prevenu de rien. La cloche restait
@@ -75,7 +75,7 @@ class OnDutyRoster
      *
      * A defaut de garde, on previent donc le personnel RATTACHE au service : un
      * medecin d'Echographie est la bonne personne a qui dire qu'un patient
-     * attend en echographie, planning ou pas. Le repli s'arrete la — jamais
+     * attend en echographie, planning ou pas. Le repli s'arrete la : jamais
      * « tout le monde », qui transformerait la cloche en bruit de fond.
      *
      * Ce repli est deliberement separe de `for()`, qui reste la reponse exacte
@@ -99,7 +99,7 @@ class OnDutyRoster
     /**
      * Dernier recours : le role qu'implique le TYPE du service.
      *
-     * Une receptionniste et un caissier n'ont aucun rattachement a un service —
+     * Une receptionniste et un caissier n'ont aucun rattachement a un service :
      * leur lien passe uniquement par le planning, et le repli precedent ne
      * donne donc rien pour l'Accueil ou une caisse. Or c'est precisement a
      * l'Accueil qu'un patient entre dans une file : y rester muet etait le plus
@@ -144,7 +144,7 @@ class OnDutyRoster
      *
      * Une receptionniste et un caissier n'ont pas de rattachement : leur lien
      * au service passe uniquement par le planning. Pour eux, le repli ne donne
-     * rien — et c'est exact, rien dans les donnees ne dit a quel guichet ils
+     * rien, et c'est exact, rien dans les donnees ne dit a quel guichet ils
      * appartiennent. La section Plannings signale ces services-la.
      *
      * @return Collection<int, User>
@@ -219,13 +219,13 @@ class OnDutyRoster
      * Les creneaux qui contiennent cet instant, creneaux de nuit compris.
      *
      * **Le creneau qui franchit minuit (v3.2.8, point 2).** La condition tenait
-     * en une ligne — `start_time <= T <= end_time` — et elle est fausse des que
-     * la fin precede le debut. Un « 22h – 06h » ne rendait alors de garde a
+     * en une ligne, `start_time <= T <= end_time`, et elle est fausse des que
+     * la fin precede le debut. Un « 22h - 06h » ne rendait alors de garde a
      * *aucune* heure : ni a 22h30, ni a 2h du matin. Dans un hopital qui tourne
      * la nuit, cela suffit a expliquer qu'un declencheur parte le jour et se
      * taise le soir, sans que rien ne l'annonce.
      *
-     * Un creneau du 10 mars « 22h – 06h » couvre donc le 10 a partir de 22h,
+     * Un creneau du 10 mars « 22h - 06h » couvre donc le 10 a partir de 22h,
      * *et* le 11 jusqu'a 6h : c'est pourquoi la veille est interrogee elle
      * aussi. Les deux bornes restent inclusives, comme avant.
      */
@@ -256,7 +256,7 @@ class OnDutyRoster
     }
 
     /**
-     * Les comptes rattaches a ce service par une colonne — medecins et
+     * Les comptes rattaches a ce service par une colonne : medecins et
      * personnel generique. Une receptionniste ou un caissier n'en font jamais
      * partie : leurs tables ne portent pas de service.
      *

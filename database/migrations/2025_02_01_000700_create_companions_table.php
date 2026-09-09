@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Accompagnateurs (addendum v2, point 4) : information non medicale rattachee
- * au patient. Un accompagnateur n'a ni ticket ni file d'attente propre — il
+ * au patient. Un accompagnateur n'a ni ticket ni file d'attente propre : il
  * n'est pas pris en charge lui-meme.
  */
 return new class extends Migration

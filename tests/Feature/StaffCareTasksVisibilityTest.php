@@ -107,7 +107,7 @@ class StaffCareTasksVisibilityTest extends TestCase
         $infirmier = $this->makeNurse($service);
 
         // Le scenario signale, de bout en bout : le medecin prescrit, et
-        // l'infirmier de garde le voit sur sa propre interface — pas sur un
+        // l'infirmier de garde le voit sur sa propre interface, pas sur un
         // composant monte a la main dans un test.
         $this->actingAs($infirmier)
             ->get('/staff/infirmier')
@@ -198,7 +198,7 @@ class StaffCareTasksVisibilityTest extends TestCase
         $this->prescrire($service);
 
         // Seconde cause : aucun creneau ne couvre l'heure. La liste est vide,
-        // mais elle n'est pas muette — sinon l'infirmier croirait a une panne.
+        // mais elle n'est pas muette : sinon l'infirmier croirait a une panne.
         $infirmier = $this->makeNurse($service, onDuty: false);
 
         $this->actingAs($infirmier)

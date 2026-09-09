@@ -1,10 +1,10 @@
-<x-layouts.auth :title="'Connexion — '.config('keneya.name')">
+<x-layouts.auth :title="'Connexion - '.config('keneya.name')">
     {{-- Sous 1024 px, la photo devient un bandeau et la carte passe dessous :
          la marque se pose alors sur le bandeau, comme sur la maquette. Elle
          est masquee sur grand ecran, ou l'image la porte deja. --}}
     <img class="login-band__marque"
          src="{{ asset('images/login-marque-bandeau.png') }}"
-         alt="{{ config('keneya.name') }} — Espace professionnel"
+         alt="{{ config('keneya.name') }} - Espace professionnel"
          width="910" height="180">
 
     {{-- L'enveloppe porte le remplissage et sert d'echelle : la carte,
@@ -17,7 +17,7 @@
                  son texte en alternative pour les lecteurs d'ecran. --}}
             <img class="login-card__marque"
                  src="{{ asset('images/login-marque.png') }}"
-                 alt="{{ config('keneya.name') }} — Espace professionnel"
+                 alt="{{ config('keneya.name') }} - Espace professionnel"
                  width="496" height="422">
 
             <div class="login-card__head">
@@ -124,7 +124,7 @@
 
     {{-- Deux interactions, et rien de plus : afficher le mot de passe, et
          signaler l'envoi du formulaire. Aucun mot de passe n'est lu, stocke ou
-         transmis par ce script — seul le type du champ change. --}}
+         transmis par ce script : seul le type du champ change. --}}
     <script>
         (function () {
             var peek = document.querySelector('[data-peek]');

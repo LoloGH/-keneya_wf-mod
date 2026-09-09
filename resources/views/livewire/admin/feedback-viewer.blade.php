@@ -78,8 +78,8 @@
 
             @if ($entry->hasRatings())
                 <p class="retour__notes">
-                    Prise en charge : <strong>{{ $entry->rating_care ?? '—' }}/5</strong> ·
-                    Personnel : <strong>{{ $entry->rating_staff ?? '—' }}/5</strong>
+                    Prise en charge : <strong>{{ $entry->rating_care ?? '-' }}/5</strong> ·
+                    Personnel : <strong>{{ $entry->rating_staff ?? '-' }}/5</strong>
                 </p>
             @endif
 
@@ -104,7 +104,7 @@
 
             @if ($entry->resolution_notes)
                 <p class="retour__resolution">
-                    <strong>Traitement</strong> — {{ $entry->resolution_notes }}
+                    <strong>Traitement</strong> - {{ $entry->resolution_notes }}
                     <span class="hint">
                         par {{ $entry->resolvedBy?->name ?? 'inconnu' }},
                         le {{ $entry->resolved_at?->format('d/m/Y H:i') }}

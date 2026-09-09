@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Schema;
  * Le motif est celui deja pose pour les renvois et l'historique
  * (2025_04_01_000300) : une colonne par rattachement, l'une **ou** l'autre,
  * jamais les deux, et jamais aucune. On n'elargit pas `doctors` a tout le
- * personnel — ce serait fabriquer de faux medecins, avec les droits de
+ * personnel : ce serait fabriquer de faux medecins, avec les droits de
  * l'interface /service.
  *
  * `care_tasks.prescribed_by_doctor_id` reste inchange : prescrire un soin est

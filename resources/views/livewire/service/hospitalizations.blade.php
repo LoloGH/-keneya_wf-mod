@@ -22,10 +22,10 @@
                         <div class="field">
                             <label for="admit-room">Salle <span class="field__hint">(facultatif)</span></label>
                             <select id="admit-room" wire:model="roomId">
-                                <option value="">— Aucune salle —</option>
+                                <option value="">Aucune salle</option>
                                 @foreach ($rooms as $room)
                                     <option value="{{ $room->id }}">
-                                        {{ $room->name }} — {{ $room->occupancy_count }}/{{ $room->capacity }} lits occupes
+                                        {{ $room->name }} - {{ $room->occupancy_count }}/{{ $room->capacity }} lits occupes
                                     </option>
                                 @endforeach
                             </select>
@@ -66,7 +66,7 @@
                 </header>
 
                 <p class="timeline__meta">
-                    Admis par {{ $sejour->admittedByName() }} —
+                    Admis par {{ $sejour->admittedByName() }} -
                     {{ $sejour->pending_care_tasks_count }} soin(s) en attente
                 </p>
 
@@ -111,7 +111,7 @@
                             <div class="field">
                                 <label for="care-type-{{ $sejour->id }}">Type de soin</label>
                                 <select id="care-type-{{ $sejour->id }}" wire:model="careTaskTypeId">
-                                    <option value="">— Choisir —</option>
+                                    <option value="">Choisir</option>
                                     @foreach ($careTaskTypes as $type)
                                         <option value="{{ $type->id }}">{{ $type->name }}</option>
                                     @endforeach
@@ -145,7 +145,7 @@
                                 Confier a <span class="field__hint">(facultatif)</span>
                             </label>
                             <select id="care-assign-{{ $sejour->id }}" wire:model="careAssignedToUserId">
-                                <option value="">— Personnel de garde —</option>
+                                <option value="">Personnel de garde</option>
                                 @foreach ($carers as $carer)
                                     <option value="{{ $carer->id }}">{{ $carer->name }}</option>
                                 @endforeach
@@ -155,7 +155,7 @@
 
                         <div class="field">
                             <label for="care-instructions-{{ $sejour->id }}">
-                                Instructions <span class="field__hint">dosage, produit precis…</span>
+                                Instructions <span class="field__hint">dosage, produit precis...</span>
                             </label>
                             <textarea id="care-instructions-{{ $sejour->id }}" rows="2"
                                       wire:model="careInstructions"></textarea>

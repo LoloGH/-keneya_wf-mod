@@ -13,12 +13,12 @@ use InvalidArgumentException;
  * Depot d'une signature ou d'un tampon (v3.2.9, point 2).
  *
  * Trois images, un seul chemin de code : signature du medecin, tampon du
- * medecin, tampon de l'etablissement. Elles partagent les memes exigences —
+ * medecin, tampon de l'etablissement. Elles partagent les memes exigences :
  * image uniquement, taille bornee, et toute modification tracee.
  *
  * Les controles sont refaits ici, cote serveur, comme pour les pieces jointes :
  * un formulaire se contourne, pas une action. Et ces trois images-la portent
- * une valeur legale — apposer la signature d'un praticien sur une ordonnance
+ * une valeur legale : apposer la signature d'un praticien sur une ordonnance
  * n'est pas un geste anodin.
  */
 class StoreSignatureImage

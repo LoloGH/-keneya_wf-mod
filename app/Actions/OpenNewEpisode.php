@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
  * existante.
  *
  * Aucune ligne `patients` n'est creee, aucun nouveau `patient_code` n'est
- * genere — c'est tout l'interet de la separation identite / passage : le
+ * genere, c'est tout l'interet de la separation identite / passage : le
  * dossier d'il y a six mois reste distinct du nouvel episode, sous le meme
  * identifiant.
  */

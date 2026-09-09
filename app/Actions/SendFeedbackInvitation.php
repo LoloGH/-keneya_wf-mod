@@ -25,7 +25,7 @@ class SendFeedbackInvitation
     public function toPatient(Patient $patient): ?SmsMessage
     {
         return SendSmsJob::dispatch($patient->mobile, sprintf(
-            '%s : votre passage est termine. Donnez-nous votre avis ici %s — votre code personnel vous a ete remis a l\'accueil.',
+            '%s : votre passage est termine. Donnez-nous votre avis ici %s : votre code personnel vous a ete remis a l\'accueil.',
             config('keneya.name'),
             route('portal.show', $patient->portal_token),
         ), $patient);

@@ -13,7 +13,7 @@ use Livewire\Component;
  * Notes de releve vues par le personnel de garde (v3.2.3, point 4).
  *
  * Meme cloisonnement que les soins : les sejours du service de rattachement, et
- * eux seuls. La lecture reste ouverte hors garde — c'est justement en prenant
+ * eux seuls. La lecture reste ouverte hors garde : c'est justement en prenant
  * son poste, avant que le planning ne couvre l'heure, qu'on a besoin de lire ce
  * que l'equipe precedente a laisse.
  */

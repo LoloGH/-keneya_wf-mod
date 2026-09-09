@@ -17,7 +17,7 @@ use Keneya\Dme\Services\Documents\DocumentStorage;
  *
  * A distinguer des pieces jointes de WorkFlow, qui accompagnent un renvoi et
  * circulent avec le patient : ici, un compte rendu d'echographie rapporte de
- * l'exterieur, un resultat d'analyse, un certificat — ce qui a vocation a
+ * l'exterieur, un resultat d'analyse, un certificat, ce qui a vocation a
  * rester au dossier.
  *
  * Deux tables, un seul disque : c'est la decision du chantier. L'operationnel
@@ -49,7 +49,7 @@ class StoreMedicalDocument
     }
 
     /**
-     * `$source` rattache le document a l'acte qu'il documente — une demande
+     * `$source` rattache le document a l'acte qu'il documente : une demande
      * d'analyses, un examen d'imagerie. Sans lui, un compte rendu se retrouve
      * bien au dossier, mais la fiche de l'examen l'ignore : le medecin voit sa
      * demande sans le resultat qui l'a close. Le module cherche ses documents

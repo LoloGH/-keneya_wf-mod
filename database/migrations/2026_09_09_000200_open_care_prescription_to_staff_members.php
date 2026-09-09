@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Schema;
  *
  * La colonne `prescribed_by_doctor_id` n'admettait qu'un medecin, et le droit
  * de prescrire etait implicite : il venait avec « Hospitaliser un patient ».
- * Deux consequences, corrigees ici — un type de personnel dedie ne pouvait pas
+ * Deux consequences, corrigees ici : un type de personnel dedie ne pouvait pas
  * prescrire du tout, et un etablissement ne pouvait pas dissocier les deux
  * actes, alors qu'admettre un patient et lui prescrire un traitement ne sont
  * pas la meme decision.
  *
  * Le motif est celui des renvois, de l'historique, des rendez-vous et des
  * admissions : une colonne par rattachement, l'une **ou** l'autre, jamais les
- * deux, et jamais aucune. On n'elargit pas `doctors` a tout le personnel — ce
+ * deux, et jamais aucune. On n'elargit pas `doctors` a tout le personnel : ce
  * serait fabriquer de faux medecins, avec les droits de l'interface /service.
  *
  * La capacite nouvelle est accordee d'office a tout type qui portait deja

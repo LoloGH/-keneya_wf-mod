@@ -11,7 +11,7 @@ namespace App\Livewire\Concerns;
  *
  * Ne concerne plus seulement /admin depuis la v3.2.3 : les cles par defaut
  * restent celles de l'administration, mais un composant d'une autre interface
- * passe les siennes — voir Service\Hospitalizations, dont les refus doivent
+ * passe les siennes, voir Service\Hospitalizations, dont les refus doivent
  * etre lus au moment ou l'on clique.
  */
 trait NotifiesUser

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
  * d'attente, deux personnes ne doivent jamais voir le meme numero pour le
  * meme service.
  *
- * Les files repartent a 1 chaque matin — le numero affiche doit rester court
+ * Les files repartent a 1 chaque matin : le numero affiche doit rester court
  * et lisible de loin.
  */
 class TokenAllocator

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schema;
  *
  * Meme raisonnement que pour `referrals.status` : une colonne `string`
  * validee par l'application, plutot qu'un enum a etendre a chaque ajout de
- * type — la table est append-only et deja tres sollicitee.
+ * type, la table est append-only et deja tres sollicitee.
  */
 return new class extends Migration
 {

@@ -17,7 +17,7 @@ use InvalidArgumentException;
  * Aucun envoi direct : chaque destinataire passe par `SendSmsJob`, comme tout
  * le reste de l'application depuis la v3.2.8. Une diffusion vers un millier de
  * patients rend donc la main immediatement, et c'est le worker qui affronte la
- * passerelle — un envoi groupe synchrone aurait fige l'ecran de
+ * passerelle : un envoi groupe synchrone aurait fige l'ecran de
  * l'administrateur pendant plusieurs minutes, quand il ne l'aurait pas fait
  * expirer.
  */
@@ -67,7 +67,7 @@ class SendBroadcast
         Audit::log(
             Audit::EVENT_BROADCAST_SENT,
             sprintf(
-                'Diffusion SMS a %d destinataire(s) — %s. Message : « %s »',
+                'Diffusion SMS a %d destinataire(s) - %s. Message : « %s »',
                 $envoyes,
                 $diffusion->targetLabel(),
                 Str::limit($content, 200),

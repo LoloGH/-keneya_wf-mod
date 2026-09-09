@@ -9,7 +9,7 @@
 
     {{-- Le sondage est borne au passage : une fois l'avis donne, il ne
          reapparait qu'a la prochaine venue. La reclamation, elle, reste
-         toujours ouverte — on peut avoir note son passage et decouvrir un
+         toujours ouverte : on peut avoir note son passage et decouvrir un
          probleme le lendemain. --}}
     @if ($sondageDonne)
         <x-notice title="Votre avis sur ce passage est enregistre">
@@ -36,9 +36,9 @@
             <div class="field">
                 <label for="avis-care">Votre prise en charge</label>
                 <select id="avis-care" wire:model="ratingCare">
-                    <option value="">— Choisir une note —</option>
+                    <option value="">Choisir une note</option>
                     @foreach ([5 => 'Tres satisfait', 4 => 'Satisfait', 3 => 'Correct', 2 => 'Peu satisfait', 1 => 'Pas satisfait'] as $note => $libelle)
-                        <option value="{{ $note }}">{{ $note }} — {{ $libelle }}</option>
+                        <option value="{{ $note }}">{{ $note }} - {{ $libelle }}</option>
                     @endforeach
                 </select>
                 @error('ratingCare') <p class="field__error">{{ $message }}</p> @enderror
@@ -48,7 +48,7 @@
                  une note unique « le personnel » : elle melait dans un seul
                  chiffre l'agent d'accueil, le caissier et le medecin. Les
                  etapes proposees sont celles que le dossier porte a cet
-                 instant — un sondage lance avant la cloture n'en montre donc
+                 instant : un sondage lance avant la cloture n'en montre donc
                  qu'une partie. --}}
             @if ($steps->isNotEmpty())
                 <h3 class="card__subtitle">Les personnes rencontrees</h3>
@@ -59,9 +59,9 @@
                         <div class="field">
                             <label for="etape-{{ $loop->index }}">{{ $etape['label'] }}</label>
                             <select id="etape-{{ $loop->index }}" wire:model="stepRatings.{{ $etape['key'] }}">
-                                <option value="">— Sans avis —</option>
+                                <option value="">Sans avis</option>
                                 @foreach ([5 => 'Tres satisfait', 4 => 'Satisfait', 3 => 'Correct', 2 => 'Peu satisfait', 1 => 'Pas satisfait'] as $note => $libelle)
-                                    <option value="{{ $note }}">{{ $note }} — {{ $libelle }}</option>
+                                    <option value="{{ $note }}">{{ $note }} - {{ $libelle }}</option>
                                 @endforeach
                             </select>
                         </div>

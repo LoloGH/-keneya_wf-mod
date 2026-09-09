@@ -25,7 +25,7 @@
     ]));
 @endphp
 
-<x-layouts.app :title="'Accueil — '.config('keneya.name')">
+<x-layouts.app :title="'Accueil - '.config('keneya.name')">
     @if (session('reception.success'))
         <div class="alert alert--success" role="status">{{ session('reception.success') }}</div>
     @endif

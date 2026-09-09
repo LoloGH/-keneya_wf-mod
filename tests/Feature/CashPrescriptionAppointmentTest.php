@@ -162,7 +162,7 @@ class CashPrescriptionAppointmentTest extends TestCase
 
     /**
      * « Orienter le patient » : le patient attendu se presente et entre dans la
-     * file sans reenregistrement — un nouveau passage, pas une nouvelle identite.
+     * file sans reenregistrement, un nouveau passage, pas une nouvelle identite.
      */
     public function test_orienter_le_patient_ouvre_une_visite_sans_nouveau_dossier(): void
     {

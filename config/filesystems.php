@@ -36,7 +36,7 @@ return [
          * Un disque a part plutot qu'un sous-dossier de `attachments` : ce sont
          * des elements a valeur legale, qui n'ont pas a cotoyer les pieces
          * jointes d'un dossier patient. Comme elles, ils vivent sous
-         * storage/app — donc sur le volume Docker persistant — et ne sont
+         * storage/app, donc sur le volume Docker persistant, et ne sont
          * jamais servis directement par le serveur web : seul dompdf les lit,
          * par leur chemin sur le disque.
          */

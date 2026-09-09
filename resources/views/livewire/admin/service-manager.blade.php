@@ -10,10 +10,10 @@
         <div class="field">
             <label for="service-kind">Type</label>
             <select id="service-kind" wire:model.live="service_kind_id">
-                <option value="">— Choisir un type —</option>
+                <option value="">Choisir un type</option>
                 @foreach ($kinds as $kind)
                     <option value="{{ $kind->id }}">
-                        {{ $kind->name }}@if ($kind->requires_payment_gate) — paiement prealable @endif
+                        {{ $kind->name }}@if ($kind->requires_payment_gate) : paiement prealable @endif
                     </option>
                 @endforeach
             </select>
@@ -23,13 +23,13 @@
         {{-- Ce que realise un plateau technique (v3.3.1). C'est ce champ qui
              fait apparaitre le bon formulaire de demande quand un medecin y
              envoie un patient : un nom de service ne se devine pas. Il ne
-             s'affiche que pour un plateau technique — ailleurs il n'a pas de
+             s'affiche que pour un plateau technique : ailleurs il n'a pas de
              sens, et la valeur est effacee a l'enregistrement. --}}
         @if ($this->estPlateauTechnique())
             <div class="field">
                 <label for="exam-kind">Examens realises</label>
                 <select id="exam-kind" wire:model="exam_kind">
-                    <option value="">— Aucun formulaire de demande —</option>
+                    <option value="">Aucun formulaire de demande</option>
                     @foreach (\App\Models\Service::EXAM_KINDS as $cle => $libelle)
                         <option value="{{ $cle }}">{{ $libelle }}</option>
                     @endforeach
@@ -69,7 +69,7 @@
                     <tr>
                         <td>{{ $service->name }}</td>
                         <td>{{ $service->kindLabel() }}</td>
-                        <td>{{ $service->examKindLabel() ?? '—' }}</td>
+                        <td>{{ $service->examKindLabel() ?? '-' }}</td>
                         <td class="mono">{{ $service->doctors_count }}</td>
                         <td class="mono">{{ $service->visits_count }}</td>
                         <td>

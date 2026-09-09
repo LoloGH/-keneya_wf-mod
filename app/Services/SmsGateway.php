@@ -39,7 +39,7 @@ class SmsGateway
      * Meme envoi que `send()`, mais en rendant compte : identifiant attribue
      * par la passerelle, raison de l'echec, et surtout s'il vaut la peine de
      * reessayer. C'est ce que `SendSmsJob` a besoin de savoir pour distinguer
-     * un telephone endormi — qui repondra a la prochaine tentative — d'une
+     * un telephone endormi, qui repondra a la prochaine tentative, d'une
      * passerelle desactivee, qui ne repondra jamais.
      */
     public function deliver(string $to, string $text): SmsSendResult

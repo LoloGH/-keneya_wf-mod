@@ -38,7 +38,7 @@ class Referral extends Model
         'billable_item_id',
         // La demande d'examen que ce renvoi transporte (v3.3.1). L'une des
         // deux au plus : un renvoi ne demande pas a la fois des analyses et
-        // une echographie — ce sont deux plateaux, donc deux renvois.
+        // une echographie, ce sont deux plateaux, donc deux renvois.
         'dme_lab_order_id',
         'dme_imaging_order_id',
         'from_doctor_id',
@@ -86,7 +86,7 @@ class Referral extends Model
     /**
      * La demande d'analyses que ce renvoi transporte (v3.3.1).
      *
-     * Sans cle etrangere en base — la table appartient au module — donc une
+     * Sans cle etrangere en base, la table appartient au module, donc une
      * reference orpheline ramene simplement `null`, ce qui se lit « pas de
      * demande attachee ».
      */

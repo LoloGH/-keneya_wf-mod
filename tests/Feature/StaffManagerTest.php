@@ -19,7 +19,7 @@ use Tests\TestCase;
  * Section « Personnels » (v3.2.3, points 2 et 3).
  *
  * Les deux menus refletent les tables, et c'est le type choisi qui decide du
- * role et du rattachement — sans quoi elargir le menu creerait des comptes
+ * role et du rattachement : sans quoi elargir le menu creerait des comptes
  * incoherents.
  */
 class StaffManagerTest extends TestCase

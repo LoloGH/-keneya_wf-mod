@@ -6,10 +6,10 @@
         <div class="field">
             <label for="consultation-visit">Patient</label>
             <select id="consultation-visit" wire:model.live="visitId">
-                <option value="">— Choisir un patient appele —</option>
+                <option value="">Choisir un patient appele</option>
                 @foreach ($visits as $visit)
                     <option value="{{ $visit->id }}">
-                        n° {{ $visit->token }} — {{ $visit->patient->name }} ({{ $visit->patient->patient_code }})
+                        n° {{ $visit->token }} - {{ $visit->patient->name }} ({{ $visit->patient->patient_code }})
                     </option>
                 @endforeach
             </select>
@@ -18,8 +18,8 @@
 
         {{-- L'onglet « Caisse Services » a disparu : depuis la v3.2 point 6,
              un encaissement se fait a la caisse et nulle part ailleurs. Le
-             composant ne portait deja plus `recordPayment` — un test le
-             verifie — mais le bouton et son formulaire etaient restes ici,
+             composant ne portait deja plus `recordPayment`, un test le
+             verifie, mais le bouton et son formulaire etaient restes ici,
              sans methode derriere. --}}
         <div class="tabs" role="tablist">
             <button type="button" role="tab" class="tabs__tab @if ($tab === 'conclusion') tabs__tab--active @endif"
@@ -50,7 +50,7 @@
                         Pathologie <span class="field__hint">(facultatif)</span>
                     </label>
                     <select id="consultation-pathologie" wire:model="pathologyId">
-                        <option value="">— Non precisee —</option>
+                        <option value="">Non precisee</option>
                         @foreach ($pathologies as $pathologie)
                             <option value="{{ $pathologie->id }}">{{ $pathologie->name }}</option>
                         @endforeach

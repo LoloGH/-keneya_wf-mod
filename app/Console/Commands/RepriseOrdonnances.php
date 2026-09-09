@@ -15,7 +15,7 @@ use Keneya\Dme\Models\Prescription as OrdonnanceMedicale;
  * Les deux ordonnances ont fusionne : une seule table, `dme_prescriptions`,
  * et un seul document. Restent celles qui avaient ete ecrites avant, dans la
  * table de WorkFlow. Les laisser la reviendrait a partager le dossier d'un
- * patient entre deux endroits — c'est precisement ce que la fusion supprime.
+ * patient entre deux endroits : c'est precisement ce que la fusion supprime.
  *
  * La commande est rejouable sans risque : la paire (`source_system`,
  * `source_id`) porte un index unique en base, et chaque ordonnance deja
@@ -156,7 +156,7 @@ class RepriseOrdonnances extends Command
      * Relie la ligne d'historique correspondante a l'ordonnance reprise.
      *
      * L'historique ne portait pas de reference avant la v3.3.1 : on retrouve
-     * la bonne ligne comme la frise le faisait, par rang au sein du passage —
+     * la bonne ligne comme la frise le faisait, par rang au sein du passage,
      * la n-ieme entree « ordonnance » repond a la n-ieme ordonnance, les deux
      * ayant ete ecrites dans la meme transaction. Les ordonnances etant
      * reprises dans l'ordre de leur identifiant, il suffit de prendre la
@@ -187,7 +187,7 @@ class RepriseOrdonnances extends Command
         // Ce qui est ecrit ici n'est pas une correction du recit : la ligne
         // disait deja qu'une ordonnance avait ete etablie, elle n'avait
         // simplement pas de colonne pour dire laquelle. On remplit cette
-        // colonne, une fois, sur des lignes ou elle est nulle — jamais un
+        // colonne, une fois, sur des lignes ou elle est nulle : jamais un
         // champ que quelqu'un a saisi.
         DB::table('patient_history')
             ->where('id', $ligne)

@@ -13,7 +13,7 @@ use Livewire\Component;
 /**
  * Catalogue de tarifs (v3.2.8, point 3).
  *
- * Meme forme que les autres catalogues administrables — types de service,
+ * Meme forme que les autres catalogues administrables, types de service,
  * types de personnel, types de soins : la liste des actes d'un hopital
  * s'enrichit, elle n'a pas sa place figee dans le code.
  *
@@ -151,7 +151,7 @@ class BillableItemManager extends Component
 
     /**
      * Designe l'acte applique automatiquement a l'enregistrement. Sans lui, la
-     * caisse ticket retombe sur la saisie libre — mieux vaut un montant a
+     * caisse ticket retombe sur la saisie libre : mieux vaut un montant a
      * saisir qu'un montant invente.
      */
     public function saveTicketItem(): void

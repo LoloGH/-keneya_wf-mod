@@ -14,7 +14,7 @@
         <div class="field">
             <label for="room-service">Service responsable</label>
             <select id="room-service" wire:model="service_id">
-                <option value="">— Choisir —</option>
+                <option value="">Choisir</option>
                 @foreach ($services as $service)
                     <option value="{{ $service->id }}">{{ $service->name }}</option>
                 @endforeach

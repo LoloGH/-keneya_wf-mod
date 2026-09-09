@@ -11,7 +11,7 @@
                     <span class="field__hint">visible par le personnel de garde</span>
                 </label>
                 <textarea id="handoff-{{ $hospitalizationId }}" rows="2" wire:model="content"
-                          placeholder="A mal dormi, la famille passe ce matin…"></textarea>
+                          placeholder="A mal dormi, la famille passe ce matin..."></textarea>
                 @error('content') <p class="field__error">{{ $message }}</p> @enderror
             </div>
 

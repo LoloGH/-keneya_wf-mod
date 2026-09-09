@@ -1,4 +1,4 @@
-{{-- Bandeau d'information — le bloc « Bon a savoir » de la reference.
+{{-- Bandeau d'information : le bloc « Bon a savoir » de la reference.
 
      A distinguer de `.alert`, qui annonce le resultat d'une action que
      l'utilisateur vient de declencher et disparait ensuite. Un bandeau

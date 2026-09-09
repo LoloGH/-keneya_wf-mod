@@ -17,8 +17,8 @@ use Keneya\Dme\Models\Prescription;
  * Ordonnance de fin de consultation, ecrite dans le dossier medical (v3.3.1).
  *
  * C'est la fusion decidee au §4 de la note du chantier : la forme vient du
- * DME — ordonnance numerotee, lignes structurees, statut, rattachement a une
- * consultation — et la fonction vient de WorkFlow, qui sait apposer la
+ * DME, ordonnance numerotee, lignes structurees, statut, rattachement a une
+ * consultation, et la fonction vient de WorkFlow, qui sait apposer la
  * signature du prescripteur et les tampons sur le PDF.
  *
  * Une seule table, donc, et les deux interfaces y ecrivent. WorkFlow garde son

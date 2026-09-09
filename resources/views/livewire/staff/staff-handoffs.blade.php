@@ -1,4 +1,4 @@
-<x-card title="Relèves — {{ $service->name }}" icon="document">
+<x-card title="Relèves - {{ $service->name }}" icon="document">
 
     @forelse ($sejours as $sejour)
         <article class="episode" wire:key="handoff-sejour-{{ $sejour->id }}">

@@ -21,8 +21,8 @@ use Livewire\Component;
 /**
  * File d'attente d'un type de personnel generique (v3.2.1, point 10).
  *
- * Aucune logique metier neuve : les memes Actions que l'interface medecin —
- * CallNextPatient, SendReferral, CloseVisit — pilotees ici par les capacites
+ * Aucune logique metier neuve : les memes Actions que l'interface medecin,
+ * CallNextPatient, SendReferral, CloseVisit, pilotees ici par les capacites
  * cochees sur le type. Une capacite absente ne rend pas une section vide : elle
  * ne rend rien du tout.
  */
@@ -204,7 +204,7 @@ class StaffQueue extends Component
     }
 
     /**
-     * Une visite hors de mon service n'existe pas de mon point de vue — meme
+     * Une visite hors de mon service n'existe pas de mon point de vue : meme
      * garde-fou que le trait ScopedToOwnService cote medecin.
      */
     private function visitInMyService(?int $visitId): Visit

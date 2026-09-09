@@ -20,7 +20,7 @@ use Tests\TestCase;
  * Le personnel proposé aux plannings, et la suppression groupée (v3.2.4).
  *
  * Les deux menus de « Plannings » interrogeaient les rôles Spatie. Un type de
- * personnel sans rôle — un infirmier — n'en porte aucun : il était introuvable,
+ * personnel sans rôle, un infirmier, n'en porte aucun : il était introuvable,
  * donc impossible à mettre de garde. Or c'est le planning qui décide de sa
  * garde, donc de tout ce qu'il voit. C'est la cause réelle des « soins
  * programmés invisibles côté infirmier ».
@@ -105,7 +105,7 @@ class ScheduleStaffCoverageTest extends TestCase
         $jourParJour = Livewire::actingAs($admin)->test(ScheduleManager::class)->viewData('staff')->pluck('id')->sort()->values();
 
         // Deux listes differentes sur le meme ecran finissaient forcement par
-        // diverger — c'est exactement ce qui s'etait produit.
+        // diverger : c'est exactement ce qui s'etait produit.
         $this->assertEquals($groupee->all(), $jourParJour->all());
         $this->assertCount(4, $groupee);
     }

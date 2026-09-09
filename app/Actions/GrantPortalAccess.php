@@ -10,8 +10,8 @@ use App\Support\Audit;
  * Validation du code a quatre chiffres du portail patient (v3.2, point 7).
  *
  * Le lien ne perime jamais, comme demande. La securite tient donc a deux
- * couches et non a une : le `portal_token` est un UUID non devinable — il faut
- * deja connaitre ce lien precis pour tenter quoi que ce soit — et ce
+ * couches et non a une : le `portal_token` est un UUID non devinable, il faut
+ * deja connaitre ce lien precis pour tenter quoi que ce soit, et ce
  * verrouillage temporaire empeche d'essayer les 10 000 codes possibles.
  *
  * Le verrouillage est volontairement temporaire : un patient qui se trompe

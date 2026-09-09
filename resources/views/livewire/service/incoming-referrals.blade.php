@@ -15,7 +15,7 @@
                     <p class="referrals__meta">
                         Envoye par {{ $referral->prescriberName() }}
                         ({{ $referral->fromService->name }})
-                        — {{ $referral->created_at->format('d/m/Y H:i') }}
+                        - {{ $referral->created_at->format('d/m/Y H:i') }}
                     </p>
 
                     <p class="referrals__instructions">{{ $referral->instructions }}</p>
@@ -27,12 +27,12 @@
                             <div class="field">
                                 <label for="result-{{ $referral->id }}">Resultat</label>
                                 <textarea id="result-{{ $referral->id }}" rows="4" wire:model="resultText"
-                                          placeholder="Conclusion de l'examen…"></textarea>
+                                          placeholder="Conclusion de l'examen..."></textarea>
                                 @error('resultText') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
 
                             {{-- Le compte rendu part au dossier medical du
-                                 patient, ou il restera — et non en piece
+                                 patient, ou il restera, et non en piece
                                  jointe d'un renvoi, qui n'est qu'un mouvement
                                  du parcours (v3.3.1). --}}
                             <div class="field">
@@ -53,7 +53,7 @@
                                 <input id="files-{{ $referral->id }}" type="file" multiple
                                        accept=".pdf,.jpg,.jpeg,.png" wire:model="files">
                                 @error('files.*') <p class="field__error">{{ $message }}</p> @enderror
-                                <p class="hint" wire:loading wire:target="files">Televersement en cours…</p>
+                                <p class="hint" wire:loading wire:target="files">Televersement en cours...</p>
                             </div>
 
                             <div class="btn-row">

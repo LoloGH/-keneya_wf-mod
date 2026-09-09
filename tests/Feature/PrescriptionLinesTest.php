@@ -22,7 +22,7 @@ use Tests\TestCase;
  * Ordonnance ligne a ligne (v3.2.6).
  *
  * L'ordonnance etait une zone de texte unique. Elle s'ecrit desormais ligne
- * par ligne, chacune avec son medicament, sa posologie et sa duree — et se
+ * par ligne, chacune avec son medicament, sa posologie et sa duree, et se
  * relit numerotee, a l'ecran comme a l'impression.
  */
 class PrescriptionLinesTest extends TestCase

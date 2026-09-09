@@ -12,7 +12,7 @@ use App\Models\Visitor;
  * A qui se rapporte la note « personnel » d'un retour (v3.2.8, point 4).
  *
  * Le principe tient en une phrase : rester nul plutot que deviner. Une note
- * attribuee au mauvais agent est pire qu'une note sans destinataire — elle
+ * attribuee au mauvais agent est pire qu'une note sans destinataire : elle
  * accuse quelqu'un a sa place.
  */
 class FeedbackAttribution

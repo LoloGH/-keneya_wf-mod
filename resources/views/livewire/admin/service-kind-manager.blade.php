@@ -8,7 +8,7 @@
     <form wire:submit="save" class="form form--inline-wrap">
         <div class="field">
             <label for="kind-name">Nom du type</label>
-            <input id="kind-name" type="text" wire:model="name" placeholder="Imagerie, Pharmacie…">
+            <input id="kind-name" type="text" wire:model="name" placeholder="Imagerie, Pharmacie...">
             @error('name') <p class="field__error">{{ $message }}</p> @enderror
         </div>
 

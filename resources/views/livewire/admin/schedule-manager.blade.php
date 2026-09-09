@@ -19,7 +19,7 @@
         <div class="field">
             <label for="schedule-user">Membre du personnel</label>
             <select id="schedule-user" wire:model="user_id">
-                <option value="">— Choisir —</option>
+                <option value="">Choisir</option>
                 @foreach ($staff as $member)
                     <option value="{{ $member->id }}">
                         {{ $member->name }} ({{ $member->roleLabel() }})
@@ -50,7 +50,7 @@
         <div class="field">
             <label for="schedule-service">Service <span class="field__hint">(facultatif)</span></label>
             <select id="schedule-service" wire:model="service_id">
-                <option value="">— Aucun —</option>
+                <option value="">Aucun</option>
                 @foreach ($services as $service)
                     <option value="{{ $service->id }}">{{ $service->name }}</option>
                 @endforeach
@@ -80,7 +80,7 @@
 
     {{-- Suppression groupee : une generation produit des dizaines de creneaux,
          les retirer un par un n'est pas praticable. La barre n'apparait que
-         lorsqu'une case est cochee — elle ne pese pas sur l'ecran le reste du
+         lorsqu'une case est cochee : elle ne pese pas sur l'ecran le reste du
          temps. --}}
     @if (count($selected) > 0)
         <div class="bulkbar" role="status">
@@ -117,7 +117,7 @@
                         <td>{{ $schedule->user->name }}</td>
                         <td>{{ $schedule->date->translatedFormat('D d/m/Y') }}</td>
                         <td class="mono">{{ $schedule->range() }}</td>
-                        <td>{{ $schedule->service?->name ?? '—' }}</td>
+                        <td>{{ $schedule->service?->name ?? '-' }}</td>
                         <td>
                             <div class="btn-row">
                                 <button type="button" class="btn btn--ghost" wire:click="edit({{ $schedule->id }})">

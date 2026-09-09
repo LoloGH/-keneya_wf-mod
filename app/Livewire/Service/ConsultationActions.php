@@ -24,7 +24,7 @@ use Livewire\Component;
  * Aucune fonction de caisse ici : dans cet hopital les medecins n'encaissent
  * jamais, tout passe par le role `cashier` et l'interface /caisse.
  *
- * Les trois actions portent sur la visite en cours du patient appele — d'ou un
+ * Les trois actions portent sur la visite en cours du patient appele : d'ou un
  * seul composant plutot que trois, pour ne pas multiplier les selecteurs de
  * patient dans la meme interface.
  */
@@ -85,7 +85,7 @@ class ConsultationActions extends Component
     }
 
     /**
-     * Conclusion de la prise en charge — distincte de l'ordonnance, qui reste
+     * Conclusion de la prise en charge : distincte de l'ordonnance, qui reste
      * dediee aux medicaments.
      */
     public function recordConclusion(RecordConsultationConclusion $action): void
@@ -147,7 +147,7 @@ class ConsultationActions extends Component
     /**
      * L'ordonnance part dans le dossier medical (v3.3.1).
      *
-     * L'ecran ne bouge pas — c'est toujours ici que le medecin ecrit — mais ce
+     * L'ecran ne bouge pas, c'est toujours ici que le medecin ecrit, mais ce
      * qu'il enregistre atterrit desormais dans `dme_prescriptions`, table
      * unique des deux interfaces. Le PDF y gagne la mise en forme du dossier
      * medical sans rien perdre de la signature et des cachets.

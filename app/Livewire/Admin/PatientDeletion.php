@@ -17,7 +17,7 @@ use Livewire\Component;
  *
  * Deux etapes deliberees : on selectionne le dossier, puis on retape son
  * numero exact et on justifie. Un simple « Etes-vous sur ? » ne protege de
- * rien — on clique oui par reflexe.
+ * rien : on clique oui par reflexe.
  *
  * Reserve a /admin : cette section n'existe dans aucune autre interface.
  */

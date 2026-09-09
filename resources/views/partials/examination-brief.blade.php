@@ -18,9 +18,9 @@
         <p class="panel__title">
             <span class="mono">{{ $demande->order_number }}</span>
             @if ($referral->dme_lab_order_id)
-                — Analyses demandees
+                - Analyses demandees
             @else
-                — {{ \Keneya\Dme\Models\ImagingOrder::MODALITIES[$demande->modality] ?? $demande->modality }}
+                - {{ \Keneya\Dme\Models\ImagingOrder::MODALITIES[$demande->modality] ?? $demande->modality }}
                 @if ($demande->body_site) : {{ $demande->body_site }} @endif
             @endif
             <span class="badge">{{ \App\Actions\Dme\OrderLaboratory::PRIORITIES[$demande->priority] ?? $demande->priority }}</span>
@@ -32,7 +32,7 @@
                     <li>
                         {{ $analyse->exam_name }}
                         @if ($analyse->category)
-                            <span class="muted">— {{ $analyse->category }}</span>
+                            <span class="muted">- {{ $analyse->category }}</span>
                         @endif
                     </li>
                 @endforeach

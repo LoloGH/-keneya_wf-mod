@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
  *
  * Les caisses etaient deja des services a part entiere : elles ont des heures,
  * du personnel, une file. L'accueil est exactement dans ce cas, mais n'existait
- * nulle part — ce qui avait deux consequences visibles :
+ * nulle part, ce qui avait deux consequences visibles :
  *
  *  - il ne figurait ni dans « Liste des services » ni dans le menu « Service »
  *    des plannings ;

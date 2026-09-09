@@ -46,7 +46,7 @@ class Doctor extends Model
     }
 
     /**
-     * Chemin absolu de la signature, pour dompdf — nul si le fichier n'est
+     * Chemin absolu de la signature, pour dompdf : nul si le fichier n'est
      * pas la (v3.2.9, point 2).
      *
      * C'est ce controle d'existence qui tient la promesse « une ordonnance

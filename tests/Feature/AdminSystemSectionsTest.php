@@ -17,7 +17,7 @@ use Tests\TestCase;
  *
  * Ce fichier existe parce qu'un controle visuel a trouve ce que la suite ne
  * couvrait pas : l'annuaire des comptes filtrait sur une colonne `users.role`
- * qui n'existe pas — le role est porte par Spatie. En ligne de commande, PHP
+ * qui n'existe pas : le role est porte par Spatie. En ligne de commande, PHP
  * n'emettait qu'un avertissement ; sous HTTP, le gestionnaire d'erreurs de
  * Laravel le transforme en exception, et la section rendait une page 500.
  * D'ou des tests qui montent reellement chaque composant.

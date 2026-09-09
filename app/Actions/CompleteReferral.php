@@ -30,7 +30,7 @@ use InvalidArgumentException;
  * le trajet aller (`SendReferral`, via RouteThroughCaisse) : on ne fait pas
  * payer deux fois un patient pour revenir voir le medecin qui l'a envoye. Cette
  * action n'appelle donc volontairement pas RouteThroughCaisse et reste un
- * chemin de code separe de l'aller — mutualiser les deux reintroduirait le
+ * chemin de code separe de l'aller : mutualiser les deux reintroduirait le
  * peage sur le retour a la premiere refactorisation.
  *
  * Le prescripteur est prevenu par SMS si son numero est renseigne ; dans tous
@@ -118,7 +118,7 @@ class CompleteReferral
      * Replace la visite dans la file du service prescripteur, avec un nouveau
      * ticket. Aucun passage par la caisse : le retour n'est pas un renvoi.
      *
-     * Ne fait rien si la visite a ete cloturee entre-temps — un dossier clos ne
+     * Ne fait rien si la visite a ete cloturee entre-temps : un dossier clos ne
      * doit pas ressusciter dans une file d'attente parce qu'un resultat arrive
      * en retard.
      */

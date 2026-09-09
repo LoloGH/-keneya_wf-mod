@@ -17,7 +17,7 @@ use Livewire\Component;
  * que le prescripteur n'a pas encore clotures : une fois la boucle fermee, le
  * renvoi disparait de ce panneau mais reste dans l'historique du patient.
  *
- * Rafraichi par wire:poll — pas de WebSocket dans cette phase.
+ * Rafraichi par wire:poll, pas de WebSocket dans cette phase.
  */
 class OutgoingReferrals extends Component
 {

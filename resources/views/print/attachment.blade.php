@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $attachment->original_name }} — {{ $hospitalName }}</title>
+    <title>{{ $attachment->original_name }} - {{ $hospitalName }}</title>
     <style>
         body { margin: 0; padding: 16px; font-family: system-ui, sans-serif; background: #f1f5f9; color: #1e293b; }
         .sheet { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; }
@@ -39,8 +39,8 @@
             <div>
             <h1>{{ $hospitalName }}</h1>
             <p>
-                {{ $attachment->original_name }} —
-                dossier {{ $attachment->patient->patient_code }} —
+                {{ $attachment->original_name }} -
+                dossier {{ $attachment->patient->patient_code }} -
                 {{ $attachment->created_at->format('d/m/Y H:i') }}
             </p>
             </div>

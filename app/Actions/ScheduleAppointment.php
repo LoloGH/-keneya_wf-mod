@@ -19,7 +19,7 @@ class ScheduleAppointment
 {
     /**
      * `$doctor` accepte aussi un membre du personnel generique : le rendez-vous
-     * est alors signe par `staff_member_id`, jamais par `doctor_id` — on ne
+     * est alors signe par `staff_member_id`, jamais par `doctor_id`, on ne
      * fabrique pas de faux medecins (v3.3.1).
      */
     public function execute(Visit $visit, Doctor|StaffMember $doctor, Carbon $scheduledAt, ?int $serviceId = null): Appointment

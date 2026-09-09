@@ -14,8 +14,8 @@ use Livewire\Component;
 /**
  * Dossier patient en lecture pour un type de personnel generique.
  *
- * Meme frise unifiee que /service et /admin — c'est le meme service
- * PatientTimeline — mais sans aucune action d'ecriture : ce type ne prescrit
+ * Meme frise unifiee que /service et /admin, c'est le meme service
+ * PatientTimeline, mais sans aucune action d'ecriture : ce type ne prescrit
  * pas, il consulte.
  */
 class StaffRecordPanel extends Component

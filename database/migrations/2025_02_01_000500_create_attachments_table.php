@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
  * Pieces jointes (addendum v2, point 3) : image d'echographie, PDF de
  * laboratoire, rattachees a un resultat de renvoi ou a une entree
  * d'historique. Stockage sur le disque local du conteneur `app`, sur le
- * volume Docker `keneya_storage` — jamais sur un service cloud, la
+ * volume Docker `keneya_storage` : jamais sur un service cloud, la
  * connectivite du site ne le permet pas.
  */
 return new class extends Migration

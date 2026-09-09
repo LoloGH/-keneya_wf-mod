@@ -18,7 +18,7 @@ use Livewire\Component;
  * Encaissement pour un type de personnel generique (v3.2.1, point 10).
  *
  * A distinguer de l'interface /caisse : il ne s'agit pas de liberer une visite
- * en attente de paiement — ce mecanisme reste la propriete du role `cashier` —
+ * en attente de paiement, ce mecanisme reste la propriete du role `cashier`,
  * mais d'encaisser un acte realise dans son propre service.
  */
 class StaffPayments extends Component

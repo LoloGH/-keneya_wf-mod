@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Retours des patients et des visiteurs (v3.2.8, point 4).
  *
- * Une seule table pour les trois natures de retour — sondage, reclamation,
+ * Une seule table pour les trois natures de retour, sondage, reclamation,
  * constat : elles partagent le meme contexte (qui, quel service, quand) et le
  * meme cycle de traitement. Les separer aurait triple le travail de
  * l'administration pour la meme lecture.
@@ -56,14 +56,14 @@ return new class extends Migration
 
             // L'adresse de la page de retour du visiteur. Un UUID, jamais le
             // `visitor_code` ni l'id : l'URL ne doit pas se deviner de proche
-            // en proche. Pas de code a quatre chiffres en revanche — un
+            // en proche. Pas de code a quatre chiffres en revanche : un
             // visiteur n'a pas de dossier medical a proteger, et le contenu de
             // cette page n'est pas medical.
             $table->uuid('feedback_token')->nullable()->unique()->after('token');
 
             // Marque l'envoi du lien de retour, pour ne jamais le renvoyer deux
-            // fois. Renseignee meme quand aucun envoi n'a lieu — visiteur sans
-            // numero — pour que la tache planifiee cesse d'y revenir.
+            // fois. Renseignee meme quand aucun envoi n'a lieu, visiteur sans
+            // numero, pour que la tache planifiee cesse d'y revenir.
             $table->timestamp('feedback_link_sent_at')->nullable()->after('reason');
 
             $table->index('feedback_link_sent_at');

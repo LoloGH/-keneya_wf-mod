@@ -75,7 +75,7 @@ class SmsMessage extends Model
     }
 
     /**
-     * Les echecs des dernieres 24 h — le chiffre affiche en tete de la section
+     * Les echecs des dernieres 24 h : le chiffre affiche en tete de la section
      * « SMS » de l'administration, pour qu'une passerelle en panne se voie sans
      * avoir a ouvrir la liste.
      */

@@ -11,7 +11,7 @@
 | c'est $_SERVER que Laravel consulte EN PREMIER. PHPUnit, lui, n'ecrit que
 | dans putenv() et $_ENV. Resultat : `DB_CONNECTION=mysql` l'emportait, la
 | suite tournait sur la base de travail de la pile, et le premier test venu la
-| reconstruisait de zero — RefreshDatabase execute `migrate:fresh`.
+| reconstruisait de zero, RefreshDatabase execute `migrate:fresh`.
 |
 | Ce fichier remet phpunit.xml en position d'autorite, jusque dans $_SERVER.
 |

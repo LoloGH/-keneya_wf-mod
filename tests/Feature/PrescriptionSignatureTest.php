@@ -137,7 +137,7 @@ class PrescriptionSignatureTest extends TestCase
 
     /**
      * Le coeur du §4 du chantier v3.3.1 : l'ordonnance prend la forme du
-     * dossier medical, et garde la fonction que WorkFlow avait seul —
+     * dossier medical, et garde la fonction que WorkFlow avait seul,
      * signature du prescripteur, son cachet, celui de l'etablissement.
      */
     public function test_l_imprime_porte_la_signature_le_cachet_du_medecin_et_celui_de_l_hopital(): void
@@ -162,7 +162,7 @@ class PrescriptionSignatureTest extends TestCase
         // Les images doivent atteindre le papier : dompdf lit le disque, le
         // navigateur ne le peut pas, et l'imprime est ce que le medecin
         // signe. Chacune des trois doit donc figurer, encodee, sur la page
-        // imprimable — pas seulement etre trouvee sur le disque.
+        // imprimable : pas seulement etre trouvee sur le disque.
         $rendu = $this->actingAs($medecin->user)
             ->get(route('service.prescription.print', $ordonnance))
             ->assertOk()

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * Le lien ne perime jamais : c'est ce verrouillage temporaire, et non une
  * expiration, qui empeche d'essayer les 10 000 codes possibles. Il est
- * volontairement temporaire — un patient qui se trompe deux fois ne doit pas
+ * volontairement temporaire : un patient qui se trompe deux fois ne doit pas
  * se retrouver bloque a vie.
  */
 class PortalAccessAttempt extends Model

@@ -12,7 +12,7 @@ use Keneya\Dme\Models\ImagingOrder;
 /**
  * Demande d'imagerie, posee depuis /service (v3.3.1).
  *
- * La modalite est exigee — echographie, radiographie, scanner — parce qu'elle
+ * La modalite est exigee, echographie, radiographie, scanner, parce qu'elle
  * conditionne tout le reste : le service qui realise l'examen, sa duree, sa
  * facturation, et le compte rendu attendu. Une demande « imagerie » sans autre
  * precision n'aide personne au bout de la chaine.

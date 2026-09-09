@@ -17,7 +17,7 @@ use Livewire\WithPagination;
  * « Retours et incidents » (v3.2.8, point 4).
  *
  * Les trois natures de retour dans une meme liste, filtrable. Chaque entree
- * porte le contexte d'accueil de la personne — nom, telephone, service, date de
+ * porte le contexte d'accueil de la personne, nom, telephone, service, date de
  * passage : sans lui, il faudrait croiser a la main avec une autre page pour
  * savoir de qui l'on parle, et l'entree resterait inexploitable.
  */

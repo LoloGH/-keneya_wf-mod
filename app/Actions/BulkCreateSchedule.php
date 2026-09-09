@@ -24,7 +24,7 @@ class BulkCreateSchedule
     public function __construct(private readonly StaffNotifier $notifier) {}
 
     /**
-     * @param  array<int, int>  $weekdays  1 = lundi … 7 = dimanche (ISO-8601)
+     * @param  array<int, int>  $weekdays  1 = lundi ... 7 = dimanche (ISO-8601)
      * @return int nombre de creneaux crees
      */
     public function execute(
@@ -95,7 +95,7 @@ class BulkCreateSchedule
         Audit::log(
             Audit::EVENT_SCHEDULE_BULK,
             sprintf(
-                '%d creneau(x) genere(s) pour %s du %s au %s (%s–%s).',
+                '%d creneau(x) genere(s) pour %s du %s au %s (%s-%s).',
                 $crees,
                 $user->name,
                 $from->format('d/m/Y'),

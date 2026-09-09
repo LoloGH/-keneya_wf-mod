@@ -47,7 +47,7 @@ class DmeIntegrationServiceProvider extends ServiceProvider
      * (v3.2.2) : la capacite `can_access_dme`, cochee dans /admin. Un compte
      * qui ne la porte pas ne voit pas l'action « Dossier medical complet »
      * dans « Mes patients », et une URL du module tapee a la main lui est
-     * refusee par le meme critere — une seule regle, pas deux.
+     * refusee par le meme critere : une seule regle, pas deux.
      */
     public function boot(): void
     {
@@ -60,10 +60,10 @@ class DmeIntegrationServiceProvider extends ServiceProvider
         // L'en-tete des documents du module doit porter les coordonnees
         // saisies dans /admin, non celles du fichier de configuration : c'est
         // la que l'etablissement les tient a jour. Le module appelle ceci au
-        // rendu, jamais a l'amorcage — aucune requete ajoutee par page.
+        // rendu, jamais a l'amorcage : aucune requete ajoutee par page.
         // La porte de sortie du module (v3.3.1). On y entre depuis « Mes
         // patients » ; sans ce lien, on n'en ressort que par le bouton
-        // « precedent » du navigateur — ou par la deconnexion, ce qui est
+        // « precedent » du navigateur, ou par la deconnexion, ce qui est
         // pire. L'adresse depend du role, que le module ne connait pas.
         Dme::returnLinkUsing(fn ($user) => $user instanceof User ? [
             'label' => 'Retour a '.config('keneya.name'),
@@ -98,7 +98,7 @@ class DmeIntegrationServiceProvider extends ServiceProvider
      *
      * C'est l'autre moitie de la fusion decidee au §4 du chantier v3.3.1 :
      * l'ordonnance prend la forme du dossier medical, et la fonction que
-     * WorkFlow avait seul — apposer la signature du medecin, son cachet et
+     * WorkFlow avait seul, apposer la signature du medecin, son cachet et
      * celui de l'etablissement. Le module ne sait rien de tout cela ; il
      * demande, WorkFlow repond depuis ses propres tables.
      *

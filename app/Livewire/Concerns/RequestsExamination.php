@@ -13,7 +13,7 @@ use Keneya\Dme\Models\ImagingOrder;
  *
  * Le formulaire ne s'affiche pas de lui-meme : il suit la destination choisie.
  * Le medecin dit ou il envoie le patient, et l'application sait quoi lui
- * demander — l'echographie appelle une demande d'imagerie, le laboratoire une
+ * demander : l'echographie appelle une demande d'imagerie, le laboratoire une
  * demande d'analyses. C'est le service qui porte cette nature
  * ({@see Service::examKind()}), declaree par l'administrateur.
  *
@@ -104,7 +104,7 @@ trait RequestsExamination
 
     /**
      * La demande telle que l'action l'attend, ou nul quand la destination ne
-     * realise pas d'examen — le renvoi part alors seul, comme avant.
+     * realise pas d'examen : le renvoi part alors seul, comme avant.
      *
      * @return array<string, mixed>|null
      */

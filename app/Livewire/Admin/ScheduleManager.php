@@ -16,7 +16,7 @@ use Livewire\Component;
 
 /**
  * Gestion complete des plannings (addendum v2, point 8) : creation,
- * modification, suppression — exclusivement dans /admin.
+ * modification, suppression, exclusivement dans /admin.
  *
  * Chaque membre du personnel ne voit que le sien, en lecture seule, dans sa
  * propre interface.
@@ -50,7 +50,7 @@ class ScheduleManager extends Component
             'date' => ['required', 'date'],
             'start_time' => ['required', 'date_format:H:i'],
             // Pas de `after:start_time` : une fin anterieure au debut designe
-            // un creneau de nuit (22h – 06h), que l'hopital pratique et que
+            // un creneau de nuit (22h - 06h), que l'hopital pratique et que
             // OnDutyRoster sait desormais lire. Seule l'egalite reste exclue,
             // un creneau de duree nulle ne voulant rien dire.
             'end_time' => ['required', 'date_format:H:i', 'different:start_time'],
@@ -207,7 +207,7 @@ class ScheduleManager extends Component
     }
 
     /**
-     * Les creneaux affiches — une seule definition, partagee par le rendu et
+     * Les creneaux affiches, une seule definition, partagee par le rendu et
      * par la suppression groupee : elles doivent porter exactement sur le meme
      * ensemble.
      *
@@ -228,7 +228,7 @@ class ScheduleManager extends Component
     public function render(): View
     {
         // Meme source que la generation groupee : deux listes differentes sur
-        // le meme ecran finissaient forcement par diverger — celle-ci oubliait
+        // le meme ecran finissaient forcement par diverger, celle-ci oubliait
         // en plus les caissiers.
         $staff = User::staff()->orderBy('name')->get();
 
