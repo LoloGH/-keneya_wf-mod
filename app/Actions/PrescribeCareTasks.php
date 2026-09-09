@@ -6,9 +6,11 @@ use App\Models\CareTask;
 use App\Models\CareTaskType;
 use App\Models\Doctor;
 use App\Models\Hospitalization;
+use App\Models\StaffMember;
 use App\Models\User;
 use App\Services\StaffNotifier;
 use App\Support\Audit;
+use App\Support\Caregiver;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -34,7 +36,7 @@ class PrescribeCareTasks
     public function execute(
         Hospitalization $hospitalization,
         CareTaskType $type,
-        Doctor $doctor,
+        Doctor|StaffMember $doctor,
         Carbon $start,
         int $intervalHours,
         int $durationDays,
@@ -53,6 +55,8 @@ class PrescribeCareTasks
             throw new InvalidArgumentException('La duree doit valoir au moins un jour.');
         }
 
+        $agent = Caregiver::of($doctor);
+
         $fin = $start->copy()->addDays($durationDays);
         $occurrences = [];
 
@@ -67,13 +71,14 @@ class PrescribeCareTasks
             }
         }
 
-        DB::transaction(function () use ($occurrences, $hospitalization, $type, $doctor, $instructions, $assignedTo): void {
+        DB::transaction(function () use ($occurrences, $hospitalization, $type, $agent, $instructions, $assignedTo): void {
             foreach ($occurrences as $moment) {
                 CareTask::create([
                     'hospitalization_id' => $hospitalization->getKey(),
                     'care_task_type_id' => $type->getKey(),
                     'instructions' => $instructions,
-                    'prescribed_by_doctor_id' => $doctor->getKey(),
+                    'prescribed_by_doctor_id' => $agent->doctorId(),
+                    'prescribed_by_staff_member_id' => $agent->staffMemberId(),
                     'assigned_to_user_id' => $assignedTo?->getKey(),
                     'scheduled_at' => $moment,
                     'status' => CareTask::STATUS_PENDING,

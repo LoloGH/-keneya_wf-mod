@@ -50,7 +50,9 @@
         $peut(StaffType::CAP_PRESCRIBE)
             ? ['key' => 'consultation', 'icon' => 'soins', 'label' => 'Fin de consultation', 'view' => 'sections.service.consultation']
             : null,
-        $peut(StaffType::CAP_ADMIT_HOSPITALIZATION)
+        // Deux capacites pour un ecran : admettre, et prescrire des soins.
+        // Elles se cochent separement depuis la v3.3.1.
+        ($peut(StaffType::CAP_ADMIT_HOSPITALIZATION) || $peut(StaffType::CAP_PRESCRIBE_CARE))
             ? ['key' => 'hospitalisation', 'icon' => 'lit', 'label' => 'Patients hospitalises', 'view' => 'sections.service.hospitalizations']
             : null,
         ['key' => 'mes-patients', 'icon' => 'patient', 'label' => 'Mes patients', 'view' => 'sections.service.my-patients'],

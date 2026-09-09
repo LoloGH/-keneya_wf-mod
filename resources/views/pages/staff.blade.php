@@ -48,7 +48,11 @@
         $sections[] = ['key' => 'consultation', 'icon' => 'soins', 'label' => 'Fin de consultation', 'view' => 'sections.staff.consultation'];
     }
 
-    if ($serviceId && $peut(StaffType::CAP_ADMIT_HOSPITALIZATION)) {
+    // « Patients hospitalises » sert deux capacites : admettre, et prescrire
+    // des soins. Elles se cochent separement — admettre un patient et lui
+    // prescrire un traitement ne sont pas la meme decision — mais elles
+    // s'exercent sur le meme ecran.
+    if ($serviceId && ($peut(StaffType::CAP_ADMIT_HOSPITALIZATION) || $peut(StaffType::CAP_PRESCRIBE_CARE))) {
         $sections[] = ['key' => 'hospitalisation', 'icon' => 'lit', 'label' => 'Patients hospitalises', 'view' => 'sections.staff.hospitalizations'];
     }
 

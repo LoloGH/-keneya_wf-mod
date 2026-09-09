@@ -42,6 +42,17 @@ class StaffType extends Model
     /** Soins programmes des patients hospitalises (v3.2.1, point 11). */
     public const CAP_CARE_TASKS = 'has_care_tasks';
 
+    /**
+     * Prescrire des soins recurrents a un patient hospitalise (v3.3.1).
+     *
+     * Distincte de CAP_CARE_TASKS, qui execute, et de
+     * CAP_ADMIT_HOSPITALIZATION, qui admet : prescrire un traitement n'est ni
+     * l'un ni l'autre. Le droit etait jusqu'ici implicite — il venait avec
+     * l'hospitalisation — ce qui empechait un etablissement de dissocier les
+     * deux actes.
+     */
+    public const CAP_PRESCRIBE_CARE = 'can_prescribe_care';
+
     public const CAP_PRESCRIBE = 'can_prescribe';
 
     public const CAP_SCHEDULE_APPOINTMENT = 'can_schedule_appointment';
@@ -138,6 +149,10 @@ class StaffType extends Model
             'label' => 'Executer les soins programmes',
             'section' => 'Soins programmes des patients hospitalises',
         ],
+        self::CAP_PRESCRIBE_CARE => [
+            'label' => 'Prescrire des soins a un patient hospitalise',
+            'section' => 'Prescription de soins (dans « Patients hospitalises »)',
+        ],
         self::CAP_PRESCRIBE => [
             'label' => 'Rediger une ordonnance et une conclusion',
             'section' => 'Fin de consultation',
@@ -224,6 +239,7 @@ class StaffType extends Model
                 self::CAP_SCHEDULE_APPOINTMENT,
                 self::CAP_ADMIT_HOSPITALIZATION,
                 self::CAP_CARE_TASKS,
+                self::CAP_PRESCRIBE_CARE,
                 self::CAP_ACCESS_DME,
                 self::CAP_RECORD_CONSULTATION,
                 self::CAP_RECORD_HISTORY,

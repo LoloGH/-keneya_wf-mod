@@ -48,6 +48,13 @@ class DeleteStaffAccount
             ['referrals', 'from_staff_member_id', 'renvoi(s) envoye(s)'],
             ['referrals', 'completed_by_staff_member_id', 'resultat(s) de renvoi'],
             ['referrals', 'closed_by_staff_member_id', 'renvoi(s) cloture(s)'],
+            // Depuis la v3.3.1, un poste dedie fixe des rendez-vous, admet et
+            // prescrit : ses traces bloquent la suppression au meme titre que
+            // celles d'un medecin. Sans ces trois lignes, la suppression
+            // n'echouerait pas poliment — elle heurterait une cle etrangere.
+            ['appointments', 'staff_member_id', 'rendez-vous'],
+            ['hospitalizations', 'admitted_by_staff_member_id', 'hospitalisation(s)'],
+            ['care_tasks', 'prescribed_by_staff_member_id', 'soin(s) prescrit(s)'],
         ],
     ];
 

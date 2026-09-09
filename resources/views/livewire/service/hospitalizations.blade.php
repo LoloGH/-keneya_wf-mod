@@ -1,4 +1,5 @@
 <div class="stack">
+    @if ($peutHospitaliser)
     <section class="card">
         <h2 class="card__title">Hospitaliser un patient</h2>
 
@@ -50,6 +51,7 @@
             @endforeach
         @endif
     </section>
+    @endif
 
     <section class="card">
         <h2 class="card__title">Patients hospitalises ({{ $hospitalizations->count() }})</h2>
@@ -81,9 +83,11 @@
                             wire:click="showHandoff({{ $sejour->id }})">
                         {{ $viewingHandoffFor === $sejour->id ? 'Masquer les releves' : 'Notes de releve' }}
                     </button>
-                    <button type="button" class="btn btn--ghost"
-                            wire:click="discharge({{ $sejour->id }})"
-                            wire:confirm="Cloturer cette hospitalisation ?">Cloturer l'hospitalisation</button>
+                    @if ($peutHospitaliser)
+                        <button type="button" class="btn btn--ghost"
+                                wire:click="discharge({{ $sejour->id }})"
+                                wire:confirm="Cloturer cette hospitalisation ?">Cloturer l'hospitalisation</button>
+                    @endif
                 </div>
 
                 @if ($viewingHandoffFor === $sejour->id)

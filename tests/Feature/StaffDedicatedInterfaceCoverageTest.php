@@ -2,12 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Actions\AdmitPatient;
+use App\Actions\PrescribeCareTasks;
+use App\Actions\ReviseCareTask;
 use App\Livewire\Reception\PatientRegistrationForm;
 use App\Livewire\Reception\VisitorRegistrationForm;
 use App\Livewire\Service\ConsultationActions;
+use App\Livewire\Service\Hospitalizations;
 use App\Livewire\Service\MedicalBackground;
 use App\Livewire\Service\MedicalConsultation;
 use App\Livewire\Service\MedicalOrders;
+use App\Models\CareTask;
+use App\Models\CareTaskType;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Models\StaffMember;
@@ -294,18 +300,87 @@ class StaffDedicatedInterfaceCoverageTest extends TestCase
     }
 
     /**
-     * Prescrire un soin reste une decision medicale : la colonne
-     * `care_tasks.prescribed_by_doctor_id` n'admet qu'un medecin, et aucune
-     * capacite ne l'ouvre au personnel generique. Le bouton ne doit donc pas
-     * apparaitre — mieux vaut ne pas le montrer que le refuser au clic.
+     * Prescrire un soin est un acte attribuable (v3.3.1) : un poste dedie qui
+     * porte la capacite prescrit, et le soin est signe par lui — jamais par un
+     * medecin invente.
      */
-    public function test_le_personnel_generique_ne_prescrit_pas_de_soins(): void
+    public function test_un_personnel_generique_prescrit_des_soins(): void
     {
-        [$type, $user] = $this->echographiste();
+        [, $user, $service] = $this->echographiste();
+
+        $visit = $this->visiteAppelee($service);
+        $sejour = app(AdmitPatient::class)->execute($visit, $user->staffMember);
+        $type = CareTaskType::create(['name' => 'Pansement']);
+
+        Livewire::actingAs($user)
+            ->test(Hospitalizations::class, ['serviceId' => $service->getKey()])
+            ->call('startPrescription', $sejour->getKey())
+            ->set('careTaskTypeId', $type->getKey())
+            ->set('careStartsAt', now()->addHour()->format('Y-m-d\TH:i'))
+            ->set('careIntervalHours', 8)
+            ->set('careDurationDays', 1)
+            ->call('prescribe')
+            ->assertHasNoErrors();
+
+        $soin = CareTask::query()->latest('id')->first();
+
+        $this->assertNotNull($soin, "Le soin n'a pas ete prescrit.");
+        $this->assertNull($soin->prescribed_by_doctor_id, 'Un faux medecin a ete inscrit au dossier.');
+        $this->assertSame($user->staffMember->getKey(), (int) $soin->prescribed_by_staff_member_id);
+        $this->assertSame('Amadou Cisse', $soin->prescribedByName());
+    }
+
+    /**
+     * La capacite se coche a part : un compte qui admet sans porter la
+     * prescription ne voit pas le bouton, et ne peut pas l'appeler.
+     */
+    public function test_prescrire_un_soin_hors_capacite_est_refuse(): void
+    {
+        [$type, $user, $service] = $this->echographiste();
+
+        $type->update([
+            'capabilities' => array_values(array_diff(
+                array_keys(StaffType::CAPABILITIES),
+                [StaffType::CAP_PRESCRIBE_CARE],
+            )),
+        ]);
 
         $this->actingAs($user)
             ->get('/staff/'.$type->slug)
             ->assertOk()
             ->assertDontSee('Prescrire des soins');
+
+        Livewire::actingAs($user)
+            ->test(Hospitalizations::class, ['serviceId' => $service->getKey()])
+            ->call('prescribe')
+            ->assertForbidden();
+    }
+
+    /**
+     * Le prescripteur peut revenir sur son propre soin, qu'il soit medecin ou
+     * non : la regle compare des comptes, non des fiches de service.
+     */
+    public function test_le_prescripteur_generique_peut_corriger_son_soin(): void
+    {
+        [, $user, $service] = $this->echographiste();
+
+        $visit = $this->visiteAppelee($service);
+        $sejour = app(AdmitPatient::class)->execute($visit, $user->staffMember);
+        $type = CareTaskType::create(['name' => 'Pansement']);
+
+        app(PrescribeCareTasks::class)->execute(
+            hospitalization: $sejour,
+            type: $type,
+            doctor: $user->staffMember,
+            start: now()->addHour(),
+            intervalHours: 8,
+            durationDays: 1,
+        );
+
+        $soin = CareTask::query()->latest('id')->first();
+
+        app(ReviseCareTask::class)->cancel($soin, $user->fresh(), 'Erreur de saisie.');
+
+        $this->assertSame(CareTask::STATUS_CANCELLED, $soin->fresh()->status);
     }
 }

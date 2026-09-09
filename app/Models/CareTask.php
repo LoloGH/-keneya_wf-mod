@@ -37,6 +37,9 @@ class CareTask extends Model
         'care_task_type_id',
         'instructions',
         'prescribed_by_doctor_id',
+        // Le prescripteur quand ce n'est pas un medecin (v3.3.1) : l'une des
+        // deux colonnes est renseignee, jamais les deux.
+        'prescribed_by_staff_member_id',
         'assigned_to_user_id',
         'scheduled_at',
         'status',
@@ -69,6 +72,25 @@ class CareTask extends Model
     public function prescribedByDoctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class, 'prescribed_by_doctor_id');
+    }
+
+    public function prescribedByStaffMember(): BelongsTo
+    {
+        return $this->belongsTo(StaffMember::class, 'prescribed_by_staff_member_id');
+    }
+
+    /** Qui a prescrit ce soin, medecin ou personnel generique. */
+    public function prescribedByName(): ?string
+    {
+        return $this->prescribedByDoctor?->name() ?? $this->prescribedByStaffMember?->name();
+    }
+
+    /** Le compte du prescripteur, quel que soit son rattachement. */
+    public function prescriberUserId(): ?int
+    {
+        $id = $this->prescribedByDoctor?->user_id ?? $this->prescribedByStaffMember?->user_id;
+
+        return $id === null ? null : (int) $id;
     }
 
     public function assignedTo(): BelongsTo

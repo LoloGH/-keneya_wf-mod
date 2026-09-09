@@ -4,7 +4,6 @@ namespace App\Actions;
 
 use App\Models\CareTask;
 use App\Models\CareTaskType;
-use App\Models\Doctor;
 use App\Models\PatientHistory;
 use App\Models\StaffType;
 use App\Models\User;
@@ -127,9 +126,13 @@ class ReviseCareTask
     }
 
     /**
-     * Qui peut corriger ou annuler : le medecin qui a prescrit, ou un medecin
-     * du meme service porteur de la capacite d'hospitalisation — celui qui
-     * tient le service en son absence.
+     * Qui peut corriger ou annuler : celui qui a prescrit, ou quelqu'un du meme
+     * service porteur de la capacite de prescription — celui qui tient le
+     * service en son absence.
+     *
+     * Depuis la v3.3.1, « celui qui a prescrit » n'est plus forcement un
+     * medecin : un type de personnel dedie peut porter la capacite. On compare
+     * donc des comptes, non des fiches de service.
      *
      * Meme regle que partout ailleurs : l'acces se lit sur les capacites du
      * type de personnel, pas sur une liste de roles ecrite ici.
@@ -142,18 +145,20 @@ class ReviseCareTask
             throw new InvalidArgumentException('Cette hospitalisation est cloturee : ses soins ne bougent plus.');
         }
 
-        $prescripteur = Doctor::find($task->prescribed_by_doctor_id);
+        $task->loadMissing(['prescribedByDoctor', 'prescribedByStaffMember']);
 
-        if ($prescripteur && (int) $prescripteur->user_id === (int) $user->getKey()) {
+        if ($task->prescriberUserId() === (int) $user->getKey()) {
             return;
         }
 
-        $tientLeService = $user->hasCapability(StaffType::CAP_ADMIT_HOSPITALIZATION)
-            && $user->doctorFor($hospitalization->service_id) !== null;
+        $rattacheAuService = $user->doctorFor($hospitalization->service_id) !== null
+            || (int) ($user->staffMember?->service_id ?? 0) === (int) $hospitalization->service_id;
+
+        $tientLeService = $user->hasCapability(StaffType::CAP_PRESCRIBE_CARE) && $rattacheAuService;
 
         if (! $tientLeService) {
             throw new InvalidArgumentException(
-                'Seul le medecin prescripteur, ou un medecin du service en charge des hospitalisations, peut corriger ou annuler ce soin.'
+                'Seul le prescripteur, ou une personne du service habilitee a prescrire des soins, peut corriger ou annuler ce soin.'
             );
         }
     }

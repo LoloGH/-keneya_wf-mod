@@ -11,7 +11,6 @@ use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
 use App\Models\CareTask;
 use App\Models\CareTaskType;
-use App\Models\Doctor;
 use App\Models\Hospitalization;
 use App\Models\Room;
 use App\Models\StaffType;
@@ -89,9 +88,22 @@ class Hospitalizations extends Component
      * La section entiere est optionnelle : le composant refuse de se monter
      * si le type du compte ne porte pas la capacite.
      */
+    /**
+     * L'ecran sert deux capacites depuis la v3.3.1 : admettre un patient, et
+     * lui prescrire des soins. Elles se cochent separement — ce ne sont pas la
+     * meme decision — d'ou une porte d'entree qui accepte l'une ou l'autre.
+     *
+     * Chaque action garde la sienne : `admit()` exige l'hospitalisation,
+     * `prescribe()` la prescription. Ouvrir l'ecran n'accorde rien.
+     */
     public function mount(int $serviceId): void
     {
-        $this->assertCapability(StaffType::CAP_ADMIT_HOSPITALIZATION);
+        abort_unless(
+            auth()->user()?->hasCapability(StaffType::CAP_ADMIT_HOSPITALIZATION)
+                || auth()->user()?->hasCapability(StaffType::CAP_PRESCRIBE_CARE),
+            403,
+            'Cette action ne releve pas de votre fonction.',
+        );
 
         $this->serviceId = $this->assertOwnService($serviceId);
     }
@@ -128,6 +140,8 @@ class Hospitalizations extends Component
 
     public function admit(AdmitPatient $action): void
     {
+        $this->assertCapability(StaffType::CAP_ADMIT_HOSPITALIZATION);
+
         $this->validate([
             'admittingVisitId' => ['required', 'integer', 'exists:visits,id'],
             'roomId' => ['nullable', 'integer', 'exists:rooms,id'],
@@ -171,6 +185,10 @@ class Hospitalizations extends Component
 
     public function prescribe(PrescribeCareTasks $action): void
     {
+        // Masquer le bouton ne suffit pas : un composant Livewire s'appelle
+        // sans passer par l'ecran.
+        $this->assertCapability(StaffType::CAP_PRESCRIBE_CARE);
+
         $this->validate([
             'prescribingId' => ['required', 'integer', 'exists:hospitalizations,id'],
             'careTaskTypeId' => ['required', 'integer', 'exists:care_task_types,id'],
@@ -193,7 +211,7 @@ class Hospitalizations extends Component
             $crees = $action->execute(
                 hospitalization: $hospitalization,
                 type: CareTaskType::findOrFail($this->careTaskTypeId),
-                doctor: $this->currentDoctor(),
+                doctor: $this->currentAgent(),
                 start: Carbon::parse($this->careStartsAt),
                 intervalHours: $this->careIntervalHours,
                 durationDays: $this->careDurationDays,
@@ -340,6 +358,9 @@ class Hospitalizations extends Component
 
     public function discharge(int $hospitalizationId, DischargePatient $action): void
     {
+        // Faire sortir un patient releve de qui l'a admis, pas de qui prescrit.
+        $this->assertCapability(StaffType::CAP_ADMIT_HOSPITALIZATION);
+
         $hospitalization = Hospitalization::where('service_id', $this->serviceId)
             ->findOrFail($hospitalizationId);
 
@@ -378,12 +399,14 @@ class Hospitalizations extends Component
                 ->orderBy('name')
                 ->get(),
             'careTaskTypes' => CareTaskType::orderBy('name')->get(),
-            // Prescrire un soin reste une decision medicale : la colonne
-            // `care_tasks.prescribed_by_doctor_id` n'admet qu'un medecin, et
-            // aucune capacite ne l'ouvre au personnel generique. Un compte non
-            // medecin admet et fait sortir, mais ne prescrit pas — mieux vaut
-            // ne pas lui montrer le bouton que le lui refuser au clic.
-            'peutPrescrireDesSoins' => $this->currentAgent() instanceof Doctor,
+            // Prescrire un soin est un acte attribuable depuis la v3.3.1 :
+            // sa propre capacite, distincte d'admettre et d'executer. Un
+            // compte qui ne la porte pas ne voit pas le bouton — mieux vaut
+            // ne pas le montrer que le refuser au clic.
+            'peutPrescrireDesSoins' => auth()->user()->hasCapability(StaffType::CAP_PRESCRIBE_CARE),
+            // Admettre et faire sortir relevent de l'autre capacite : un
+            // compte qui ne fait que prescrire lit l'ecran sans y admettre.
+            'peutHospitaliser' => auth()->user()->hasCapability(StaffType::CAP_ADMIT_HOSPITALIZATION),
             // Les soins du sejour deplie : la liste complete, annules compris,
             // parce que le dossier garde tout — c'est le decompte qui les
             // ignore, pas l'affichage.

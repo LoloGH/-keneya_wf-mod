@@ -191,13 +191,24 @@ class StaffTypeCapabilitiesTest extends TestCase
     /** Un medecin dont le type n'a plus la capacite donnee. */
     private function makeDoctorWithout(string $capacite, Service $service): User
     {
+        return $this->makeDoctorSans([$capacite], $service);
+    }
+
+    /**
+     * Un medecin porteur de toutes les capacites optionnelles, sauf celles
+     * nommees. Plusieurs a la fois : un ecran peut en servir deux.
+     *
+     * @param  array<int, string>  $capacites
+     */
+    private function makeDoctorSans(array $capacites, Service $service): User
+    {
         $type = StaffType::create([
             'name' => 'Medecin restreint',
             'matched_role' => Roles::DOCTOR,
         ]);
         $type->update([
             'capabilities' => $type->normalizeCapabilities(
-                array_values(array_diff(StaffType::ROLE_CAPABILITIES[Roles::DOCTOR]['optional'], [$capacite])),
+                array_values(array_diff(StaffType::ROLE_CAPABILITIES[Roles::DOCTOR]['optional'], $capacites)),
             ),
         ]);
 
@@ -263,15 +274,45 @@ class StaffTypeCapabilitiesTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_l_hospitalisation_se_retire_avec_sa_capacite(): void
+    /**
+     * L'ecran « Patients hospitalises » sert deux capacites depuis la v3.3.1 :
+     * admettre, et prescrire des soins. Il ne disparait donc que si les deux
+     * sont decochees — et decocher la seule hospitalisation retire l'admission
+     * sans retirer l'ecran.
+     */
+    public function test_l_hospitalisation_se_retire_avec_ses_deux_capacites(): void
     {
         $service = Service::factory()->create();
-        $user = $this->makeDoctorWithout(StaffType::CAP_ADMIT_HOSPITALIZATION, $service);
+        $user = $this->makeDoctorSans(
+            [StaffType::CAP_ADMIT_HOSPITALIZATION, StaffType::CAP_PRESCRIBE_CARE],
+            $service,
+        );
 
         $this->actingAs($user)->get('/service')->assertDontSee('Patients hospitalises');
 
         Livewire::actingAs($user)
             ->test(Hospitalizations::class, ['serviceId' => $service->getKey()])
+            ->assertStatus(403);
+    }
+
+    /**
+     * Decocher la seule hospitalisation laisse l'ecran — le compte y prescrit
+     * encore — mais lui retire d'admettre, y compris sur appel direct.
+     */
+    public function test_sans_l_hospitalisation_le_prescripteur_garde_l_ecran_mais_n_admet_plus(): void
+    {
+        $service = Service::factory()->create();
+        $user = $this->makeDoctorWithout(StaffType::CAP_ADMIT_HOSPITALIZATION, $service);
+        $visit = $this->makeVisit($service, ['status' => Visit::STATUS_CALLED]);
+
+        $this->actingAs($user)->get('/service')->assertSee('Patients hospitalises');
+
+        Livewire::actingAs($user)
+            ->test(Hospitalizations::class, ['serviceId' => $service->getKey()])
+            ->assertOk()
+            ->assertDontSee('Hospitaliser un patient')
+            ->call('startAdmission', $visit->getKey())
+            ->call('admit')
             ->assertStatus(403);
     }
 

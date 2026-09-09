@@ -317,7 +317,7 @@ class CareTaskRevisionTest extends TestCase
             app(ReviseCareTask::class)->cancel($task, $ailleurs->user, 'Pas mon patient');
             $this->fail("L'annulation devait etre refusee.");
         } catch (InvalidArgumentException $e) {
-            $this->assertStringContainsString('Seul le medecin prescripteur', $e->getMessage());
+            $this->assertStringContainsString('Seul le prescripteur', $e->getMessage());
         }
 
         $this->assertSame(CareTask::STATUS_PENDING, $task->refresh()->status);
@@ -343,7 +343,7 @@ class CareTaskRevisionTest extends TestCase
         // Executer un soin et decider de son arret sont deux choses
         // differentes : marquer « manque » reste ouvert, annuler non.
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Seul le medecin prescripteur');
+        $this->expectExceptionMessage('Seul le prescripteur');
 
         app(ReviseCareTask::class)->cancel($task, $nurse, 'Je prefere pas');
     }
