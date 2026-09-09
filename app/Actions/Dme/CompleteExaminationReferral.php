@@ -6,6 +6,7 @@ use App\Actions\CompleteReferral;
 use App\Models\Doctor;
 use App\Models\Referral;
 use App\Models\StaffMember;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Keneya\Dme\Models\ImagingOrder;
@@ -13,14 +14,18 @@ use Keneya\Dme\Models\ImagingOrder;
 /**
  * Le technicien rend son resultat : au dossier, puis au prescripteur (v3.3.1).
  *
- * Trois choses en un geste, parce qu'elles n'ont de sens qu'ensemble :
+ * Quatre choses en un geste, parce qu'elles n'ont de sens qu'ensemble :
  *
- *  1. le compte rendu est verse au **dossier medical** du patient, ou il
- *     restera — et non en piece jointe d'un renvoi, qui n'est qu'un
- *     mouvement du parcours ;
- *  2. la demande d'examen passe de « demandee » a rendue, pour qu'elle cesse
+ *  1. la conclusion est ecrite **sur la demande elle-meme**, la ou le medecin
+ *     ira la relire : le compte rendu d'imagerie pour une echographie, la
+ *     conclusion du biologiste pour des analyses. Sans cela, la fiche de
+ *     l'examen resterait « compte rendu non redige » alors que le resultat
+ *     existe ;
+ *  2. les fichiers sont verses au **dossier medical**, rattaches a la demande
+ *     qu'ils documentent — sinon la fiche de l'examen les ignore ;
+ *  3. la demande passe de « demandee » a rendue, pour qu'elle cesse
  *     d'apparaitre comme en attente dans le dossier ;
- *  3. le renvoi est clos, ce qui **ramene le patient** dans la file du
+ *  4. le renvoi est clos, ce qui **ramene le patient** dans la file du
  *     medecin qui l'a envoye ({@see CompleteReferral}).
  *
  * Une seule transaction : un resultat verse au dossier sans que le patient
@@ -50,6 +55,7 @@ class CompleteExaminationReferral
     ): Referral {
         return DB::transaction(function () use ($referral, $completedBy, $resultText, $fichiers, $titre): Referral {
             $visit = $referral->visit()->firstOrFail();
+            $demande = $this->rendLaDemande($referral, $completedBy, $resultText);
 
             foreach ($fichiers as $fichier) {
                 $this->documents->execute(
@@ -58,10 +64,9 @@ class CompleteExaminationReferral
                     fichier: $fichier,
                     type: $this->typeDeDocument($referral),
                     titre: $titre,
+                    source: $demande,
                 );
             }
-
-            $this->marqueLaDemandeRendue($referral);
 
             // En dernier : c'est lui qui deplace le patient, et il ne doit
             // partir que si tout le reste a tenu.
@@ -84,25 +89,64 @@ class CompleteExaminationReferral
     }
 
     /**
-     * La demande cesse d'etre en attente.
+     * Ecrit la conclusion sur la demande et la marque rendue.
      *
-     * Les deux tables du module n'ont pas le meme vocabulaire de statut : une
-     * analyse devient « disponible », une imagerie « compte rendu
-     * disponible ». On respecte le leur plutot que d'en imposer un troisieme.
+     * Les deux tables du module n'ont ni le meme vocabulaire de statut ni la
+     * meme forme de compte rendu : une analyse devient « disponible » et porte
+     * sa conclusion sur la demande, une imagerie devient « compte rendu
+     * disponible » et la porte dans une table dediee, avec sa technique et son
+     * statut de redaction propres. On respecte leur vocabulaire plutot que
+     * d'en imposer un troisieme.
      *
      * Une demande introuvable — dossier purge, module remonte — n'interrompt
      * rien : le patient doit revenir chez son medecin quoi qu'il arrive.
      */
-    private function marqueLaDemandeRendue(Referral $referral): void
-    {
+    private function rendLaDemande(
+        Referral $referral,
+        Doctor|StaffMember $completedBy,
+        string $resultText,
+    ): ?Model {
         if ($demande = $referral->labOrder()->first()) {
-            $demande->update(['status' => 'available', 'completed_at' => now()]);
+            $demande->update([
+                'conclusion' => $resultText,
+                'status' => 'available',
+                'completed_at' => now(),
+            ]);
 
-            return;
+            return $demande;
         }
 
         if ($demande = $referral->imagingOrder()->first()) {
-            $demande->update(['status' => array_key_exists('reported', ImagingOrder::STATUSES) ? 'reported' : 'performed']);
+            $this->ecritLeCompteRendu($demande, $completedBy, $resultText);
+            $demande->update(['status' => 'reported']);
+
+            return $demande;
         }
+
+        return null;
+    }
+
+    /**
+     * Le compte rendu d'imagerie, cree ou repris.
+     *
+     * `findings` et `conclusion` recoivent le meme texte : le technicien saisit
+     * une conclusion unique depuis WorkFlow, et le gabarit du module n'affiche
+     * que les champs remplis. Les distinguer demanderait deux zones de saisie
+     * la ou une suffit — le radiologue qui veut detailler dispose du formulaire
+     * complet dans le module.
+     */
+    private function ecritLeCompteRendu(
+        ImagingOrder $demande,
+        Doctor|StaffMember $completedBy,
+        string $resultText,
+    ): void {
+        $demande->report()->updateOrCreate([], [
+            'patient_id' => $demande->patient_id,
+            'radiologist_id' => $completedBy->user_id,
+            'findings' => $resultText,
+            'conclusion' => $resultText,
+            'reported_at' => now(),
+            'status' => 'final',
+        ]);
     }
 }

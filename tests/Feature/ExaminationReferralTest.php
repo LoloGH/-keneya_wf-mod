@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Livewire\Service\IncomingReferrals;
 use App\Livewire\Service\ServiceQueue;
+use App\Models\Attachment;
 use App\Models\Patient;
 use App\Models\Referral;
 use App\Models\Service;
@@ -233,15 +234,26 @@ class ExaminationReferralTest extends TestCase
             ->call('submitResult')
             ->assertHasNoErrors();
 
-        // 1. Le compte rendu est au dossier medical, classe pour ce qu'il est.
+        // 1. Le compte rendu est au dossier medical, classe pour ce qu'il est,
+        //    et rattache a la demande : sans cela, la fiche de l'examen
+        //    l'ignorerait et le medecin verrait sa demande sans son resultat.
         $document = MedicalDocument::query()->latest('id')->first();
 
         $this->assertNotNull($document, "Le compte rendu n'est pas arrive au dossier medical.");
         $this->assertSame('imaging_report', $document->type);
         $this->assertSame('Compte rendu d\'echographie', $document->title);
+        $this->assertSame(ImagingOrder::class, $document->source_type);
+        $this->assertSame($referral->dme_imaging_order_id, (int) $document->source_id);
 
-        // 2. La demande cesse d'etre en attente.
-        $this->assertSame('reported', $referral->imagingOrder()->first()->status);
+        // 2. La conclusion est ecrite sur la demande elle-meme, la ou le
+        //    medecin ira la relire : la fiche ne doit plus dire « compte rendu
+        //    non redige » alors que le resultat existe.
+        $demande = $referral->imagingOrder()->with('report')->first();
+
+        $this->assertSame('reported', $demande->status);
+        $this->assertNotNull($demande->report, "La fiche d'imagerie reste sans compte rendu.");
+        $this->assertSame('Foie et voies biliaires sans particularite.', $demande->report->conclusion);
+        $this->assertSame($technicien->user_id, (int) $demande->report->radiologist_id);
 
         // 3. Le patient revient dans la file de celui qui l'a envoye.
         $this->assertSame(Referral::STATUS_DONE, $referral->refresh()->status);
@@ -282,8 +294,57 @@ class ExaminationReferralTest extends TestCase
             ->call('submitResult')
             ->assertHasNoErrors();
 
-        $this->assertSame('lab_result', MedicalDocument::query()->latest('id')->firstOrFail()->type);
-        $this->assertSame('available', $referral->labOrder()->first()->status);
+        $document = MedicalDocument::query()->latest('id')->firstOrFail();
+
+        $this->assertSame('lab_result', $document->type);
+        $this->assertSame(LabOrder::class, $document->source_type);
+        $this->assertSame($referral->dme_lab_order_id, (int) $document->source_id);
+
+        // La conclusion du biologiste vit sur la demande : elle n'appartient a
+        // aucune ligne de resultat en particulier.
+        $demande = $referral->labOrder()->first();
+
+        $this->assertSame('available', $demande->status);
+        $this->assertSame('Glycemie a 0,92 g/l.', $demande->conclusion);
+    }
+
+    /**
+     * Un compte rendu se regarde : PDF et images s'affichent dans le
+     * navigateur, sans laisser de copie du dossier sur le poste qui l'a
+     * consulte. Le telechargement reste offert a qui le demande.
+     */
+    public function test_une_piece_jointe_s_affiche_dans_le_navigateur(): void
+    {
+        Storage::fake('attachments');
+
+        $service = Service::factory()->create();
+        $doctor = $this->makeDoctor($service);
+        $visit = $this->makeVisit($service, ['status' => Visit::STATUS_CALLED]);
+
+        $piece = Attachment::create([
+            'patient_id' => $visit->patient_id,
+            'visit_id' => $visit->getKey(),
+            'uploaded_by_user_id' => $doctor->user_id,
+            'original_name' => 'echographie.jpg',
+            'path' => 'pieces/echographie.jpg',
+            'mime_type' => 'image/jpeg',
+            'size' => 1024,
+        ]);
+
+        Storage::disk('attachments')->put($piece->path, 'contenu');
+
+        $reponse = $this->actingAs($doctor->user)
+            ->get(route('service.attachment', $piece))
+            ->assertOk();
+
+        $this->assertStringStartsWith('inline', $reponse->headers->get('Content-Disposition'));
+        $this->assertSame('nosniff', $reponse->headers->get('X-Content-Type-Options'));
+
+        // Le telechargement reste possible, mais sur demande explicite.
+        $this->actingAs($doctor->user)
+            ->get(route('service.attachment', $piece).'?telecharger=1')
+            ->assertOk()
+            ->assertHeader('Content-Disposition', 'attachment; filename=echographie.jpg');
     }
 
     /**

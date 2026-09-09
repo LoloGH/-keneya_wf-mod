@@ -71,6 +71,34 @@ class Attachment extends Model
         return $this->belongsTo(User::class, 'uploaded_by_user_id');
     }
 
+    /**
+     * Les types dont l'apercu integre est sur.
+     *
+     * Liste blanche, et non « tout sauf » : une piece jointe arrive par
+     * televersement, et servir un HTML ou un SVG en ligne reviendrait a
+     * executer du script de l'utilisateur sur le domaine de l'application.
+     *
+     * @var array<int, string>
+     */
+    public const PREVIEWABLE_MIMES = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+    ];
+
+    /**
+     * Cette piece se regarde-t-elle dans le navigateur, sans telechargement ?
+     *
+     * Obliger a telecharger pour lire laisse une copie du dossier sur chaque
+     * poste qui l'a consultee — dans un hopital, sur des postes partages.
+     */
+    public function isPreviewable(): bool
+    {
+        return in_array((string) $this->mime_type, self::PREVIEWABLE_MIMES, true);
+    }
+
     public function isImage(): bool
     {
         return str_starts_with($this->mime_type, 'image/');

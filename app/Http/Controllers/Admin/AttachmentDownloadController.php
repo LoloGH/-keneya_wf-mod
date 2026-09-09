@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
-use Illuminate\Support\Facades\Storage;
+use App\Support\AttachmentResponse;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -15,10 +16,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class AttachmentDownloadController extends Controller
 {
-    public function __invoke(Attachment $attachment): StreamedResponse
+    public function __invoke(Request $request, Attachment $attachment): StreamedResponse
     {
-        abort_unless(Storage::disk('attachments')->exists($attachment->path), 404);
-
-        return Storage::disk('attachments')->download($attachment->path, $attachment->original_name);
+        return AttachmentResponse::for($attachment, $request->boolean('telecharger'));
     }
 }

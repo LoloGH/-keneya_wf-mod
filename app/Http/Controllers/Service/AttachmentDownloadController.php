@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Service;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
+use App\Support\AttachmentResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -33,8 +33,7 @@ class AttachmentDownloadController extends Controller
         }
 
         abort_unless($allowed, 403, 'Cette piece jointe ne releve pas de vos services.');
-        abort_unless(Storage::disk('attachments')->exists($attachment->path), 404);
 
-        return Storage::disk('attachments')->download($attachment->path, $attachment->original_name);
+        return AttachmentResponse::for($attachment, $request->boolean('telecharger'));
     }
 }
