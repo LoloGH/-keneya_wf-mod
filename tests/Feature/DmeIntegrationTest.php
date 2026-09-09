@@ -8,6 +8,7 @@ use App\Livewire\Service\MyPatients;
 use App\Models\Patient;
 use App\Models\PatientHistory;
 use App\Models\Service;
+use App\Models\Setting;
 use App\Models\SmsMessage;
 use App\Models\StaffType;
 use App\Models\User;
@@ -125,6 +126,44 @@ class DmeIntegrationTest extends TestCase
         // La porte du module (`dme.access`) rend le meme verdict que
         // l'interface : c'est HostAccessGate qui interroge WorkFlow.
         $this->actingAs($medecin)->get(route('dme.home'))->assertForbidden();
+    }
+
+    /**
+     * Le module porte le nom de l'etablissement, pas celui de son fichier de
+     * configuration (v3.3.1).
+     *
+     * Il affichait « Centre Hospitalier Keneya », valeur d'exemple livree avec
+     * le paquet, pendant que l'etablissement s'appelait autrement dans
+     * /admin. Deux noms pour un seul hopital, sur des ecrans que le meme
+     * praticien enchaine.
+     */
+    public function test_le_module_affiche_le_nom_de_l_etablissement_de_workflow(): void
+    {
+        Setting::put(Setting::HOSPITAL_NAME, 'Hopital Fousseyni Daou');
+
+        $admin = $this->makeAdmin();
+
+        $this->actingAs($admin)
+            ->get(route('dme.dashboard'))
+            ->assertOk()
+            ->assertSee('Hopital Fousseyni Daou')
+            ->assertDontSee(config('dme.facility.name'));
+    }
+
+    /**
+     * La mention de demonstration n'a rien a faire sur un dossier reel.
+     *
+     * Elle reste par defaut dans le module — un jeu d'essai pris pour un vrai
+     * dossier serait plus grave que l'inverse — et l'exploitant la leve. Ici,
+     * l'assemblage la leve.
+     */
+    public function test_le_module_ne_dit_pas_que_les_donnees_sont_fictives(): void
+    {
+        $this->actingAs($this->makeAdmin())
+            ->get(route('dme.dashboard'))
+            ->assertOk()
+            ->assertDontSee('Donnees de demonstration')
+            ->assertDontSee('Données de démonstration', escape: false);
     }
 
     /**
