@@ -9,7 +9,7 @@
 
         <div class="field">
             <label for="service-kind">Type</label>
-            <select id="service-kind" wire:model="service_kind_id">
+            <select id="service-kind" wire:model.live="service_kind_id">
                 <option value="">— Choisir un type —</option>
                 @foreach ($kinds as $kind)
                     <option value="{{ $kind->id }}">
@@ -19,6 +19,28 @@
             </select>
             @error('service_kind_id') <p class="field__error">{{ $message }}</p> @enderror
         </div>
+
+        {{-- Ce que realise un plateau technique (v3.3.1). C'est ce champ qui
+             fait apparaitre le bon formulaire de demande quand un medecin y
+             envoie un patient : un nom de service ne se devine pas. Il ne
+             s'affiche que pour un plateau technique — ailleurs il n'a pas de
+             sens, et la valeur est effacee a l'enregistrement. --}}
+        @if ($this->estPlateauTechnique())
+            <div class="field">
+                <label for="exam-kind">Examens realises</label>
+                <select id="exam-kind" wire:model="exam_kind">
+                    <option value="">— Aucun formulaire de demande —</option>
+                    @foreach (\App\Models\Service::EXAM_KINDS as $cle => $libelle)
+                        <option value="{{ $cle }}">{{ $libelle }}</option>
+                    @endforeach
+                </select>
+                <p class="hint">
+                    Le medecin qui envoie un patient ici remplira la demande
+                    correspondante, et elle partira avec lui.
+                </p>
+                @error('exam_kind') <p class="field__error">{{ $message }}</p> @enderror
+            </div>
+        @endif
 
         <div class="btn-row">
             <button type="submit" class="btn btn--primary">
@@ -36,6 +58,7 @@
                 <tr>
                     <th>Service</th>
                     <th>Type</th>
+                    <th>Examens</th>
                     <th>Medecins</th>
                     <th>Passages</th>
                     <th></th>
@@ -46,6 +69,7 @@
                     <tr>
                         <td>{{ $service->name }}</td>
                         <td>{{ $service->kindLabel() }}</td>
+                        <td>{{ $service->examKindLabel() ?? '—' }}</td>
                         <td class="mono">{{ $service->doctors_count }}</td>
                         <td class="mono">{{ $service->visits_count }}</td>
                         <td>
@@ -60,7 +84,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="empty">Aucun service.</td></tr>
+                    <tr><td colspan="6" class="empty">Aucun service.</td></tr>
                 @endforelse
             </tbody>
         </table>

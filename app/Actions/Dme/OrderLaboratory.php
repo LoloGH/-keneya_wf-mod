@@ -27,6 +27,15 @@ class OrderLaboratory
     use ResolvesMedicalRecord;
 
     /** @var array<string, string> */
+    /**
+     * Garde-fou : une demande ne porte pas quarante analyses.
+     *
+     * Ici plutot que dans le formulaire : la borne appartient a l'acte, non a
+     * l'ecran qui le saisit — et un gabarit Blade ne peut pas lire une
+     * constante de trait.
+     */
+    public const MAX_ANALYSES = 15;
+
     public const PRIORITIES = [
         'routine' => 'Courante',
         'urgent' => 'Urgente',

@@ -26,8 +26,11 @@ class ServiceSeeder extends Seeder
             ['name' => 'Urgences', 'slug' => ServiceKind::SLUG_CLINIQUE],
             ['name' => 'Maternite', 'slug' => ServiceKind::SLUG_CLINIQUE],
             ['name' => 'Administration', 'slug' => ServiceKind::SLUG_CLINIQUE],
-            ['name' => 'Echographie', 'slug' => ServiceKind::SLUG_PLATEAU_TECHNIQUE],
-            ['name' => 'Laboratoire', 'slug' => ServiceKind::SLUG_PLATEAU_TECHNIQUE],
+            // Les deux plateaux declarent ce qu'ils realisent : c'est ce qui
+            // fait apparaitre le bon formulaire de demande quand un medecin y
+            // envoie un patient (v3.3.1).
+            ['name' => 'Echographie', 'slug' => ServiceKind::SLUG_PLATEAU_TECHNIQUE, 'exam' => Service::EXAM_IMAGING],
+            ['name' => 'Laboratoire', 'slug' => ServiceKind::SLUG_PLATEAU_TECHNIQUE, 'exam' => Service::EXAM_LABORATORY],
 
             // Les deux caisses sont des services a part entiere : meme file,
             // meme token, meme « Appeler le suivant ».
@@ -39,10 +42,18 @@ class ServiceSeeder extends Seeder
         ];
 
         foreach ($services as $service) {
-            Service::firstOrCreate(
+            $ligne = Service::firstOrCreate(
                 ['name' => $service['name']],
                 ['service_kind_id' => $types[$service['slug']]],
             );
+
+            // `firstOrCreate` ne touche pas a une ligne existante : la nature
+            // des examens est posee a part, pour qu'un etablissement installe
+            // avant la v3.3.1 la recoive aussi. Une valeur deja choisie par
+            // l'administrateur n'est jamais ecrasee.
+            if (isset($service['exam']) && $ligne->exam_kind === null) {
+                $ligne->forceFill(['exam_kind' => $service['exam']])->saveQuietly();
+            }
         }
     }
 }

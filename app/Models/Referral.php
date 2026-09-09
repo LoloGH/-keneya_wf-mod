@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Keneya\Dme\Models\ImagingOrder as DemandeImagerie;
+use Keneya\Dme\Models\LabOrder as DemandeAnalyses;
 
 class Referral extends Model
 {
@@ -34,6 +36,11 @@ class Referral extends Model
         'from_service_id',
         'to_service_id',
         'billable_item_id',
+        // La demande d'examen que ce renvoi transporte (v3.3.1). L'une des
+        // deux au plus : un renvoi ne demande pas a la fois des analyses et
+        // une echographie — ce sont deux plateaux, donc deux renvois.
+        'dme_lab_order_id',
+        'dme_imaging_order_id',
         'from_doctor_id',
         'from_staff_member_id',
         'completed_by_doctor_id',
@@ -74,6 +81,39 @@ class Referral extends Model
     public function visit(): BelongsTo
     {
         return $this->belongsTo(Visit::class);
+    }
+
+    /**
+     * La demande d'analyses que ce renvoi transporte (v3.3.1).
+     *
+     * Sans cle etrangere en base — la table appartient au module — donc une
+     * reference orpheline ramene simplement `null`, ce qui se lit « pas de
+     * demande attachee ».
+     */
+    public function labOrder(): BelongsTo
+    {
+        return $this->belongsTo(DemandeAnalyses::class, 'dme_lab_order_id');
+    }
+
+    public function imagingOrder(): BelongsTo
+    {
+        return $this->belongsTo(DemandeImagerie::class, 'dme_imaging_order_id');
+    }
+
+    /**
+     * La demande attachee, quelle qu'en soit la nature, ou nul.
+     *
+     * Un renvoi n'en porte qu'une au plus : demander des analyses **et** une
+     * echographie, ce sont deux plateaux, donc deux renvois.
+     */
+    public function examinationOrder(): DemandeAnalyses|DemandeImagerie|null
+    {
+        return $this->labOrder ?? $this->imagingOrder;
+    }
+
+    public function carriesExamination(): bool
+    {
+        return $this->dme_lab_order_id !== null || $this->dme_imaging_order_id !== null;
     }
 
     public function fromService(): BelongsTo

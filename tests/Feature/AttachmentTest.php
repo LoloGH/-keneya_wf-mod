@@ -15,6 +15,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
+use Keneya\Dme\Models\MedicalDocument;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -36,8 +37,19 @@ class AttachmentTest extends TestCase
         $this->mock(SmsGateway::class)->shouldReceive('deliver')->andReturn(SmsSendResult::sent());
     }
 
-    public function test_une_piece_jointe_accompagne_le_resultat_d_un_renvoi(): void
+    /**
+     * Depuis la v3.3.1, le compte rendu d'un renvoi part au **dossier medical**
+     * du patient, ou il restera — et non en piece jointe du renvoi, qui n'est
+     * qu'un mouvement du parcours. Le prescripteur lit la conclusion dans sa
+     * frise ; le fichier, lui, appartient au dossier.
+     *
+     * Les pieces jointes de WorkFlow demeurent pour ce qui accompagne un
+     * passage : elles se deposent depuis « Mes patients » et le dossier.
+     */
+    public function test_le_compte_rendu_d_un_renvoi_part_au_dossier_medical(): void
     {
+        Storage::fake(config('dme.documents.disk', 'local'));
+
         [$referral, $technicien] = $this->pendingReferral();
 
         Livewire::actingAs($technicien->user)
@@ -48,13 +60,10 @@ class AttachmentTest extends TestCase
             ->call('submitResult')
             ->assertHasNoErrors();
 
-        $attachment = Attachment::firstOrFail();
+        $document = MedicalDocument::firstOrFail();
 
-        $this->assertSame('echographie.jpg', $attachment->original_name);
-        $this->assertSame($referral->getKey(), $attachment->referral_id);
-        $this->assertSame($referral->visit_id, $attachment->visit_id);
-        $this->assertSame($technicien->user_id, $attachment->uploaded_by_user_id);
-        Storage::disk('attachments')->assertExists($attachment->path);
+        $this->assertSame($technicien->user_id, (int) $document->uploaded_by);
+        $this->assertSame(0, Attachment::count(), 'Le compte rendu ne doit pas doubler en piece jointe.');
     }
 
     public function test_un_type_de_fichier_non_autorise_est_refuse_cote_serveur(): void
@@ -94,11 +103,12 @@ class AttachmentTest extends TestCase
             ->test(IncomingReferrals::class, ['serviceId' => $technicien->service_id])
             ->call('startAnswer', $referral->getKey())
             ->set('resultText', 'Resultat.')
-            ->set('files', [UploadedFile::fake()->create('note.txt', 5, 'text/plain')])
+            // Un executable : ni le dossier medical ni WorkFlow n'en veulent.
+            ->set('files', [UploadedFile::fake()->create('script.php', 5, 'application/x-php')])
             ->call('submitResult')
             ->assertHasErrors('files.0');
 
-        $this->assertSame(0, Attachment::count());
+        $this->assertSame(0, MedicalDocument::count());
     }
 
     public function test_un_medecin_etranger_au_dossier_ne_telecharge_pas_la_piece_jointe(): void

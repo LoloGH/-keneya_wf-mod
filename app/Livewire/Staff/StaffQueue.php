@@ -4,7 +4,8 @@ namespace App\Livewire\Staff;
 
 use App\Actions\CallNextPatient;
 use App\Actions\CloseVisit;
-use App\Actions\SendReferral;
+use App\Actions\Dme\ReferForExamination;
+use App\Livewire\Concerns\RequestsExamination;
 use App\Models\BillableItem;
 use App\Models\Service;
 use App\Models\StaffMember;
@@ -27,6 +28,8 @@ use Livewire\Component;
  */
 class StaffQueue extends Component
 {
+    use RequestsExamination;
+
     /** Visite selectionnee pour un renvoi. */
     public ?int $referringVisitId = null;
 
@@ -98,46 +101,74 @@ class StaffQueue extends Component
         $this->toServiceId = null;
         $this->billableItemId = null;
         $this->instructions = '';
+        $this->resetExamination();
         $this->resetValidation();
     }
 
     public function cancelReferral(): void
     {
         $this->reset(['referringVisitId', 'toServiceId', 'billableItemId', 'instructions']);
+        $this->resetExamination();
         $this->resetValidation();
     }
 
-    /** Changer de destination change la liste des actes proposes. */
+    /**
+     * Changer de destination change la liste des actes proposes, et la demande
+     * d'examen : elle suit le plateau choisi, jamais celui qu'on quitte.
+     */
     public function updatedToServiceId(): void
     {
         $this->billableItemId = null;
+        $this->resetExamination();
     }
 
-    public function sendReferral(SendReferral $action): void
+    /**
+     * Le renvoi emporte la demande d'examen quand la destination en realise
+     * (v3.3.1) : meme geste et meme formulaire que dans l'interface medecin.
+     */
+    public function sendReferral(ReferForExamination $action): void
     {
         $this->assertCan(StaffType::CAP_SEND_REFERRAL);
+
+        // Le service est lu avant la validation : c'est lui qui decide quelles
+        // regles s'appliquent.
+        $toService = Service::with('serviceKind')->find($this->toServiceId);
 
         $this->validate([
             'referringVisitId' => ['required', 'integer', 'exists:visits,id'],
             'toServiceId' => ['required', 'integer', 'exists:services,id'],
             'billableItemId' => ['nullable', 'integer', 'exists:billable_items,id'],
             'instructions' => ['required', 'string', 'min:3', 'max:2000'],
+            ...$this->examinationRules($toService),
         ], attributes: [
             'referringVisitId' => 'patient',
             'toServiceId' => 'service destinataire',
             'billableItemId' => 'acte demande',
             'instructions' => 'instructions',
+            'examPriority' => 'priorite',
+            'examIndication' => 'indication',
+            'examModality' => 'modalite',
+            'examBodySite' => 'region examinee',
         ]);
+
+        if ($capacite = $this->examinationCapability($toService)) {
+            $this->assertCan($capacite);
+        }
+
+        if (! $this->examinationIsComplete($toService)) {
+            return;
+        }
 
         $visit = $this->visitInMyService($this->referringVisitId);
 
         try {
             $action->execute(
-                $visit,
-                $this->member(),
-                Service::findOrFail($this->toServiceId),
-                $this->instructions,
-                $this->billableItemId ? BillableItem::find($this->billableItemId) : null,
+                visit: $visit,
+                fromDoctor: $this->member(),
+                toService: $toService,
+                instructions: $this->instructions,
+                billableItem: $this->billableItemId ? BillableItem::find($this->billableItemId) : null,
+                examen: $this->examinationPayload($toService),
             );
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['toServiceId' => $e->getMessage()]);
@@ -203,6 +234,9 @@ class StaffQueue extends Component
             'actes' => $this->toServiceId
                 ? BillableItem::forService((int) $this->toServiceId)->orderBy('name')->get()
                 : collect(),
+            'examKind' => $this->toServiceId
+                ? Service::with('serviceKind')->find($this->toServiceId)?->examKind()
+                : null,
         ]);
     }
 }

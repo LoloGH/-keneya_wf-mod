@@ -11,11 +11,12 @@ use App\Livewire\Service\ConsultationActions;
 use App\Livewire\Service\Hospitalizations;
 use App\Livewire\Service\MedicalBackground;
 use App\Livewire\Service\MedicalConsultation;
-use App\Livewire\Service\MedicalOrders;
+use App\Livewire\Staff\StaffQueue;
 use App\Models\CareTask;
 use App\Models\CareTaskType;
 use App\Models\Patient;
 use App\Models\Service;
+use App\Models\ServiceKind;
 use App\Models\StaffMember;
 use App\Models\StaffType;
 use App\Models\User;
@@ -192,17 +193,33 @@ class StaffDedicatedInterfaceCoverageTest extends TestCase
         $this->assertSame($user->getKey(), (int) $consultation->doctor_id);
     }
 
+    /**
+     * Depuis la v3.3.1, demander un examen c'est envoyer le patient le faire :
+     * le formulaire vit dans le renvoi. Un poste dedie doit donc pouvoir
+     * adresser une demande, comme un medecin.
+     */
     public function test_un_personnel_generique_demande_une_imagerie(): void
     {
         [, $user, $service] = $this->echographiste();
         $visit = $this->visiteAppelee($service);
 
+        $plateau = Service::factory()->create([
+            'name' => 'Radiologie',
+            'service_kind_id' => ServiceKind::firstOrCreate(
+                ['slug' => ServiceKind::SLUG_PLATEAU_TECHNIQUE],
+                ['name' => 'Plateau technique'],
+            )->getKey(),
+            'exam_kind' => Service::EXAM_IMAGING,
+        ]);
+
         Livewire::actingAs($user)
-            ->test(MedicalOrders::class, ['serviceId' => $service->getKey()])
-            ->set('visitId', $visit->getKey())
-            ->set('modality', 'ultrasound')
-            ->set('bodySite', 'Abdomen')
-            ->call('saveImagingOrder')
+            ->test(StaffQueue::class)
+            ->call('startReferral', $visit->getKey())
+            ->set('toServiceId', $plateau->getKey())
+            ->set('examModality', 'ultrasound')
+            ->set('examBodySite', 'Abdomen')
+            ->set('instructions', 'Douleur du flanc droit.')
+            ->call('sendReferral')
             ->assertHasNoErrors();
 
         $demande = ImagingOrder::query()->latest('id')->first();

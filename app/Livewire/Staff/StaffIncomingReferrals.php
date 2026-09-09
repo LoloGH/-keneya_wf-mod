@@ -2,7 +2,8 @@
 
 namespace App\Livewire\Staff;
 
-use App\Actions\CompleteReferral;
+use App\Actions\Dme\CompleteExaminationReferral;
+use App\Actions\Dme\StoreMedicalDocument;
 use App\Models\Referral;
 use App\Models\StaffMember;
 use App\Models\StaffType;
@@ -12,18 +13,33 @@ use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 /**
  * Renvois recus par un type de personnel generique (v3.2.1, point 10).
  *
- * Meme Action que cote medecin : saisir le resultat renvoie le patient dans la
- * file du prescripteur, sans repasser par la caisse.
+ * Meme Action que cote medecin : le compte rendu part au dossier medical du
+ * patient, la demande d'examen cesse d'etre en attente, et le patient repart
+ * dans la file du prescripteur — sans repasser par la caisse.
+ *
+ * C'est ici qu'arrive le technicien du plateau technique : le renvoi lui
+ * montre ce qu'on lui demande (v3.3.1), et il verse son compte rendu au
+ * dossier sans changer d'ecran.
  */
 class StaffIncomingReferrals extends Component
 {
+    use WithFileUploads;
+
     public ?int $answeringReferralId = null;
 
     public string $resultText = '';
+
+    /** @var array<int, TemporaryUploadedFile> */
+    public array $files = [];
+
+    /** Titre du compte rendu au dossier. Facultatif : le module en pose un. */
+    public string $documentTitle = '';
 
     /**
      * La capacite est verifiee des le montage, pas seulement a l'action : un
@@ -54,35 +70,56 @@ class StaffIncomingReferrals extends Component
     {
         $this->answeringReferralId = $referralId;
         $this->resultText = '';
+        $this->files = [];
+        $this->documentTitle = '';
         $this->resetValidation();
     }
 
     public function cancel(): void
     {
-        $this->reset(['answeringReferralId', 'resultText']);
+        $this->reset(['answeringReferralId', 'resultText', 'files', 'documentTitle']);
         $this->resetValidation();
     }
 
-    public function submitResult(CompleteReferral $action): void
+    public function submitResult(CompleteExaminationReferral $action, StoreMedicalDocument $documents): void
     {
         $member = $this->member();
 
         $this->validate([
             'answeringReferralId' => ['required', 'integer', 'exists:referrals,id'],
             'resultText' => ['required', 'string', 'min:3', 'max:5000'],
-        ], attributes: ['answeringReferralId' => 'renvoi', 'resultText' => 'resultat']);
+            'documentTitle' => ['nullable', 'string', 'max:255'],
+            'files' => ['array', 'max:5'],
+            'files.*' => [
+                'file',
+                'max:'.$documents->maxSizeKb(),
+                'mimes:'.implode(',', $documents->allowedExtensions()),
+            ],
+        ], attributes: [
+            'answeringReferralId' => 'renvoi',
+            'resultText' => 'resultat',
+            'documentTitle' => 'titre du compte rendu',
+            'files' => 'comptes rendus',
+        ]);
 
         // Un renvoi adresse a un autre service n'existe pas de mon point de vue.
-        $referral = Referral::where('to_service_id', $member->service_id)
+        $referral = Referral::with('visit')
+            ->where('to_service_id', $member->service_id)
             ->findOrFail($this->answeringReferralId);
 
         try {
-            $action->execute($referral, $member, $this->resultText);
+            $action->execute(
+                referral: $referral,
+                completedBy: $member,
+                resultText: $this->resultText,
+                fichiers: $this->files,
+                titre: $this->documentTitle ?: null,
+            );
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['resultText' => $e->getMessage()]);
         }
 
-        session()->flash('staff.status', 'Resultat saisi : le patient repart vers le service prescripteur.');
+        session()->flash('staff.status', 'Resultat verse au dossier : le patient repart vers le service prescripteur.');
 
         $this->cancel();
         $this->dispatch('file-mise-a-jour');
@@ -94,7 +131,11 @@ class StaffIncomingReferrals extends Component
 
         return view('livewire.staff.staff-incoming-referrals', [
             'referrals' => Referral::query()
-                ->with(['patient', 'fromService', 'fromDoctor.user', 'fromStaffMember.user'])
+                ->with([
+                    'patient', 'fromService', 'fromDoctor.user', 'fromStaffMember.user',
+                    // La demande arrive avec le patient : elle se lit ici.
+                    'labOrder.items', 'imagingOrder',
+                ])
                 ->where('to_service_id', $member->service_id)
                 ->where('status', Referral::STATUS_PENDING)
                 ->orderBy('id')

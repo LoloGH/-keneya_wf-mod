@@ -24,6 +24,14 @@ class ServiceManager extends Component
     /** Le type est desormais une ligne administrable, plus une valeur d'enum. */
     public ?int $service_kind_id = null;
 
+    /**
+     * Ce que realise un plateau technique : des analyses, de l'imagerie, ou
+     * rien (v3.3.1). C'est ce qui fait apparaitre le bon formulaire de demande
+     * quand un medecin y envoie un patient — un nom de service ne se devine
+     * pas, l'etablissement le declare.
+     */
+    public ?string $exam_kind = null;
+
     #[On('types-de-service-mis-a-jour')]
     public function refreshKinds(): void
     {
@@ -41,6 +49,7 @@ class ServiceManager extends Component
             // peut avoir besoin d'un troisieme guichet, et le masquer ne
             // faisait qu'empecher de le declarer.
             'service_kind_id' => ['required', 'integer', 'exists:service_kinds,id'],
+            'exam_kind' => ['nullable', 'in:'.implode(',', array_keys(Service::EXAM_KINDS))],
         ];
     }
 
@@ -49,7 +58,11 @@ class ServiceManager extends Component
      */
     protected function validationAttributes(): array
     {
-        return ['name' => 'nom du service', 'service_kind_id' => 'type de service'];
+        return [
+            'name' => 'nom du service',
+            'service_kind_id' => 'type de service',
+            'exam_kind' => 'examens realises',
+        ];
     }
 
     public function edit(int $serviceId): void
@@ -59,18 +72,26 @@ class ServiceManager extends Component
         $this->editingId = $service->getKey();
         $this->name = $service->name;
         $this->service_kind_id = $service->service_kind_id;
+        $this->exam_kind = $service->exam_kind;
         $this->resetValidation();
     }
 
     public function cancel(): void
     {
-        $this->reset(['editingId', 'name', 'service_kind_id']);
+        $this->reset(['editingId', 'name', 'service_kind_id', 'exam_kind']);
         $this->resetValidation();
     }
 
     public function save(): void
     {
         $data = $this->validate();
+
+        // Un service qui n'est pas un plateau technique ne realise pas
+        // d'examen : garder la valeur laisserait un formulaire de demande
+        // s'afficher pour une consultation apres un simple changement de type.
+        if (! $this->estPlateauTechnique()) {
+            $data['exam_kind'] = null;
+        }
 
         if ($this->editingId) {
             $service = Service::findOrFail($this->editingId);
@@ -87,6 +108,12 @@ class ServiceManager extends Component
 
         $this->cancel();
         $this->dispatch('services-mis-a-jour');
+    }
+
+    /** Le type choisi dans le formulaire est-il le plateau technique ? */
+    public function estPlateauTechnique(): bool
+    {
+        return ServiceKind::find($this->service_kind_id)?->slug === ServiceKind::SLUG_PLATEAU_TECHNIQUE;
     }
 
     /**

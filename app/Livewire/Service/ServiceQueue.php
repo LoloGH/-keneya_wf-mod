@@ -4,7 +4,9 @@ namespace App\Livewire\Service;
 
 use App\Actions\CallNextPatient;
 use App\Actions\CloseVisit;
-use App\Actions\SendReferral;
+use App\Actions\Dme\ReferForExamination;
+use App\Livewire\Concerns\RequestsExamination;
+use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
 use App\Models\BillableItem;
 use App\Models\Service;
@@ -24,7 +26,7 @@ use Livewire\Component;
  */
 class ServiceQueue extends Component
 {
-    use ScopedToOwnService;
+    use RequestsExamination, RequiresCapability, ScopedToOwnService;
 
     /** Visite selectionnee pour un renvoi. */
     public ?int $referringVisitId = null;
@@ -76,6 +78,7 @@ class ServiceQueue extends Component
         $this->referringVisitId = $visitId;
         $this->toServiceId = null;
         $this->billableItemId = null;
+        $this->resetExamination();
         $this->instructions = '';
         $this->resetValidation();
     }
@@ -87,39 +90,66 @@ class ServiceQueue extends Component
     public function updatedToServiceId(): void
     {
         $this->billableItemId = null;
+        // Le formulaire de demande suit la destination : changer de service
+        // doit repartir d'une demande vierge, jamais de celle qu'on
+        // s'appretait a adresser ailleurs.
+        $this->resetExamination();
     }
 
     public function cancelReferral(): void
     {
         $this->reset(['referringVisitId', 'toServiceId', 'billableItemId', 'instructions']);
+        $this->resetExamination();
         $this->resetValidation();
     }
 
-    public function sendReferral(SendReferral $action): void
+    /**
+     * Le renvoi emporte la demande d'examen quand la destination en realise
+     * (v3.3.1) : le technicien recoit le patient **et** ce qu'on lui demande.
+     */
+    public function sendReferral(ReferForExamination $action): void
     {
+        // Le service est lu avant la validation : c'est lui qui decide quelles
+        // regles s'appliquent, la demande n'ayant pas la meme forme selon
+        // qu'on adresse des analyses ou une imagerie.
+        $toService = Service::with('serviceKind')->find($this->toServiceId);
+
         $this->validate([
             'referringVisitId' => ['required', 'integer', 'exists:visits,id'],
             'toServiceId' => ['required', 'integer', 'exists:services,id', 'different:serviceId'],
             'billableItemId' => ['nullable', 'integer', 'exists:billable_items,id'],
             'instructions' => ['required', 'string', 'min:3', 'max:2000'],
+            ...$this->examinationRules($toService),
         ], attributes: [
             'toServiceId' => 'service destinataire',
             'billableItemId' => 'acte demande',
             'instructions' => 'instructions',
+            'examPriority' => 'priorite',
+            'examIndication' => 'indication',
+            'examModality' => 'modalite',
+            'examBodySite' => 'region examinee',
         ]);
+
+        if ($capacite = $this->examinationCapability($toService)) {
+            $this->assertCapability($capacite);
+        }
+
+        if (! $this->examinationIsComplete($toService)) {
+            return;
+        }
 
         // La visite doit se trouver dans la file de ce service : on ne renvoie
         // pas un patient dont on n'a pas la charge.
         $visit = Visit::where('service_id', $this->serviceId)->findOrFail($this->referringVisitId);
-        $toService = Service::findOrFail($this->toServiceId);
 
         try {
             $action->execute(
                 visit: $visit,
-                fromDoctor: $this->currentDoctor(),
+                fromDoctor: $this->currentAgent(),
                 toService: $toService,
                 instructions: $this->instructions,
                 billableItem: $this->billableItemId ? BillableItem::find($this->billableItemId) : null,
+                examen: $this->examinationPayload($toService),
             );
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['toServiceId' => $e->getMessage()]);
@@ -193,6 +223,11 @@ class ServiceQueue extends Component
             'actes' => $this->toServiceId
                 ? BillableItem::forService((int) $this->toServiceId)->orderBy('name')->get()
                 : collect(),
+            // Ce que realise la destination choisie : c'est elle qui fait
+            // apparaitre le formulaire de demande, et lequel.
+            'examKind' => $this->toServiceId
+                ? Service::with('serviceKind')->find($this->toServiceId)?->examKind()
+                : null,
         ]);
     }
 }

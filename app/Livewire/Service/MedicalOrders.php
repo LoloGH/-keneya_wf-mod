@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Service;
 
-use App\Actions\Dme\OrderImaging;
-use App\Actions\Dme\OrderLaboratory;
 use App\Actions\Dme\RecordMedication;
 use App\Actions\Dme\StoreMedicalDocument;
+use App\Livewire\Concerns\RequestsExamination;
 use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
 use App\Models\StaffType;
@@ -22,17 +21,19 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 
 /**
- * Traitements, examens et documents, saisis dans /service (v3.3.1).
+ * Traitements, examens et documents du dossier medical, dans /service (v3.3.1).
  *
- * Quatre formulaires derriere quatre capacites, sur un ecran commun : ils
- * partagent le meme patient et le meme geste — completer le dossier medical
- * pendant que le patient est la. Chacun reste neanmoins independant, et un
- * type de personnel peut n'en recevoir qu'un seul.
+ * Deux formulaires derriere deux capacites — traitements habituels et
+ * documents — sur un ecran commun : ils partagent le meme patient et le meme
+ * geste, completer le dossier pendant que le patient est la. Chacun reste
+ * independant, et un type de personnel peut n'en recevoir qu'un seul.
  *
- * Ce que ces ecrans ne remplacent pas : le renvoi inter-service de WorkFlow,
- * qui fait circuler le patient vers le laboratoire ou l'echographie et porte
- * sa facturation. Les deux coexistent — le renvoi conduit le patient, la
- * demande documente l'acte au dossier.
+ * Les demandes d'examens, elles, ne se **posent** plus ici : elles s'y lisent
+ * seulement. Demander un examen, c'est envoyer le patient le faire — le
+ * formulaire vit donc dans le renvoi, ou il apparait des que la destination
+ * realise des examens ({@see RequestsExamination}).
+ * Les avoir separes laissait le technicien recevoir un patient sans savoir ce
+ * qu'on lui demandait, et la demande dormir au dossier sans destinataire.
  */
 class MedicalOrders extends Component
 {
@@ -51,34 +52,6 @@ class MedicalOrders extends Component
     public string $route = '';
 
     public string $medicationComment = '';
-
-    // ------------------------------------------------------- Laboratoire
-
-    /**
-     * Analyses demandees. Une ligne vide est ouverte d'emblee.
-     *
-     * @var array<int, array{name: string, category: string}>
-     */
-    public array $exams = [self::ANALYSE_VIDE];
-
-    public string $labPriority = 'routine';
-
-    public string $labIndication = '';
-
-    /** Garde-fou : une demande ne porte pas quarante analyses. */
-    public const MAX_ANALYSES = 15;
-
-    private const ANALYSE_VIDE = ['name' => '', 'category' => ''];
-
-    // ---------------------------------------------------------- Imagerie
-
-    public string $modality = 'ultrasound';
-
-    public string $bodySite = '';
-
-    public string $imagingPriority = 'routine';
-
-    public string $imagingIndication = '';
 
     // --------------------------------------------------------- Documents
 
@@ -109,30 +82,12 @@ class MedicalOrders extends Component
     {
         $this->reset(['visitId']);
         $this->resetTraitement();
-        $this->resetLaboratoire();
-        $this->resetImagerie();
         $this->resetDocument();
     }
 
     private function resetTraitement(): void
     {
         $this->reset(['medicationName', 'dosage', 'frequency', 'route', 'medicationComment']);
-        $this->resetValidation();
-    }
-
-    private function resetLaboratoire(): void
-    {
-        $this->reset(['labIndication']);
-        $this->exams = [self::ANALYSE_VIDE];
-        $this->labPriority = 'routine';
-        $this->resetValidation();
-    }
-
-    private function resetImagerie(): void
-    {
-        $this->reset(['bodySite', 'imagingIndication']);
-        $this->modality = 'ultrasound';
-        $this->imagingPriority = 'routine';
         $this->resetValidation();
     }
 
@@ -193,109 +148,6 @@ class MedicalOrders extends Component
         );
 
         session()->flash('service.status', 'Traitement mis a jour au dossier medical.');
-    }
-
-    // ------------------------------------------------------- Laboratoire
-
-    public function addExam(): void
-    {
-        if (count($this->exams) >= self::MAX_ANALYSES) {
-            return;
-        }
-
-        $this->exams[] = self::ANALYSE_VIDE;
-    }
-
-    public function removeExam(int $index): void
-    {
-        if (! array_key_exists($index, $this->exams)) {
-            return;
-        }
-
-        if (count($this->exams) === 1) {
-            $this->exams = [self::ANALYSE_VIDE];
-
-            return;
-        }
-
-        unset($this->exams[$index]);
-        $this->exams = array_values($this->exams);
-    }
-
-    public function saveLabOrder(OrderLaboratory $action): void
-    {
-        $this->assertCapability(StaffType::CAP_ORDER_LABORATORY);
-
-        $this->validate([
-            'visitId' => ['required', 'integer', 'exists:visits,id'],
-            'labPriority' => ['required', 'in:'.implode(',', array_keys(OrderLaboratory::PRIORITIES))],
-            'labIndication' => ['nullable', 'string', 'max:1000'],
-            'exams.*.name' => ['nullable', 'string', 'max:150'],
-            'exams.*.category' => ['nullable', 'string', 'max:100'],
-        ], attributes: [
-            'visitId' => 'patient',
-            'labPriority' => 'priorite',
-            'labIndication' => 'indication',
-        ]);
-
-        // Une demande sans aucune analyse ne veut rien dire : le controle est
-        // ici plutot que dans les regles, car il porte sur l'ensemble des
-        // lignes et non sur l'une d'elles.
-        $analyses = array_values(array_filter($this->exams, fn ($ligne) => filled($ligne['name'] ?? null)));
-
-        if ($analyses === []) {
-            $this->addError('exams', 'Indiquez au moins une analyse.');
-
-            return;
-        }
-
-        $visit = $this->visitInThisService();
-
-        $action->execute($visit, $this->currentAgent(), [
-            'requested_at' => now()->toDateTimeString(),
-            'priority' => $this->labPriority,
-            'indication' => $this->labIndication,
-            'exams' => $analyses,
-        ]);
-
-        session()->flash('service.status', 'Demande d\'analyses posee au dossier medical.');
-        $this->resetLaboratoire();
-    }
-
-    // ---------------------------------------------------------- Imagerie
-
-    public function saveImagingOrder(OrderImaging $action): void
-    {
-        $this->assertCapability(StaffType::CAP_ORDER_IMAGING);
-
-        $this->validate([
-            'visitId' => ['required', 'integer', 'exists:visits,id'],
-            // Exigee : elle conditionne le service qui realise l'examen, sa
-            // duree et le compte rendu attendu.
-            'modality' => ['required', 'in:'.implode(',', array_keys(ImagingOrder::MODALITIES))],
-            'bodySite' => ['nullable', 'string', 'max:150'],
-            'imagingPriority' => ['required', 'in:'.implode(',', array_keys(OrderLaboratory::PRIORITIES))],
-            'imagingIndication' => ['nullable', 'string', 'max:1000'],
-        ], attributes: [
-            'visitId' => 'patient',
-            'modality' => 'modalite',
-            'bodySite' => 'region examinee',
-            'imagingPriority' => 'priorite',
-            'imagingIndication' => 'indication',
-        ]);
-
-        $visit = $this->visitInThisService();
-
-        $action->execute($visit, $this->currentAgent(), [
-            'modality' => $this->modality,
-            'body_site' => $this->bodySite,
-            'requested_at' => now()->toDateTimeString(),
-            'priority' => $this->imagingPriority,
-            'indication' => $this->imagingIndication,
-        ]);
-
-        session()->flash('service.status', 'Demande d\'imagerie posee au dossier medical.');
-        $this->resetImagerie();
     }
 
     // --------------------------------------------------------- Documents
@@ -378,7 +230,6 @@ class MedicalOrders extends Component
                 ->get(),
             'medicationStatuses' => RecordMedication::STATUSES,
             'medicationRoutes' => RecordMedication::ROUTES,
-            'priorities' => OrderLaboratory::PRIORITIES,
             'modalities' => ImagingOrder::MODALITIES,
             'documentTypes' => MedicalDocument::TYPES,
             'medications' => $dossier?->medications()->orderByDesc('id')->get() ?? new Collection,

@@ -104,144 +104,63 @@
             @endif
 
             {{-- ------------------------------------------------ Laboratoire --}}
+            {{-- Les demandes se lisent ici, elles ne s'y posent plus (v3.3.1) :
+                 demander un examen, c'est envoyer le patient le faire. Le
+                 formulaire vit donc dans « Envoyer vers un service », ou il
+                 s'affiche des que la destination realise des analyses. --}}
             @if ($peutLaboratoire)
                 <fieldset class="formset">
-                    <legend>Examen biologique</legend>
+                    <legend>Examens biologiques demandes</legend>
 
-                    @if ($labOrders->isNotEmpty())
+                    @if ($labOrders->isEmpty())
+                        <p class="empty">Aucune demande d'analyses a ce dossier.</p>
+                    @else
                         <ul class="my-patients">
                             @foreach ($labOrders as $demande)
                                 <li class="my-patients__item">
                                     <span class="mono">{{ $demande->order_number }}</span>
                                     <span>{{ $demande->items->pluck('exam_name')->implode(', ') }}</span>
+                                    <span class="badge">{{ $demande->statusLabel() }}</span>
                                     <time>{{ $demande->requested_at?->format('d/m/Y') }}</time>
                                 </li>
                             @endforeach
                         </ul>
                     @endif
 
-                    <form wire:submit="saveLabOrder" class="form">
-                        @foreach ($exams as $index => $ligne)
-                            <div class="form form--inline-wrap">
-                                <div class="field field--wide">
-                                    <label for="mo-exam-{{ $index }}">Analyse</label>
-                                    <input id="mo-exam-{{ $index }}" type="text"
-                                           wire:model="exams.{{ $index }}.name"
-                                           placeholder="Numeration formule sanguine">
-                                    @error('exams.'.$index.'.name') <p class="field__error">{{ $message }}</p> @enderror
-                                </div>
-                                <div class="field">
-                                    <label for="mo-exam-cat-{{ $index }}">
-                                        Categorie <span class="field__hint">(facultatif)</span>
-                                    </label>
-                                    <input id="mo-exam-cat-{{ $index }}" type="text"
-                                           wire:model="exams.{{ $index }}.category" placeholder="Hematologie">
-                                </div>
-                                <div class="field field--inline">
-                                    <button type="button" class="btn btn--ghost" wire:click="removeExam({{ $index }})">
-                                        Retirer
-                                    </button>
-                                </div>
-                            </div>
-                        @endforeach
-
-                        @error('exams') <p class="field__error">{{ $message }}</p> @enderror
-
-                        @if (count($exams) < \App\Livewire\Service\MedicalOrders::MAX_ANALYSES)
-                            <button type="button" class="btn btn--secondary" wire:click="addExam">
-                                Ajouter une analyse
-                            </button>
-                        @endif
-
-                        <div class="form form--inline-wrap">
-                            <div class="field">
-                                <label for="mo-lab-priority">Priorite</label>
-                                <select id="mo-lab-priority" wire:model="labPriority">
-                                    @foreach ($priorities as $valeur => $libelle)
-                                        <option value="{{ $valeur }}">{{ $libelle }}</option>
-                                    @endforeach
-                                </select>
-                                @error('labPriority') <p class="field__error">{{ $message }}</p> @enderror
-                            </div>
-                            <div class="field field--wide">
-                                <label for="mo-lab-indication">Indication <span class="field__hint">(facultatif)</span></label>
-                                <input id="mo-lab-indication" type="text" wire:model="labIndication"
-                                       placeholder="Pourquoi ces analyses.">
-                                @error('labIndication') <p class="field__error">{{ $message }}</p> @enderror
-                            </div>
-                        </div>
-
-                        <div class="btn-row">
-                            <button type="submit" class="btn btn--primary"
-                                    wire:loading.attr="disabled" wire:target="saveLabOrder">
-                                Demander les analyses
-                            </button>
-                        </div>
-                    </form>
+                    <p class="hint">
+                        Pour demander des analyses, envoyez le patient vers le
+                        laboratoire depuis la file d'attente : la demande part
+                        avec lui.
+                    </p>
                 </fieldset>
             @endif
 
             {{-- --------------------------------------------------- Imagerie --}}
             @if ($peutImagerie)
                 <fieldset class="formset">
-                    <legend>Imagerie</legend>
+                    <legend>Examens d'imagerie demandes</legend>
 
-                    @if ($imagingOrders->isNotEmpty())
+                    @if ($imagingOrders->isEmpty())
+                        <p class="empty">Aucune demande d'imagerie a ce dossier.</p>
+                    @else
                         <ul class="my-patients">
                             @foreach ($imagingOrders as $demande)
                                 <li class="my-patients__item">
                                     <span class="mono">{{ $demande->order_number }}</span>
                                     <span>{{ $modalities[$demande->modality] ?? $demande->modality }}</span>
                                     @if ($demande->body_site) <span>— {{ $demande->body_site }}</span> @endif
+                                    <span class="badge">{{ $demande->statusLabel() }}</span>
                                     <time>{{ $demande->requested_at?->format('d/m/Y') }}</time>
                                 </li>
                             @endforeach
                         </ul>
                     @endif
 
-                    <form wire:submit="saveImagingOrder" class="form">
-                        <div class="form form--inline-wrap">
-                            <div class="field">
-                                <label for="mo-modality">Modalite</label>
-                                <select id="mo-modality" wire:model="modality">
-                                    @foreach ($modalities as $valeur => $libelle)
-                                        <option value="{{ $valeur }}">{{ $libelle }}</option>
-                                    @endforeach
-                                </select>
-                                @error('modality') <p class="field__error">{{ $message }}</p> @enderror
-                            </div>
-                            <div class="field field--wide">
-                                <label for="mo-body-site">
-                                    Region examinee <span class="field__hint">(facultatif)</span>
-                                </label>
-                                <input id="mo-body-site" type="text" wire:model="bodySite"
-                                       placeholder="Abdomen, obstetricale…">
-                                @error('bodySite') <p class="field__error">{{ $message }}</p> @enderror
-                            </div>
-                            <div class="field">
-                                <label for="mo-img-priority">Priorite</label>
-                                <select id="mo-img-priority" wire:model="imagingPriority">
-                                    @foreach ($priorities as $valeur => $libelle)
-                                        <option value="{{ $valeur }}">{{ $libelle }}</option>
-                                    @endforeach
-                                </select>
-                                @error('imagingPriority') <p class="field__error">{{ $message }}</p> @enderror
-                            </div>
-                        </div>
-
-                        <div class="field">
-                            <label for="mo-img-indication">Indication <span class="field__hint">(facultatif)</span></label>
-                            <textarea id="mo-img-indication" rows="2" wire:model="imagingIndication"></textarea>
-                            @error('imagingIndication') <p class="field__error">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div class="btn-row">
-                            <button type="submit" class="btn btn--primary"
-                                    wire:loading.attr="disabled" wire:target="saveImagingOrder">
-                                Demander l'examen
-                            </button>
-                        </div>
-                    </form>
+                    <p class="hint">
+                        Pour demander une imagerie, envoyez le patient vers le
+                        plateau depuis la file d'attente : la demande part avec
+                        lui.
+                    </p>
                 </fieldset>
             @endif
 

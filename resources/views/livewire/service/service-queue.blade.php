@@ -94,6 +94,15 @@
                                 </p>
                             @endif
 
+                            {{-- La demande d'examen, quand la destination en
+                                 realise une (v3.3.1). Elle part avec le
+                                 patient : le technicien recoit le patient et
+                                 ce qu'on lui demande, d'un seul geste. --}}
+                            @include('partials.examination-request', [
+                                'examKind' => $examKind,
+                                'suffixe' => 'renvoi-'.$visit->id,
+                            ])
+
                             <div class="field">
                                 <label for="instructions-{{ $visit->id }}">Instructions</label>
                                 <textarea id="instructions-{{ $visit->id }}" rows="3" wire:model="instructions"

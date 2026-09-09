@@ -13,12 +13,14 @@
                     </button>
 
                     <p class="referrals__meta">
-                        Envoye par {{ $referral->fromDoctor->name() }}
+                        Envoye par {{ $referral->prescriberName() }}
                         ({{ $referral->fromService->name }})
                         — {{ $referral->created_at->format('d/m/Y H:i') }}
                     </p>
 
                     <p class="referrals__instructions">{{ $referral->instructions }}</p>
+
+                    @include('partials.examination-brief', ['referral' => $referral])
 
                     @if ($answeringReferralId === $referral->id)
                         <form wire:submit="submitResult" class="form">
@@ -29,10 +31,24 @@
                                 @error('resultText') <p class="field__error">{{ $message }}</p> @enderror
                             </div>
 
+                            {{-- Le compte rendu part au dossier medical du
+                                 patient, ou il restera — et non en piece
+                                 jointe d'un renvoi, qui n'est qu'un mouvement
+                                 du parcours (v3.3.1). --}}
+                            <div class="field">
+                                <label for="titre-{{ $referral->id }}">
+                                    Titre du compte rendu
+                                    <span class="field__hint">(facultatif)</span>
+                                </label>
+                                <input type="text" id="titre-{{ $referral->id }}" wire:model="documentTitle"
+                                       placeholder="Compte rendu d'echographie">
+                                @error('documentTitle') <p class="field__error">{{ $message }}</p> @enderror
+                            </div>
+
                             <div class="field">
                                 <label for="files-{{ $referral->id }}">
-                                    Pieces jointes
-                                    <span class="field__hint">PDF, JPG ou PNG. 10 Mo maximum, 5 fichiers</span>
+                                    Comptes rendus et resultats
+                                    <span class="field__hint">Verses au dossier medical du patient. 5 fichiers au plus</span>
                                 </label>
                                 <input id="files-{{ $referral->id }}" type="file" multiple
                                        accept=".pdf,.jpg,.jpeg,.png" wire:model="files">

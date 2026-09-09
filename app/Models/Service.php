@@ -21,7 +21,25 @@ class Service extends Model
     /** Le poste d'accueil, pose a l'installation (v3.2.5). */
     public const RECEPTION = 'Accueil';
 
-    protected $fillable = ['name', 'service_kind_id'];
+    /**
+     * Ce que realise un plateau technique (v3.3.1).
+     *
+     * C'est ce qui permet au formulaire de demande de s'afficher tout seul
+     * quand le medecin choisit la destination du renvoi : l'echographie
+     * appelle une demande d'imagerie, le laboratoire une demande d'analyses.
+     * Un nom de service ne se devine pas — l'administrateur le declare.
+     */
+    public const EXAM_LABORATORY = 'laboratory';
+
+    public const EXAM_IMAGING = 'imaging';
+
+    /** @var array<string, string> */
+    public const EXAM_KINDS = [
+        self::EXAM_LABORATORY => 'Examens biologiques',
+        self::EXAM_IMAGING => 'Imagerie medicale',
+    ];
+
+    protected $fillable = ['name', 'service_kind_id', 'exam_kind'];
 
     public function serviceKind(): BelongsTo
     {
@@ -126,6 +144,41 @@ class Service extends Model
     public function kindLabel(): string
     {
         return $this->serviceKind?->name ?? '—';
+    }
+
+    /**
+     * Ce service realise-t-il des examens, et lesquels ?
+     *
+     * Nul pour tout service qui n'est pas un plateau technique, meme si la
+     * colonne porte encore une valeur : changer le type d'un service ne doit
+     * pas laisser un formulaire de demande s'afficher pour une consultation.
+     */
+    public function examKind(): ?string
+    {
+        if ($this->serviceKind?->slug !== ServiceKind::SLUG_PLATEAU_TECHNIQUE) {
+            return null;
+        }
+
+        return array_key_exists((string) $this->exam_kind, self::EXAM_KINDS)
+            ? (string) $this->exam_kind
+            : null;
+    }
+
+    public function ordersLaboratory(): bool
+    {
+        return $this->examKind() === self::EXAM_LABORATORY;
+    }
+
+    public function ordersImaging(): bool
+    {
+        return $this->examKind() === self::EXAM_IMAGING;
+    }
+
+    public function examKindLabel(): ?string
+    {
+        $kind = $this->examKind();
+
+        return $kind === null ? null : self::EXAM_KINDS[$kind];
     }
 
     public static function auditLabel(): string

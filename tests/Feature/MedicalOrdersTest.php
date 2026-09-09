@@ -14,8 +14,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Keneya\Dme\Models\ImagingOrder;
-use Keneya\Dme\Models\LabOrder;
 use Keneya\Dme\Models\MedicalDocument;
 use Keneya\Dme\Models\Medication;
 use Livewire\Features\SupportTesting\Testable;
@@ -76,8 +74,6 @@ class MedicalOrdersTest extends TestCase
     {
         return [
             'traitements' => [StaffType::CAP_RECORD_MEDICATIONS, 'saveMedication', 'dme_medications'],
-            'laboratoire' => [StaffType::CAP_ORDER_LABORATORY, 'saveLabOrder', 'dme_lab_orders'],
-            'imagerie' => [StaffType::CAP_ORDER_IMAGING, 'saveImagingOrder', 'dme_imaging_orders'],
             'documents' => [StaffType::CAP_RECORD_DOCUMENTS, 'saveDocument', 'dme_medical_documents'],
         ];
     }
@@ -98,17 +94,16 @@ class MedicalOrdersTest extends TestCase
 
     public function test_ecrire_au_dossier_n_exige_pas_le_droit_de_l_ouvrir(): void
     {
-        [$medecin, $visit, $service] = $this->medecinEtPatientAppele([StaffType::CAP_ORDER_IMAGING]);
+        [$medecin, $visit, $service] = $this->medecinEtPatientAppele([StaffType::CAP_RECORD_MEDICATIONS]);
 
         $this->assertFalse($medecin->canAccessDme());
 
         $this->ecran($medecin, $service, $visit)
-            ->set('modality', 'ultrasound')
-            ->set('bodySite', 'Abdomen')
-            ->call('saveImagingOrder')
+            ->set('medicationName', 'Amlodipine')
+            ->call('saveMedication')
             ->assertHasNoErrors();
 
-        $this->assertDatabaseCount('dme_imaging_orders', 1);
+        $this->assertDatabaseCount('dme_medications', 1);
         $this->actingAs($medecin)->get(route('dme.home'))->assertForbidden();
     }
 
@@ -152,75 +147,12 @@ class MedicalOrdersTest extends TestCase
         $this->assertNotNull($traitement->fresh()->ended_on);
     }
 
-    // ---------------------------------------------------------- Laboratoire
-
-    public function test_une_demande_d_analyses_porte_ses_lignes(): void
-    {
-        [$medecin, $visit, $service] = $this->medecinEtPatientAppele([StaffType::CAP_ORDER_LABORATORY]);
-
-        $this->ecran($medecin, $service, $visit)
-            ->set('exams.0.name', 'Numeration formule sanguine')
-            ->set('exams.0.category', 'Hematologie')
-            ->call('addExam')
-            ->set('exams.1.name', 'Goutte epaisse')
-            ->call('addExam')
-            ->set('labPriority', 'urgent')
-            ->set('labIndication', 'Fievre depuis trois jours.')
-            ->call('saveLabOrder')
-            ->assertHasNoErrors();
-
-        $demande = LabOrder::firstOrFail();
-
-        $this->assertSame('urgent', $demande->priority);
-        $this->assertSame($medecin->getKey(), $demande->doctor_id);
-        // Trois lignes ouvertes, deux remplies : la vide est ecartee.
-        $this->assertSame(2, $demande->items()->count());
-        $this->assertDatabaseHas('dme_lab_order_items', ['exam_name' => 'Goutte epaisse']);
-    }
-
-    public function test_une_demande_sans_aucune_analyse_est_refusee(): void
-    {
-        [$medecin, $visit, $service] = $this->medecinEtPatientAppele([StaffType::CAP_ORDER_LABORATORY]);
-
-        $this->ecran($medecin, $service, $visit)
-            ->set('labIndication', 'Bilan.')
-            ->call('saveLabOrder')
-            ->assertHasErrors('exams');
-
-        $this->assertDatabaseCount('dme_lab_orders', 0);
-    }
-
-    // ------------------------------------------------------------- Imagerie
-
-    public function test_une_demande_d_imagerie_porte_sa_modalite(): void
-    {
-        [$medecin, $visit, $service] = $this->medecinEtPatientAppele([StaffType::CAP_ORDER_IMAGING]);
-
-        $this->ecran($medecin, $service, $visit)
-            ->set('modality', 'ultrasound')
-            ->set('bodySite', 'Abdomen')
-            ->set('imagingPriority', 'urgent')
-            ->call('saveImagingOrder')
-            ->assertHasNoErrors();
-
-        $demande = ImagingOrder::firstOrFail();
-
-        $this->assertSame('ultrasound', $demande->modality);
-        $this->assertSame('Abdomen', $demande->body_site);
-        $this->assertSame('requested', $demande->status);
-    }
-
-    public function test_une_modalite_inconnue_est_refusee(): void
-    {
-        [$medecin, $visit, $service] = $this->medecinEtPatientAppele([StaffType::CAP_ORDER_IMAGING]);
-
-        $this->ecran($medecin, $service, $visit)
-            ->set('modality', 'teleportation')
-            ->call('saveImagingOrder')
-            ->assertHasErrors('modality');
-
-        $this->assertDatabaseCount('dme_imaging_orders', 0);
-    }
+    // ------------------------------------------------------------ Examens
+    //
+    // Les demandes d'analyses et d'imagerie ne se posent plus sur cet ecran :
+    // demander un examen, c'est envoyer le patient le faire (v3.3.1). Le
+    // formulaire vit dans le renvoi, et son circuit complet — de la demande au
+    // compte rendu verse au dossier — est verifie par ExaminationReferralTest.
 
     // ------------------------------------------------------------ Documents
 
@@ -267,7 +199,7 @@ class MedicalOrdersTest extends TestCase
 
     public function test_ouvrir_l_ecran_ne_cree_aucun_dossier_medical(): void
     {
-        [$medecin, $visit, $service] = $this->medecinEtPatientAppele([StaffType::CAP_ORDER_LABORATORY]);
+        [$medecin, $visit, $service] = $this->medecinEtPatientAppele([StaffType::CAP_RECORD_MEDICATIONS]);
 
         $this->ecran($medecin, $service, $visit)->assertOk();
 
@@ -276,7 +208,7 @@ class MedicalOrdersTest extends TestCase
 
     public function test_un_patient_d_un_autre_service_reste_hors_de_portee(): void
     {
-        [$medecin, , $service] = $this->medecinEtPatientAppele([StaffType::CAP_ORDER_IMAGING]);
+        [$medecin, , $service] = $this->medecinEtPatientAppele([StaffType::CAP_RECORD_MEDICATIONS]);
 
         $autre = Service::factory()->create(['name' => 'Urgences']);
         $etrangere = $this->makeVisit($autre, ['status' => Visit::STATUS_CALLED]);
@@ -286,7 +218,7 @@ class MedicalOrdersTest extends TestCase
         Livewire::actingAs($medecin)
             ->test(MedicalOrders::class, ['serviceId' => $service->getKey()])
             ->set('visitId', $etrangere->getKey())
-            ->set('modality', 'ultrasound')
-            ->call('saveImagingOrder');
+            ->set('medicationName', 'Amlodipine')
+            ->call('saveMedication');
     }
 }

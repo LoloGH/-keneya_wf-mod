@@ -74,6 +74,11 @@
                     </div>
                 @endif
 
+                @include('partials.examination-request', [
+                    'examKind' => $examKind,
+                    'suffixe' => 'staff',
+                ])
+
                 <div class="field">
                     <label for="staff-instructions">Instructions</label>
                     <textarea id="staff-instructions" rows="3" wire:model="instructions"></textarea>
