@@ -9,6 +9,30 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    {{-- Le theme, relu avant le premier rendu.
+
+         Une page peinte en clair puis basculee en sombre donne un eclair blanc
+         a chaque navigation : sur un poste de garde, la nuit, c'est
+         desagreable au point qu'on renonce au mode sombre. Ce script est donc
+         volontairement en ligne et bloquant, avant la feuille de style.
+
+         Sans choix enregistre, on suit le systeme. --}}
+    <script>
+        (function () {
+            try {
+                var choix = localStorage.getItem('keneya.theme');
+                if (! choix) {
+                    choix = window.matchMedia('(prefers-color-scheme: dark)').matches
+                        ? 'sombre'
+                        : 'clair';
+                }
+                document.documentElement.dataset.theme = choix;
+            } catch (e) {
+                // Stockage refuse : la page reste dans le theme clair.
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @livewireStyles
 </head>

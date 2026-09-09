@@ -95,7 +95,7 @@
     $sections[] = ['key' => 'planning', 'icon' => 'planning', 'label' => 'Mon planning', 'view' => 'sections.staff.schedule'];
 @endphp
 
-<x-layouts.app :title="$type->name.'-'.config('keneya.name')">
+<x-layouts.app :title="$type->name.' - '.config('keneya.name')">
     {{-- A droite de la barre : le service de rattachement plutot que le seul
          nom du type, comme dans /service. --}}
     <x-slot:context>
@@ -128,14 +128,20 @@
         <p class="empty">Aucune fonction n'est activee pour ce type de personnel.</p>
     @endif
 
-    <div class="grid--main">
+    {{-- `grid` manquait : la classe de variante seule ne pose pas la grille,
+         et la colonne du dossier ne s'est jamais placee a droite ici. --}}
+    <div class="grid grid--main">
         @livewire('shared.vertical-tab-nav', [
             'sections' => $sections,
             'context' => ['serviceId' => $serviceId],
         ], key('nav-staff'))
 
+        {{-- Le dossier ne prend sa colonne que lorsqu'il est ouvert : ferme,
+             il ne rend rien et l'espace de travail occupe toute la largeur. --}}
         @if ($type->can(StaffType::CAP_VIEW_DOSSIER))
-            @livewire('staff.staff-record-panel', [], key('staff-record-panel'))
+            <div class="record-column">
+                @livewire('staff.staff-record-panel', [], key('staff-record-panel'))
+            </div>
         @endif
     </div>
 </x-layouts.app>

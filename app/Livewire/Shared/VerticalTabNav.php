@@ -78,6 +78,12 @@ class VerticalTabNav extends Component
 
         $this->active = $key;
 
+        // Changer de section rend l'ecran a son travail : le dossier ouvert en
+        // panneau lateral se referme, et la colonne qu'il occupait disparait
+        // (v3.3.1). Un dossier consulte pour la file d'attente n'a aucune
+        // raison de retrecir l'ecran des antecedents.
+        $this->dispatch('section-changee');
+
         // Le groupe de la section choisie reste ouvert.
         foreach ($this->groupsContaining($key) as $group) {
             if (! in_array($group, $this->expanded, true)) {

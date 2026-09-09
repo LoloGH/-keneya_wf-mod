@@ -1,8 +1,17 @@
-<aside class="card record">
-    @if (! $patient)
-        <h2 class="card__title">Dossier patient</h2>
-        <p class="empty">Selectionnez un patient dans la file pour ouvrir son dossier.</p>
-    @else
+{{--
+    Le dossier du patient, en panneau lateral.
+
+    Ferme, il ne s'affiche pas et n'occupe aucune place : la colonne qu'il
+    tenait rend son espace au travail en cours (v3.3.1). Auparavant il montrait
+    « Selectionnez un patient », ce qui retrecissait chaque page de trois cent
+    quarante pixels pour une phrase.
+
+    L'attribut `data-ouvert` est ce que la mise en page observe : c'est lui qui
+    fait apparaitre la colonne de droite, et lui seul.
+--}}
+<div @if ($patient) data-ouvert @endif>
+    @if ($patient)
+        <aside class="card record">
         <div class="card__head">
             <h2 class="card__title">Dossier {{ $patient->patient_code }}</h2>
             <button type="button" class="btn btn--ghost" wire:click="close">Fermer</button>
@@ -88,4 +97,5 @@
             </ol>
         @endif
     @endif
-</aside>
+    </aside>
+</div>

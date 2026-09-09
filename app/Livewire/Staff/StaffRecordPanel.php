@@ -28,6 +28,11 @@ class StaffRecordPanel extends Component
         $this->patientId = $patientId;
     }
 
+    /**
+     * Le panneau se referme aussi quand on change de section : la colonne
+     * qu'il occupait rend alors sa place au travail en cours (v3.3.1).
+     */
+    #[On('section-changee')]
     public function close(): void
     {
         $this->patientId = null;

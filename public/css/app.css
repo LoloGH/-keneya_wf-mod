@@ -140,6 +140,74 @@
 
 html { -webkit-text-size-adjust: 100%; }
 
+/* =========================================================================
+   Theme sombre
+   =========================================================================
+
+   Une seule bascule : toutes les surfaces de l'application passent par la
+   palette ci-dessus, il suffit donc de la redefinir. Rien d'autre ne change,
+   ni une regle de mise en page, ni un gabarit.
+
+   L'echelle de gris s'inverse : `--gris-900`, qui portait le texte, devient
+   presque blanc ; `--gris-200`, qui posait les filets, devient sombre. Les
+   composants qui lisent « du texte en gris-900 sur du blanc » continuent de
+   dire vrai, dans l'autre sens.
+
+   Les teintes d'accent montent d'un cran. Un bleu #2563eb, juste sur du blanc,
+   manque de contraste sur un fond d'ardoise : c'est la version vive qui prend
+   sa place. Les fonds pales deviennent des fonds sourds de la meme famille,
+   assez soutenus pour se distinguer de la carte sans eblouir.
+
+   Les ombres, enfin, se durcissent. Une ombre a 5 % d'opacite est invisible
+   sur du sombre : ce qui pose une carte ici, c'est un noir franc.
+
+   `data-theme` est pose sur `<html>` par le bouton de la barre, et relu avant
+   le premier rendu — sans quoi la page s'afficherait claire une fraction de
+   seconde avant de basculer. */
+[data-theme='sombre'] {
+    --fond: #0b1220;
+    --blanc: #141d2f;
+
+    --gris-50: #1a2439;
+    --gris-100: #1f2a41;
+    --gris-200: #2a3752;
+    --gris-300: #3a4a68;
+    --gris-400: #778aa6;
+    --gris-500: #94a5bd;
+    --gris-600: #b0bfd4;
+    --gris-700: #ccd7e6;
+    --gris-800: #e3eaf4;
+    --gris-900: #f3f7fc;
+
+    --bleu: #3b82f6;
+    --bleu-vif: #60a5fa;
+    --bleu-fonce: #2563eb;
+    --bleu-nuit: #bfdbfe;
+    --bleu-clair: #1e3356;
+    --bleu-pale: #16243c;
+
+    --sarcelle: #10b981;
+    --sarcelle-vif: #34d399;
+    --sarcelle-fonce: #059669;
+    --sarcelle-clair: #10291f;
+
+    --vert: var(--sarcelle);
+    --vert-clair: var(--sarcelle-clair);
+    --ambre: #fbbf24;
+    --ambre-clair: #33260c;
+    --rouge: #f87171;
+    --rouge-clair: #3a1616;
+
+    --ombre: 0 1px 2px 0 rgba(0, 0, 0, .5);
+    --ombre-1: var(--ombre);
+    --ombre-2: 0 1px 3px 0 rgba(0, 0, 0, .6), 0 1px 2px -1px rgba(0, 0, 0, .6);
+    --ombre-3: 0 10px 15px -3px rgba(0, 0, 0, .7), 0 4px 6px -4px rgba(0, 0, 0, .7);
+    --anneau: 0 0 0 2px rgba(59, 130, 246, .55);
+
+    color-scheme: dark;
+}
+
+
 body {
     margin: 0;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -307,8 +375,22 @@ body::-webkit-scrollbar,
     .grid--two { grid-template-columns: 1fr 1fr; }
 }
 
+/* Le dossier patient n'ouvre sa colonne que lorsqu'il est ouvert (v3.3.1).
+
+   La colonne de droite etait reservee en permanence : chaque page perdait
+   trois cent quarante pixels pour une phrase invitant a choisir un patient.
+   Elle n'existe plus que si le panneau porte `data-ouvert`, ce qu'il ne fait
+   qu'un dossier a l'ecran.
+
+   `:has()` porte la regle : la grille observe son propre contenu, et rien
+   n'a besoin de remonter l'etat du panneau jusqu'a la page. Sur un navigateur
+   qui l'ignore, la grille reste sur une colonne et le dossier s'affiche
+   dessous : l'ecran reste utilisable, il est seulement moins commode. */
 @media (min-width: 1100px) {
-    .grid--main { grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr); align-items: start; }
+    .grid--main:has(.record-column [data-ouvert]) {
+        grid-template-columns: minmax(0, 2fr) minmax(340px, 1fr);
+        align-items: start;
+    }
     .record-column { position: sticky; top: calc(var(--e4) + 64px); }
 }
 
@@ -1227,6 +1309,20 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .icon-btn:hover { background: var(--gris-100); transform: scale(1.06); }
 .icon-btn:active { transform: scale(.97); transition-duration: 60ms; }
 
+/* Bascule clair / sombre. Meme gabarit que la cloche, dont elle est voisine :
+   deux reglages du poste doivent se ressembler. Le trait est plus discret que
+   celui de la cloche, qui, elle, porte un compteur et appelle le regard. */
+.theme-toggle { border-color: var(--gris-300); color: var(--gris-600); }
+.theme-toggle:hover { color: var(--gris-900); border-color: var(--gris-400); }
+.theme-toggle__icone { width: 1.15rem; height: 1.15rem; }
+
+/* Alpine retire cet attribut une fois l'element pris en main. Sans cette
+   regle, les deux icones de la bascule s'affichent ensemble le temps que le
+   script demarre. */
+[x-cloak] { display: none !important; }
+
+
+
 /* Sur fond clair, l'aplat blanc du survol ne se voit pas : on assombrit. */
 .icon-btn--danger { color: var(--rouge); border-color: var(--gris-300); }
 .icon-btn--danger:hover { background: var(--rouge-clair); border-color: var(--rouge); }
@@ -1470,7 +1566,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     .tabnav__replier { display: flex; }
 }
 
-/* Dans /service, le dossier patient occupe une troisieme colonne. */
+/* Dans /service, le dossier patient occupe une seconde colonne quand il est
+   ouvert ; l'espace de travail garde la premiere dans tous les cas. */
 @media (min-width: 1100px) {
     .grid--main > .workspace { grid-column: 1; }
 }
@@ -2252,7 +2349,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     width: min(22rem, calc(100vw - 2rem));
     max-height: 70vh;
     overflow-y: auto;
-    background: #fff;
+    background: var(--blanc);
     color: var(--gris-900);
     border: 1px solid var(--gris-200);
     border-radius: var(--rayon-lg);
@@ -2322,7 +2419,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     right: 0;
     z-index: 40;
     width: min(23rem, calc(100vw - 2rem));
-    background: #fff;
+    background: var(--blanc);
     color: var(--gris-900);
     border: 1px solid var(--gris-200);
     border-radius: var(--rayon-lg);
@@ -2670,7 +2767,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     margin: var(--e3) 0;
     padding: var(--e3) var(--e4);
     border: 1px solid var(--gris-200); border-radius: var(--rayon);
-    background: #fff;
+    background: var(--blanc);
 }
 .retour__head { display: flex; align-items: center; gap: var(--e2); flex-wrap: wrap; }
 .retour__head time { margin-left: auto; color: var(--gris-500); font-size: var(--texte-sm); }

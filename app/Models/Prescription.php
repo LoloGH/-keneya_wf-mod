@@ -71,7 +71,7 @@ class Prescription extends Model
     {
         return collect([$ligne['medicament'], $ligne['posologie'], $ligne['duree']])
             ->filter(fn (?string $part) => filled($part))
-            ->implode('-');
+            ->implode(' - ');
     }
 
     public static function auditLabel(): string

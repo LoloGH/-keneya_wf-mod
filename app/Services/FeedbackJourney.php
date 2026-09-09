@@ -76,7 +76,7 @@ class FeedbackJourney
     private function libelle(?string $service, ?string $agent): string
     {
         if ($service !== null && $agent !== null) {
-            return $service.'-'.$agent;
+            return $service.' - '.$agent;
         }
 
         return $service ?? (string) $agent;
