@@ -42,7 +42,7 @@
                     {{-- Rendez-vous et pieces jointes depuis le dossier, pour
                          tout patient de la liste : pas seulement celui qu'on
                          est en train de consulter. --}}
-                    <div class="btn-row">
+                    <div class="btn-row btn-row--egaux">
                         <button type="button" class="btn btn--secondary"
                                 wire:click="startAppointment({{ $patient->id }})">
                             Donner un rendez-vous

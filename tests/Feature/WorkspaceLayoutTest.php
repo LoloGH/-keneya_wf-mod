@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Service\MyPatients;
 use App\Livewire\Service\PatientRecordPanel;
 use App\Livewire\Shared\VerticalTabNav;
+use App\Models\PatientHistory;
 use App\Models\Service;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -93,6 +95,35 @@ class WorkspaceLayoutTest extends TestCase
             ])
             ->call('select', 'planning')
             ->assertDispatched('section-changee');
+    }
+
+    /**
+     * Les actions de meme rang ont la meme largeur.
+     *
+     * Un bouton se dimensionne sur son texte : « Envoyer le lien de mes
+     * documents » paraissait plus important que « Donner un rendez-vous » par
+     * la seule longueur de son libelle. Elles ne le sont pas.
+     */
+    public function test_les_actions_de_la_carte_patient_ont_la_meme_largeur(): void
+    {
+        $service = Service::factory()->create();
+        $medecin = $this->makeDoctor($service);
+        $visit = $this->makeVisit($service);
+
+        // « Mes patients » liste ceux dont ce medecin porte une trace de prise
+        // en charge : sans elle, la liste serait vide.
+        PatientHistory::create([
+            'patient_id' => $visit->patient_id,
+            'visit_id' => $visit->getKey(),
+            'type' => PatientHistory::TYPE_CONSULTATION,
+            'service_id' => $service->getKey(),
+            'doctor_id' => $medecin->getKey(),
+            'description' => 'Consultation initiale.',
+        ]);
+
+        Livewire::actingAs($medecin->user)
+            ->test(MyPatients::class)
+            ->assertSee('btn-row--egaux', escape: false);
     }
 
     // ------------------------------------------------------------- Le theme

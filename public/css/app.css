@@ -800,6 +800,25 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--e2); align-items: center; }
 .btn-row--centered { justify-content: center; }
 
+/* Rangee d'actions de meme rang : tous les boutons ont la meme largeur.
+
+   Un bouton se dimensionne sur son texte, si bien qu'une rangee de quatre
+   actions egales — « Donner un rendez-vous », « Ajouter une piece jointe »,
+   « Envoyer le lien de mes documents », « Dossier medical complet » — les
+   affichait de quatre largeurs differentes, la plus longue paraissant la plus
+   importante. Elles ne le sont pas.
+
+   Une grille de colonnes egales, et non un `flex: 1` : la largeur minimale
+   tient le libelle le plus long sans le couper, et les rangees se cassent
+   proprement quand la carte retrecit, chaque bouton gardant sa largeur. */
+.btn-row--egaux {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: var(--e2);
+}
+.btn-row--egaux > .btn { width: 100%; }
+
+
 /* ---------- Alertes ---------- */
 
 .alert {
