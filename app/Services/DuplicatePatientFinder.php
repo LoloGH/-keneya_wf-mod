@@ -13,11 +13,18 @@ use Illuminate\Database\Eloquent\Collection;
  * `patient_code`, ce qui contredit la promesse centrale du produit, un
  * identifiant unique et permanent par patient.
  *
- * Deux passes, dans cet ordre :
- *  1. le numero de telephone, le champ le plus fiable : un nom se prononce et
- *     s'ecrit de dix facons, un numero ne se negocie pas ;
- *  2. le nom associe a un age voisin, pour rattraper le patient qui a change
+ * Trois passes, dans cet ordre de fiabilite decroissante :
+ *  1. le numero de la carte d'identite (v3.3.1), le seul champ qui distingue
+ *     deux personnes a coup sur. Il est facultatif, mais quand il est la, il
+ *     tranche ;
+ *  2. le numero de telephone : un nom se prononce et s'ecrit de dix facons, un
+ *     numero ne se negocie pas. Mais un telephone se prete et se change ;
+ *  3. le nom associe a un age voisin, pour rattraper le patient qui a change
  *     de numero depuis sa derniere venue.
+ *
+ * Aucune de ces passes ne bloque : elles proposent un dossier existant, la
+ * receptionniste tranche. Un patient qui attend ne doit jamais se heurter a un
+ * refus d'enregistrement.
  */
 class DuplicatePatientFinder
 {
@@ -30,8 +37,18 @@ class DuplicatePatientFinder
     /**
      * @return Collection<int, Patient>
      */
-    public function search(?string $mobile, ?string $name = null, ?int $age = null): Collection
-    {
+    public function search(
+        ?string $mobile,
+        ?string $name = null,
+        ?int $age = null,
+        ?string $idCardNumber = null,
+    ): Collection {
+        $parCarte = $this->byIdCard($idCardNumber);
+
+        if ($parCarte->isNotEmpty()) {
+            return $parCarte;
+        }
+
         $parTelephone = $this->byMobile($mobile);
 
         if ($parTelephone->isNotEmpty()) {
@@ -39,6 +56,31 @@ class DuplicatePatientFinder
         }
 
         return $this->byNameAndAge($name, $age);
+    }
+
+    /**
+     * Correspondance sur la carte d'identite, a la casse et aux espaces pres :
+     * « AB 123 456 » et « ab123456 » designent la meme piece, et personne ne
+     * saisit deux fois de la meme facon.
+     *
+     * @return Collection<int, Patient>
+     */
+    public function byIdCard(?string $idCardNumber): Collection
+    {
+        $normalise = $this->normaliseCarte($idCardNumber);
+
+        // Trois caracteres au moins : en deca, ce n'est pas un numero de piece
+        // mais une saisie interrompue, et la correspondance ramenerait tout.
+        if (strlen($normalise) < 3) {
+            return new Collection;
+        }
+
+        return Patient::query()
+            ->whereNotNull('id_card_number')
+            ->whereRaw('UPPER('.$this->expressionCarte().') = ?', [$normalise])
+            ->orderBy('id')
+            ->limit(self::LIMITE)
+            ->get();
     }
 
     /**
@@ -106,6 +148,27 @@ class DuplicatePatientFinder
         }
 
         return $expression;
+    }
+
+    /**
+     * Retire de `patients.id_card_number` les separateurs de saisie, cote
+     * base. Meme forme que pour le telephone, et pour la meme raison : c'est
+     * la seule que MySQL/MariaDB et SQLite comprennent a l'identique.
+     */
+    private function expressionCarte(): string
+    {
+        $expression = 'id_card_number';
+
+        foreach ([' ', '-', '.', '/'] as $caractere) {
+            $expression = sprintf("REPLACE(%s, '%s', '')", $expression, $caractere);
+        }
+
+        return $expression;
+    }
+
+    private function normaliseCarte(?string $value): string
+    {
+        return mb_strtoupper(preg_replace('/[\s\-.\/]+/', '', (string) $value) ?? '');
     }
 
     private function digits(?string $value): string

@@ -17,6 +17,9 @@ class Visitor extends Model
         'visitor_code',
         'name',
         'mobile',
+        // Un accompagnateur revient : l'etablissement doit pouvoir le
+        // reconnaitre. Facultatif, comme pour un patient.
+        'id_card_number',
         'service_id',
         'registered_by_user_id',
         'token',

@@ -33,11 +33,15 @@ final class PatientProjection
      */
     public static function resolve(Patient $patient): DossierMedical
     {
-        return app(PatientIdentifierResolver::class)->resolve(
+        $dossier = app(PatientIdentifierResolver::class)->resolve(
             system: self::SYSTEM,
             value: (string) $patient->patient_code,
             attributes: self::attributes($patient),
         );
+
+        self::linkIdCard($patient, $dossier);
+
+        return $dossier;
     }
 
     /**
@@ -49,6 +53,71 @@ final class PatientProjection
     {
         return app(PatientIdentifierResolver::class)
             ->find(self::SYSTEM, (string) $patient->patient_code);
+    }
+
+    /** Le systeme sous lequel la carte d'identite se presente au DME. */
+    public const SYSTEM_CARTE = 'carte_identite';
+
+    /**
+     * Repercute au dossier medical ce que l'accueil vient de corriger.
+     *
+     * Ne cree rien : un patient sans dossier medical n'en obtient pas un pour
+     * une correction de nom. Le dossier nait au premier acte clinique, jamais
+     * a l'accueil.
+     *
+     * Le sens reste unique. WorkFlow n'ecrit que les champs qu'il possede, et
+     * ne touche a rien de clinique : ni groupe sanguin, ni antecedent, ni
+     * medecin traitant.
+     */
+    public static function sync(Patient $patient): ?DossierMedical
+    {
+        $dossier = self::find($patient);
+
+        if ($dossier === null) {
+            return null;
+        }
+
+        // Par le module, jamais en ecrivant directement : c'est lui qui
+        // traduit « Homme » vers la valeur que sa colonne accepte, et qui sait
+        // ce qu'il ne faut pas ecraser.
+        app(PatientIdentifierResolver::class)->sync($dossier, self::attributes($patient));
+
+        self::linkIdCard($patient, $dossier);
+
+        return $dossier;
+    }
+
+    /**
+     * Relie la carte d'identite au dossier medical, dans la table des
+     * identifiants externes du module.
+     *
+     * C'est ce qui permet au DME de reconnaitre la meme personne au-dela du
+     * numero de dossier WorkFlow, et a un futur rapprochement de dossiers de
+     * s'appuyer sur autre chose qu'un nom.
+     *
+     * Une carte effacee retire le lien : un identifiant qui ne correspond plus
+     * a rien vaut moins que pas d'identifiant.
+     */
+    public static function linkIdCard(Patient $patient, ?DossierMedical $dossier = null): void
+    {
+        $dossier ??= self::find($patient);
+
+        if ($dossier === null) {
+            return;
+        }
+
+        $identifiants = $dossier->identifiers();
+
+        if (blank($patient->id_card_number)) {
+            $identifiants->where('system', self::SYSTEM_CARTE)->delete();
+
+            return;
+        }
+
+        $identifiants->updateOrCreate(
+            ['system' => self::SYSTEM_CARTE],
+            ['value' => (string) $patient->id_card_number, 'label' => 'Carte d\'identite'],
+        );
     }
 
     /**

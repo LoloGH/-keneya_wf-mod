@@ -40,6 +40,8 @@ class RegisterVisitor
             'patient_id' => $data['patient_id'] ?? null,
             'name' => $data['name'],
             'mobile' => $data['mobile'] ?? null,
+            // Facultatif : une chaine vide vaut absence.
+            'id_card_number' => filled($data['idCardNumber'] ?? null) ? $data['idCardNumber'] : null,
             'service_id' => $service->getKey(),
             // Qui l'a recu : c'est la personne que sa note « personnel »
             // concernera, la seule qu'il aura rencontree (v3.2.8, point 4).

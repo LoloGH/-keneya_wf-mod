@@ -101,6 +101,21 @@
                     @error('mobile') <p class="field__error">{{ $message }}</p> @enderror
                 </div>
 
+                {{-- Le seul champ qui distingue deux personnes a coup sur, et
+                     c'est a ce titre que la recherche de doublon le consulte
+                     en premier. Facultatif, et il doit le rester : un patient
+                     arrive sans papiers doit etre enregistre quand meme. --}}
+                <div class="field">
+                    <label for="patient-id-card">
+                        N&deg; de la carte d'identite <span class="field__hint">(facultatif)</span>
+                    </label>
+                    <input id="patient-id-card" type="text" wire:model="idCardNumber"
+                           autocomplete="off" placeholder="Recommande : evite les doublons">
+                    @error('idCardNumber') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="field-row">
                 <div class="field">
                     <label for="patient-crno">
                         Numero de dossier papier <span class="field__hint">(facultatif)</span>

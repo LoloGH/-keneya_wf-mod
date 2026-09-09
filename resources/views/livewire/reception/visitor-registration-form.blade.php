@@ -13,6 +13,16 @@
             @error('mobile') <p class="field__error">{{ $message }}</p> @enderror
         </div>
 
+        {{-- Un accompagnateur revient : l'etablissement doit pouvoir le
+             reconnaitre. Facultatif, comme pour un patient. --}}
+        <div class="field">
+            <label for="visitor-id-card">
+                N&deg; de la carte d'identite <span class="field__hint">(facultatif)</span>
+            </label>
+            <input id="visitor-id-card" type="text" wire:model="idCardNumber" autocomplete="off">
+            @error('idCardNumber') <p class="field__error">{{ $message }}</p> @enderror
+        </div>
+
         <div class="field">
             <label for="visitor-service">Service visite</label>
             <select id="visitor-service" wire:model="service_id">

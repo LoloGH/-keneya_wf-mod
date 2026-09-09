@@ -35,6 +35,17 @@ class PatientRegistrationForm extends Component
 
     public string $mobile = '';
 
+    /**
+     * Le numero de la carte d'identite (v3.3.1).
+     *
+     * Facultatif, et il doit le rester : tout le monde n'a pas sa carte sur
+     * soi, et un patient arrive sans papiers doit etre enregistre quand meme.
+     * Recommande, jamais exige. C'est le seul champ qui distingue deux
+     * personnes a coup sur, et c'est a ce titre que la recherche de doublon le
+     * consulte en premier.
+     */
+    public string $idCardNumber = '';
+
     public string $crno = '';
 
     public ?int $service_id = null;
@@ -83,6 +94,7 @@ class PatientRegistrationForm extends Component
             'gender' => ['required', 'in:Homme,Femme'],
             'profession' => ['nullable', 'string', 'max:120'],
             'mobile' => ['required', 'string', 'max:30'],
+            'idCardNumber' => ['nullable', 'string', 'max:60'],
             'crno' => ['nullable', 'string', 'max:20'],
             'service_id' => ['required', 'integer', 'exists:services,id'],
             'reason' => ['nullable', 'string', 'max:500'],
@@ -105,6 +117,7 @@ class PatientRegistrationForm extends Component
             'gender' => 'sexe',
             'profession' => 'profession',
             'mobile' => 'telephone',
+            'idCardNumber' => 'numero de la carte d\'identite',
             'crno' => 'numero de dossier papier',
             'service_id' => 'service',
             'reason' => 'motif',
@@ -142,7 +155,12 @@ class PatientRegistrationForm extends Component
         // Verification prealable (v3.2.8, point 1) : rien ne l'assurait, et la
         // meme personne pouvait repartir avec un second `patient_code`.
         if (! $this->forceCreation) {
-            $candidats = $finder->search($data['mobile'], $data['name'], $data['age']);
+            $candidats = $finder->search(
+                mobile: $data['mobile'],
+                name: $data['name'],
+                age: $data['age'],
+                idCardNumber: $data['idCardNumber'] ?? null,
+            );
 
             if ($candidats->isNotEmpty()) {
                 $this->duplicateCandidates = $candidats
@@ -280,7 +298,7 @@ class PatientRegistrationForm extends Component
 
     private function reinitialiserSaisie(): void
     {
-        $this->reset(['name', 'age', 'profession', 'mobile', 'crno', 'reason', 'note', 'companions']);
+        $this->reset(['name', 'age', 'profession', 'mobile', 'idCardNumber', 'crno', 'reason', 'note', 'companions']);
         $this->gender = 'Homme';
         $this->duplicateCandidates = [];
         $this->forceCreation = false;

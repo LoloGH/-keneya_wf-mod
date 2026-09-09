@@ -31,6 +31,10 @@ class Patient extends Model
         'gender',
         'profession',
         'mobile',
+        // Le seul champ qui distingue deux personnes a coup sur, et le
+        // dernier recours de la recherche de doublon. Facultatif : un patient
+        // arrive sans papiers doit pouvoir etre enregistre.
+        'id_card_number',
         'crno',
         'note',
         'access_code',

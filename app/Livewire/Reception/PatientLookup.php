@@ -2,9 +2,12 @@
 
 namespace App\Livewire\Reception;
 
+use App\Actions\CorrectPatientIdentity;
 use App\Actions\OpenNewEpisode;
+use App\Livewire\Concerns\RequiresCapability;
 use App\Models\Patient;
 use App\Models\Service;
+use App\Models\StaffType;
 use App\Models\Visit;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -19,6 +22,8 @@ use Livewire\Component;
  */
 class PatientLookup extends Component
 {
+    use RequiresCapability;
+
     public string $search = '';
 
     /** Patient retenu, en attente de confirmation par la receptionniste. */
@@ -27,6 +32,23 @@ class PatientLookup extends Component
     public ?int $serviceId = null;
 
     public string $reason = '';
+
+    /**
+     * Correction en cours, et les cinq champs qu'elle porte. Cinq seulement :
+     * ce sont ceux que WorkFlow possede et que l'accueil peut constater. Le
+     * `patient_code`, lui, ne change jamais.
+     */
+    public ?int $correctingPatientId = null;
+
+    public string $correctionName = '';
+
+    public string $correctionMobile = '';
+
+    public string $correctionProfession = '';
+
+    public string $correctionGender = 'Homme';
+
+    public string $correctionIdCardNumber = '';
 
     public function updatedSearch(): void
     {
@@ -45,7 +67,72 @@ class PatientLookup extends Component
     public function cancel(): void
     {
         $this->reset(['selectedPatientId', 'serviceId', 'reason']);
+        $this->cancelCorrection();
         $this->resetValidation();
+    }
+
+    // ------------------------------------------- Correction de l'identite
+
+    /**
+     * Un nom mal orthographie, un numero qui a change, une carte d'identite
+     * relevee apres coup : sans correction possible, la seule issue serait
+     * d'ouvrir un second dossier pour la meme personne (v3.3.1).
+     */
+    public function startCorrection(int $patientId): void
+    {
+        $patient = Patient::findOrFail($patientId);
+
+        $this->correctingPatientId = $patient->getKey();
+        $this->correctionName = (string) $patient->name;
+        $this->correctionMobile = (string) $patient->mobile;
+        $this->correctionProfession = (string) $patient->profession;
+        $this->correctionGender = (string) $patient->gender;
+        $this->correctionIdCardNumber = (string) $patient->id_card_number;
+        $this->resetValidation();
+    }
+
+    public function cancelCorrection(): void
+    {
+        $this->reset([
+            'correctingPatientId', 'correctionName', 'correctionMobile',
+            'correctionProfession', 'correctionGender', 'correctionIdCardNumber',
+        ]);
+        $this->resetValidation();
+    }
+
+    public function saveCorrection(CorrectPatientIdentity $action): void
+    {
+        $this->assertCapability(StaffType::CAP_REGISTER_PATIENT);
+
+        $this->validate([
+            'correctingPatientId' => ['required', 'integer', 'exists:patients,id'],
+            'correctionName' => ['required', 'string', 'max:255'],
+            'correctionMobile' => ['required', 'string', 'max:30'],
+            'correctionProfession' => ['nullable', 'string', 'max:120'],
+            'correctionGender' => ['required', 'in:Homme,Femme'],
+            'correctionIdCardNumber' => ['nullable', 'string', 'max:60'],
+        ], attributes: [
+            'correctionName' => 'nom',
+            'correctionMobile' => 'telephone',
+            'correctionProfession' => 'profession',
+            'correctionGender' => 'sexe',
+            'correctionIdCardNumber' => 'numero de la carte d\'identite',
+        ]);
+
+        $patient = $action->execute(Patient::findOrFail($this->correctingPatientId), [
+            'name' => $this->correctionName,
+            'mobile' => $this->correctionMobile,
+            'profession' => $this->correctionProfession,
+            'gender' => $this->correctionGender,
+            'id_card_number' => $this->correctionIdCardNumber,
+        ]);
+
+        session()->flash('reception.success', sprintf(
+            'Dossier %s corrige. Le numero de dossier, lui, ne change jamais.',
+            $patient->patient_code,
+        ));
+
+        $this->cancelCorrection();
     }
 
     public function openEpisode(OpenNewEpisode $action): void

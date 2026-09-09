@@ -44,6 +44,10 @@ class RegisterPatient
                 // vide au lieu du tiret prevu pour l'absence.
                 'profession' => filled($data['profession'] ?? null) ? $data['profession'] : null,
                 'mobile' => $data['mobile'],
+                // Facultatif : une chaine vide vaut absence, pour que la
+                // recherche de doublon ne rapproche pas deux dossiers sur un
+                // champ que personne n'a rempli.
+                'id_card_number' => filled($data['idCardNumber'] ?? null) ? $data['idCardNumber'] : null,
                 'crno' => filled($data['crno'] ?? null) ? $data['crno'] : null,
                 'note' => filled($data['note'] ?? null) ? $data['note'] : null,
             ]);

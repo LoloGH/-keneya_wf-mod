@@ -43,8 +43,80 @@
                 <div><dt>Age</dt><dd>{{ $selected->age }} ans</dd></div>
                 <div><dt>Sexe</dt><dd>{{ $selected->gender }}</dd></div>
                 <div><dt>Telephone</dt><dd>{{ $selected->mobile }}</dd></div>
+                <div><dt>Carte d'identite</dt><dd>{{ $selected->id_card_number ?: '-' }}</dd></div>
                 <div><dt>Passages</dt><dd>{{ $selected->visits->count() }}</dd></div>
             </dl>
+
+            {{-- Correction de l'identite (v3.3.1).
+
+                 Un nom mal orthographie, un numero qui a change, une carte
+                 relevee apres coup : sans correction possible, la seule issue
+                 serait d'ouvrir un second dossier pour la meme personne, ce
+                 que tout le reste du produit s'emploie a empecher.
+
+                 Cinq champs, et le numero de dossier n'en fait pas partie. --}}
+            @if ($correctingPatientId === $selected->id)
+                <form wire:submit="saveCorrection" class="form lookup__correction">
+                    <p class="hint">
+                        Le numero de dossier {{ $selected->patient_code }} ne change pas :
+                        on corrige une identite, on n'en cree pas une seconde.
+                    </p>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="correction-name">Nom complet</label>
+                            <input id="correction-name" type="text" wire:model="correctionName">
+                            @error('correctionName') <p class="field__error">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="field">
+                            <label for="correction-gender">Sexe</label>
+                            <select id="correction-gender" wire:model="correctionGender">
+                                <option value="Homme">Homme</option>
+                                <option value="Femme">Femme</option>
+                            </select>
+                            @error('correctionGender') <p class="field__error">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="correction-mobile">Telephone</label>
+                            <input id="correction-mobile" type="tel" inputmode="tel" wire:model="correctionMobile">
+                            @error('correctionMobile') <p class="field__error">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="field">
+                            <label for="correction-profession">
+                                Profession <span class="field__hint">(facultatif)</span>
+                            </label>
+                            <input id="correction-profession" type="text" wire:model="correctionProfession">
+                            @error('correctionProfession') <p class="field__error">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="correction-id-card">
+                            N&deg; de la carte d'identite <span class="field__hint">(facultatif)</span>
+                        </label>
+                        <input id="correction-id-card" type="text" wire:model="correctionIdCardNumber"
+                               autocomplete="off" placeholder="Recommande : evite les doublons">
+                        @error('correctionIdCardNumber') <p class="field__error">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="btn-row">
+                        <button type="submit" class="btn btn--primary">Enregistrer la correction</button>
+                        <button type="button" class="btn btn--ghost" wire:click="cancelCorrection">Annuler</button>
+                    </div>
+                </form>
+            @else
+                <div class="btn-row">
+                    <button type="button" class="btn btn--ghost"
+                            wire:click="startCorrection({{ $selected->id }})">
+                        Corriger l'identite
+                    </button>
+                </div>
+            @endif
 
             @php $openVisit = $selected->visits->whereIn('status', $openStatuses)->sortByDesc('opened_at')->first(); @endphp
 

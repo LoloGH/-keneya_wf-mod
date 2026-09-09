@@ -21,6 +21,13 @@ class VisitorRegistrationForm extends Component
 
     public string $mobile = '';
 
+    /**
+     * Le numero de la carte d'identite (v3.3.1). Facultatif, comme pour un
+     * patient : un accompagnateur venu en urgence n'a pas toujours ses
+     * papiers. Il sert a reconnaitre celui qui revient.
+     */
+    public string $idCardNumber = '';
+
     public ?int $service_id = null;
 
     public string $reason = '';
@@ -40,6 +47,7 @@ class VisitorRegistrationForm extends Component
         return [
             'name' => ['required', 'string', 'max:255'],
             'mobile' => ['nullable', 'string', 'max:30'],
+            'idCardNumber' => ['nullable', 'string', 'max:60'],
             'service_id' => ['required', 'integer', 'exists:services,id'],
             'reason' => ['nullable', 'string', 'max:255'],
             // Requis des qu'un service clinique est choisi : on rend visite a
@@ -60,6 +68,7 @@ class VisitorRegistrationForm extends Component
         return [
             'name' => 'nom du visiteur',
             'mobile' => 'telephone',
+            'idCardNumber' => 'numero de la carte d\'identite',
             'service_id' => 'service',
             'reason' => 'motif',
             'patient_id' => 'patient visite',
@@ -118,7 +127,7 @@ class VisitorRegistrationForm extends Component
             'id' => $visitor->getKey(),
         ];
 
-        $this->reset(['name', 'mobile', 'reason', 'patient_id', 'patientSearch']);
+        $this->reset(['name', 'mobile', 'idCardNumber', 'reason', 'patient_id', 'patientSearch']);
 
         $this->dispatch('visiteur-enregistre');
     }
