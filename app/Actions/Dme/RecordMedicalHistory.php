@@ -4,6 +4,7 @@ namespace App\Actions\Dme;
 
 use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Support\Audit;
 use Keneya\Dme\Models\MedicalHistory;
@@ -34,7 +35,7 @@ class RecordMedicalHistory
      *     comment?: ?string,
      * }  $data
      */
-    public function execute(Visit $visit, Doctor $doctor, array $data): MedicalHistory
+    public function execute(Visit $visit, Doctor|StaffMember $doctor, array $data): MedicalHistory
     {
         $dossier = $this->dossierMedical($visit);
 

@@ -10,10 +10,12 @@ use App\Models\Attachment;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\PatientHistory;
+use App\Models\StaffMember;
 use App\Models\StaffType;
 use App\Models\Visit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
@@ -94,15 +96,15 @@ class MyPatients extends Component
             'appointmentAt' => ['required', 'date', 'after:now'],
         ], attributes: ['appointmentAt' => 'date du rendez-vous']);
 
-        $doctor = $this->doctor();
+        $agent = $this->agent();
         $patient = Patient::findOrFail($this->appointmentPatientId);
 
         // Le rendez-vous s'ancre sur le dernier passage connu du patient.
         $visit = $patient->visits()->orderByDesc('opened_at')->first()
-            ?? new Visit(['patient_id' => $patient->getKey(), 'service_id' => $doctor->service_id]);
+            ?? new Visit(['patient_id' => $patient->getKey(), 'service_id' => $agent->service_id]);
 
         try {
-            $action->execute($visit, $doctor, Carbon::parse($this->appointmentAt), $doctor->service_id);
+            $action->execute($visit, $agent, Carbon::parse($this->appointmentAt), $agent->service_id);
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['appointmentAt' => $e->getMessage()]);
         }
@@ -166,9 +168,49 @@ class MyPatients extends Component
         $this->dispatch('afficher-dossier', patientId: $patient->getKey());
     }
 
-    private function doctor(): Doctor
+    /**
+     * Le rattachement du compte connecte : sa fiche medecin, ou a defaut sa
+     * fiche de personnel generique (v3.3.1). Les deux portent un service et un
+     * compte, ce qui suffit ici.
+     */
+    private function agent(): Doctor|StaffMember
     {
-        return Auth::user()->doctors()->orderBy('id')->firstOrFail();
+        $user = Auth::user();
+
+        $agent = $user->doctors()->orderBy('id')->first() ?? $user->staffMember;
+
+        abort_unless($agent, 403, "Aucun service n'est rattache a votre compte.");
+
+        return $agent;
+    }
+
+    /**
+     * Les patients dont ce compte a signe au moins un acte, quel que soit son
+     * rattachement. Sans aucun rattachement, la liste est vide plutot que
+     * complete : un filtre absent montrerait tout l'hopital.
+     */
+    private function mesPatientIds(): Collection
+    {
+        $user = Auth::user();
+        $doctorIds = $user->doctors()->pluck('id');
+        $staffMemberId = $user->staffMember?->getKey();
+
+        if ($doctorIds->isEmpty() && $staffMemberId === null) {
+            return collect();
+        }
+
+        return PatientHistory::query()
+            ->where(function ($requete) use ($doctorIds, $staffMemberId) {
+                if ($doctorIds->isNotEmpty()) {
+                    $requete->orWhereIn('doctor_id', $doctorIds);
+                }
+
+                if ($staffMemberId !== null) {
+                    $requete->orWhere('staff_member_id', $staffMemberId);
+                }
+            })
+            ->distinct()
+            ->pluck('patient_id');
     }
 
     /**
@@ -195,14 +237,10 @@ class MyPatients extends Component
 
     public function render(): View
     {
-        $doctorIds = Auth::user()->doctors()->pluck('id');
         $search = trim($this->search);
 
-        // Les patients ayant au moins une trace de prise en charge par ce medecin.
-        $patientIds = PatientHistory::query()
-            ->whereIn('doctor_id', $doctorIds)
-            ->distinct()
-            ->pluck('patient_id');
+        // Les patients ayant au moins une trace de prise en charge par ce compte.
+        $patientIds = $this->mesPatientIds();
 
         $patients = Patient::query()
             ->whereIn('id', $patientIds)

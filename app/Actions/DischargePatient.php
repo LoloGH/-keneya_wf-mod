@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\Doctor;
 use App\Models\Hospitalization;
 use App\Models\PatientHistory;
+use App\Models\StaffMember;
 use App\Services\PatientHistoryRecorder;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,7 @@ class DischargePatient
 {
     public function __construct(private readonly PatientHistoryRecorder $history) {}
 
-    public function execute(Hospitalization $hospitalization, Doctor $doctor): Hospitalization
+    public function execute(Hospitalization $hospitalization, Doctor|StaffMember $doctor): Hospitalization
     {
         if (! $hospitalization->isActive()) {
             throw new InvalidArgumentException('Cette hospitalisation est deja cloturee.');

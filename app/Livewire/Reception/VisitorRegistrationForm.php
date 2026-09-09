@@ -3,9 +3,11 @@
 namespace App\Livewire\Reception;
 
 use App\Actions\RegisterVisitor;
+use App\Livewire\Concerns\RequiresCapability;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Models\ServiceKind;
+use App\Models\StaffType;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
@@ -13,6 +15,8 @@ use Livewire\Component;
 
 class VisitorRegistrationForm extends Component
 {
+    use RequiresCapability;
+
     public string $name = '';
 
     public string $mobile = '';
@@ -87,8 +91,16 @@ class VisitorRegistrationForm extends Component
         $this->reset(['patient_id', 'patientSearch']);
     }
 
+    /**
+     * Le formulaire est desormais atteignable depuis /staff/{slug}
+     * (v3.3.1), ou la capacite decide de tout. Masquer la section ne
+     * suffit pas : un composant Livewire s'appelle sans passer par le
+     * menu.
+     */
     public function save(RegisterVisitor $register): void
     {
+        $this->assertCapability(StaffType::CAP_REGISTER_VISITOR);
+
         $data = $this->validate();
 
         try {

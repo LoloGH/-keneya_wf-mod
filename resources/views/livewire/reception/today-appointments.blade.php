@@ -17,7 +17,7 @@
                                 <span class="mono">{{ $appointment->patient->patient_code }}</span>
                             </td>
                             <td>{{ $appointment->service->name }}</td>
-                            <td>{{ $appointment->doctor->name() }}</td>
+                            <td>{{ $appointment->authorName() ?? '—' }}</td>
                             <td>
                                 <span class="badge badge--{{ $appointment->status }}">
                                     {{ $appointment->statusLabel() }}

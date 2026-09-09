@@ -4,6 +4,7 @@ namespace App\Actions\Dme;
 
 use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Support\Audit;
 use Keneya\Dme\Models\Medication;
@@ -50,7 +51,7 @@ class RecordMedication
      *     comment?: ?string,
      * }  $data
      */
-    public function execute(Visit $visit, Doctor $doctor, array $data): Medication
+    public function execute(Visit $visit, Doctor|StaffMember $doctor, array $data): Medication
     {
         $dossier = $this->dossierMedical($visit);
 
@@ -83,7 +84,7 @@ class RecordMedication
      * Suspend ou arrete un traitement. La ligne demeure : un traitement
      * interrompu explique souvent la venue suivante.
      */
-    public function updateStatus(Visit $visit, Doctor $doctor, Medication $traitement, string $statut): Medication
+    public function updateStatus(Visit $visit, Doctor|StaffMember $doctor, Medication $traitement, string $statut): Medication
     {
         abort_unless(
             (int) $traitement->patient_id === (int) $this->dossierMedical($visit)->getKey(),

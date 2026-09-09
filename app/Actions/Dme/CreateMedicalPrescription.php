@@ -5,6 +5,7 @@ namespace App\Actions\Dme;
 use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
 use App\Models\PatientHistory;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Support\Audit;
@@ -46,7 +47,7 @@ class CreateMedicalPrescription
     /**
      * @param  array<int, array{medicament?: ?string, posologie?: ?string, duree?: ?string}>  $lignes
      */
-    public function execute(Visit $visit, Doctor $doctor, array $lignes): Prescription
+    public function execute(Visit $visit, Doctor|StaffMember $doctor, array $lignes): Prescription
     {
         $retenues = $this->nettoie($lignes);
 

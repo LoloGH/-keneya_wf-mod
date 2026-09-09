@@ -138,7 +138,7 @@ class MedicalBackground extends Component
 
         $visit = $this->visitInThisService();
 
-        $action->execute($visit, $this->currentDoctor(), [
+        $action->execute($visit, $this->currentAgent(), [
             'category' => $this->category,
             'label' => $this->label,
             'year' => $this->year,
@@ -179,7 +179,7 @@ class MedicalBackground extends Component
 
         $visit = $this->visitInThisService();
 
-        $action->execute($visit, $this->currentDoctor(), [
+        $action->execute($visit, $this->currentAgent(), [
             'allergen' => $this->allergen,
             'allergen_type' => $this->allergenType,
             'reaction' => $this->reaction,
@@ -207,7 +207,7 @@ class MedicalBackground extends Component
 
         $visit = $this->visitInThisService();
 
-        $action->updateStatus($visit, $this->currentDoctor(), Allergy::findOrFail($allergyId), $statut);
+        $action->updateStatus($visit, $this->currentAgent(), Allergy::findOrFail($allergyId), $statut);
 
         session()->flash('service.status', 'Allergie mise a jour au dossier medical.');
     }

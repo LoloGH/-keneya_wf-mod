@@ -26,6 +26,8 @@ class Hospitalization extends Model
         'visit_id',
         'room_id',
         'admitted_by_doctor_id',
+        // Qui a admis, quand ce n'est pas un medecin (v3.3.1).
+        'admitted_by_staff_member_id',
         'admitted_at',
         'discharged_at',
         'status',
@@ -62,6 +64,17 @@ class Hospitalization extends Model
     public function admittedByDoctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class, 'admitted_by_doctor_id');
+    }
+
+    public function admittedByStaffMember(): BelongsTo
+    {
+        return $this->belongsTo(StaffMember::class, 'admitted_by_staff_member_id');
+    }
+
+    /** Qui a admis ce patient, medecin ou personnel generique. */
+    public function admittedByName(): ?string
+    {
+        return $this->admittedByDoctor?->name() ?? $this->admittedByStaffMember?->name();
     }
 
     public function careTasks(): HasMany

@@ -5,6 +5,7 @@ namespace App\Actions\Dme;
 use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
 use App\Models\PatientHistory;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Support\Audit;
@@ -51,7 +52,7 @@ class RecordMedicalConsultation
      *     diagnoses?: array<int, array<string, ?string>>,
      * }  $data
      */
-    public function execute(Visit $visit, Doctor $doctor, array $data): Consultation
+    public function execute(Visit $visit, Doctor|StaffMember $doctor, array $data): Consultation
     {
         $dossier = $this->dossierMedical($visit);
 
@@ -123,7 +124,7 @@ class RecordMedicalConsultation
     /**
      * @param  array<string, mixed>  $vitals
      */
-    private function attachVitals(Consultation $consultation, Doctor $doctor, array $vitals): void
+    private function attachVitals(Consultation $consultation, Doctor|StaffMember $doctor, array $vitals): void
     {
         $mesures = array_filter($vitals, static fn ($valeur) => $valeur !== null && $valeur !== '');
 
@@ -161,7 +162,7 @@ class RecordMedicalConsultation
     /**
      * @param  array<int, array<string, ?string>>  $diagnoses
      */
-    private function attachDiagnoses(Consultation $consultation, Doctor $doctor, array $diagnoses): void
+    private function attachDiagnoses(Consultation $consultation, Doctor|StaffMember $doctor, array $diagnoses): void
     {
         foreach ($diagnoses as $ligne) {
             if (blank($ligne['label'] ?? null)) {

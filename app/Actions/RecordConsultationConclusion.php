@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Doctor;
 use App\Models\PatientHistory;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Support\Audit;
@@ -25,7 +26,7 @@ class RecordConsultationConclusion
      * regrouper des patients pour une diffusion ulterieure, et ne doit jamais
      * conditionner l'enregistrement d'une conclusion.
      */
-    public function execute(Visit $visit, Doctor $doctor, string $conclusion, ?int $pathologyId = null): PatientHistory
+    public function execute(Visit $visit, Doctor|StaffMember $doctor, string $conclusion, ?int $pathologyId = null): PatientHistory
     {
         $entree = DB::transaction(function () use ($visit, $doctor, $conclusion, $pathologyId): PatientHistory {
             if ($pathologyId !== null) {

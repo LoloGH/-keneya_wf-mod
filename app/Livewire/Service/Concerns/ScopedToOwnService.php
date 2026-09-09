@@ -3,13 +3,25 @@
 namespace App\Livewire\Service\Concerns;
 
 use App\Models\Doctor;
+use App\Models\StaffMember;
+use App\Support\Caregiver;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Rattache un composant de l'interface /service a un service du medecin
- * connecte, et refuse tout autre service — y compris si l'identifiant est
- * force cote client.
+ * Rattache un composant a un service du compte connecte, et refuse tout autre
+ * service — y compris si l'identifiant est force cote client.
+ *
+ * Deux rattachements valent : la fiche `doctors` d'un medecin, et la fiche
+ * `staff_members` d'un type de personnel a interface dediee. Les memes ecrans
+ * servent les deux interfaces (v3.3.1) : un echographiste a qui l'admin a
+ * coche « Demander un examen d'imagerie » doit pouvoir le demander depuis
+ * /staff/echographie, sans qu'on lui fabrique une fausse fiche medecin.
+ *
+ * Les colonnes `*_doctor_id` de WorkFlow restent pour autant reservees aux
+ * vrais medecins : c'est {@see Caregiver} qui traduit « qui agit » vers le bon
+ * couple de colonnes. Un composant qui a besoin d'un medecin — et il en reste —
+ * appelle `currentDoctor()`, qui refuse net les autres.
  */
 trait ScopedToOwnService
 {
@@ -31,26 +43,55 @@ trait ScopedToOwnService
      */
     protected function resetServiceState(): void {}
 
+    /**
+     * L'agent connecte dans ce service, medecin ou personnel generique.
+     */
+    protected function currentAgent(): Doctor|StaffMember
+    {
+        return $this->resolveAgent($this->serviceId);
+    }
+
+    protected function currentCaregiver(): Caregiver
+    {
+        return Caregiver::of($this->currentAgent());
+    }
+
+    /**
+     * Reserve aux ecrans qui ecrivent une colonne de praticien : on ne
+     * fabrique pas de faux medecin dans un dossier.
+     */
     protected function currentDoctor(): Doctor
     {
-        return $this->resolveDoctor($this->serviceId);
+        $agent = $this->resolveAgent($this->serviceId);
+
+        if (! $agent instanceof Doctor) {
+            throw new HttpException(403, 'Cette action est reservee aux medecins du service.');
+        }
+
+        return $agent;
     }
 
     protected function assertOwnService(int $serviceId): int
     {
-        $this->resolveDoctor($serviceId);
+        $this->resolveAgent($serviceId);
 
         return $serviceId;
     }
 
-    private function resolveDoctor(int $serviceId): Doctor
+    private function resolveAgent(int $serviceId): Doctor|StaffMember
     {
-        $doctor = Auth::user()?->doctorFor($serviceId);
+        $user = Auth::user();
 
-        if (! $doctor) {
-            throw new HttpException(403, "Vous n'etes pas rattache a ce service.");
+        if ($doctor = $user?->doctorFor($serviceId)) {
+            return $doctor;
         }
 
-        return $doctor;
+        $member = $user?->staffMember;
+
+        if ($member && (int) $member->service_id === $serviceId) {
+            return $member;
+        }
+
+        throw new HttpException(403, "Vous n'etes pas rattache a ce service.");
     }
 }

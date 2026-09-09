@@ -76,7 +76,7 @@ class TodayAppointments extends Component
     public function render(): View
     {
         $appointments = Appointment::query()
-            ->with(['patient', 'doctor.user', 'service'])
+            ->with(['patient', 'doctor.user', 'staffMember.user', 'service'])
             ->whereDate('scheduled_at', today())
             ->orderBy('scheduled_at')
             ->get();

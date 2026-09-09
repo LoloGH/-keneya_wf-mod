@@ -43,7 +43,7 @@
                         <li>
                             <strong>{{ $rdv->scheduled_at->format('d/m/Y a H:i') }}</strong>
                             — {{ $rdv->service->name }}
-                            <span>{{ $rdv->doctor?->name() }}</span>
+                            <span>{{ $rdv->authorName() }}</span>
                         </li>
                     @endforeach
                 </ul>

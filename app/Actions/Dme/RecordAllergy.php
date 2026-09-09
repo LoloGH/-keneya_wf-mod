@@ -4,6 +4,7 @@ namespace App\Actions\Dme;
 
 use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Support\Audit;
 use Keneya\Dme\Models\Allergy;
@@ -34,7 +35,7 @@ class RecordAllergy
      *     comment?: ?string,
      * }  $data
      */
-    public function execute(Visit $visit, Doctor $doctor, array $data): Allergy
+    public function execute(Visit $visit, Doctor|StaffMember $doctor, array $data): Allergy
     {
         $dossier = $this->dossierMedical($visit);
 
@@ -71,7 +72,7 @@ class RecordAllergy
      * information clinique en elle-meme — l'effacer reviendrait a laisser le
      * prochain medecin refaire le meme cheminement.
      */
-    public function updateStatus(Visit $visit, Doctor $doctor, Allergy $allergie, string $statut): Allergy
+    public function updateStatus(Visit $visit, Doctor|StaffMember $doctor, Allergy $allergie, string $statut): Allergy
     {
         abort_unless(
             (int) $allergie->patient_id === (int) $this->dossierMedical($visit)->getKey(),

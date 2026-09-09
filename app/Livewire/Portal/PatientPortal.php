@@ -82,7 +82,7 @@ class PatientPortal extends Component
             'prescriptions' => $unlocked ? $patient->ordonnances() : collect(),
             'appointments' => $unlocked
                 ? $patient->appointments()
-                    ->with(['service', 'doctor.user'])
+                    ->with(['service', 'doctor.user', 'staffMember.user'])
                     ->where('scheduled_at', '>=', now())
                     ->where('status', Appointment::STATUS_SCHEDULED)
                     ->orderBy('scheduled_at')

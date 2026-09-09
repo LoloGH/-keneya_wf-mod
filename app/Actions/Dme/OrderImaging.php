@@ -4,6 +4,7 @@ namespace App\Actions\Dme;
 
 use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Support\Audit;
 use Keneya\Dme\Models\ImagingOrder;
@@ -32,7 +33,7 @@ class OrderImaging
      *     indication?: ?string,
      * }  $data
      */
-    public function execute(Visit $visit, Doctor $doctor, array $data): ImagingOrder
+    public function execute(Visit $visit, Doctor|StaffMember $doctor, array $data): ImagingOrder
     {
         $dossier = $this->dossierMedical($visit);
 

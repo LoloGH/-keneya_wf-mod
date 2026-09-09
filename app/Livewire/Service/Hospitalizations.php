@@ -11,6 +11,7 @@ use App\Livewire\Concerns\RequiresCapability;
 use App\Livewire\Service\Concerns\ScopedToOwnService;
 use App\Models\CareTask;
 use App\Models\CareTaskType;
+use App\Models\Doctor;
 use App\Models\Hospitalization;
 use App\Models\Room;
 use App\Models\StaffType;
@@ -136,7 +137,7 @@ class Hospitalizations extends Component
         $room = $this->roomId ? Room::findOrFail($this->roomId) : null;
 
         try {
-            $action->execute($visit, $this->currentDoctor(), $room, $this->overCapacityConfirmed);
+            $action->execute($visit, $this->currentAgent(), $room, $this->overCapacityConfirmed);
         } catch (InvalidArgumentException $e) {
             // Salle pleine : on n'interdit pas, on demande confirmation.
             throw ValidationException::withMessages(['roomId' => $e->getMessage()]);
@@ -343,7 +344,7 @@ class Hospitalizations extends Component
             ->findOrFail($hospitalizationId);
 
         try {
-            $action->execute($hospitalization, $this->currentDoctor());
+            $action->execute($hospitalization, $this->currentAgent());
         } catch (InvalidArgumentException $e) {
             $this->notifyError($e->getMessage(), 'service.error');
 
@@ -357,7 +358,7 @@ class Hospitalizations extends Component
     {
         return view('livewire.service.hospitalizations', [
             'hospitalizations' => Hospitalization::query()
-                ->with(['patient', 'room', 'admittedByDoctor.user'])
+                ->with(['patient', 'room', 'admittedByDoctor.user', 'admittedByStaffMember.user'])
                 ->withCount([
                     'careTasks as pending_care_tasks_count' => fn ($q) => $q->where('status', CareTask::STATUS_PENDING),
                 ])
@@ -377,6 +378,12 @@ class Hospitalizations extends Component
                 ->orderBy('name')
                 ->get(),
             'careTaskTypes' => CareTaskType::orderBy('name')->get(),
+            // Prescrire un soin reste une decision medicale : la colonne
+            // `care_tasks.prescribed_by_doctor_id` n'admet qu'un medecin, et
+            // aucune capacite ne l'ouvre au personnel generique. Un compte non
+            // medecin admet et fait sortir, mais ne prescrit pas — mieux vaut
+            // ne pas lui montrer le bouton que le lui refuser au clic.
+            'peutPrescrireDesSoins' => $this->currentAgent() instanceof Doctor,
             // Les soins du sejour deplie : la liste complete, annules compris,
             // parce que le dossier garde tout — c'est le decompte qui les
             // ignore, pas l'affichage.

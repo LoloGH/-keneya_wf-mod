@@ -4,6 +4,7 @@ namespace App\Actions\Dme;
 
 use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Support\Audit;
 use Illuminate\Http\UploadedFile;
@@ -48,7 +49,7 @@ class StoreMedicalDocument
 
     public function execute(
         Visit $visit,
-        Doctor $doctor,
+        Doctor|StaffMember $doctor,
         UploadedFile $fichier,
         string $type,
         ?string $titre = null,

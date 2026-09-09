@@ -166,7 +166,7 @@ class MedicalOrders extends Component
 
         $visit = $this->visitInThisService();
 
-        $action->execute($visit, $this->currentDoctor(), [
+        $action->execute($visit, $this->currentAgent(), [
             'name' => $this->medicationName,
             'dosage' => $this->dosage,
             'frequency' => $this->frequency,
@@ -187,7 +187,7 @@ class MedicalOrders extends Component
 
         $action->updateStatus(
             $this->visitInThisService(),
-            $this->currentDoctor(),
+            $this->currentAgent(),
             Medication::findOrFail($medicationId),
             $statut,
         );
@@ -251,7 +251,7 @@ class MedicalOrders extends Component
 
         $visit = $this->visitInThisService();
 
-        $action->execute($visit, $this->currentDoctor(), [
+        $action->execute($visit, $this->currentAgent(), [
             'requested_at' => now()->toDateTimeString(),
             'priority' => $this->labPriority,
             'indication' => $this->labIndication,
@@ -286,7 +286,7 @@ class MedicalOrders extends Component
 
         $visit = $this->visitInThisService();
 
-        $action->execute($visit, $this->currentDoctor(), [
+        $action->execute($visit, $this->currentAgent(), [
             'modality' => $this->modality,
             'body_site' => $this->bodySite,
             'requested_at' => now()->toDateTimeString(),
@@ -325,7 +325,7 @@ class MedicalOrders extends Component
 
         $action->execute(
             $visit,
-            $this->currentDoctor(),
+            $this->currentAgent(),
             $this->document,
             $this->documentType,
             $this->documentTitle ?: null,

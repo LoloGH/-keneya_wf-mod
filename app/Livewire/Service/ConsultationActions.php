@@ -106,7 +106,7 @@ class ConsultationActions extends Component
 
         $visit = $this->visitInThisService();
 
-        $action->execute($visit, $this->currentDoctor(), $this->conclusion, $this->pathologyId);
+        $action->execute($visit, $this->currentAgent(), $this->conclusion, $this->pathologyId);
 
         session()->flash('service.status', sprintf(
             'Conclusion enregistree pour %s.',
@@ -167,7 +167,7 @@ class ConsultationActions extends Component
         $visit = $this->visitInThisService();
 
         try {
-            $prescription = $action->execute($visit, $this->currentDoctor(), $this->prescriptionLines);
+            $prescription = $action->execute($visit, $this->currentAgent(), $this->prescriptionLines);
         } catch (InvalidArgumentException $e) {
             // Le medicament fait la ligne : le message le dit plutot que de
             // signaler un champ vide parmi vingt.
@@ -199,7 +199,7 @@ class ConsultationActions extends Component
         $visit = $this->visitInThisService();
 
         try {
-            $action->execute($visit, $this->currentDoctor(), Carbon::parse($this->appointmentAt), $this->serviceId);
+            $action->execute($visit, $this->currentAgent(), Carbon::parse($this->appointmentAt), $this->serviceId);
         } catch (InvalidArgumentException $e) {
             throw ValidationException::withMessages(['appointmentAt' => $e->getMessage()]);
         }

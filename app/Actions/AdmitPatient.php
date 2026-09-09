@@ -6,9 +6,11 @@ use App\Models\Doctor;
 use App\Models\Hospitalization;
 use App\Models\PatientHistory;
 use App\Models\Room;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Services\PatientHistoryRecorder;
 use App\Support\Audit;
+use App\Support\Caregiver;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -28,15 +30,23 @@ class AdmitPatient
 {
     public function __construct(private readonly PatientHistoryRecorder $history) {}
 
+    /**
+     * `$doctor` accepte aussi un membre du personnel generique : l'admission
+     * est alors signee par `admitted_by_staff_member_id` (v3.3.1). Le controle
+     * de service ne change pas — on hospitalise dans son propre service, que
+     * l'on soit medecin ou non.
+     */
     public function execute(
         Visit $visit,
-        Doctor $doctor,
+        Doctor|StaffMember $doctor,
         ?Room $room = null,
         bool $overCapacityConfirmed = false,
     ): Hospitalization {
         if ($visit->isClosed()) {
             throw new InvalidArgumentException('Ce dossier est deja cloture.');
         }
+
+        $agent = Caregiver::of($doctor);
 
         if ((int) $doctor->service_id !== (int) $visit->service_id) {
             throw new InvalidArgumentException('Seul un praticien du service du patient peut l\'hospitaliser.');
@@ -50,13 +60,14 @@ class AdmitPatient
             ));
         }
 
-        $hospitalization = DB::transaction(function () use ($visit, $doctor, $room): Hospitalization {
+        $hospitalization = DB::transaction(function () use ($visit, $doctor, $agent, $room): Hospitalization {
             $hospitalization = Hospitalization::create([
                 'patient_id' => $visit->patient_id,
                 'service_id' => $visit->service_id,
                 'visit_id' => $visit->getKey(),
                 'room_id' => $room?->getKey(),
-                'admitted_by_doctor_id' => $doctor->getKey(),
+                'admitted_by_doctor_id' => $agent->doctorId(),
+                'admitted_by_staff_member_id' => $agent->staffMemberId(),
                 'admitted_at' => now(),
                 'status' => Hospitalization::STATUS_ACTIVE,
             ]);

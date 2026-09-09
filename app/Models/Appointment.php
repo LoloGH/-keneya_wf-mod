@@ -32,6 +32,9 @@ class Appointment extends Model
     protected $fillable = [
         'patient_id',
         'doctor_id',
+        // L'auteur du rendez-vous quand ce n'est pas un medecin (v3.3.1) :
+        // l'une des deux colonnes est renseignee, jamais les deux.
+        'staff_member_id',
         'service_id',
         'scheduled_at',
         'status',
@@ -53,6 +56,17 @@ class Appointment extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class);
+    }
+
+    public function staffMember(): BelongsTo
+    {
+        return $this->belongsTo(StaffMember::class);
+    }
+
+    /** Qui a fixe ce rendez-vous, medecin ou personnel generique. */
+    public function authorName(): ?string
+    {
+        return $this->doctor?->name() ?? $this->staffMember?->name();
     }
 
     public function service(): BelongsTo

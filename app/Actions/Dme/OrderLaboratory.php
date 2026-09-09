@@ -4,6 +4,7 @@ namespace App\Actions\Dme;
 
 use App\Actions\Dme\Concerns\ResolvesMedicalRecord;
 use App\Models\Doctor;
+use App\Models\StaffMember;
 use App\Models\Visit;
 use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +41,7 @@ class OrderLaboratory
      *     exams: array<int, array{name: string, category?: ?string}>,
      * }  $data
      */
-    public function execute(Visit $visit, Doctor $doctor, array $data): LabOrder
+    public function execute(Visit $visit, Doctor|StaffMember $doctor, array $data): LabOrder
     {
         $dossier = $this->dossierMedical($visit);
 

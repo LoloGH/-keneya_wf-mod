@@ -33,6 +33,14 @@ class NotificationTargetingTest extends TestCase
     {
         parent::setUp();
 
+        // Ces tests decrivent une garde en journee : leur creneau va de
+        // now()-1h a now()+3h. Entre minuit et une heure, ce calcul enjambe
+        // deux dates — le creneau commence a 23:30 et finit a 03:30, ne
+        // contient plus l'instant present, et personne n'est de garde. La
+        // suite echouait alors une heure par nuit, sans que rien n'ait
+        // change dans le code. L'horloge est donc posee a une heure ouvrable.
+        $this->travelTo(today()->setTime(10, 0));
+
         $this->seedRoles();
     }
 

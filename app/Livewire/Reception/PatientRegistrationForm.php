@@ -5,8 +5,10 @@ namespace App\Livewire\Reception;
 use App\Actions\OpenNewEpisode;
 use App\Actions\RegisterPatient;
 use App\Actions\SendPortalLink;
+use App\Livewire\Concerns\RequiresCapability;
 use App\Models\Patient;
 use App\Models\Service;
+use App\Models\StaffType;
 use App\Services\DuplicatePatientFinder;
 use App\Support\Audit;
 use Illuminate\Contracts\View\View;
@@ -21,6 +23,8 @@ use Livewire\Component;
  */
 class PatientRegistrationForm extends Component
 {
+    use RequiresCapability;
+
     public string $name = '';
 
     public ?int $age = null;
@@ -123,8 +127,16 @@ class PatientRegistrationForm extends Component
         $this->companions = array_values($this->companions);
     }
 
+    /**
+     * Le formulaire est desormais atteignable depuis /staff/{slug}
+     * (v3.3.1), ou la capacite decide de tout. Masquer la section ne
+     * suffit pas : un composant Livewire s'appelle sans passer par le
+     * menu.
+     */
     public function save(RegisterPatient $register, DuplicatePatientFinder $finder): void
     {
+        $this->assertCapability(StaffType::CAP_REGISTER_PATIENT);
+
         $data = $this->validate();
 
         // Verification prealable (v3.2.8, point 1) : rien ne l'assurait, et la

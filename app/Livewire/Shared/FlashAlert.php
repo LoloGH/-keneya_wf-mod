@@ -21,25 +21,51 @@ use Livewire\Component;
  */
 class FlashAlert extends Component
 {
-    /** Cle de session lue au premier rendu (redirection, chargement complet). */
-    public string $successKey = 'admin.status';
+    /**
+     * Cles de session lues au premier rendu (redirection, chargement complet).
+     *
+     * Plusieurs cles plutot qu'une seule : depuis la v3.3.1, /staff/{slug}
+     * affiche des ecrans partages avec l'interface medecin, qui ecrivent sous
+     * `service.*`. Sans cela, un enregistrement reussi depuis un poste dedie
+     * ne disait rien a l'ecran.
+     *
+     * @var array<int, string>
+     */
+    public array $successKeys = ['admin.status'];
 
-    public string $errorKey = 'admin.error';
+    /** @var array<int, string> */
+    public array $errorKeys = ['admin.error'];
 
     public ?string $message = null;
 
     /** `success` ou `error`. */
     public string $level = 'success';
 
-    public function mount(string $successKey = 'admin.status', string $errorKey = 'admin.error'): void
+    /**
+     * @param  string|array<int, string>  $successKey
+     * @param  string|array<int, string>  $errorKey
+     */
+    public function mount(string|array $successKey = 'admin.status', string|array $errorKey = 'admin.error'): void
     {
-        $this->successKey = $successKey;
-        $this->errorKey = $errorKey;
+        $this->successKeys = (array) $successKey;
+        $this->errorKeys = (array) $errorKey;
 
-        if ($texte = session($errorKey)) {
-            $this->show('error', $texte);
-        } elseif ($texte = session($successKey)) {
-            $this->show('success', $texte);
+        // L'erreur d'abord : quand les deux sont posees, c'est le refus qui
+        // doit se lire, pas le succes qui l'a precede.
+        foreach ($this->errorKeys as $cle) {
+            if ($texte = session($cle)) {
+                $this->show('error', $texte);
+
+                return;
+            }
+        }
+
+        foreach ($this->successKeys as $cle) {
+            if ($texte = session($cle)) {
+                $this->show('success', $texte);
+
+                return;
+            }
         }
     }
 

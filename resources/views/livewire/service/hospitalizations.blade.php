@@ -64,13 +64,15 @@
                 </header>
 
                 <p class="timeline__meta">
-                    Admis par {{ $sejour->admittedByDoctor?->name() }} —
+                    Admis par {{ $sejour->admittedByName() }} —
                     {{ $sejour->pending_care_tasks_count }} soin(s) en attente
                 </p>
 
                 <div class="btn-row">
-                    <button type="button" class="btn btn--secondary"
-                            wire:click="startPrescription({{ $sejour->id }})">Prescrire des soins</button>
+                    @if ($peutPrescrireDesSoins)
+                        <button type="button" class="btn btn--secondary"
+                                wire:click="startPrescription({{ $sejour->id }})">Prescrire des soins</button>
+                    @endif
                     <button type="button" class="btn btn--ghost"
                             wire:click="showCareTasks({{ $sejour->id }})">
                         {{ $viewingCareTasksFor === $sejour->id ? 'Masquer les soins' : 'Voir et corriger les soins' }}

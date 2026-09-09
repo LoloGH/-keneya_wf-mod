@@ -200,7 +200,7 @@ class MedicalConsultation extends Component
         // dossier d'un patient d'un autre service.
         $visit = $this->visitInThisService();
 
-        $consultation = $action->execute($visit, $this->currentDoctor(), [
+        $consultation = $action->execute($visit, $this->currentAgent(), [
             'started_at' => $donnees['startedAt'],
             'type' => $donnees['type'],
             'reason' => $donnees['reason'],
