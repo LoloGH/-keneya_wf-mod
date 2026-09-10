@@ -53,8 +53,8 @@ class LoginScreenTest extends TestCase
         $response = $this->get('/connexion');
 
         $response->assertOk()
-            ->assertSee('login-stage__scene', escape: false)
-            ->assertSee('login-card', escape: false)
+            ->assertSee('login-scene', escape: false)
+            ->assertSee('login-carte', escape: false)
             ->assertSee('Bienvenue', escape: false);
 
         // La scene est une photographie posee en fond : elle n'apporte aucun
@@ -64,6 +64,43 @@ class LoginScreenTest extends TestCase
             'alt="'.config('keneya.name').' - Espace professionnel"',
             $response->getContent(),
         );
+    }
+
+    /**
+     * Le discours de la page etait peint dans le JPEG jusqu'a la v3.3.1 : un
+     * lecteur d'ecran n'en voyait rien, et le changer demandait un logiciel de
+     * dessin. C'est desormais du texte, et c'est ce que verifie ce test.
+     */
+    public function test_l_accroche_et_le_perimetre_sont_du_texte_et_non_de_l_image(): void
+    {
+        $response = $this->get('/connexion')->assertOk();
+
+        $response->assertSee('Le poste de travail', escape: false)
+            ->assertSee('du soignant(e).', escape: false);
+
+        foreach ([
+            'Accueil et enregistrement',
+            'File d\'attente',
+            'Consultation',
+            'Caisse',
+            'Plateau technique',
+            'Dossier medical',
+        ] as $entree) {
+            // Sans « escape: false » : l'apostrophe de « File d'attente » sort
+            // du gabarit en entite HTML, et c'est bien ce qu'on veut lire.
+            $response->assertSee($entree);
+        }
+    }
+
+    /**
+     * La version aide au support : on sait ce que le poste execute avant meme
+     * de decrocher.
+     */
+    public function test_la_carte_annonce_la_version_du_produit(): void
+    {
+        $this->get('/connexion')
+            ->assertOk()
+            ->assertSee('v'.config('keneya.version'), escape: false);
     }
 
     public function test_la_mention_de_droits_pointe_vers_le_site_de_l_editeur(): void
@@ -78,20 +115,20 @@ class LoginScreenTest extends TestCase
     }
 
     /**
-     * Sur telephone, la rangee des quatre atouts ferme la carte et la mention
-     * de l'editeur vient sous elle. Aucune regle de style ne les reordonne :
-     * c'est l'ordre du document qui le dit, et c'est donc lui qu'on verifie.
+     * La mention de l'editeur ferme la carte, sous la ligne de version. Aucune
+     * regle de style ne les reordonne : c'est l'ordre du document qui le dit,
+     * et c'est donc lui qu'on verifie.
      */
-    public function test_la_mention_de_droits_vient_apres_la_rangee_des_atouts(): void
+    public function test_la_mention_de_droits_ferme_la_carte(): void
     {
         $contenu = $this->get('/connexion')->assertOk()->getContent();
 
-        $atouts = strpos($contenu, 'login-atouts');
+        $version = strpos($contenu, 'login-carte__version');
         $droits = strpos($contenu, 'login-card__rights');
 
-        $this->assertNotFalse($atouts);
+        $this->assertNotFalse($version);
         $this->assertNotFalse($droits);
-        $this->assertGreaterThan($atouts, $droits);
+        $this->assertGreaterThan($version, $droits);
     }
 
     // --------------------------------------------------------- Les protections

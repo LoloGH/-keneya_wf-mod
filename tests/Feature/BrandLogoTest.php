@@ -94,17 +94,18 @@ class BrandLogoTest extends TestCase
     // ------------------------------------------------------ Les placements
 
     /**
-     * Depuis la maquette v3.2.6, la carte de connexion porte le bloc de marque
-     * de la maquette elle-meme (symbole, nom et mention « Espace
-     * professionnel ») plutot que le logo seul : c'est une composition, pas
-     * une variante du logo.
+     * Depuis la v3.3.2, la scene de connexion ne porte plus aucun texte peint :
+     * la marque y est une image du logo, posee deux fois — en tete de la
+     * colonne de gauche, et dans la carte. Le fichier compose « login-marque »
+     * de la v3.2.6 n'a plus lieu d'etre.
      */
-    public function test_la_connexion_affiche_le_logo_complet_sans_texte_double(): void
+    public function test_la_connexion_affiche_le_logo_du_produit(): void
     {
         $response = $this->get('/connexion');
 
         $response->assertOk()
-            ->assertSee('images/login-marque.png', escape: false);
+            ->assertSee('images/keneya-logo.png', escape: false)
+            ->assertDontSee('images/login-marque.png', escape: false);
 
         // Le nom du produit ne doit pas apparaitre en texte a cote du logo :
         // seul le <title> de l'onglet le reprend.

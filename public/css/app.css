@@ -1704,529 +1704,599 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .attachments li { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
 
 /* =========================================================================
-   Addendum v3.2.6 — ecran de connexion
+   v3.3.2 — ecran de connexion
    =========================================================================
 
-   L'ecran reprend la maquette public/images/keneya-workflow-login.svg :
-   la photographie occupe toute la page, et la carte de connexion se pose
-   exactement sur celle qui y est dessinee.
+   L'ecran reprend l'architecture de celui du DME : scene pleine page, marque
+   et accroche a gauche, carte blanche a droite, mentions discretes en bas.
 
-   Le cadrage n'est pas fait par « background-size: cover » mais par un
-   element au meme rapport que l'image (1402 x 1122), dimensionne pour la
-   couvrir. La carte, placee en pourcentages de cet element, retombe donc au
-   pixel pres sur la carte dessinee, quelle que soit la taille de la fenetre —
-   ce qu'un fond en « cover » ne permet pas, puisqu'il recadre sans que la
-   page sache de combien.
+   Trois choses le distinguent de la version precedente.
 
-   Toutes les dimensions de la carte sont exprimees en unites de conteneur
-   (cqw) : elles suivent l'echelle de l'image au lieu de s'en detacher. Sous
-   1024 px, ou ce cadrage n'aurait plus de sens, la mise en page bascule sur
-   une carte centree classique et les memes variables passent en rem.
+   D'abord, la scene ne porte plus aucun texte. Le titre, les six entrees du
+   perimetre et les mentions etaient peints dans le JPEG : ils sont redevenus
+   du texte HTML, donc lisibles par un lecteur d'ecran, traduisibles, et
+   modifiables sans repasser par un logiciel de dessin. Les trois tailles de
+   l'image se derivent du master par `tools/images-connexion.php`.
+
+   Ensuite, rien n'est voile ni floute. La photographie est claire : le texte
+   s'y pose en bleu nuit, la ou elle est deja calme, plutot que de l'assombrir
+   pour ecrire en blanc dessus.
+
+   Enfin, le placement est une grille, non plus un calage au pourcentage sur
+   un dessin. La carte n'a plus a retomber au pixel pres sur une carte peinte
+   dans l'image, puisqu'il n'y en a plus : elle occupe la colonne de droite et
+   suit la fenetre.
+
+   Sous 64 rem la composition change au lieu de retrecir : la scene devient un
+   bandeau, la marque et l'accroche s'y posent en haut a droite, et la carte
+   prend tout ce qui reste.
    ========================================================================= */
 
 .login-page {
     min-height: 100vh;
     min-height: 100dvh;
     margin: 0;
-    background: #f4f6f8;
+    background: var(--fond);
 }
 
-/* La photographie porte le discours de la maquette : logo, accroche et barre
-   d'atouts y sont peints, tous dans sa moitie gauche.
+.login-scene {
+    position: relative;
+    min-height: 100dvh;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr auto auto;
+    column-gap: 2rem;
+    padding: clamp(1.6rem, 3.2vw, 3.4rem);
 
-   Elle a ete elargie au format 2,32:1 en etirant la baie vitree de droite, ou
-   il n'y a rien a lire. Elle est ainsi plus large que toutes les fenetres
-   courantes : « cover » la cale donc sur la hauteur, et ce qui se fait couper
-   est le vide de droite, jamais le haut ni le bas de la scene. */
-.login-stage {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    background: var(--fond) url('../images/login-scene.jpg') left center / cover no-repeat;
+    /* La scene est plus large que haute : « cover » la cale sur la hauteur et
+       recadre horizontalement. Le point de 14 % garde le soignant au centre
+       gauche et laisse la baie vitree a la carte. */
+    background: var(--fond) url('../images/login-scene.jpg') 14% 44% / cover no-repeat;
+    color: var(--gris-800);
 }
 
-.login-stage__scene {
-    position: absolute;
-    inset: 0;
+/* ---------- La marque et l'accroche ---------- */
+
+.login-intro {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(1.2rem, 2.6vw, 2.2rem);
 }
 
-/* ---------- La carte de connexion ---------- */
+.login-marque {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
-.login-card {
-    position: absolute;
-    top: 50%;
+.login-marque img {
+    display: block;
+    width: auto;
+    height: clamp(3.2rem, 5.6vw, 5.25rem);
+}
 
-    /* L'image etant calee sur la hauteur, le dessin s'arrete toujours a la
-       meme distance du bord gauche : 103,6 % de la hauteur de la fenetre. La
-       carte se pose au milieu de ce qui reste — le vide de la scene — sans
-       jamais sortir de la fenetre si ce vide se reduit. */
-    left: clamp(calc(2vw + var(--carte-l) / 2),
-                calc(51.8vh + 50vw),
-                calc(98vw - var(--carte-l) / 2));
-    transform: translate(-50%, -50%);
+.login-marque__filet {
+    width: 1px;
+    align-self: stretch;
+    margin: .7rem 0;
+    background: var(--gris-400);
+    opacity: .55;
+}
+
+.login-marque__mot {
+    font-size: .8rem;
+    line-height: 1.7;
+    font-weight: 600;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+    color: var(--gris-700);
+}
+
+.login-promesse { max-width: 22rem; }
+
+.login-promesse h1 {
+    margin: 0;
+    font-size: clamp(1.9rem, 3.3vw, 2.5rem);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--bleu-nuit);
+    text-wrap: balance;
+}
+
+/* La seconde ligne change de graisse et de teinte, pas de taille : c'est la
+   meme phrase, pas un sous-titre. */
+.login-promesse h1 em {
+    display: block;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--sarcelle-fonce);
+}
+
+.login-filet {
+    display: block;
+    width: 3.5rem;
+    height: 3px;
+    margin-top: .9rem;
+    border-radius: 2px;
+    background: var(--sarcelle);
+}
+
+/* ---------- Le perimetre ---------- */
+
+.login-perimetre {
+    grid-area: 3 / 1;
+    align-self: end;
+    max-width: 42.5rem;
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    background: var(--blanc);
+    border: 1px solid var(--gris-200);
+    border-radius: 16px;
+    box-shadow: 0 14px 40px -22px rgba(15, 42, 92, .45);
+}
+
+.login-perimetre__titre {
+    margin: 0 0 1rem;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gris-500);
+}
+
+.login-perimetre ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 1rem 1.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.login-perimetre li {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+}
+
+.login-perimetre svg { flex: 0 0 auto; color: var(--sarcelle); }
+.login-perimetre span { font-size: .88rem; font-weight: 500; color: var(--gris-800); }
+
+.login-mentions {
+    grid-area: 4 / 1;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: .9rem 0 0;
+    font-size: .78rem;
+    color: var(--gris-600);
+}
+
+.login-mentions svg { flex: 0 0 auto; color: var(--gris-500); }
+
+/* ---------- La carte de connexion ----------
+   Seul bloc opaque de la page : c'est la que va l'attention. */
+
+.login-carte {
+    grid-area: 1 / 2 / 5 / 3;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: min(25.75rem, 100%);
+    padding: 1.6rem 1.9rem 1.5rem;
+    background: var(--blanc);
+    border-radius: 20px;
+    box-shadow: 0 30px 70px -26px rgba(15, 42, 92, .5),
+                0 0 0 1px rgba(15, 23, 42, .05);
 
     /* Elle arrive par la droite, une seule fois, au chargement. */
     animation: kw-carte-entre 620ms cubic-bezier(.22, .61, .36, 1) both;
-
-    /* Sa largeur est bornee par la hauteur disponible : la carte est deux
-       fois plus haute que large, c'est donc la hauteur qui commande, sans quoi
-       elle deborderait et defilerait. */
-    --carte-l: clamp(18rem, min(36vw, 58vh), 44rem);
-    width: var(--carte-l);
-    max-height: 95vh;
-    box-sizing: border-box;
-    overflow: auto;
-
-    background: #fff;
-    border-radius: 2.2cqw;
-    box-shadow: 0 4.68cqw 12.29cqw rgba(4, 28, 46, .16);
-
-    /* Les dimensions internes suivent la largeur de la carte, pas celle de la
-       fenetre : les proportions de la maquette sont donc tenues a toute
-       taille, sans jeu de tailles a maintenir. Le remplissage vit dans
-       l'enveloppe : un conteneur ne peut pas s'exprimer dans ses propres
-       unites. */
-    container-type: inline-size;
-
-    /* La carte de connexion avait sa propre palette, un cyan repris d'une
-       maquette anterieure. Elle pointe desormais sur les tokens de la marque :
-       c'est le premier ecran que voit un agent, il ne peut pas etre le seul a
-       ne pas parler la meme langue que le reste du produit. */
-    --or-teal: var(--sarcelle);
-    --or-teal-fonce: var(--sarcelle-fonce);
-    --or-nuit: var(--bleu-fonce);
-    --or-gris: var(--gris-500);
-    --or-bord: var(--gris-200);
 }
 
-.login-card__inner {
+/* Le selecteur de langue, en <details> : le clavier et le lecteur d'ecran le
+   connaissent deja, sans une ligne de script. */
+.login-langue { position: relative; align-self: flex-end; margin-top: -.2rem; }
+
+.login-langue summary {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    box-sizing: border-box;
-    padding: 5.2cqw 8.6cqw 0;
+    align-items: center;
+    gap: .3rem;
+    padding: .15rem .3rem;
+    border-radius: 6px;
+    font-size: .76rem;
+    font-weight: 500;
+    color: var(--gris-500);
+    cursor: pointer;
+    list-style: none;
 }
 
-/* Le bloc de marque est repris tel quel de la maquette : meme composition,
-   memes graisses, sans avoir a charger une police web — l'application
-   fonctionne sur un reseau d'hopital, parfois sans acces exterieur. */
-.login-card__marque {
+.login-langue summary::-webkit-details-marker { display: none; }
+.login-langue summary:hover { color: var(--gris-700); }
+.login-langue summary:focus-visible { outline: 2px solid var(--bleu); outline-offset: 2px; }
+.login-langue summary svg { flex: 0 0 auto; transform: rotate(90deg); transition: transform .15s ease; }
+.login-langue[open] summary svg { transform: rotate(-90deg); }
+
+.login-langue ul {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 2;
+    width: 9.5rem;
+    margin: .25rem 0 0;
+    padding: .25rem 0;
+    list-style: none;
+    background: var(--blanc);
+    border: 1px solid var(--gris-200);
+    border-radius: 10px;
+    box-shadow: 0 12px 28px -14px rgba(15, 42, 92, .45);
+}
+
+.login-langue li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .35rem .75rem;
+    font-size: .76rem;
+    color: var(--gris-400);
+}
+
+.login-langue__actif { color: var(--gris-700); font-weight: 600; }
+.login-langue li svg { color: var(--sarcelle); flex: 0 0 auto; }
+
+.login-langue li em {
+    font-style: normal;
+    font-size: .58rem;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.login-carte__logo {
+    align-self: center;
     display: block;
-    width: 44%;
-    height: auto;
-    margin: 0 auto;
+    width: auto;
+    height: 3.75rem;
+    margin-top: .1rem;
 }
 
-.login-card__head { text-align: center; margin: 3.6cqw 0 0; }
+/* Le titre d'accueil ne sert que sur telephone, ou le logo est deja sur le
+   bandeau. */
+.login-carte__titre { display: none; }
 
-.login-card__title {
-    margin: 0;
-    font-size: 6.26cqw;
-    line-height: 1.2;
-    font-weight: 700;
-    letter-spacing: -.01em;
-    color: var(--or-nuit);
+.login-carte__sous {
+    margin: .8rem 0 0;
+    text-align: center;
+    font-size: .92rem;
+    color: var(--gris-600);
 }
 
-.login-card__subtitle {
-    margin: 1.5cqw 0 0;
-    font-size: 3.25cqw;
-    line-height: 1.4;
-    color: var(--or-gris);
-}
-
-.login-card__site {
+.login-carte__site {
+    align-self: center;
     display: inline-flex;
     align-items: center;
-    gap: 1.6cqw;
-    margin: 2.6cqw 0 0;
-    padding: 1.4cqw 3.2cqw;
-    font-size: 2.8cqw;
+    gap: .45rem;
+    margin: .8rem 0 0;
+    padding: .32rem .85rem;
+    background: var(--bleu-pale);
+    border: 1px solid var(--bleu-clair);
+    border-radius: 999px;
+    font-size: .78rem;
     font-weight: 600;
-    color: var(--sarcelle-fonce);
-    background: var(--sarcelle-clair);
-    border-radius: var(--rayon-pilule);
+    color: var(--bleu-nuit);
 }
 
-.login-card__site svg { width: 3.4cqw; height: 3.4cqw; }
+.login-carte__site svg { flex: 0 0 auto; }
+
+/* ---------- Le formulaire ---------- */
 
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 5cqw;
-    margin-top: 5.6cqw;
+    gap: .85rem;
+    margin-top: 1.25rem;
 }
 
-/* La session persistante existe cote serveur depuis toujours ; il ne manquait
-   que la case pour la demander. Elle se place sous les champs, avant le
-   bouton, la ou l'utilisateur decide. */
-.login-remember {
-    display: flex;
-    align-items: center;
-    gap: 2.4cqw;
-    margin: -4cqw 0 -2cqw;
-    font-size: 2.9cqw;
-    color: var(--or-gris);
-    cursor: pointer;
-}
-
-.login-remember input {
-    width: 4.2cqw;
-    height: 4.2cqw;
-    margin: 0;
-    accent-color: var(--or-teal);
-    cursor: pointer;
-}
-
-.login-remember input:focus-visible { outline: 2px solid var(--or-teal); outline-offset: 2px; }
-
-.login-form .field { display: flex; flex-direction: column; gap: 2.2cqw; margin: 0; }
+.login-form .field { display: flex; flex-direction: column; gap: .4rem; margin: 0; }
 
 .login-form label {
-    font-size: 2.93cqw;
-    font-weight: 700;
-    color: var(--or-nuit);
-    letter-spacing: .005em;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--gris-700);
 }
 
 .login-control { position: relative; display: flex; align-items: center; }
 
 .login-control__icon {
     position: absolute;
-    left: 3.95cqw;
-    width: 4.39cqw;
-    height: 4.39cqw;
-    color: #9aa8bb;
+    left: .75rem;
+    color: var(--gris-400);
     pointer-events: none;
 }
 
 .login-control input {
     width: 100%;
-    height: 11.4cqw;
     box-sizing: border-box;
-    padding: 0 3.51cqw 0 11.71cqw;
-    font-family: inherit;
-    font-size: 3.13cqw;
-    color: var(--or-nuit);
-    background: #fff;
-    border: 1px solid var(--or-bord);
-    border-radius: 2.28cqw;
-    transition: border-color 160ms ease, box-shadow 160ms ease;
+    height: 2.85rem;
+    padding: 0 .85rem 0 2.4rem;
+    font: inherit;
+    font-size: .92rem;
+    color: var(--gris-900);
+    background: var(--blanc);
+    border: 1px solid var(--gris-300);
+    border-radius: 10px;
 }
 
-.login-control input::placeholder { color: #a4b0c0; }
+.login-control input::placeholder { color: #a3b0c2; }
 
 .login-control input:focus {
+    border-color: var(--sarcelle);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, .16);
     outline: none;
-    border-color: var(--or-teal);
-    box-shadow: 0 0 0 .82cqw rgba(5, 163, 157, .18);
 }
 
-.login-control input:focus-visible { outline: 2px solid var(--or-teal); outline-offset: 2px; }
-.login-control input[aria-invalid="true"] { border-color: #c0392b; }
-.login-control input.login-control__input--pw { padding-right: 11.71cqw; }
+.login-control input:focus-visible { outline: 2px solid var(--sarcelle); outline-offset: 1px; }
+.login-control input[aria-invalid="true"] { border-color: var(--rouge); }
+.login-control input.login-control__input--pw { padding-right: 2.75rem; }
 
 .login-peek {
     position: absolute;
-    right: 2.63cqw;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 7.03cqw;
-    height: 7.03cqw;
+    right: .4rem;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
     padding: 0;
-    color: #8d9bad;
+    color: var(--gris-400);
     background: none;
     border: 0;
-    border-radius: 1.46cqw;
+    border-radius: 8px;
     cursor: pointer;
 }
 
-.login-peek:hover, .login-peek[aria-pressed="true"] { color: var(--or-teal); }
-.login-peek svg { width: 4.39cqw; height: 4.39cqw; display: block; }
+.login-peek:hover, .login-peek[aria-pressed="true"] { color: var(--sarcelle); background: var(--gris-100); }
+.login-peek svg { display: block; }
 .login-peek [data-icon="off"] { display: none; }
 .login-peek[aria-pressed="true"] [data-icon="on"] { display: none; }
 .login-peek[aria-pressed="true"] [data-icon="off"] { display: block; }
 
-.login-submit {
-    display: inline-flex;
+.login-rangee {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 2.49cqw;
-    width: 100%;
-    height: 11.8cqw;
-    margin-top: .85cqw;
-    padding: 0;
-    font-family: inherit;
-    font-size: 3.54cqw;
-    font-weight: 700;
-    color: #fff;
-    background: var(--or-teal);
-    border: 0;
-    border-radius: 2.28cqw;
-    cursor: pointer;
-    transition: background-color 160ms ease;
+    justify-content: space-between;
+    gap: .4rem .9rem;
+    font-size: .8rem;
 }
 
-.login-submit:hover:not([disabled]) { background: var(--or-teal-fonce); }
-.login-submit:focus-visible { outline: 3px solid var(--or-nuit); outline-offset: 3px; }
+.login-remember {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--gris-600);
+    cursor: pointer;
+}
+
+.login-remember input {
+    width: .95rem;
+    height: .95rem;
+    margin: 0;
+    accent-color: var(--sarcelle);
+}
+
+.login-remember input:focus-visible { outline: 2px solid var(--sarcelle); outline-offset: 2px; }
+
+.login-oubli {
+    padding: 0;
+    font: inherit;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--bleu);
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.login-oubli:hover { text-decoration: underline; }
+.login-oubli:focus-visible { outline: 2px solid var(--bleu); outline-offset: 2px; border-radius: 4px; }
+
+.login-oubli__aide {
+    margin: 0;
+    padding: .6rem .75rem;
+    background: var(--gris-100);
+    border-radius: 10px;
+    font-size: .78rem;
+    line-height: 1.5;
+    color: var(--gris-600);
+}
+
+.login-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    height: 3rem;
+    margin-top: .15rem;
+    font: inherit;
+    font-size: .98rem;
+    font-weight: 600;
+    color: var(--blanc);
+    background: linear-gradient(100deg, var(--bleu-nuit) 0%, var(--bleu) 42%, var(--sarcelle) 100%);
+    border: 0;
+    border-radius: 11px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px -12px rgba(5, 150, 105, .8);
+}
+
+.login-submit:hover:not([disabled]) { filter: brightness(1.07); }
+.login-submit:focus-visible { outline: 3px solid var(--bleu-nuit); outline-offset: 3px; }
 .login-submit[disabled] { opacity: .8; cursor: default; }
-.login-submit svg { width: 4.39cqw; height: 4.39cqw; flex: 0 0 auto; }
+.login-submit svg { flex: 0 0 auto; }
 
 .login-spinner {
-    width: 3.51cqw;
-    height: 3.51cqw;
-    border: .5cqw solid rgba(255, 255, 255, .45);
-    border-top-color: #fff;
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 auto;
+    border: 2px solid rgba(255, 255, 255, .45);
+    border-top-color: var(--blanc);
     border-radius: 50%;
-    animation: kw-tourne 700ms linear infinite;
+    animation: kw-tourne 720ms linear infinite;
 }
 
 @keyframes kw-tourne { to { transform: rotate(360deg); } }
 
-/* L'etat d'arrivee n'est pas decrit : c'est celui de la carte elle-meme, donc
-   la regle de centrage reste la seule source de sa position. Le reglage
-   « animations reduites » du systeme la pose directement en place. */
 @keyframes kw-carte-entre {
-    from {
-        opacity: 0;
-        transform: translate(calc(-50% + 6rem), -50%);
-    }
+    from { opacity: 0; transform: translateX(1.5rem); }
+    to { opacity: 1; transform: none; }
 }
 
-/* Les messages du serveur n'existent pas sur la maquette : ils s'inserent
-   au-dessus du formulaire, dans le meme vocabulaire graphique. */
 .login-alert {
     display: flex;
-    gap: 2.49cqw;
-    margin-top: 6.26cqw;
-    padding: 2.93cqw 3.51cqw;
-    font-size: 2.99cqw;
-    line-height: 1.4;
-    color: #8a2b21;
-    background: #fdecea;
-    border: 1px solid #f3c6c0;
-    border-radius: 2.28cqw;
+    align-items: flex-start;
+    gap: .5rem;
+    margin-top: 1rem;
+    padding: .7rem .85rem;
+    background: var(--rouge-clair);
+    border-left: 3px solid var(--rouge);
+    border-radius: 0 10px 10px 0;
+    font-size: .84rem;
+    line-height: 1.5;
+    color: #8f2018;
 }
 
-.login-alert svg { width: 3.81cqw; height: 3.81cqw; flex: 0 0 auto; margin-top: .4cqw; }
+.login-alert svg { flex: 0 0 auto; margin-top: .1rem; color: var(--rouge); }
 
-.login-card__foot {
-    margin-top: 3.8cqw;
-    text-align: center;
-}
+/* ---------- Le pied de carte ---------- */
 
-.login-card__foot::before {
-    content: "";
-    display: block;
-    height: 1px;
-    margin-bottom: 4.2cqw;
-    background: var(--or-bord);
-}
-
-.login-card__secure {
-    display: inline-flex;
+.login-carte__secure {
+    display: flex;
     align-items: center;
-    gap: 1.76cqw;
-    font-size: 3.13cqw;
-    font-weight: 600;
-    color: var(--or-nuit);
+    justify-content: center;
+    gap: .4rem;
+    margin: 1.1rem 0 0;
+    font-size: .76rem;
+    color: var(--gris-500);
 }
 
-.login-card__secure svg { width: 4.68cqw; height: 4.68cqw; color: var(--or-teal); }
+.login-carte__secure svg { flex: 0 0 auto; }
 
-/* La mention d'editeur ferme la carte. Elle est sortie du pied pour passer,
-   sur mobile, sous la rangee des atouts — l'ordre du document suffit, aucun
-   reordonnancement visuel n'est necessaire. */
-.login-card__rights {
-    margin: 2.8cqw 0 0;
-    padding-bottom: 5.6cqw;
-    font-size: 2.72cqw;
-    color: var(--or-gris);
+.login-carte__version {
+    margin: .5rem 0 0;
     text-align: center;
+    font-size: .72rem;
+    color: var(--gris-400);
+    font-variant-numeric: tabular-nums;
 }
 
-.login-card__rights a { color: var(--or-teal); font-weight: 600; text-decoration: none; }
+.login-card__rights {
+    margin: .25rem 0 0;
+    text-align: center;
+    font-size: .72rem;
+    color: var(--gris-400);
+}
+
+.login-card__rights a { color: var(--bleu); font-weight: 600; text-decoration: none; }
 .login-card__rights a:hover { text-decoration: underline; }
 
 /* ---------- Ecrans etroits ----------
-   La maquette responsive change de composition, elle ne se contente pas de
-   retrecir : la photographie devient un bandeau en haut, la carte passe
-   dessous et remonte sur lui par ses angles arrondis, et la marque quitte la
-   carte pour se poser sur le bandeau. Sur mobile s'ajoute la rangee des
-   quatre atouts, qui sur grand ecran est deja dans l'image.
+   La composition change, elle ne retrecit pas : la photographie devient un
+   bandeau, la marque et l'accroche s'y posent en haut a droite, et la carte
+   prend toute la hauteur restante. Le perimetre disparait : on vient ici pour
+   se connecter, pas pour lire ce que fait l'outil. */
 
-   Les selecteurs restent ceux du grand ecran : seules les unites passent de
-   cqw a rem, l'echelle n'ayant plus a suivre l'image. */
-
-.login-band__marque { display: none; }
-.login-atouts { display: none; }
-
-@media (max-width: 64rem) {
-    .login-page { display: block; }
-
-    /* Le discours de la scene n'a pas sa place sur un petit ecran : on y vient
-       pour se connecter, pas pour lire une accroche. */
-    .login-stage { position: static; overflow: visible; }
-
-    .login-stage { background: var(--fond); }
-
-    .login-stage__scene {
-        position: relative;
-        inset: auto;
-        transform: none;
-        width: 100%;
-        height: auto;
-        min-height: 100dvh;
-        aspect-ratio: auto;
-        background: var(--fond);
-        container-type: normal;
+@media (max-width: 63.99rem) {
+    .login-scene {
         display: flex;
         flex-direction: column;
+        padding: 0;
+        background: var(--fond);
     }
 
-    /* Le bandeau est decoupe dans la scene sans aucun texte peint : le
-       soignant, sa mallette et l'ecran au centre, et au-dessus d'eux la bande
-       de mur clair ou vient se poser la marque. */
-    .login-stage__scene::before {
+    .login-scene::before {
         content: "";
         display: block;
-        height: 44dvh;
-        background: url('../images/login-scene-mobile.jpg') center top / cover no-repeat;
+        flex: 0 0 auto;
+        height: clamp(11.5rem, 27dvh, 16rem);
+        background: url('../images/login-scene-mobile.jpg') 22% 42% / cover no-repeat;
     }
 
-    .login-band__marque {
-        display: block;
+    .login-intro {
         position: absolute;
-        top: .95rem;
-        left: 1.15rem;
-        width: min(60vw, 18.5rem);
-        height: auto;
-        filter: drop-shadow(0 0 6px rgba(255, 255, 255, .95))
-                drop-shadow(0 0 14px rgba(255, 255, 255, .75));
+        top: 1.3rem;
+        right: 1.3rem;
+        width: 9.4rem;
+        align-items: flex-end;
+        text-align: right;
+        gap: .62rem;
     }
 
-    .login-card {
-        position: relative;
-        z-index: 1;
-        left: auto;
-        top: auto;
-        right: auto;
-        transform: none;
-        max-height: none;
-        container-type: normal;
+    /* Le fichier du logo porte du vide : 11 % de sa hauteur en haut, 20 % en
+       bas. Sans ces marges negatives, l'espace sous le logo paraitrait double
+       de celui du dessus, et le bloc ne serait aligne que sur le papier. */
+    .login-marque img { height: 3.15rem; margin: -.38rem 0 -.62rem; }
+    .login-marque__filet, .login-marque__mot { display: none; }
+
+    .login-promesse { max-width: none; }
+    .login-promesse h1 { font-size: 1.06rem; line-height: 1.2; }
+    /* Le filet suit le bloc : il se cale a droite comme le reste de
+       l'accroche, alors qu'il ouvre la ligne a gauche sur un poste fixe. */
+    .login-filet { width: 2.4rem; height: 3px; margin: .62rem 0 0 auto; }
+
+    .login-perimetre, .login-mentions { display: none; }
+
+    .login-carte {
         flex: 1;
         width: 100%;
-        height: auto;
-        margin: -1.75rem 0 0;
-        border-radius: 22px 22px 0 0;
-        box-shadow: 0 -.5rem 1.6rem rgba(6, 33, 74, .14);
-        overflow: visible;
+        max-width: none;
+        justify-content: center;
+        padding: 1.4rem 1.4rem 1.6rem;
+        border-radius: 0;
+        box-shadow: none;
+        animation: none;
     }
 
-    .login-card__inner { padding: 1.9rem 1.5rem 1.6rem; }
+    /* Le logo est sur le bandeau : le repeter dans la carte ferait double. */
+    .login-carte__logo { display: none; }
 
-    /* La marque est sur le bandeau : la repeter dans la carte ferait double. */
-    .login-card__marque { display: none; }
-
-    .login-card__head { margin-top: 0; }
-    .login-card__title { font-size: 1.62rem; }
-    .login-card__subtitle { font-size: .95rem; margin-top: .35rem; }
-
-    .login-card__site {
-        gap: .4rem;
-        margin-top: .7rem;
-        padding: .3rem .8rem;
-        font-size: .82rem;
-    }
-
-    .login-card__site svg { width: .95rem; height: .95rem; }
-
-    .login-form { gap: 1.15rem; margin-top: 1.2rem; }
-
-    .login-remember { gap: .55rem; margin: -.5rem 0 -.25rem; font-size: .88rem; }
-    .login-remember input { width: 1.05rem; height: 1.05rem; }
-    .login-form .field { gap: .45rem; }
-    .login-form label { font-size: .9rem; }
-
-    .login-control__icon { left: .9rem; width: 1.2rem; height: 1.2rem; }
-    .login-control input { height: 3.1rem; padding: 0 1rem 0 2.8rem; font-size: 1rem; border-radius: 10px; }
-    .login-control input.login-control__input--pw { padding-right: 3rem; }
-    .login-control input:focus { box-shadow: 0 0 0 3px rgba(5, 163, 157, .18); }
-
-    .login-peek { right: .5rem; width: 2.2rem; height: 2.2rem; border-radius: 8px; }
-    .login-peek svg { width: 1.25rem; height: 1.25rem; }
-
-    .login-submit { height: 3.25rem; margin-top: .25rem; font-size: 1.05rem; border-radius: 10px; gap: .55rem; }
-    .login-submit svg { width: 1.2rem; height: 1.2rem; }
-    .login-spinner { width: 1rem; height: 1rem; border-width: 2px; }
-
-    .login-alert { gap: .55rem; margin-top: 1.1rem; padding: .75rem .9rem; font-size: .92rem; border-radius: 10px; }
-    .login-alert svg { width: 1.05rem; height: 1.05rem; margin-top: .1rem; }
-
-    .login-card__foot { margin-top: 1.5rem; }
-    .login-card__foot::before { margin-bottom: 1.1rem; }
-    .login-card__secure { font-size: .97rem; gap: .45rem; }
-    .login-card__secure svg { width: 1.2rem; height: 1.2rem; }
-    .login-card__rights { margin-top: 1rem; padding-bottom: .6rem; font-size: .86rem; }
-}
-
-/* Tablette : la carte s'elargit avec l'ecran, mais le formulaire garde une
-   largeur de lecture confortable. */
-@media (min-width: 48rem) and (max-width: 64rem) {
-    .login-stage__scene::before {
-        height: 45dvh;
-        /* Meme scene, cadre plus large : le bandeau d'une tablette est bien
-           plus etale que celui d'un telephone. */
-        background-image: url('../images/login-scene-tablette.jpg');
-        background-position: center top;
-    }
-
-    .login-card__inner { padding: 2.2rem 2rem 1.8rem; }
-
-    .login-card__head,
-    .login-form,
-    .login-card__foot,
-    .login-alert {
-        width: 100%;
-        max-width: 32rem;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .login-card__title { font-size: 1.8rem; }
-}
-
-/* Mobile : la rangee des atouts ferme la carte, comme sur la maquette. */
-@media (max-width: 47.99rem) {
-    .login-atouts {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: .4rem;
-        margin: 1.2rem 0 0;
-        padding: 1.1rem 0 0;
-        list-style: none;
-        border-top: 1px solid var(--or-bord);
-    }
-
-    /* La mention d'editeur passe sous les icones : c'est la derniere ligne de
-       la page, apres les atouts. */
-    .login-card__rights { margin-top: 1.1rem; }
-
-    .login-atouts li {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: .4rem;
-        font-size: .6rem;
-        font-weight: 700;
-        letter-spacing: .07em;
-        text-transform: uppercase;
-        color: var(--or-nuit);
+    .login-carte__titre {
+        display: block;
+        margin: 0;
         text-align: center;
+        font-size: 1.32rem;
+        font-weight: 700;
+        color: var(--bleu-nuit);
     }
 
-    .login-atouts svg { width: 1.45rem; height: 1.45rem; color: var(--or-teal); }
+    .login-carte__sous { margin-top: .35rem; font-size: .95rem; }
+    .login-carte__site { margin-top: .75rem; }
+
+    .login-form { gap: 1rem; margin-top: 1.35rem; }
+    .login-control input { height: 3.1rem; font-size: 1rem; }
+    .login-submit { height: 3.25rem; font-size: 1.05rem; }
+}
+
+/* Tablette : meme composition, cadre plus large, et le formulaire garde une
+   largeur de lecture confortable au milieu d'une carte pleine largeur. */
+@media (min-width: 48rem) and (max-width: 63.99rem) {
+    .login-scene::before {
+        height: clamp(14rem, 30dvh, 20rem);
+        background-image: url('../images/login-scene-tablette.jpg');
+    }
+
+    .login-intro { top: 1.9rem; right: 1.9rem; width: 12.5rem; }
+    .login-marque img { height: 4rem; margin: -.48rem 0 -.78rem; }
+    .login-promesse h1 { font-size: 1.35rem; }
+    .login-filet { width: 3rem; }
+
+    .login-carte {
+        padding-left: max(1.4rem, (100% - 32rem) / 2);
+        padding-right: max(1.4rem, (100% - 32rem) / 2);
+    }
 }
 
 /* ---------- Animations reduites ---------- */

@@ -1424,9 +1424,13 @@ d'un autre.
 
 ### Identité visuelle
 
-- Page de connexion : formulaire centré sur une image de fond institutionnelle.
-  Le placeholder livré est `public/images/login-background.jpg` - le remplacer
-  par une photo de l'hôpital suffit, aucun code à toucher.
+- Page de connexion : la scène occupe toute la page, le formulaire se pose à
+  droite. Le master est `public/images/login-scene-source.png`, **sans aucun
+  texte incrusté** : l'accroche, les six entrées du périmètre et les mentions
+  sont du texte HTML, donc lisibles par un lecteur d'écran et modifiables sans
+  logiciel de dessin. Remplacer le master par une photo de l'hôpital puis
+  relancer `docker compose exec app php tools/images-connexion.php` régénère les
+  trois tailles servies (poste fixe, tablette, téléphone). Aucun code à toucher.
 - Barre de marque sur les quatre interfaces : logo à gauche, **nom de
   l'établissement à droite, lu depuis la table `settings`** et modifiable par
   l'admin sans redéploiement. Aucun lien de navigation croisée n'y figure.
