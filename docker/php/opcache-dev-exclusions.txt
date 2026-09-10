@@ -1,0 +1,30 @@
+# Fichiers tenus hors d'opcache sur un poste de developpement.
+#
+# Un chemin qui se termine par « / » couvre tout le repertoire. Ce qui est
+# liste ici n'est jamais mis en cache : PHP le recompile a chaque requete, et
+# une modification est donc visible au rechargement de la page, sans commande
+# ni redemarrage de conteneur.
+#
+# Le reste — `vendor/`, soit 8 700 fichiers — garde le cache complet, sans
+# revalidation. C'est ce partage qui tient les deux exigences a la fois : voir
+# ses modifications, et ne pas payer une seconde d'appels systeme par requete
+# sur un montage venant de l'hote. Le detail des mesures est dans
+# `php-dev.ini`.
+#
+# Ce fichier n'est monte que par `docker-compose.yml`, la pile de
+# developpement. Un deploiement en service ne le voit pas.
+
+# Le code de l'hote.
+/var/www/html/app/
+/var/www/html/routes/
+/var/www/html/database/
+
+# Les gabarits Blade compiles. C'est ici que se jouait le piege : Laravel les
+# recompile bien, mais sous le meme nom de fichier, et opcache ne le voyait
+# pas.
+/var/www/html/storage/framework/views/
+
+# Le code du module DME, monte a cote et tout aussi vivant.
+/var/www/keneya-dme_mod/src/
+/var/www/keneya-dme_mod/routes/
+/var/www/keneya-dme_mod/resources/

@@ -173,13 +173,23 @@ docker compose exec app php artisan tinker      # console
 
 Sous Windows, les mêmes commandes fonctionnent telles quelles dans PowerShell.
 
-> **Le code monté est relu à chaque requête.** `docker/php/php.ini` pose
+> **Vos modifications s'affichent au rechargement.** `docker/php/php.ini` pose
 > `opcache.validate_timestamps = 0`, ce qui est le bon réglage en service mais
 > transforme le montage du code en piège sur un poste de travail : on modifie
 > un gabarit, on recharge, et l'ancienne version s'affiche — `artisan
-> view:clear` n'y change rien, puisque c'est opcache qui garde l'opcode.
-> `docker-compose.yml` monte donc `docker/php/php-dev.ini` par-dessus, sur les
-> trois services PHP. Rien à faire, sinon savoir pourquoi ce fichier existe.
+> view:clear` n'y change rien, puisque c'est opcache qui garde l'opcode sous le
+> même nom de fichier.
+>
+> Activer la revalidation générale coûterait un facteur dix (0,4 s → 4 s par
+> requête : il faut interroger la date des 8 700 fichiers de `vendor/` à
+> travers le pont de fichiers de Docker Desktop). `docker-compose.yml` monte
+> donc `docker/php/php-dev.ini`, qui garde le cache complet sur `vendor/` et
+> n'en sort que le code du projet — quelques centaines de fichiers, listés dans
+> `docker/php/opcache-dev-exclusions.txt`. Rien à faire, sinon savoir pourquoi
+> ces deux fichiers existent.
+>
+> Seule exception : après un `composer install`, rechargez php-fpm avec
+> `docker compose exec app kill -USR2 1`.
 >
 > Si vous recréez le conteneur `app` (`docker compose up -d app`), redémarrez
 > aussi `web` : nginx résout l'adresse de `app` au démarrage et rend un 502
