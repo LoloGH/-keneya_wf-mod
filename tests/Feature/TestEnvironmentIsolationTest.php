@@ -28,12 +28,37 @@ use Tests\TestCase;
  */
 class TestEnvironmentIsolationTest extends TestCase
 {
-    public function test_la_suite_tourne_sur_sqlite_en_memoire(): void
+    /**
+     * La suite ne pointe jamais une base de travail.
+     *
+     * Deux environnements, une seule regle. Sur un poste, phpunit.xml impose
+     * SQLite en memoire. La CI, elle, valide la meme suite contre MariaDB —
+     * c'est la porte de sortie `KENEYA_TEST_DB_FROM_ENV`, prevue et
+     * documentee dans tests/bootstrap.php, parce que les deux moteurs ne se
+     * comportent pas pareil et que l'hopital tourne sur MariaDB.
+     *
+     * Exiger SQLite sans condition revenait a interdire cette porte : c'est ce
+     * qu'a fait la premiere version de ce test, et elle a fait echouer la CI
+     * pendant deux commits. Ce qui doit tenir des deux cotes, c'est que la
+     * base visee soit une base dediee aux tests.
+     */
+    public function test_la_suite_ne_pointe_jamais_une_base_de_travail(): void
     {
         $connexion = config('database.default');
+        $base = (string) config("database.connections.$connexion.database");
 
-        $this->assertSame('sqlite', $connexion, 'La suite doit tourner sur SQLite, jamais sur la base de la pile.');
-        $this->assertSame(':memory:', config("database.connections.$connexion.database"));
+        if (getenv('KENEYA_TEST_DB_FROM_ENV') === '1') {
+            $this->assertStringContainsString(
+                'test',
+                $base,
+                'Avec KENEYA_TEST_DB_FROM_ENV, la base visee doit etre dediee aux tests.',
+            );
+
+            return;
+        }
+
+        $this->assertSame('sqlite', $connexion, 'Sans la porte de sortie, la suite tourne sur SQLite.');
+        $this->assertSame(':memory:', $base);
     }
 
     public function test_l_environnement_est_celui_des_tests(): void
