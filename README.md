@@ -173,27 +173,44 @@ docker compose exec app php artisan tinker      # console
 
 Sous Windows, les mêmes commandes fonctionnent telles quelles dans PowerShell.
 
-> **Vos modifications s'affichent au rechargement.** `docker/php/php.ini` pose
-> `opcache.validate_timestamps = 0`, ce qui est le bon réglage en service mais
-> transforme le montage du code en piège sur un poste de travail : on modifie
-> un gabarit, on recharge, et l'ancienne version s'affiche — `artisan
-> view:clear` n'y change rien, puisque c'est opcache qui garde l'opcode sous le
-> même nom de fichier.
+> **Ce qui s'affiche tout de suite, et ce qui demande un redémarrage.**
 >
-> Activer la revalidation générale coûterait un facteur dix (0,4 s → 4 s par
-> requête : il faut interroger la date des 8 700 fichiers de `vendor/` à
-> travers le pont de fichiers de Docker Desktop). `docker-compose.yml` monte
-> donc `docker/php/php-dev.ini`, qui garde le cache complet sur `vendor/` et
-> n'en sort que le code du projet — quelques centaines de fichiers, listés dans
-> `docker/php/opcache-dev-exclusions.txt`. Rien à faire, sinon savoir pourquoi
-> ces deux fichiers existent.
+> Le code est monté depuis l'hôte, et sur Docker Desktop chaque accès fichier
+> traverse un pont. Deux réglages en découlent, tous deux portés par
+> `docker-compose.yml`, donc actifs sans rien faire.
 >
-> Seule exception : après un `composer install`, rechargez php-fpm avec
-> `docker compose exec app kill -USR2 1`.
+> `docker/php/php-dev.ini` sort les **gabarits Blade compilés** d'opcache.
+> Sans cela, on modifie un gabarit, on recharge, et l'ancienne version
+> s'affiche — `artisan view:clear` n'y peut rien, puisque Laravel recompile
+> sous le même nom de fichier et qu'opcache ne le voit pas. Tout le reste
+> garde le cache complet : revalider les 8 700 fichiers de `vendor/` à chaque
+> requête coûterait dix fois le temps de réponse (0,4 s → 4 s).
 >
-> Si vous recréez le conteneur `app` (`docker compose up -d app`), redémarrez
-> aussi `web` : nginx résout l'adresse de `app` au démarrage et rend un 502
-> tant qu'il pointe sur l'ancienne.
+> `docker/php/dev-entrypoint.sh` reconstruit les **caches de démarrage de
+> Laravel** — configuration, routes, événements — à chaque démarrage du
+> conteneur. Mesuré en alternant les deux états pour annuler la dérive de la
+> machine : médiane de 0,16 à 0,22 s avec, de 0,28 à 0,53 s sans.
+>
+> D'où la règle, qui tient en une ligne :
+>
+> | Ce que vous modifiez | Ce qu'il faut faire |
+> |---|---|
+> | Gabarits, styles, images | rien, rechargez la page |
+> | Classes PHP, routes, `config/`, `.env`, `vendor/` | `docker compose restart app` |
+>
+> Le redémarrage prend une minute : c'est le temps de reconstruire les trois
+> caches depuis le montage. Pour une simple modification de classe, un
+> `docker compose exec app kill -USR2 1` suffit et va plus vite.
+>
+> Si vous recréez le conteneur (`docker compose up -d app`) au lieu de le
+> redémarrer, relancez aussi `web` : nginx résout l'adresse de `app` au
+> démarrage et rend un 502 tant qu'il pointe sur l'ancienne.
+>
+> **Les tests, eux, ignorent ces caches.** `tests/bootstrap.php` les détourne
+> vers un chemin absent, et `TestEnvironmentIsolationTest` le vérifie. Sans
+> cette garde, un `config.php` en cache ferait tourner la suite sur la base de
+> travail au lieu du SQLite en mémoire — et `RefreshDatabase` la
+> reconstruirait de zéro.
 
 ## 4. Installation sans Docker
 

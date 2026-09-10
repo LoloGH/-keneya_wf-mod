@@ -21,7 +21,16 @@ services:
     image: keneya-wf-mod-app
     restart: unless-stopped
     working_dir: /var/www/html
+    # Reconstruit les caches de demarrage de Laravel avant php-fpm : sans eux,
+    # chaque requete relit `config/` et reconstruit la table des routes a
+    # travers le montage, ce qui double le temps de reponse. Les reconstruire
+    # ici plutot que par une commande a retenir evite le piege du cache
+    # perime : un `docker compose restart app` suffit apres une modification
+    # de `.env`, `config/`, `routes/` ou `vendor/`.
+    entrypoint: ["/usr/local/bin/dev-entrypoint.sh"]
+    command: ["php-fpm"]
     volumes:
+      - ./docker/php/dev-entrypoint.sh:/usr/local/bin/dev-entrypoint.sh:ro
       - ./:/var/www/html
       - keneya_storage:/var/www/html/storage
       # Le module DME est reference en depot `path` dans composer.json. Sans
@@ -29,9 +38,11 @@ services:
       # qu'il fonctionne sur l'hote : le chemin declare dans composer.json est
       # celui vu d'ici, pas celui de la machine.
       - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
-      # Surcouche de developpement : opcache revalide les fichiers. Sans
-      # elle, une modification de gabarit ou de classe n'apparait qu'apres
-      # un redemarrage du conteneur, sans que rien ne le signale.
+      # Surcouche de developpement : les gabarits compiles sortent d'opcache,
+      # sans quoi une modification de gabarit n'apparait qu'apres un
+      # redemarrage du conteneur, sans que rien ne le signale. Le reste garde
+      # le cache complet — revalider tout le montage couterait dix fois le
+      # temps de reponse.
       - ./docker/php/php-dev.ini:/usr/local/etc/php/conf.d/zz-keneya-dev.ini:ro
       - ./docker/php/opcache-dev-exclusions.txt:/usr/local/etc/php/conf.d/opcache-dev-exclusions.txt:ro
     env_file:
@@ -79,9 +90,11 @@ services:
       - ./:/var/www/html
       - keneya_storage:/var/www/html/storage
       - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
-      # Surcouche de developpement : opcache revalide les fichiers. Sans
-      # elle, une modification de gabarit ou de classe n'apparait qu'apres
-      # un redemarrage du conteneur, sans que rien ne le signale.
+      # Surcouche de developpement : les gabarits compiles sortent d'opcache,
+      # sans quoi une modification de gabarit n'apparait qu'apres un
+      # redemarrage du conteneur, sans que rien ne le signale. Le reste garde
+      # le cache complet — revalider tout le montage couterait dix fois le
+      # temps de reponse.
       - ./docker/php/php-dev.ini:/usr/local/etc/php/conf.d/zz-keneya-dev.ini:ro
       - ./docker/php/opcache-dev-exclusions.txt:/usr/local/etc/php/conf.d/opcache-dev-exclusions.txt:ro
     env_file:
@@ -119,9 +132,11 @@ services:
       - ./:/var/www/html
       - keneya_storage:/var/www/html/storage
       - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
-      # Surcouche de developpement : opcache revalide les fichiers. Sans
-      # elle, une modification de gabarit ou de classe n'apparait qu'apres
-      # un redemarrage du conteneur, sans que rien ne le signale.
+      # Surcouche de developpement : les gabarits compiles sortent d'opcache,
+      # sans quoi une modification de gabarit n'apparait qu'apres un
+      # redemarrage du conteneur, sans que rien ne le signale. Le reste garde
+      # le cache complet — revalider tout le montage couterait dix fois le
+      # temps de reponse.
       - ./docker/php/php-dev.ini:/usr/local/etc/php/conf.d/zz-keneya-dev.ini:ro
       - ./docker/php/opcache-dev-exclusions.txt:/usr/local/etc/php/conf.d/opcache-dev-exclusions.txt:ro
     env_file:

@@ -2,29 +2,30 @@
 #
 # Un chemin qui se termine par « / » couvre tout le repertoire. Ce qui est
 # liste ici n'est jamais mis en cache : PHP le recompile a chaque requete, et
-# une modification est donc visible au rechargement de la page, sans commande
-# ni redemarrage de conteneur.
+# une modification est donc visible au simple rechargement de la page.
 #
-# Le reste — `vendor/`, soit 8 700 fichiers — garde le cache complet, sans
-# revalidation. C'est ce partage qui tient les deux exigences a la fois : voir
-# ses modifications, et ne pas payer une seconde d'appels systeme par requete
-# sur un montage venant de l'hote. Le detail des mesures est dans
-# `php-dev.ini`.
+# La liste tient en une entree, et c'est voulu. Elle a d'abord couvert tout le
+# code du projet — `app/`, `routes/`, `database/`, le module — ce qui rendait
+# bien toute modification immediate, mais faisait recompiler 272 fichiers a
+# chaque requete depuis un montage venant de l'hote :
+#
+#     tout le code du projet hors cache      0,35 s par requete
+#     les seuls gabarits compiles            0,15 s par requete
+#
+# Les gabarits compiles, eux, ne coutent presque rien a exclure : ils vivent
+# dans le volume `keneya_storage`, pas sur le montage, et il n'y en a qu'une
+# soixantaine.
+#
+# C'est aussi le seul endroit ou le piege se refermait vraiment : Laravel
+# recompile bien un gabarit modifie, mais sous le meme nom de fichier, et
+# opcache ne le voyait pas. Une classe modifiee, elle, se remarque tout de
+# suite — l'ecran ne change pas du tout, la ou un gabarit perime donne
+# l'illusion d'avoir enregistre.
+#
+# Regle : gabarits, styles et images sont visibles au rechargement ; une
+# modification de classe, de route, de configuration ou de `vendor/` demande
+# un `docker compose restart app`.
 #
 # Ce fichier n'est monte que par `docker-compose.yml`, la pile de
 # developpement. Un deploiement en service ne le voit pas.
-
-# Le code de l'hote.
-/var/www/html/app/
-/var/www/html/routes/
-/var/www/html/database/
-
-# Les gabarits Blade compiles. C'est ici que se jouait le piege : Laravel les
-# recompile bien, mais sous le meme nom de fichier, et opcache ne le voyait
-# pas.
 /var/www/html/storage/framework/views/
-
-# Le code du module DME, monte a cote et tout aussi vivant.
-/var/www/keneya-dme_mod/src/
-/var/www/keneya-dme_mod/routes/
-/var/www/keneya-dme_mod/resources/

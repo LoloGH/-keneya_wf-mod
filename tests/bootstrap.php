@@ -25,6 +25,38 @@
 
 require __DIR__.'/../vendor/autoload.php';
 
+/*
+| Les caches de demarrage ne doivent jamais servir aux tests.
+|
+| `bootstrap/cache/config.php` est un instantane fige de la configuration de
+| la pile de travail. Quand il existe, Laravel le charge tel quel et ne
+| consulte plus l'environnement : tout le soin pris ci-dessus a remettre
+| phpunit.xml en autorite devient sans effet, et la suite se retrouve sur
+| `mysql` / `keneya_wf_mod` au lieu du SQLite en memoire. Le premier test
+| venu la reconstruit alors de zero — RefreshDatabase execute
+| `migrate:fresh`.
+|
+| Ce n'est pas une hypothese : la pile de developpement construit ces caches
+| a chaque demarrage du conteneur depuis la v3.3.2, parce qu'ils divisent par
+| deux le temps de reponse.
+|
+| Laravel laisse choisir ou il va les chercher. On les envoie vers un chemin
+| qui n'existe pas : la suite lit donc toujours la configuration reelle.
+*/
+foreach ([
+    // Ces trois-la seulement : ce sont des instantanes de la configuration et
+    // du code de la pile. Les deux autres — `APP_PACKAGES_CACHE` et
+    // `APP_SERVICES_CACHE` — sont des caches de decouverte de paquets, que
+    // Laravel reconstruit et doit donc pouvoir ecrire ; les detourner vers un
+    // chemin absent fait echouer l'amorcage.
+    'APP_CONFIG_CACHE', 'APP_ROUTES_CACHE', 'APP_EVENTS_CACHE',
+] as $cache) {
+    $chemin = __DIR__.'/../bootstrap/cache/tests-sans-cache/'.strtolower($cache).'.php';
+
+    putenv($cache.'='.$chemin);
+    $_ENV[$cache] = $_SERVER[$cache] = $chemin;
+}
+
 $variablesBase = ['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_URL'];
 $baseDepuisEnvironnement = getenv('KENEYA_TEST_DB_FROM_ENV') === '1';
 
