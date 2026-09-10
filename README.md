@@ -173,6 +173,18 @@ docker compose exec app php artisan tinker      # console
 
 Sous Windows, les mêmes commandes fonctionnent telles quelles dans PowerShell.
 
+> **Le code monté est relu à chaque requête.** `docker/php/php.ini` pose
+> `opcache.validate_timestamps = 0`, ce qui est le bon réglage en service mais
+> transforme le montage du code en piège sur un poste de travail : on modifie
+> un gabarit, on recharge, et l'ancienne version s'affiche — `artisan
+> view:clear` n'y change rien, puisque c'est opcache qui garde l'opcode.
+> `docker-compose.yml` monte donc `docker/php/php-dev.ini` par-dessus, sur les
+> trois services PHP. Rien à faire, sinon savoir pourquoi ce fichier existe.
+>
+> Si vous recréez le conteneur `app` (`docker compose up -d app`), redémarrez
+> aussi `web` : nginx résout l'adresse de `app` au démarrage et rend un 502
+> tant qu'il pointe sur l'ancienne.
+
 ## 4. Installation sans Docker
 
 À utiliser si Docker n'est pas installable sur un site donné.

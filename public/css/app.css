@@ -1744,10 +1744,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     min-height: 100dvh;
     box-sizing: border-box;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: auto 1fr auto auto;
+    grid-template-columns: minmax(0, 1fr) clamp(22rem, 31vw, 31rem);
+    grid-template-rows: auto 1fr auto;
     column-gap: 2rem;
-    padding: clamp(1.6rem, 3.2vw, 3.4rem);
+    padding: clamp(1.15rem, 2.6vh, 2.4rem) clamp(1.6rem, 3.2vw, 3.4rem);
 
     /* La scene est plus large que haute : « cover » la cale sur la hauteur et
        recadre horizontalement. Le point de 14 % garde le soignant au centre
@@ -1763,7 +1763,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: clamp(1.2rem, 2.6vw, 2.2rem);
+    gap: clamp(.85rem, 1.9vh, 1.5rem);
 }
 
 .login-marque {
@@ -1775,7 +1775,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-marque img {
     display: block;
     width: auto;
-    height: clamp(3.2rem, 5.6vw, 5.25rem);
+    height: clamp(3.6rem, 6vw, 6.25rem);
 }
 
 .login-marque__filet {
@@ -1799,8 +1799,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 .login-promesse h1 {
     margin: 0;
-    font-size: clamp(1.9rem, 3.3vw, 2.5rem);
-    line-height: 1.1;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    line-height: 1.08;
     font-weight: 700;
     letter-spacing: -.02em;
     color: var(--bleu-nuit);
@@ -1820,7 +1820,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     display: block;
     width: 3.5rem;
     height: 3px;
-    margin-top: .9rem;
+    margin-top: .75rem;
     border-radius: 2px;
     background: var(--sarcelle);
 }
@@ -1830,9 +1830,9 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-perimetre {
     grid-area: 3 / 1;
     align-self: end;
-    max-width: 42.5rem;
+    max-width: 52rem;
     margin: 0;
-    padding: 1.25rem 1.5rem;
+    padding: 1.15rem 1.6rem 1rem;
     background: var(--blanc);
     border: 1px solid var(--gris-200);
     border-radius: 16px;
@@ -1851,7 +1851,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-perimetre ul {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-    gap: 1rem 1.4rem;
+    gap: .85rem 1.6rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -1866,29 +1866,32 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-perimetre svg { flex: 0 0 auto; color: var(--sarcelle); }
 .login-perimetre span { font-size: .88rem; font-weight: 500; color: var(--gris-800); }
 
-.login-mentions {
-    grid-area: 4 / 1;
+.login-perimetre__mention {
     display: flex;
     align-items: center;
     gap: .5rem;
-    margin: .9rem 0 0;
-    font-size: .78rem;
+    margin: .95rem 0 0;
+    padding-top: .8rem;
+    border-top: 1px solid var(--gris-200);
+    font-size: .76rem;
     color: var(--gris-600);
 }
 
-.login-mentions svg { flex: 0 0 auto; color: var(--gris-500); }
+.login-perimetre__mention svg { flex: 0 0 auto; color: var(--gris-500); }
 
 /* ---------- La carte de connexion ----------
    Seul bloc opaque de la page : c'est la que va l'attention. */
 
 .login-carte {
-    grid-area: 1 / 2 / 5 / 3;
+    grid-area: 1 / 2 / 4 / 3;
     align-self: center;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    width: min(25.75rem, 100%);
-    padding: 1.6rem 1.9rem 1.5rem;
+    width: 100%;
+    max-height: 100%;
+    overflow: auto;
+    padding: 2rem 2.6rem 1.8rem;
     background: var(--blanc);
     border-radius: 20px;
     box-shadow: 0 30px 70px -26px rgba(15, 42, 92, .5),
@@ -1961,7 +1964,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     align-self: center;
     display: block;
     width: auto;
-    height: 3.75rem;
+    height: 5rem;
     margin-top: .1rem;
 }
 
@@ -2065,16 +2068,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-peek[aria-pressed="true"] [data-icon="on"] { display: none; }
 .login-peek[aria-pressed="true"] [data-icon="off"] { display: block; }
 
-.login-rangee {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: .4rem .9rem;
-    font-size: .8rem;
-}
-
 .login-remember {
+    font-size: .8rem;
     display: inline-flex;
     align-items: center;
     gap: .45rem;
@@ -2090,30 +2085,6 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 
 .login-remember input:focus-visible { outline: 2px solid var(--sarcelle); outline-offset: 2px; }
-
-.login-oubli {
-    padding: 0;
-    font: inherit;
-    font-size: .8rem;
-    font-weight: 600;
-    color: var(--bleu);
-    background: none;
-    border: 0;
-    cursor: pointer;
-}
-
-.login-oubli:hover { text-decoration: underline; }
-.login-oubli:focus-visible { outline: 2px solid var(--bleu); outline-offset: 2px; border-radius: 4px; }
-
-.login-oubli__aide {
-    margin: 0;
-    padding: .6rem .75rem;
-    background: var(--gris-100);
-    border-radius: 10px;
-    font-size: .78rem;
-    line-height: 1.5;
-    color: var(--gris-600);
-}
 
 .login-submit {
     display: flex;
@@ -2247,7 +2218,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
        l'accroche, alors qu'il ouvre la ligne a gauche sur un poste fixe. */
     .login-filet { width: 2.4rem; height: 3px; margin: .62rem 0 0 auto; }
 
-    .login-perimetre, .login-mentions { display: none; }
+    .login-perimetre { display: none; }
 
     .login-carte {
         flex: 1;

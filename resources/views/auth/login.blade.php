@@ -46,12 +46,12 @@
                 </li>
             @endforeach
         </ul>
-    </section>
 
-    <p class="login-mentions">
-        <x-icon name="bouclier" size="15" />
-        Acces reserve au personnel de l'etablissement.
-    </p>
+        <p class="login-perimetre__mention">
+            <x-icon name="bouclier" size="15" />
+            Acces reserve au personnel de l'etablissement.
+        </p>
+    </section>
 
     <div class="login-carte">
         {{-- Le francais est la seule langue servie a ce jour. L'entree anglaise
@@ -132,25 +132,10 @@
                 </div>
             </div>
 
-            <div class="login-rangee">
-                <label class="login-remember">
-                    <input type="checkbox" name="remember" value="1">
-                    <span>Rester connecte sur ce poste</span>
-                </label>
-
-                {{-- Aucun envoi de courriel n'est configure : le mot de passe se
-                     reinitialise a l'administration. Le dire vaut mieux qu'un
-                     lien qui ne menerait nulle part. --}}
-                <button type="button" class="login-oubli" data-oubli
-                        aria-controls="login-oubli-aide" aria-expanded="false">
-                    Mot de passe oublie ?
-                </button>
-            </div>
-
-            <p class="login-oubli__aide" id="login-oubli-aide" hidden>
-                Adressez-vous a un administrateur de l'etablissement pour faire
-                reinitialiser votre mot de passe.
-            </p>
+            <label class="login-remember">
+                <input type="checkbox" name="remember" value="1">
+                <span>Rester connecte sur ce poste</span>
+            </label>
 
             <button type="submit" class="login-submit" data-submit>
                 <x-icon name="connexion" size="18" />
@@ -175,10 +160,9 @@
         </p>
     </div>
 
-    {{-- Trois interactions, et rien de plus : afficher le mot de passe, montrer
-         la marche a suivre en cas d'oubli, et signaler l'envoi du formulaire.
-         Aucun mot de passe n'est lu, stocke ou transmis par ce script : seul le
-         type du champ change. --}}
+    {{-- Deux interactions, et rien de plus : afficher le mot de passe, et
+         signaler l'envoi du formulaire. Aucun mot de passe n'est lu, stocke ou
+         transmis par ce script : seul le type du champ change. --}}
     <script>
         (function () {
             var peek = document.querySelector('[data-peek]');
@@ -192,16 +176,6 @@
                     peek.setAttribute('aria-pressed', String(afficher));
                     peek.setAttribute('aria-label', afficher ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
                     field.focus();
-                });
-            }
-
-            var oubli = document.querySelector('[data-oubli]');
-            var aide = document.getElementById('login-oubli-aide');
-
-            if (oubli && aide) {
-                oubli.addEventListener('click', function () {
-                    aide.hidden = ! aide.hidden;
-                    oubli.setAttribute('aria-expanded', String(! aide.hidden));
                 });
             }
 

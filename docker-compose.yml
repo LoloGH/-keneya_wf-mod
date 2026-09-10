@@ -29,6 +29,10 @@ services:
       # qu'il fonctionne sur l'hote : le chemin declare dans composer.json est
       # celui vu d'ici, pas celui de la machine.
       - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
+      # Surcouche de developpement : opcache revalide les fichiers. Sans
+      # elle, une modification de gabarit ou de classe n'apparait qu'apres
+      # un redemarrage du conteneur, sans que rien ne le signale.
+      - ./docker/php/php-dev.ini:/usr/local/etc/php/conf.d/zz-keneya-dev.ini:ro
     env_file:
       - .env
     depends_on:
@@ -74,6 +78,10 @@ services:
       - ./:/var/www/html
       - keneya_storage:/var/www/html/storage
       - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
+      # Surcouche de developpement : opcache revalide les fichiers. Sans
+      # elle, une modification de gabarit ou de classe n'apparait qu'apres
+      # un redemarrage du conteneur, sans que rien ne le signale.
+      - ./docker/php/php-dev.ini:/usr/local/etc/php/conf.d/zz-keneya-dev.ini:ro
     env_file:
       - .env
     depends_on:
@@ -109,6 +117,10 @@ services:
       - ./:/var/www/html
       - keneya_storage:/var/www/html/storage
       - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
+      # Surcouche de developpement : opcache revalide les fichiers. Sans
+      # elle, une modification de gabarit ou de classe n'apparait qu'apres
+      # un redemarrage du conteneur, sans que rien ne le signale.
+      - ./docker/php/php-dev.ini:/usr/local/etc/php/conf.d/zz-keneya-dev.ini:ro
     env_file:
       - .env
     depends_on:
