@@ -43,6 +43,9 @@ class CareTask extends Model
         'assigned_to_user_id',
         'scheduled_at',
         'status',
+        // Le soin programme correspondant au dossier medical (v3.3.2) : les
+        // occurrences d'une meme prescription pointent toutes vers lui.
+        'dme_care_order_id',
         'completed_by_user_id',
         'completed_at',
         'cancelled_at',

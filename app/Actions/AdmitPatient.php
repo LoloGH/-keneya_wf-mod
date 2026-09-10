@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Dme\RecordHospitalization;
 use App\Models\Doctor;
 use App\Models\Hospitalization;
 use App\Models\PatientHistory;
@@ -28,7 +29,10 @@ use InvalidArgumentException;
  */
 class AdmitPatient
 {
-    public function __construct(private readonly PatientHistoryRecorder $history) {}
+    public function __construct(
+        private readonly PatientHistoryRecorder $history,
+        private readonly RecordHospitalization $dossier,
+    ) {}
 
     /**
      * `$doctor` accepte aussi un membre du personnel generique : l'admission
@@ -77,6 +81,10 @@ class AdmitPatient
                 'status' => Visit::STATUS_CLOSED,
                 'closed_at' => now(),
             ]);
+
+            // Un patient peut occuper un lit huit jours : son dossier medical
+            // doit le dire des l'admission, pas au moment de la sortie (v3.3.2).
+            $this->dossier->execute($hospitalization, $doctor);
 
             $visit->load('service');
 

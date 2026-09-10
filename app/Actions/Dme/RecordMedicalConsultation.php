@@ -12,7 +12,6 @@ use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 use Keneya\Dme\Models\ClinicalNote;
 use Keneya\Dme\Models\Consultation;
-use Keneya\Dme\Models\Service as ServiceDme;
 
 /**
  * Consultation medicale redigee depuis /service (v3.3.1).
@@ -61,7 +60,7 @@ class RecordMedicalConsultation
                 // Le compte WorkFlow, pas la fiche medecin : `users` est la
                 // table partagee, et c'est elle que le DME reference.
                 'doctor_id' => $doctor->user_id,
-                'service_id' => $this->serviceDme($visit),
+                'service_id' => $this->serviceDme($visit->service?->name),
                 'started_at' => $data['started_at'],
                 'type' => $data['type'],
                 'status' => 'completed',
@@ -99,26 +98,6 @@ class RecordMedicalConsultation
         );
 
         return $consultation;
-    }
-
-    /**
-     * Le service du DME correspondant a celui de la visite, s'il existe.
-     *
-     * Rapprochement par le nom, et jamais de creation : les deux applications
-     * tiennent chacune leur liste de services, et fabriquer ici un service du
-     * DME au vu d'un nom rendrait la correspondance encore plus incertaine.
-     * A defaut, la consultation reste sans service : c'est une information de
-     * moins, pas une information fausse.
-     */
-    private function serviceDme(Visit $visit): ?int
-    {
-        $nom = $visit->service?->name;
-
-        if (blank($nom)) {
-            return null;
-        }
-
-        return ServiceDme::where('name', $nom)->value('id');
     }
 
     /**

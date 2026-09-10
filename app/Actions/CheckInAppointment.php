@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Dme\RecordAppointment;
 use App\Jobs\SendSmsJob;
 use App\Models\Appointment;
 use App\Models\PatientHistory;
@@ -23,6 +24,7 @@ class CheckInAppointment
     public function __construct(
         private readonly TokenAllocator $tokens,
         private readonly PatientHistoryRecorder $history,
+        private readonly RecordAppointment $dossier,
     ) {}
 
     public function execute(Appointment $appointment): Visit
@@ -44,6 +46,8 @@ class CheckInAppointment
                 'status' => Appointment::STATUS_CHECKED_IN,
                 'visit_id' => $visit->getKey(),
             ]);
+
+            $this->dossier->syncStatus($appointment->refresh());
 
             $visit->load(['service', 'patient']);
 
@@ -81,6 +85,8 @@ class CheckInAppointment
 
         $appointment->update(['status' => Appointment::STATUS_NO_SHOW]);
 
+        $this->dossier->syncStatus($appointment);
+
         return $appointment;
     }
 
@@ -91,6 +97,8 @@ class CheckInAppointment
         }
 
         $appointment->update(['status' => Appointment::STATUS_CANCELLED]);
+
+        $this->dossier->syncStatus($appointment);
 
         return $appointment;
     }

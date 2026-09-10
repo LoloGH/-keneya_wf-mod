@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Dme\RecordCareOrder;
 use App\Models\CareTask;
 use App\Models\PatientHistory;
 use App\Models\User;
@@ -19,7 +20,10 @@ use InvalidArgumentException;
  */
 class CompleteCareTask
 {
-    public function __construct(private readonly PatientHistoryRecorder $history) {}
+    public function __construct(
+        private readonly PatientHistoryRecorder $history,
+        private readonly RecordCareOrder $dossier,
+    ) {}
 
     public function execute(CareTask $task, User $user): CareTask
     {
@@ -45,6 +49,10 @@ class CompleteCareTask
                 'completed_by_user_id' => $user->getKey(),
                 'completed_at' => now(),
             ]);
+
+            // Le soin programme du dossier se cloture quand plus aucune
+            // administration n'attend, pas a la premiere (v3.3.2).
+            $this->dossier->syncCompletion($task, $user);
 
             if ($visit = $hospitalization->visit) {
                 $this->history->record(
@@ -88,6 +96,8 @@ class CompleteCareTask
             'completed_by_user_id' => $user->getKey(),
             'completed_at' => now(),
         ]);
+
+        $this->dossier->syncCompletion($task, $user);
 
         Audit::log(
             Audit::EVENT_CARE_TASK_COMPLETED,

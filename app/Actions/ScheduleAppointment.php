@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Dme\RecordAppointment;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\StaffMember;
@@ -17,6 +18,8 @@ use InvalidArgumentException;
  */
 class ScheduleAppointment
 {
+    public function __construct(private readonly RecordAppointment $dossier) {}
+
     /**
      * `$doctor` accepte aussi un membre du personnel generique : le rendez-vous
      * est alors signe par `staff_member_id`, jamais par `doctor_id`, on ne
@@ -38,6 +41,11 @@ class ScheduleAppointment
             'scheduled_at' => $scheduledAt,
             'status' => Appointment::STATUS_SCHEDULED,
         ]));
+
+        // Le dossier medical porte la suite du parcours : sans cette ligne,
+        // l'onglet « Rendez-vous » du DME reste vide alors que le patient a
+        // bien un prochain passage (v3.3.2).
+        $this->dossier->execute($appointment);
 
         // Journalise seulement une fois la transaction validee.
         Audit::log(

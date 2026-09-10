@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Dme\RecordHospitalization;
 use App\Models\Doctor;
 use App\Models\Hospitalization;
 use App\Models\PatientHistory;
@@ -20,7 +21,10 @@ use InvalidArgumentException;
  */
 class DischargePatient
 {
-    public function __construct(private readonly PatientHistoryRecorder $history) {}
+    public function __construct(
+        private readonly PatientHistoryRecorder $history,
+        private readonly RecordHospitalization $dossier,
+    ) {}
 
     public function execute(Hospitalization $hospitalization, Doctor|StaffMember $doctor): Hospitalization
     {
@@ -42,6 +46,9 @@ class DischargePatient
                 'status' => Hospitalization::STATUS_DISCHARGED,
                 'discharged_at' => now(),
             ]);
+
+            // Le sejour se ferme au dossier, il ne s'y recree pas.
+            $this->dossier->close($hospitalization->refresh());
 
             // La visite d'origine est deja cloturee : la ligne d'historique est
             // rattachee au meme passage, pour rester sur une seule frise.

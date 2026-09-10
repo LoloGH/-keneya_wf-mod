@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Actions\Dme\RecordCareOrder;
 use App\Models\CareTask;
 use App\Models\CareTaskType;
 use App\Models\Doctor;
@@ -28,7 +29,10 @@ class PrescribeCareTasks
     /** Garde-fou : une prescription ne genere jamais des milliers de lignes. */
     public const MAX_OCCURRENCES = 200;
 
-    public function __construct(private readonly StaffNotifier $notifier) {}
+    public function __construct(
+        private readonly StaffNotifier $notifier,
+        private readonly RecordCareOrder $dossier,
+    ) {}
 
     /**
      * @return int nombre d'occurrences creees
@@ -71,7 +75,15 @@ class PrescribeCareTasks
             }
         }
 
-        DB::transaction(function () use ($occurrences, $hospitalization, $type, $agent, $instructions, $assignedTo): void {
+        DB::transaction(function () use ($occurrences, $hospitalization, $type, $doctor, $agent, $start, $intervalHours, $durationDays, $instructions, $assignedTo): void {
+            // Un soin programme au dossier pour la prescription entiere, et
+            // non un par administration : le dossier porte ce qui est demande,
+            // WorkFlow ce qui reste a faire (v3.3.2).
+            $soin = $this->dossier->execute(
+                $hospitalization, $type, $doctor, $start,
+                $intervalHours, $durationDays, $instructions, $assignedTo,
+            );
+
             foreach ($occurrences as $moment) {
                 CareTask::create([
                     'hospitalization_id' => $hospitalization->getKey(),
@@ -82,6 +94,7 @@ class PrescribeCareTasks
                     'assigned_to_user_id' => $assignedTo?->getKey(),
                     'scheduled_at' => $moment,
                     'status' => CareTask::STATUS_PENDING,
+                    'dme_care_order_id' => $soin?->getKey(),
                 ]);
             }
         });
