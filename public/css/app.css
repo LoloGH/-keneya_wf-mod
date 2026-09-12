@@ -1654,6 +1654,47 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     text-indent: .5em;
 }
 
+/* ---------- Verification publique de document (QR code, v3.4) ---------- */
+/* Page consultee au telephone juste apres un scan : le verdict tient dans le
+   premier ecran, sans avoir a faire defiler. */
+.verification__etat { display: flex; align-items: center; gap: var(--e4); }
+
+.verification__icone {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+}
+
+.verification--valide .verification__icone { background: var(--vert-clair); color: var(--vert); }
+.verification--invalide .verification__icone { background: var(--rouge-clair); color: var(--rouge); }
+
+.verification__titre { margin: 0; font-size: var(--texte-xl); font-weight: 700; }
+.verification--valide .verification__titre { color: var(--vert); }
+.verification--invalide .verification__titre { color: var(--rouge); }
+
+.verification__soustitre { margin: var(--e1) 0 0; color: var(--gris-500); font-size: var(--texte-sm); }
+
+.verification__details {
+    margin: var(--e5) 0 0;
+    padding-top: var(--e4);
+    border-top: 1px solid var(--gris-200);
+    display: grid;
+    gap: var(--e3);
+}
+
+.verification__details dt {
+    font-size: var(--texte-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--gris-500);
+}
+
+.verification__details dd { margin: var(--e1) 0 0; font-size: var(--texte-md); color: var(--gris-900); }
+
 /* ---------- Tableau d'affichage : visiteurs rattaches ---------- */
 .board__visitors {
     list-style: none;

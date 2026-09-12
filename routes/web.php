@@ -8,6 +8,7 @@ use App\Http\Controllers\BoardController;
 use App\Http\Controllers\Caisse\CaisseReceiptController;
 use App\Http\Controllers\CaisseController;
 use App\Http\Controllers\DmeRecordController;
+use App\Http\Controllers\DocumentVerificationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Portal\PatientPortalController;
 use App\Http\Controllers\Portal\PortalDownloadController;
@@ -141,6 +142,29 @@ Route::middleware(['auth', 'role.scope:staff'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dossier-medical/{patient}', DmeRecordController::class)
         ->name('dossier-medical.ouvrir');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Verification publique d'un document par QR code (module keneya/dme)
+|--------------------------------------------------------------------------
+|
+| Chaque PDF genere par le module porte un QR code qui pointe ici (voir
+| PdfGenerator::payload() dans keneya-dme_mod). Volontairement hors des
+| routes du module : celles-ci sont chargees sous le prefixe `dme` et
+| derriere une session authentifiee (`dme.access`), alors que ce lien doit
+| rester vrai sans connexion et a l'adresse exacte imprimee sur le document,
+| /documents/verifier/{reference}.
+|
+| Public et sans authentification, comme le portail patient : la personne
+| qui scanne n'a droit qu'a la preuve que la reference existe, jamais au
+| contenu medical. Le `throttle` limite le rythme des verifications
+| automatisees sans genant la lecture normale d'un QR code.
+|
+*/
+Route::middleware('throttle:30,1')->group(function () {
+    Route::get('/documents/verifier/{reference}', DocumentVerificationController::class)
+        ->name('documents.verifier');
 });
 
 // Affichage public en salle d'attente (moniteur mural, sans connexion).

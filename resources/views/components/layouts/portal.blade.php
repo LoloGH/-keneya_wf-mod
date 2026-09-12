@@ -46,7 +46,7 @@
             <x-brand-logo variant="color" class="app-header__logo" />
             <span class="app-header__identite">
                 <span class="app-header__hospital">{{ hospital_name() }}</span>
-                <span class="app-header__produit">Espace patient</span>
+                <span class="app-header__produit">{{ $subtitle ?? 'Espace patient' }}</span>
             </span>
         </div>
     </header>
