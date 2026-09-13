@@ -47,30 +47,13 @@ jobs:
       DB_USERNAME: keneya
       DB_PASSWORD: keneya
 
-    defaults:
-      run:
-        working-directory: keneya_wf-mod
-
     steps:
+      # Un seul `checkout` depuis la v3.4.2. Le module DME etait un second
+      # depot, clone a cote de celui-ci et sur une branche nommee a la main :
+      # une CI verte ne prouvait donc pas que les deux moities avancaient
+      # ensemble, seulement qu'elles s'entendaient a l'instant du clone.
+      # Il vit desormais sous `modules/dme` et arrive avec le reste.
       - uses: actions/checkout@v4
-        with:
-          path: keneya_wf-mod
-
-      # Le module DME est une dependance Composer de type `path`, resolue en
-      # `../keneya-dme_mod`. Il faut donc le poser a cote du projet — sans lui,
-      # `composer install` n'a rien a installer et la CI echoue avant d'avoir
-      # rien teste.
-      - uses: actions/checkout@v4
-        with:
-          repository: LoloGH/-keneya-dme_mod
-          # La branche que cet assemblage exige : elle porte le prefixe `dme_`
-          # sur les tables du module et la traduction de ses roles. Tant
-          # qu'elle n'est pas fusionnee dans `main` la-bas, cloner la branche
-          # par defaut donnerait un module qui entre en collision avec les
-          # tables de WorkFlow — a remettre sur `main` une fois la fusion faite.
-          ref: assemblage-workflow
-          path: keneya-dme_mod
-          token: ${{ secrets.DME_MODULE_TOKEN || github.token }}
 
       - name: Installer PHP 8.4
         uses: shivammathur/setup-php@v2
@@ -95,8 +78,8 @@ jobs:
       - name: Cache des dependances Composer
         uses: actions/cache@v4
         with:
-          path: keneya_wf-mod/vendor
-          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('keneya_wf-mod/composer.lock') }}
+          path: vendor
+          key: composer-${{ runner.os }}-php8.4-${{ hashFiles('composer.lock') }}
           restore-keys: composer-${{ runner.os }}-php8.4-
 
       - name: composer install
@@ -130,3 +113,53 @@ jobs:
       # que la CI signale l'ecart sans reecrire le code dans le dos de l'auteur.
       - name: Style de code (Pint)
         run: vendor/bin/pint --test
+
+  # La suite propre du module, qui n'a jamais tourne en CI : elle vivait dans
+  # un autre depot, avec son propre outillage, et personne ne la declenchait.
+  # Le module etant desormais ici, la raison a disparu.
+  #
+  # Elle dit autre chose que celle de l'hote. Celle-ci traverse le module,
+  # mais toujours avec WorkFlow derriere ; la sienne le verifie **seul**, sans
+  # hote pour lui fournir un utilisateur, des roles ou une signature. Un
+  # cablage manquant passe la premiere et echoue la seconde.
+  #
+  # Aucun service de base : le module tourne sous Testbench, en SQLite en
+  # memoire (`DB_CONNECTION=testing` dans son phpunit.xml).
+  module:
+    name: Suite du module DME
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: modules/dme
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          extensions: bcmath, gd, intl, pcntl, pdo_mysql, zip, mbstring
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache des dependances Composer
+        uses: actions/cache@v4
+        with:
+          path: modules/dme/vendor
+          key: composer-dme-${{ runner.os }}-php8.4-${{ hashFiles('modules/dme/composer.lock') }}
+          restore-keys: composer-dme-${{ runner.os }}-php8.4-
+
+      - name: composer install
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: phpunit
+        run: ./vendor/bin/phpunit
+
+      # Le module garde son propre style — il porte `declare(strict_types=1)`
+      # et des conventions qui lui sont propres. `pint.json` l'exclut du
+      # formateur de l'hote, et c'est le sien qui le verifie ici : reformater
+      # 114 fichiers pour aligner deux presets aurait detruit son `git blame`
+      # pour un gain nul.
+      - name: Style de code (Pint du module)
+        run: ./vendor/bin/pint --test

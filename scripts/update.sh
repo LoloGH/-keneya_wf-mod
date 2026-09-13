@@ -17,21 +17,23 @@
 # Pourquoi un script plutot qu'une suite de commandes dans un README
 # ---------------------------------------------------------------------------
 #
-# Parce que cette installation est un **assemblage de deux depots** : WorkFlow
-# et le module `keneya/dme`, monte depuis le dossier voisin par un depot
-# Composer de type `path`. Mettre a jour l'un sans l'autre ne produit pas une
-# erreur franche : l'application demarre, et se comporte mal a un endroit
-# precis, celui ou le code d'un cote appelle ce qui n'existe pas encore de
-# l'autre. C'est la panne la plus couteuse a diagnostiquer, et la seule facon
-# de ne jamais l'avoir est de ne pas laisser le choix a celui qui deploie.
+# Il en reste sept ou huit, et chacune se paie cher quand on l'oublie : une
+# sauvegarde qui doit preceder des migrations sans retour en arriere, un
+# autoloader a regenerer sans quoi les classes nouvelles restent introuvables,
+# des conteneurs a redemarrer dans un ordre precis, une verification qui doit
+# attendre la page et non le conteneur.
+#
+# La plus couteuse a disparu avec la v3.4.2 : le module DME etait un second
+# depot, et en tirer un sans l'autre ne produisait pas d'erreur franche —
+# l'application demarrait, et se comportait mal a l'endroit precis ou un cote
+# appelait ce qui n'existait pas encore de l'autre. Il fait desormais partie
+# de ce depot.
 
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 RACINE="$(pwd)"
-MODULE="$RACINE/../keneya-dme_mod"
-BRANCHE_MODULE="assemblage-workflow"
 
 SAUVEGARDE=1
 BUILD=0
@@ -69,9 +71,9 @@ info "$([ "$DOCKER" = 1 ] && echo 'pile Docker Compose' || echo 'installation na
 
 # ------------------------------------------------------ Etat des deux depots
 
-titre "Verification des deux depots"
+titre "Verification du depot"
 
-[ -d "$MODULE/.git" ] || erreur "le module DME est introuvable dans $MODULE. L'assemblage exige les deux depots cote a cote ; clonez https://github.com/LoloGH/-keneya-dme_mod.git a cet emplacement."
+[ -d "$RACINE/modules/dme" ] || erreur "le module DME est introuvable dans $RACINE/modules/dme. Depuis la v3.4.2 il fait partie de ce depot : verifiez que le clone est complet."
 
 # `--untracked-files=no` : un fichier depose a cote, un journal, une
 # sauvegarde, ne regarde pas la mise a jour. Ce qui la bloque, c'est un
@@ -80,14 +82,12 @@ titre "Verification des deux depots"
 # On ne touche pas a `core.fileMode` : sur un serveur Linux il est deja juste,
 # et le forcer sur un poste Windows ferait passer pour modifie tout fichier
 # executable, NTFS ne portant pas ce bit.
-for depot in "$RACINE" "$MODULE"; do
-    if [ -n "$(git -C "$depot" status --porcelain --untracked-files=no)" ]; then
-        git -C "$depot" status --short --untracked-files=no >&2
-        erreur "$depot porte des modifications locales. Traitez-les avant de recommencer : le script ne les ecrase pas."
-    fi
-done
+if [ -n "$(git -C "$RACINE" status --porcelain --untracked-files=no)" ]; then
+    git -C "$RACINE" status --short --untracked-files=no >&2
+    erreur "$RACINE porte des modifications locales. Traitez-les avant de recommencer : le script ne les ecrase pas."
+fi
 
-info "aucune modification locale des deux cotes"
+info "aucune modification locale"
 
 # --------------------------------------------------------------- Sauvegarde
 #
@@ -111,25 +111,15 @@ fi
 titre "Recuperation depuis GitHub"
 
 AVANT_HOTE="$(git -C "$RACINE" rev-parse HEAD)"
-AVANT_MODULE="$(git -C "$MODULE" rev-parse HEAD)"
 
 git -C "$RACINE" pull --ff-only
 
-# Le module vit sur sa branche d'assemblage, pas sur `main` : c'est elle qui
-# porte le prefixe `dme_` sur ses tables et la traduction de ses roles. Le
-# script la nomme explicitement plutot que de suivre la branche courante, qui
-# a pu deriver au fil des interventions.
-git -C "$MODULE" checkout "$BRANCHE_MODULE"
-git -C "$MODULE" pull --ff-only
-
 APRES_HOTE="$(git -C "$RACINE" rev-parse HEAD)"
-APRES_MODULE="$(git -C "$MODULE" rev-parse HEAD)"
 
-if [ "$AVANT_HOTE" = "$APRES_HOTE" ] && [ "$AVANT_MODULE" = "$APRES_MODULE" ]; then
-    info "les deux depots etaient deja a jour."
+if [ "$AVANT_HOTE" = "$APRES_HOTE" ]; then
+    info "le depot etait deja a jour."
 else
-    git -C "$RACINE" --no-pager log --oneline "$AVANT_HOTE..$APRES_HOTE" | sed 's/^/    WF  /'
-    git -C "$MODULE" --no-pager log --oneline "$AVANT_MODULE..$APRES_MODULE" | sed 's/^/    DME /'
+    git -C "$RACINE" --no-pager log --oneline "$AVANT_HOTE..$APRES_HOTE" | sed 's/^/    /'
 fi
 
 # L'image ne se reconstruit pas toute seule, et rien ne signale qu'elle aurait
@@ -154,9 +144,9 @@ fi
 # deploiement qui doit avoir les droits, pas l'application.
 #
 # `dump-autoload` suffit tant que `composer.lock` n'a pas bouge : le module
-# est monte en lien symbolique, son code est deja a jour derriere. Mais les
-# classes nouvelles, elles, manquent a la table figee que produit
-# `--optimize-autoloader`, et restent introuvables a l'execution.
+# est lie en symbolique depuis `modules/dme`, son code est donc deja a jour
+# derriere. Mais les classes nouvelles, elles, manquent a la table figee que
+# produit `--optimize-autoloader`, et restent introuvables a l'execution.
 
 titre "Autoloader et dependances"
 
@@ -238,8 +228,7 @@ cat <<EOF
 ======================================================================
   Mise a jour terminee.
 
-  WorkFlow    $(git -C "$RACINE" rev-parse --short HEAD)  $(git -C "$RACINE" log -1 --format=%s)
-  module DME  $(git -C "$MODULE" rev-parse --short HEAD)  $(git -C "$MODULE" log -1 --format=%s)
+  $(git -C "$RACINE" rev-parse --short HEAD)  $(git -C "$RACINE" log -1 --format=%s)
 $([ "$SAUVEGARDE" = 1 ] && printf '\n  Sauvegarde  %s\n' "$DEST_SAUVEGARDE")
   Ne lancez PAS scripts/verify-deploy.sh sur cette installation :
   il vide la base qu'il verifie. Il s'adresse a une pile jetable.

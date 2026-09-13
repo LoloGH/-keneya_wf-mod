@@ -273,7 +273,7 @@ class DocumentVerificationTest extends TestCase
     // --------------------------------------------------------------- QR
 
     /**
-     * PdfGenerator (keneya-dme_mod) construit l'URL du QR code par simple
+     * PdfGenerator (modules/dme) construit l'URL du QR code par simple
      * concatenation : rtrim(config('app.url'), '/').'/documents/verifier/'.
      * $reference. Ce test ne rejoue pas le rendu PDF, il verifie que cette
      * URL, construite exactement de la meme facon, est bien celle que sert

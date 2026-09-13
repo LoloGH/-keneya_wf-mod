@@ -13,9 +13,9 @@
     "license": "proprietary",
     "repositories": [
         {
-            "//": "Module DME, monte depuis le dossier voisin ../keneya-dme_mod. Le chemin est relatif a la racine du projet, ce qui le rend vrai des deux cotes : sur la machine, ou le module est range a cote de ce depot, et dans le conteneur, ou docker-compose.yml le monte sur /var/www/keneya-dme_mod (soit ../keneya-dme_mod depuis /var/www/html).",
+            "//": "Module DME, dans ce depot depuis la v3.4.2. Il vivait dans un dossier voisin, ce qui obligeait a cloner et a tenir a jour deux depots pour une seule application : en tirer un sans l'autre ne donnait pas d'erreur franche, l'application demarrait et se comportait mal a l'endroit precis ou un cote appelait ce qui n'existait pas encore de l'autre. Le chemin est relatif a la racine du projet, donc vrai sur la machine comme dans le conteneur.",
             "type": "path",
-            "url": "../keneya-dme_mod",
+            "url": "./modules/dme",
             "options": {
                 "symlink": true
             }
