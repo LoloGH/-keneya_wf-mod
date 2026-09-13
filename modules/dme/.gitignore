@@ -1,0 +1,31 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# Application hôte de test générée par Orchestra Testbench.
+# Seuls les fichiers écrits à la main sous workbench/ sont versionnés.
+/workbench/bootstrap/cache
+/workbench/database/*.sqlite
+/workbench/storage
+/vendor/orchestra
+
+# Les ressources compilées du module, elles, sont versionnées :
+# une application hôte installe le module, elle ne le construit pas.
+# (public/build est donc volontairement absent de cette liste.)
+/public/hot

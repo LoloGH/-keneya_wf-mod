@@ -1,0 +1,57 @@
+### Application Laravel hôte minimale, fournie par Orchestra Testbench.
+###
+### Elle n'existe que pour vérifier que le module se monte et se navigue
+### sans Keneya Workflow :
+###
+###   composer install
+###   composer serve      # http://127.0.0.1:8000
+###
+### Le mode autonome de développement y est actif — c'est le seul endroit
+### du dépôt où il l'est.
+
+providers:
+  - Workbench\App\Providers\WorkbenchServiceProvider
+
+migrations: false
+
+seeders:
+  - Workbench\Database\Seeders\DatabaseSeeder
+
+workbench:
+  start: '/'
+  install: true
+  health: false
+  discovers:
+    web: true
+    api: true
+    commands: true
+    views: true
+  build:
+    - asset-publish
+    - create-sqlite-db
+    - db-wipe
+    - migrate-refresh
+  assets:
+    - laravel-assets
+    - dme-assets
+  sync: []
+
+env:
+  - APP_NAME="Keneya-DME (hôte de test)"
+  - APP_ENV=local
+  - APP_DEBUG=true
+  - APP_LOCALE=fr
+  - APP_FALLBACK_LOCALE=fr
+  - APP_FAKER_LOCALE=fr_FR
+  - DB_CONNECTION=sqlite
+  - SESSION_DRIVER=file
+  - QUEUE_CONNECTION=sync
+  - CACHE_STORE=file
+  - MAIL_MAILER=log
+  # Mode autonome : page de connexion locale et session de développement.
+  - DME_STANDALONE_DEV=true
+  - DME_STANDALONE_AUTO_LOGIN=false
+  - DME_STANDALONE_USER_PASSWORD=DevKeneya2026!
+  - DEMO_SEED_ENABLED=true
+  - DEMO_USER_PASSWORD=DevKeneya2026!
+  - SMS_GATEWAY=log
