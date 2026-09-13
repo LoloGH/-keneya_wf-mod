@@ -91,13 +91,44 @@ echo "Sauvegarde SQL ecrite : $FILE ($(du -h "$FILE" | cut -f1))"
 #     ordonnances (v3.2.9). Une ordonnance restauree sans eux est un document a
 #     valeur legale ampute ; ce dossier est donc sauvegarde au meme titre que
 #     les pieces jointes, et non quand on y pense.
+# Sous Docker, ces dossiers ne sont pas sur l'hote.
+#
+# `docker-compose.yml` monte le volume nomme `keneya_storage` par-dessus tout
+# `storage/`. L'hote garde donc un point de montage vide a `storage/app`, et
+# les fichiers ne sont lisibles que depuis le conteneur.
+#
+# Cette fonction lisait l'hote sans condition. Le resultat n'etait pas une
+# erreur mais une phrase rassurante — « Aucune donnee a sauvegarder » — et un
+# code de sortie zero : toutes les sauvegardes prises sur une pile Docker ne
+# contenaient que le SQL. Une restauration aurait rendu une base dont chaque
+# piece jointe, chaque signature et chaque document medical designe un fichier
+# qui n'a jamais ete sauvegarde. C'est le pire genre de panne de sauvegarde :
+# elle ne se voit que le jour ou l'on en a besoin.
+#
+# Le dump SQL, lui, savait deja distinguer les deux topologies. Les fichiers
+# suivent desormais la meme regle.
+if docker compose ps -q app 2>/dev/null | grep -q .; then
+    DANS_CONTENEUR=1
+else
+    DANS_CONTENEUR=0
+fi
+
+# Vrai si le dossier existe et contient quelque chose, la ou il vit reellement.
+dossier_peuple() {
+    if [ "$DANS_CONTENEUR" = 1 ]; then
+        docker compose exec -T app sh -c "[ -d '$1' ] && [ -n \"\$(ls -A '$1' 2>/dev/null)\" ]" 2>/dev/null
+    else
+        [ -d "$1" ] && [ -n "$(ls -A "$1" 2>/dev/null)" ]
+    fi
+}
+
 archiver_dossier() {
     dossier="$1"
     prefixe="$2"
     libelle="$3"
 
-    if [ ! -d "$dossier" ] || [ -z "$(ls -A "$dossier" 2>/dev/null)" ]; then
-        echo "Aucune donnee a sauvegarder dans $dossier."
+    if ! dossier_peuple "$dossier"; then
+        echo "Aucune donnee a sauvegarder dans $dossier$([ "$DANS_CONTENEUR" = 1 ] && echo ' (vu depuis le conteneur)')."
         return 0
     fi
 
@@ -107,10 +138,31 @@ archiver_dossier() {
     # sauvegarde ne peut pas les lire, tar n'archive qu'une partie du dossier
     # sans que rien ne l'indique. On refuse plutot que de produire une archive
     # trompeuse.
-    if ! tar czf "$archive" -C "$dossier" . 2>"$DEST/.tar-erreurs"; then
+    if [ "$DANS_CONTENEUR" = 1 ]; then
+        # `tar` ecrit sur la sortie standard et l'archive se forme sur l'hote :
+        # rien n'est depose dans le conteneur, dont le systeme de fichiers est
+        # jetable.
+        ok=0
+        docker compose exec -T app tar czf - -C "$dossier" . \
+            > "$archive" 2>"$DEST/.tar-erreurs" || ok=1
+    else
+        ok=0
+        tar czf "$archive" -C "$dossier" . 2>"$DEST/.tar-erreurs" || ok=1
+    fi
+
+    if [ "$ok" != 0 ]; then
         echo "Erreur : archivage des $libelle incomplet." >&2
         sed 's/^/    /' "$DEST/.tar-erreurs" >&2
         echo "    Lancez la sauvegarde avec un compte capable de lire $dossier (root, ou le compte du serveur web)." >&2
+        rm -f "$archive" "$DEST/.tar-erreurs"
+        exit 1
+    fi
+
+    # Une archive vide alors que le dossier ne l'est pas : meme raisonnement que
+    # pour le dump SQL, mieux vaut le dire ici que le decouvrir a la
+    # restauration.
+    if [ ! -s "$archive" ]; then
+        echo "Erreur : l'archive des $libelle est vide alors que $dossier contient des fichiers." >&2
         rm -f "$archive" "$DEST/.tar-erreurs"
         exit 1
     fi
@@ -129,8 +181,22 @@ archiver_dossier storage/app/signatures signatures "signatures et tampons"
 # melangees ne laisseraient que quinze exemplaires de chacune, et une serie
 # produite a chaque execution finirait par evincer entierement une serie plus
 # rare. Les pieces jointes disparaitraient alors des sauvegardes sans un mot.
-ls -1t "$DEST"/*.sql 2>/dev/null | tail -n +31 | xargs -r rm --
+#
+# `|| true` sur chaque purge, et ce n'est pas de la negligence : sous
+# `set -euo pipefail`, un motif qui ne correspond a rien fait sortir `ls` en
+# erreur, la sortie du tube devient celle-la, et le script s'arretait donc en
+# echec la premiere fois qu'on sauvegardait vers un dossier neuf — apres avoir
+# pourtant tout ecrit correctement. Une sauvegarde reussie annoncee comme un
+# echec apprend a ne plus lire le code de sortie, ce qui est exactement ce
+# qu'il ne faut pas pour un script de sauvegarde.
+purger() {
+    ls -1t $1 2>/dev/null | tail -n +31 | xargs -r rm -- || true
+}
+
+purger "$DEST/*.sql"
 
 for prefixe in attachments signatures; do
-    ls -1t "$DEST/$prefixe"-*.tar.gz 2>/dev/null | tail -n +31 | xargs -r rm --
+    purger "$DEST/$prefixe-*.tar.gz"
 done
+
+echo "Sauvegarde terminee dans $DEST."
