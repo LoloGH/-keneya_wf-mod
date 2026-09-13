@@ -32,7 +32,7 @@
         })();
     </script>
 
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset_date('css/app.css') }}">
     @livewireStyles
 </head>
 <body class="app-body">

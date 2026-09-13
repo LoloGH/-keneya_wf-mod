@@ -80,11 +80,146 @@
             @endif
         </section>
 
+        {{-- Resultats d'analyses (v3.4). Seules les demandes rendues figurent
+             ici : une analyse encore au laboratoire n'a rien a dire au
+             patient, et l'annoncer « en attente » ne ferait qu'inquieter. --}}
         <section class="card">
-            <h2 class="card__subtitle">Mes documents ({{ $attachments->count() }})</h2>
+            <h2 class="card__subtitle">Mes resultats d'analyses ({{ $labOrders->count() }})</h2>
+
+            @if ($labOrders->isEmpty())
+                <p class="empty">Aucun resultat d'analyse.</p>
+            @else
+                <ul class="referrals">
+                    @foreach ($labOrders as $analyse)
+                        <li class="referrals__item">
+                            <p class="referrals__meta">
+                                {{ $analyse->completed_at?->format('d/m/Y') ?? $analyse->requested_at?->format('d/m/Y') }}
+                                @if ($analyse->doctor) - demande par {{ $analyse->doctor->displayName() }} @endif
+                            </p>
+
+                            @if (filled($analyse->conclusion))
+                                <p class="resultats__conclusion">{{ $analyse->conclusion }}</p>
+                            @endif
+
+                            @foreach ($analyse->items as $examen)
+                                @php $mesures = $examen->results->whereNotNull('validated_at'); @endphp
+
+                                <p class="resultats__examen">{{ $examen->exam_name }}</p>
+
+                                @if ($mesures->isEmpty())
+                                    <p class="hint">
+                                        {{ $examen->results->isEmpty()
+                                            ? 'Resultat non chiffre : voyez le compte rendu ci-dessus.'
+                                            : 'Valeurs en cours de validation par le biologiste.' }}
+                                    </p>
+                                @else
+                                    <ul class="resultats">
+                                        @foreach ($mesures as $mesure)
+                                            <li class="resultats__ligne">
+                                                <span class="resultats__parametre">{{ $mesure->parameter }}</span>
+                                                <span class="resultats__valeur">
+                                                    {{ $mesure->value }}@if ($mesure->unit) {{ $mesure->unit }}@endif
+                                                </span>
+                                                @if ($mesure->reference_range)
+                                                    <span class="resultats__reference">normale : {{ $mesure->reference_range }}</span>
+                                                @endif
+                                                @if ($mesure->isAbnormal())
+                                                    <span class="resultats__ecart">{{ $mesure->flagLabel() }}</span>
+                                                @endif
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            @endforeach
+
+                            <a href="{{ route('portal.lab.pdf', [$patient->portal_token, $analyse]) }}"
+                               class="attachments__link">
+                                Telecharger le compte rendu
+                                <span class="attachments__size">PDF</span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <p class="hint">
+                    Ces resultats se lisent avec le medecin qui les a demandes :
+                    une valeur hors normale n'est pas, a elle seule, un diagnostic.
+                </p>
+            @endif
+        </section>
+
+        {{-- Comptes rendus d'imagerie (v3.4). Un brouillon reste au dossier
+             medical : le radiologue le reprend et le corrige, et ce n'est
+             qu'une fois arrete qu'il devient la parole de l'etablissement. --}}
+        <section class="card">
+            <h2 class="card__subtitle">Mes comptes rendus d'examens ({{ $imagingReports->count() }})</h2>
+
+            @if ($imagingReports->isEmpty())
+                <p class="empty">Aucun compte rendu d'examen.</p>
+            @else
+                <ul class="referrals">
+                    @foreach ($imagingReports as $compteRendu)
+                        <li class="referrals__item">
+                            <p class="referrals__meta">
+                                {{ $compteRendu->reported_at?->format('d/m/Y') }}
+                                @if ($compteRendu->order) - {{ $compteRendu->order->modalityLabel() }} @endif
+                                @if ($compteRendu->order?->body_site) ({{ $compteRendu->order->body_site }}) @endif
+                            </p>
+
+                            @if (filled($compteRendu->technique))
+                                <p class="resultats__examen">Technique</p>
+                                <p class="resultats__conclusion">{{ $compteRendu->technique }}</p>
+                            @endif
+
+                            @if (filled($compteRendu->findings))
+                                <p class="resultats__examen">Resultats</p>
+                                <p class="resultats__conclusion">{{ $compteRendu->findings }}</p>
+                            @endif
+
+                            {{-- La conclusion n'est repetee que si elle differe des
+                                 resultats : le technicien qui rend depuis WorkFlow
+                                 saisit un texte unique, et l'afficher deux fois
+                                 ferait croire a deux avis distincts. --}}
+                            @if (filled($compteRendu->conclusion) && $compteRendu->conclusion !== $compteRendu->findings)
+                                <p class="resultats__examen">Conclusion</p>
+                                <p class="resultats__conclusion">{{ $compteRendu->conclusion }}</p>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+
+        {{-- Documents du dossier medical (v3.4), a distinguer des pieces
+             jointes de WorkFlow affichees plus bas : celles-ci accompagnent un
+             renvoi et circulent avec le patient, ceux-la restent au dossier. --}}
+        <section class="card">
+            <h2 class="card__subtitle">Les documents de mon dossier medical ({{ $documents->count() }})</h2>
+
+            @if ($documents->isEmpty())
+                <p class="empty">Aucun document au dossier medical.</p>
+            @else
+                <ul class="attachments">
+                    @foreach ($documents as $document)
+                        <li>
+                            <a href="{{ route('portal.document', [$patient->portal_token, $document]) }}"
+                               class="attachments__link">
+                                {{ $document->title }}
+                                <span class="attachments__size">
+                                    {{ $document->typeLabel() }} - {{ $document->humanSize() }}
+                                </span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+
+        <section class="card">
+            <h2 class="card__subtitle">Mes pieces jointes ({{ $attachments->count() }})</h2>
 
             @if ($attachments->isEmpty())
-                <p class="empty">Aucun document.</p>
+                <p class="empty">Aucune piece jointe.</p>
             @else
                 <ul class="attachments">
                     @foreach ($attachments as $piece)

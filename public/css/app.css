@@ -1654,6 +1654,52 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     text-indent: .5em;
 }
 
+/* Resultats d'analyses et comptes rendus (v3.4).
+   Lus au telephone, souvent debout dans un couloir : pas de tableau, qui
+   deborderait de l'ecran, mais une ligne par parametre qui se replie. */
+.resultats { list-style: none; margin: var(--e2) 0 0; padding: 0; }
+
+.resultats__ligne {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .25rem .5rem;
+    padding: .4rem 0;
+    border-bottom: 1px solid var(--gris-200);
+}
+.resultats__ligne:last-child { border-bottom: 0; }
+
+.resultats__parametre { flex: 1 1 8rem; }
+.resultats__valeur { font-weight: 700; font-variant-numeric: tabular-nums; }
+.resultats__reference { font-size: .85rem; color: var(--gris-500); }
+
+/* L'ecart a la normale se signale sans dramatiser : une mention lisible,
+   jamais un rouge d'alerte. Le patient lit seul, sans personne a qui
+   demander sur-le-champ ce que la couleur veut dire. */
+.resultats__ecart {
+    padding: .1rem .45rem;
+    border-radius: var(--rayon);
+    background: var(--ambre-clair);
+    color: var(--ambre);
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.resultats__examen {
+    margin: var(--e3) 0 0;
+    font-weight: 600;
+}
+
+/* Un compte rendu est un texte libre, saisi avec ses retours a la ligne :
+   les preserver evite d'en faire un pave illisible. */
+.resultats__conclusion {
+    margin: var(--e1) 0 0;
+    padding: .6rem;
+    background: var(--gris-100);
+    border-radius: var(--rayon);
+    white-space: pre-line;
+}
+
 /* ---------- Verification publique de document (QR code, v3.4) ---------- */
 /* Page consultee au telephone juste apres un scan : le verdict tient dans le
    premier ecran, sans avoir a faire defiler. */

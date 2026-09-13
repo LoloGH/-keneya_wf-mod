@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Keneya\Dme\Models\ImagingReport as CompteRenduImagerie;
+use Keneya\Dme\Models\LabOrder as AnalyseMedicale;
+use Keneya\Dme\Models\MedicalDocument as DocumentMedical;
 use Keneya\Dme\Models\Patient as DossierMedical;
 use Keneya\Dme\Models\Prescription as OrdonnanceMedicale;
 
@@ -139,6 +142,81 @@ class Patient extends Model
         return $dossier->prescriptions()
             ->with(['doctor', 'items'])
             ->orderByDesc('id')
+            ->get();
+    }
+
+    /**
+     * Ses demandes d'analyses rendues (v3.4).
+     *
+     * Rendues, et rendues seulement : une demande encore au laboratoire n'a
+     * rien a dire au patient, et l'afficher « en attente » ne ferait
+     * qu'inquieter. `available` est l'etat qu'atteint une demande quand le
+     * technicien a rendu sa conclusion, `validated` celui qu'elle atteint
+     * apres validation biologique.
+     *
+     * @return Collection<int, AnalyseMedicale>
+     */
+    public function resultatsDAnalyse(): Collection
+    {
+        $dossier = $this->dossierMedical();
+
+        if ($dossier === null) {
+            return AnalyseMedicale::query()->whereRaw('1 = 0')->get();
+        }
+
+        return $dossier->labOrders()
+            ->whereIn('status', ['available', 'validated'])
+            ->with(['doctor', 'items.results'])
+            ->get();
+    }
+
+    /**
+     * Ses comptes rendus d'imagerie definitifs (v3.4).
+     *
+     * Un brouillon reste au dossier medical : le radiologue le reprend, le
+     * corrige, et ce n'est qu'une fois signe qu'il devient la parole de
+     * l'etablissement. Le portail ne montre que ce qui est arrete.
+     *
+     * @return Collection<int, CompteRenduImagerie>
+     */
+    public function comptesRendusDImagerie(): Collection
+    {
+        $dossier = $this->dossierMedical();
+
+        if ($dossier === null) {
+            return CompteRenduImagerie::query()->whereRaw('1 = 0')->get();
+        }
+
+        return $dossier->imagingReports()
+            ->whereIn('status', ['final', 'amended'])
+            ->with(['order', 'radiologist'])
+            ->orderByDesc('reported_at')
+            ->get();
+    }
+
+    /**
+     * Les documents de son dossier medical (v3.4).
+     *
+     * A ne pas confondre avec `attachments`, les pieces jointes de WorkFlow,
+     * qui accompagnent un renvoi et circulent avec le patient. Ici, ce qui a
+     * vocation a rester au dossier : un compte rendu, un resultat scanne, un
+     * certificat.
+     *
+     * Un brouillon n'y figure pas, un dossier archive non plus : l'un n'est
+     * pas fini, l'autre a ete retire de la circulation.
+     *
+     * @return Collection<int, DocumentMedical>
+     */
+    public function documentsMedicaux(): Collection
+    {
+        $dossier = $this->dossierMedical();
+
+        if ($dossier === null) {
+            return DocumentMedical::query()->whereRaw('1 = 0')->get();
+        }
+
+        return $dossier->documents()
+            ->whereIn('status', ['final', 'signed'])
             ->get();
     }
 

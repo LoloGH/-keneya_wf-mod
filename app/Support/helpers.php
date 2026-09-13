@@ -23,6 +23,38 @@ if (! function_exists('hospital_name')) {
     }
 }
 
+if (! function_exists('asset_date')) {
+    /**
+     * URL d'un fichier de `public/`, suivie de la date de sa derniere
+     * modification (v3.4).
+     *
+     * Sans cela, une feuille de style corrigee n'atteint pas les navigateurs
+     * qui la tiennent deja : Nginx la sert sans `Cache-Control`, et le
+     * navigateur applique alors sa propre duree de fraicheur, qui se compte en
+     * heures. Le correctif est bien deploye, personne ne le voit, et le seul
+     * remede connu de l'utilisateur est un rechargement force qu'il n'a aucune
+     * raison de tenter.
+     *
+     * La date de modification plutot qu'un numero de version : elle change
+     * toute seule au deploiement, et ne demande a personne de penser a
+     * l'incrementer. Un fichier absent repart sans suffixe : une URL qui n'a
+     * rien a versionner vaut mieux qu'une erreur en pleine page.
+     */
+    function asset_date(string $fichier): string
+    {
+        static $dates = [];
+
+        if (! array_key_exists($fichier, $dates)) {
+            $chemin = public_path($fichier);
+            $dates[$fichier] = is_file($chemin) ? (string) filemtime($chemin) : null;
+        }
+
+        return $dates[$fichier] === null
+            ? asset($fichier)
+            : asset($fichier).'?v='.$dates[$fichier];
+    }
+}
+
 if (! function_exists('notification_sound_url')) {
     /**
      * URL du son de notification, ou null si aucun fichier n'est fourni

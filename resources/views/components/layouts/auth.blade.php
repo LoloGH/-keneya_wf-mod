@@ -15,7 +15,7 @@
          d'avoir analyse la feuille de style. --}}
     <link rel="preload" as="image" href="{{ asset('images/login-scene.jpg') }}"
           media="(min-width: 64rem)">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset_date('css/app.css') }}">
     @livewireStyles
 </head>
 <body class="login-page">

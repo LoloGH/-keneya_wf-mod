@@ -80,6 +80,13 @@ class PatientPortal extends Component
             // Les ordonnances viennent du dossier medical depuis la v3.3.1 :
             // le patient lit celle que son medecin a signee, pas une copie.
             'prescriptions' => $unlocked ? $patient->ordonnances() : collect(),
+            // Resultats, comptes rendus et documents du dossier medical
+            // (v3.4). Ils y etaient deja ; le portail, lui, ne regardait que
+            // les pieces jointes de WorkFlow, si bien qu'un patient venu
+            // chercher son resultat d'analyse trouvait une page vide.
+            'labOrders' => $unlocked ? $patient->resultatsDAnalyse() : collect(),
+            'imagingReports' => $unlocked ? $patient->comptesRendusDImagerie() : collect(),
+            'documents' => $unlocked ? $patient->documentsMedicaux() : collect(),
             'appointments' => $unlocked
                 ? $patient->appointments()
                     ->with(['service', 'doctor.user', 'staffMember.user'])

@@ -12,6 +12,8 @@ use App\Http\Controllers\DocumentVerificationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Portal\PatientPortalController;
 use App\Http\Controllers\Portal\PortalDownloadController;
+use App\Http\Controllers\Portal\PortalLabReportPdfController;
+use App\Http\Controllers\Portal\PortalMedicalDocumentController;
 use App\Http\Controllers\Portal\PortalPrescriptionPdfController;
 use App\Http\Controllers\Portal\VisitorFeedbackController;
 use App\Http\Controllers\Reception\PrintTicketController;
@@ -191,6 +193,15 @@ Route::middleware('throttle:10,1')->group(function () {
 
     Route::get('/mes-documents/{token}/ordonnance/{prescription}/pdf', PortalPrescriptionPdfController::class)
         ->name('portal.prescription.pdf');
+
+    // Le dossier medical, cote patient (v3.4) : ses comptes rendus d'analyses
+    // et les documents verses a son dossier. Les memes garde-fous que
+    // ci-dessus s'appliquent dans chaque controleur, jeton et code compris.
+    Route::get('/mes-documents/{token}/analyses/{labOrder}/pdf', PortalLabReportPdfController::class)
+        ->name('portal.lab.pdf');
+
+    Route::get('/mes-documents/{token}/document/{document}', PortalMedicalDocumentController::class)
+        ->name('portal.document');
 });
 
 /*

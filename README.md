@@ -788,6 +788,14 @@ du porteur du projet ; la sécurité repose donc sur deux couches et non sur une
 Le verrouillage est volontairement **temporaire** : un patient qui se trompe
 deux fois ne doit pas rester bloqué à vie devant ses propres documents.
 
+Le patient y lit, depuis la v3.4, **tout ce que l'établissement a arrêté à son
+sujet** : ses rendez-vous à venir, ses ordonnances, ses résultats d'analyses,
+les comptes rendus de ses examens d'imagerie, les documents de son dossier
+médical et les pièces jointes de WorkFlow. Ce que le portail refuse d'afficher
+est aussi décidé : une analyse encore au laboratoire, une valeur non validée
+par le biologiste, un compte rendu à l'état de brouillon, un document archivé.
+Le détail est dans **[docs/v3.4-portail-dossier-medical.md](docs/v3.4-portail-dossier-medical.md)**.
+
 La page **n'affiche rien** - pas même le nom du patient - tant que le code n'a
 pas été validé, et l'accès accordé vit en session côté serveur, pas dans une
 propriété Livewire qui voyagerait avec le client. Le SMS contenant le lien part
@@ -1530,6 +1538,7 @@ commande.
 | `AttachmentTest` | Dépôt de pièce jointe, refus serveur d'un type ou d'une taille invalide, cloisonnement du téléchargement. |
 | `CaisseFlowTest` | Cloisonnement du rôle `cashier`, routage sous condition de paiement à l'enregistrement et sur renvoi vers un plateau technique, bascule après confirmation, refus de la caisse comme destination, et journalisation d'« Appeler le suivant » et « Confirmer le paiement ». |
 | `PatientPortalTest` | Génération du code et du jeton, page muette avant validation, code correct, cinq codes erronés -> verrouillage temporaire, expiration du verrou, jeton invalide, envoi du lien par SMS. |
+| `PortalMedicalRecordTest` | Le dossier médical côté patient : résultats d'analyses, comptes rendus d'imagerie et documents, avec pour chacun ce que le portail **refuse** d'afficher - analyse non rendue, valeur non validée par le biologiste, compte rendu en brouillon, document archivé - et le cloisonnement des téléchargements entre deux portails. |
 | `PatientDeletionTest` | Suppression en cascade, **survie explicite de l'entrée d'audit**, absence de trace dans `patient_history`, visiteur détaché, garde-fous de confirmation, inaccessibilité aux autres rôles. |
 | `DossierWorkflowV32Test` | Visiteurs rattachés, création groupée de planning, dépôt de pièce jointe depuis le dossier (médecin et admin), frise unifiée triée par date, actions d'impression, « Mes rendez-vous », conclusion de consultation. |
 | `PrintTicketTest` | Rendu du ticket patient et du ticket visiteur avec les champs propres à chacun, masquage de la navigation à l'impression, réimpression depuis les passages du jour. |
