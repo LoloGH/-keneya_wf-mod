@@ -174,6 +174,7 @@ class DemoReset extends Command
 
         $this->viderLesTables($tables);
         $this->viderLesPiecesJointes();
+        $this->viderLesDocumentsMedicaux();
 
         // Les seeders recreent roles, services, personnel et comptes de demo.
         // Ils sont idempotents : relances sans vidage, ils ne creent que ce
@@ -261,5 +262,31 @@ class DemoReset extends Command
         foreach ($disque->directories() as $dossier) {
             $disque->deleteDirectory($dossier);
         }
+    }
+
+    /**
+     * Les documents du dossier medical, sur leur disque a eux.
+     *
+     * `dme_medical_documents` figure bien dans les tables videes, mais les
+     * fichiers vivent ailleurs que les pieces jointes de WorkFlow : sur le
+     * disque prive du module, sous `dme.documents.directory`. Ils restaient
+     * donc apres le vidage, et pour la pire des raisons — un compte rendu
+     * d'analyse ou une echographie oublie sur le volume d'un serveur de
+     * demonstration public, lisible par qui connait son chemin, sans plus
+     * aucune ligne en base pour dire qu'il existe.
+     *
+     * Seul le repertoire du module est efface : le disque `local` sert aussi
+     * a Laravel, et le vider entierement emporterait bien autre chose.
+     */
+    private function viderLesDocumentsMedicaux(): void
+    {
+        $disque = Storage::disk((string) config('dme.documents.disk', 'local'));
+        $repertoire = trim((string) config('dme.documents.directory', 'medical-documents'), '/');
+
+        if ($repertoire === '' || ! $disque->exists($repertoire)) {
+            return;
+        }
+
+        $disque->deleteDirectory($repertoire);
     }
 }

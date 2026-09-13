@@ -9,9 +9,11 @@ use App\Models\Hospitalization;
 use App\Models\Patient;
 use App\Models\User;
 use App\Support\Audit;
+use App\Support\Dme\PatientProjection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
+use Keneya\Dme\Services\Patients\PurgePatient;
 
 /**
  * Suppression definitive d'un dossier patient (v3.2, point 8).
@@ -22,9 +24,18 @@ use InvalidArgumentException;
  * Elle n'est jamais tracee dans `patient_history` : cette table disparait avec
  * le patient. Seul le journal d'audit la conserve, et lui survit puisqu'il ne
  * reference pas le patient par cle etrangere.
+ *
+ * Elle emporte aussi le dossier medical du module. Elle ne le faisait pas :
+ * `dme_patients` gardait consultations, ordonnances, analyses, imagerie et
+ * documents sur disque, rattaches a un identifiant externe qui ne designait
+ * plus rien. L'administrateur retapait le numero de dossier, fournissait un
+ * motif, lisait « dossier supprime » — et les donnees de sante restaient en
+ * base, sans plus aucun ecran pour les montrer ni personne pour le savoir.
  */
 class DeletePatientRecord
 {
+    public function __construct(private readonly PurgePatient $purge) {}
+
     public function execute(Patient $patient, User $admin, string $confirmation, string $reason): void
     {
         if ($confirmation !== $patient->patient_code) {
@@ -56,6 +67,13 @@ class DeletePatientRecord
                 'supprime_le' => now()->toDateTimeString(),
             ],
         );
+
+        // Releve maintenant, tant que le patient existe encore : c'est la
+        // table d'identifiants externes du module qui fait la correspondance,
+        // et elle part avec le dossier medical. Nul quand aucun acte clinique
+        // n'a ete pose — le dossier medical nait au premier formulaire du DME,
+        // jamais a l'enregistrement a l'accueil.
+        $dossierMedical = PatientProjection::find($patient);
 
         // Les chemins sont releves maintenant, mais les fichiers ne partiront
         // qu'apres la transaction : le disque, lui, ne sait pas revenir en
@@ -119,5 +137,40 @@ class DeletePatientRecord
         // car tout acces passe par l'enregistrement. C'est le seul des deux
         // echecs possibles qui ne detruit rien.
         Storage::disk('attachments')->delete($fichiers);
+
+        // Le dossier medical en dernier, et non dans la transaction ci-dessus.
+        //
+        // Les deux vivent pourtant dans la meme base, et une transaction
+        // unique serait plus propre sur le papier. Mais la sequence du module
+        // efface des fichiers apres sa propre transaction ; imbriquee, cette
+        // transaction n'est plus qu'un point de sauvegarde de la notre, et les
+        // documents du dossier medical partiraient du disque alors que la
+        // transaction englobante peut encore echouer. C'est exactement le
+        // piege que les deux cotes evitent chacun chez eux.
+        //
+        // Reste a choisir l'ordre, et les deux echecs possibles ne se valent
+        // pas. Le dossier medical efface en premier, une panne sur la cascade
+        // WorkFlow laisserait un patient bien vivant prive de tout son contenu
+        // clinique : une perte seche, sans retour. Efface en dernier, une
+        // panne laisse un dossier medical orphelin — des donnees qui auraient
+        // du partir, mais qui sont toujours la, reperables par leur
+        // identifiant externe et emportees par la commande de reprise
+        // `keneya:dossiers-medicaux-orphelins`. On garde le defaut qui se
+        // repare.
+        if ($dossierMedical !== null) {
+            $this->purge->purge(
+                patient: $dossierMedical,
+                reason: trim($reason),
+                origin: sprintf(
+                    'suppression du dossier WorkFlow %s par %s',
+                    $patient->patient_code,
+                    $admin->name,
+                ),
+                properties: [
+                    'patient_code_workflow' => $patient->patient_code,
+                    'supprime_par' => $admin->name,
+                ],
+            );
+        }
     }
 }

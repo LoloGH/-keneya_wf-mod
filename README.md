@@ -852,6 +852,58 @@ directement.
   cette cascade est **la seule exception prévue** : elle passe sous le modèle en
   SQL direct plutôt que d'affaiblir le garde-fou pour tout le monde.
 
+#### Le dossier médical part avec
+
+La suppression **emporte aussi le dossier médical du module** : consultations,
+ordonnances, analyses, imagerie, hospitalisations, documents sur disque, SMS et
+notifications. Elle ne le faisait pas, et `dme_patients` gardait tout ce contenu
+clinique rattaché à un identifiant externe qui ne désignait plus rien - sans
+qu'aucun écran ne le montre, donc sans que personne puisse s'en apercevoir.
+C'était un manquement à la protection des données, pas un défaut de propreté de
+base.
+
+- La séquence de suppression vit **dans le module**
+  (`Keneya\Dme\Services\Patients\PurgePatient`), pas recopiée ici : l'écran
+  « Supprimer définitivement » du module l'utilise aussi, faute de quoi les deux
+  auraient divergé.
+- Le dossier médical est supprimé **après** la cascade WorkFlow, hors de sa
+  transaction. Des deux échecs possibles, on garde celui qui se répare : une
+  panne laisse un dossier médical orphelin, que la commande ci-dessous emporte,
+  plutôt qu'un patient bien vivant privé de tout son contenu clinique.
+- **Un dossier médical sans lien WorkFlow n'est jamais touché.** Le module
+  s'utilise aussi seul : un dossier ouvert directement dans le DME ne porte
+  aucun identifiant `keneya_workflow` et n'a pas de dossier WorkFlow à avoir
+  perdu. La suppression ne suit que ce lien, jamais un rapprochement sur le nom.
+- Un patient enregistré à l'accueil et jamais vu en consultation n'a pas de
+  dossier médical : sa suppression se déroule sans rien réclamer. Le dossier
+  médical naît au premier acte clinique.
+- **Deux entrées d'audit**, et elles ne disent pas la même chose : celle de
+  WorkFlow tient le geste administratif, celle du module tient la disparition
+  d'un dossier de santé et porte en plus son origine (« suppression du dossier
+  WorkFlow HFD-00001 par ... »). Aucune des deux ne référence le patient par clé
+  étrangère ; les deux survivent.
+
+#### Les dossiers médicaux restés orphelins
+
+La correction vaut pour les suppressions à venir, pas pour celles déjà faites.
+Les dossiers médicaux dont le dossier WorkFlow a disparu avant cette version
+restent en base, et rien dans l'application ne les montre.
+
+```bash
+php artisan keneya:dossiers-medicaux-orphelins          # liste, n'efface rien
+php artisan keneya:dossiers-medicaux-orphelins --force  # supprime définitivement
+```
+
+La commande part des identifiants `keneya_workflow` dont la valeur ne
+correspond plus à aucun `patients.patient_code` ; un dossier médical sans cet
+identifiant est absent de sa liste **par construction**. Sans `--force` elle
+affiche ce qu'elle a trouvé et s'arrête - l'inverse d'un `--dry-run`, et c'est
+voulu : elle détruit des données de santé sans retour possible. `--motif=`
+remplace le motif inscrit au journal d'audit.
+
+Le détail des décisions est dans
+**[docs/v3.4.1-suppression-dossier-medical.md](docs/v3.4.1-suppression-dossier-medical.md)**.
+
 ## 12. Catalogues administrables et interfaces générées
 
 ### Types de service
@@ -1526,6 +1578,29 @@ alors que composer, PHPUnit et Pint écrivent tous. Le profil `tools` le tient
 hors de `docker compose up` : il ne démarre qu'à la demande, le temps d'une
 commande.
 
+### Depuis une copie de travail secondaire
+
+Les deux commandes ci-dessus supposent deux choses : qu'on se trouve dans la
+copie principale du dépôt, et que la pile tourne. Le travail se fait pourtant
+souvent dans un `git worktree` - un répertoire sans `.env`, sans `vendor/`, et
+d'où le chemin relatif `../keneya-dme_mod` du `docker-compose.yml` ne désigne
+plus le module. Chaque tentative se solde alors par une erreur qui ne dit pas sa
+cause, et la conclusion tentante - « les tests ne se lancent pas d'ici » - est
+fausse.
+
+```bash
+scripts/tests.sh hote  [--filter=...]   # WorkFlow, module monté compris
+scripts/tests.sh dme   [--filter=...]   # le module seul
+scripts/tests.sh                        # les deux
+```
+
+Le script monte explicitement ce qu'il faut : la copie de travail courante, le
+`vendor/` et le `.env` de la copie principale (qu'il retrouve par
+`git rev-parse --git-common-dir`), et le module à l'endroit où le lien
+symbolique `vendor/keneya/dme` le cherche. Il n'a besoin d'aucun conteneur en
+marche, seulement de l'image que `docker compose build` produit déjà.
+`KENEYA_DME_PATH` indique le module s'il n'est pas rangé à côté du dépôt.
+
 **559 tests, 1938 assertions**, module DME assemblé compris. La suite couvre :
 
 | Fichier | Objet |
@@ -1540,6 +1615,8 @@ commande.
 | `PatientPortalTest` | Génération du code et du jeton, page muette avant validation, code correct, cinq codes erronés -> verrouillage temporaire, expiration du verrou, jeton invalide, envoi du lien par SMS. |
 | `PortalMedicalRecordTest` | Le dossier médical côté patient : résultats d'analyses, comptes rendus d'imagerie et documents, avec pour chacun ce que le portail **refuse** d'afficher - analyse non rendue, valeur non validée par le biologiste, compte rendu en brouillon, document archivé - et le cloisonnement des téléchargements entre deux portails. |
 | `PatientDeletionTest` | Suppression en cascade, **survie explicite de l'entrée d'audit**, absence de trace dans `patient_history`, visiteur détaché, garde-fous de confirmation, inaccessibilité aux autres rôles. |
+| `DmeRecordDeletionTest` | La suppression d'un dossier patient **emporte le dossier médical** et son contenu clinique, tous ses documents quittent le disque, un dossier médical **sans lien WorkFlow n'est pas touché**, un patient sans dossier médical se supprime sans erreur, et les **deux** traces d'audit survivent. |
+| `DossiersMedicauxOrphelinsTest` | La commande de reprise trouve les dossiers médicaux dont le dossier WorkFlow a disparu, n'efface rien sans `--force`, épargne le dossier autonome et le dossier encore rattaché, emporte le dossier en suppression douce, et laisse sa trace d'audit. |
 | `DossierWorkflowV32Test` | Visiteurs rattachés, création groupée de planning, dépôt de pièce jointe depuis le dossier (médecin et admin), frise unifiée triée par date, actions d'impression, « Mes rendez-vous », conclusion de consultation. |
 | `PrintTicketTest` | Rendu du ticket patient et du ticket visiteur avec les champs propres à chacun, masquage de la navigation à l'impression, réimpression depuis les passages du jour. |
 | `CashPrescriptionAppointmentTest` | Ordonnance + export PDF, rendez-vous et « Orienter le patient », **et que les anciennes portes de caisse côté médecin et accueil sont bien condamnées**. |
