@@ -9,9 +9,11 @@ use App\Models\Prescription;
 use App\Models\Service;
 use App\Models\Setting;
 use App\Models\Visit;
+use App\Support\Dme\PatientProjection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Keneya\Dme\Models\MedicalDocument;
 use Tests\TestCase;
 
 /**
@@ -98,6 +100,42 @@ class DemoResetTest extends TestCase
 
         Storage::disk('attachments')->assertMissing($patient->getKey().'/resultat.pdf');
         $this->assertSame(0, Attachment::count());
+    }
+
+    /**
+     * Les documents du dossier medical vivent sur le disque prive du module,
+     * pas avec les pieces jointes de WorkFlow. La table etait bien videe, les
+     * fichiers restaient : un compte rendu d'analyse oublie sur le volume d'un
+     * serveur de demonstration public, lisible par qui connait son chemin, et
+     * plus aucune ligne en base pour dire qu'il existe.
+     */
+    public function test_les_documents_du_dossier_medical_sont_supprimes_du_disque(): void
+    {
+        Storage::fake('attachments');
+        Storage::fake(config('dme.documents.disk', 'local'));
+
+        $patient = Patient::factory()->create();
+        $dossier = PatientProjection::resolve($patient);
+
+        $chemin = trim((string) config('dme.documents.directory', 'medical-documents'), '/')
+            .'/'.$dossier->getKey().'/compte-rendu.pdf';
+
+        Storage::disk(config('dme.documents.disk', 'local'))->put($chemin, 'contenu fictif');
+
+        MedicalDocument::create([
+            'patient_id' => $dossier->getKey(),
+            'title' => 'Compte rendu',
+            'type' => 'imported',
+            'disk' => config('dme.documents.disk', 'local'),
+            'storage_path' => $chemin,
+            'status' => 'final',
+            'is_generated' => false,
+        ]);
+
+        $this->artisan('demo:reset', ['--force' => true])->assertSuccessful();
+
+        $this->assertSame(0, MedicalDocument::count());
+        Storage::disk(config('dme.documents.disk', 'local'))->assertMissing($chemin);
     }
 
     /**
