@@ -1582,11 +1582,9 @@ commande.
 
 Les deux commandes ci-dessus supposent deux choses : qu'on se trouve dans la
 copie principale du dépôt, et que la pile tourne. Le travail se fait pourtant
-souvent dans un `git worktree` - un répertoire sans `.env`, sans `vendor/`, et
-d'où le chemin relatif `../keneya-dme_mod` du `docker-compose.yml` ne désigne
-plus le module. Chaque tentative se solde alors par une erreur qui ne dit pas sa
-cause, et la conclusion tentante - « les tests ne se lancent pas d'ici » - est
-fausse.
+souvent dans un `git worktree` - un répertoire sans `.env` et sans `vendor/`.
+Chaque tentative se solde alors par une erreur qui ne dit pas sa cause, et la
+conclusion tentante - « les tests ne se lancent pas d'ici » - est fausse.
 
 ```bash
 scripts/tests.sh hote  [--filter=...]   # WorkFlow, module monté compris
@@ -1712,9 +1710,11 @@ validation et d'erreur.
 ## 21. Module Dossier Médical Électronique
 
 Ce dépôt monte le module `keneya/dme`, antécédents, consultations, ordonnances,
-laboratoire, imagerie, hospitalisation, dans WorkFlow. Le module vit dans un
-dossier voisin (`../keneya-dme_mod`) et est référencé par un dépôt Composer de
-type `path` ; il n'est pas copié ici.
+laboratoire, imagerie, hospitalisation, dans WorkFlow. **Depuis la v3.4.2 le
+module vit ici**, sous `modules/dme`, référencé par un dépôt Composer de type
+`path`. Il occupait auparavant un dépôt voisin, ce qui obligeait à en cloner et
+à en tenir à jour deux pour une seule application - et à en tirer un sans
+l'autre sans qu'aucune erreur franche ne le signale.
 
 Ce que l'assemblage établit, en une phrase chacun :
 

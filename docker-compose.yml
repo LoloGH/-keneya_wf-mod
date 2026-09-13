@@ -33,11 +33,6 @@ services:
       - ./docker/php/dev-entrypoint.sh:/usr/local/bin/dev-entrypoint.sh:ro
       - ./:/var/www/html
       - keneya_storage:/var/www/html/storage
-      # Le module DME est reference en depot `path` dans composer.json. Sans
-      # ce montage, `composer install` echouerait dans le conteneur alors
-      # qu'il fonctionne sur l'hote : le chemin declare dans composer.json est
-      # celui vu d'ici, pas celui de la machine.
-      - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
       # Surcouche de developpement : les gabarits compiles sortent d'opcache,
       # sans quoi une modification de gabarit n'apparait qu'apres un
       # redemarrage du conteneur, sans que rien ne le signale. Le reste garde
@@ -89,7 +84,6 @@ services:
     volumes:
       - ./:/var/www/html
       - keneya_storage:/var/www/html/storage
-      - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
       # Surcouche de developpement : les gabarits compiles sortent d'opcache,
       # sans quoi une modification de gabarit n'apparait qu'apres un
       # redemarrage du conteneur, sans que rien ne le signale. Le reste garde
@@ -131,7 +125,6 @@ services:
     volumes:
       - ./:/var/www/html
       - keneya_storage:/var/www/html/storage
-      - ../keneya-dme_mod:/var/www/keneya-dme_mod:ro
       # Surcouche de developpement : les gabarits compiles sortent d'opcache,
       # sans quoi une modification de gabarit n'apparait qu'apres un
       # redemarrage du conteneur, sans que rien ne le signale. Le reste garde
@@ -149,15 +142,15 @@ services:
 
   # Outillage du module DME : ses tests, son formateur, son composer.
   #
-  # Les trois services qui servent l'application montent `../keneya-dme_mod` en
-  # lecture seule, et c'est voulu : une pile qui repond a des requetes HTTP n'a
-  # aucune raison de pouvoir reecrire le code d'un de ses paquets. Mais le
-  # module reste un depot de travail, dont la suite de tests doit pouvoir se
-  # lancer — or PHPUnit ecrit, composer ecrit, Pint ecrit.
+  # Le module vit dans ce depot depuis la v3.4.2, sous `modules/dme`. Il
+  # arrive donc avec le montage `./:/var/www/html` des services qui servent
+  # l'application, et n'a plus de montage a lui.
   #
-  # D'ou ce service, qui monte le meme repertoire en ecriture et ne demarre
-  # jamais tout seul : le profil `tools` le tient hors de `docker compose up`.
-  # Il ne sert que de `docker compose run`.
+  # Il garde en revanche son service d'outillage, parce qu'il garde sa propre
+  # suite : celle de l'hote le traverse, mais toujours avec WorkFlow derriere,
+  # tandis que la sienne le verifie **seul**, sans hote pour lui fournir un
+  # utilisateur, des roles ou une signature. Les deux disent des choses
+  # differentes et se gardent.
   #
   #   docker compose run --rm dme composer install   # une fois, pour les
   #                                                  # dependances de dev
@@ -174,11 +167,17 @@ services:
     image: keneya-wf-mod-app
     profiles: ["tools"]
     user: "0:0"
-    working_dir: /var/www/keneya-dme_mod
+    working_dir: /var/www/html/modules/dme
     environment:
       COMPOSER_ALLOW_SUPERUSER: 1
+      # Sans plafond : `composer install` ecrit quelques milliers de fichiers
+      # dans `modules/dme/vendor`, sur un montage venant de l'hote. Sous
+      # Docker Desktop chaque ecriture traverse un pont, et le delai de 300 s
+      # que composer s'impose par defaut est atteint avant la fin — l'erreur
+      # parle alors d'un processus expire, jamais du montage.
+      COMPOSER_PROCESS_TIMEOUT: 0
     volumes:
-      - ../keneya-dme_mod:/var/www/keneya-dme_mod
+      - ./:/var/www/html
     networks:
       - keneya
 

@@ -4,16 +4,26 @@ Ce dépôt est une **copie de travail** de `keneya_workflow` dans laquelle le
 module `keneya/dme` est monté. Il est volontairement séparé du dépôt d'origine :
 rien n'y est reversé tant que l'ensemble n'a pas été validé.
 
-Le module vit dans un dossier voisin (`../keneya-dme_mod`) et est référencé par
-un dépôt Composer de type `path`. Il n'est donc pas copié dans ce dépôt : les
-deux se développent côte à côte.
+**Depuis la v3.4.2, le module vit dans ce dépôt**, sous `modules/dme`, et y est
+référencé par un dépôt Composer de type `path`. Un seul clone, un seul
+`git pull`, une seule CI.
 
-**La version du module qu'exige cet assemblage est la branche
-`assemblage-workflow` de [`LoloGH/-keneya-dme_mod`](https://github.com/LoloGH/-keneya-dme_mod/tree/assemblage-workflow)**,
-pas encore `main`. C'est elle qui porte le préfixe `dme_` sur les tables du
-module et la traduction de ses rôles ; sans elle, les deux schémas entrent en
-collision. La CI la cible explicitement (`.github/workflows/ci.yml`) : à
-remettre sur `main` une fois la fusion faite là-bas.
+Il a d'abord vécu dans un dossier voisin, les deux dépôts se développant côte
+à côte. C'était une bonne façon de les écrire, une mauvaise façon de les
+exploiter : mettre à jour l'un sans l'autre ne produisait aucune erreur
+franche. L'application démarrait et se comportait mal à l'endroit précis où le
+code d'un côté appelait ce qui n'existait pas encore de l'autre — la panne la
+plus coûteuse à diagnostiquer, parce qu'elle ne ressemble pas à un problème de
+déploiement. La CI elle-même clonait deux dépôts sur deux références
+distinctes : verte, elle ne prouvait pas que les deux moitiés avançaient
+ensemble, seulement qu'elles s'entendaient à l'instant du clone.
+
+L'historique du module a été repris par `git subtree`, pas recopié : les
+commits d'origine, leurs auteurs et leurs messages sont dans ce dépôt.
+
+Le dépôt [`LoloGH/-keneya-dme_mod`](https://github.com/LoloGH/-keneya-dme_mod)
+reste en place, figé à `2428ead` sur `assemblage-workflow` — c'est l'état repris
+ici. Le développement du module continue **dans ce dépôt**, plus là-bas.
 
 ---
 
@@ -81,23 +91,29 @@ des rôles, une signature ou des coordonnées d'établissement, chaque point
 d'accroche doit se rabattre proprement sur son comportement par défaut. Un
 câblage manquant passe la première suite et échoue la seconde.
 
-Le service `dme` monte le module **en écriture**, contrairement aux trois
-services qui servent l'application : composer, PHPUnit et Pint écrivent tous,
-alors qu'une pile qui répond à des requêtes HTTP n'a aucune raison de pouvoir
-réécrire le code d'un de ses paquets. Son profil `tools` le tient hors de
-`docker compose up`.
+Le service `dme` existe toujours, avec son profil `tools` qui le tient hors de
+`docker compose up` : composer, PHPUnit et Pint écrivent tous, et il ouvre le
+module à l'écriture le temps de son outillage.
 
-### Le montage du module dans le conteneur
+### Le module dans le conteneur
 
-`docker-compose.yml` monte `../keneya-dme_mod` sur `/var/www/keneya-dme_mod`, et
-c'est **ce chemin-là**, celui vu de l'intérieur du conteneur, que déclare le
-dépôt `path` de `composer.json`. Sans le montage, `composer install` échouerait
-dans le conteneur alors qu'il fonctionnerait sur la machine : c'est l'erreur
-classique de ce genre d'assemblage.
+Il n'a plus de montage à lui. `modules/dme` fait partie du dépôt, donc du
+montage `./:/var/www/html` que partagent les services, et le dépôt `path` de
+`composer.json` le désigne par un chemin relatif — `./modules/dme` — vrai sur
+la machine comme dans le conteneur. Composer y pose le lien symbolique
+`vendor/keneya/dme -> ../../modules/dme`.
 
-L'image, elle, se construit sans le module : le `Dockerfile` pose un
-`composer.json` minimal à cette adresse le temps du build, et la découverte des
-paquets se refait au premier démarrage, une fois le vrai module en place.
+Trois contournements ont disparu avec le dossier voisin :
+
+- le `composer.json` bidon que le `Dockerfile` fabriquait à l'adresse du
+  module, parce que celle-ci était vide pendant le build et que composer
+  refusait alors d'installer quoi que ce soit ;
+- le second `safe.directory` déclaré dans l'image ;
+- le second `checkout` de la CI, sur une branche nommée à la main.
+
+Le `Dockerfile` copie désormais `modules/dme/composer.json` avec celui de
+l'hôte, avant l'installation des dépendances — lui seul, pour que la couche ne
+soit pas invalidée dès qu'une vue du module change.
 
 ---
 

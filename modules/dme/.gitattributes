@@ -1,0 +1,28 @@
+* text=auto eol=lf
+
+# Scripts shell : toujours en LF, y compris s'ils sont extraits sous
+# Windows (WSL, Git Bash) — un CRLF casse le shebang.
+*.sh text eol=lf
+docker/entrypoint/* text eol=lf
+
+# Scripts PowerShell : CRLF, convention Windows.
+*.ps1 text eol=crlf
+
+# Fichiers de configuration destinés à Linux.
+deploy/**/*.conf text eol=lf
+deploy/**/*.service text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
+
+/.github export-ignore
+/deploy export-ignore
+/docs export-ignore
+/scripts export-ignore
+/tests export-ignore
+CHANGELOG.md export-ignore

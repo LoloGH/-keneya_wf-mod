@@ -1,0 +1,83 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "keneya/dme",
+    "type": "library",
+    "description": "Module Dossier Médical Électronique de Keneya — se monte dans une application Laravel hôte (Keneya Workflow).",
+    "keywords": [
+        "dme",
+        "dossier-medical",
+        "laravel",
+        "module",
+        "sante",
+        "keneya"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "bacon/bacon-qr-code": "^3.1",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "illuminate/contracts": "^12.0",
+        "illuminate/support": "^12.0",
+        "laravel/sanctum": "^4.0",
+        "spatie/laravel-activitylog": "^4.10 || ^5.0",
+        "spatie/laravel-permission": "^6.0 || ^8.0"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "laravel/pint": "^1.24",
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^10.0",
+        "phpunit/phpunit": "^11.5.50"
+    },
+    "autoload": {
+        "psr-4": {
+            "Keneya\\Dme\\": "src/",
+            "Keneya\\Dme\\Database\\Factories\\": "database/factories/",
+            "Keneya\\Dme\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Keneya\\Dme\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Keneya\\Dme\\DmeServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": [
+            "@php vendor/bin/testbench workbench:build --ansi",
+            "@php vendor/bin/testbench db:seed --class=\"Workbench\\Database\\Seeders\\DatabaseSeeder\" --ansi"
+        ],
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ],
+        "test": "@php vendor/bin/phpunit"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "version": "0.2.0"
+}

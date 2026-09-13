@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d84421422d82003bea2c82c59421100a",
+    "content-hash": "01a75a8d7b6e118575415819130246ce",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1400,8 +1400,8 @@
             "version": "0.2.0",
             "dist": {
                 "type": "path",
-                "url": "../keneya-dme_mod",
-                "reference": "3024ce37567da47033924ac969252011034f1190"
+                "url": "./modules/dme",
+                "reference": "b8075cb64e87eb98f701ebbda88949b9d3f5c3ae"
             },
             "require": {
                 "bacon/bacon-qr-code": "^3.1",

@@ -42,27 +42,25 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/keneya.ini
 # croire que git est absent alors qu'il est installe. Les deux chemins sont
 # declares surs une fois pour toutes, dans l'image : sans cela, chacun doit le
 # redecouvrir sur son poste.
-RUN git config --system --add safe.directory /var/www/html \
-    && git config --system --add safe.directory /var/www/keneya-dme_mod
+RUN git config --system --add safe.directory /var/www/html
 
 WORKDIR /var/www/html
 
-# Le module DME est declare en depot `path` dans composer.json, a une adresse
-# qui n'existe qu'au demarrage : docker-compose.yml y monte le dossier voisin
-# ../keneya-dme_mod. Pendant le build, ce chemin est vide, et composer refuse
-# alors d'installer quoi que ce soit — l'image ne se construirait pas.
-#
-# Un composer.json minimal a la meme adresse suffit a le satisfaire ici : il
-# ne sert qu'a resoudre les dependances publiques pour garnir le cache de
-# couches. Au lancement, le montage le remplace par le vrai module, et
-# `docker compose exec app composer install` termine l'installation.
-RUN mkdir -p /var/www/keneya-dme_mod \
-    && printf '%s' '{"name":"keneya/dme","description":"Substitut de build","type":"library","version":"0.2.0"}' \
-        > /var/www/keneya-dme_mod/composer.json
-
 # Les dependances sont installees d'abord, pour profiter du cache de couches
 # lorsque seul le code applicatif change.
+#
+# Le composer.json du module vient avec, et lui seul : il est declare en depot
+# `path`, composer doit donc le trouver pour resoudre quoi que ce soit. Copier
+# le module entier ici ferait refaire l'installation des qu'une de ses vues
+# change, ce que le decoupage en deux couches cherche justement a eviter.
+#
+# Ces deux lignes en remplacent onze. Le module vivant dans un dossier voisin,
+# son adresse etait vide pendant le build et composer refusait d'installer :
+# l'image fabriquait donc un composer.json bidon a cette adresse, que le
+# montage remplacait au demarrage. Depuis que le module est dans le depot
+# (v3.4.2), il suffit de le copier.
 COPY composer.json composer.lock ./
+COPY modules/dme/composer.json modules/dme/composer.json
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
 
 COPY . .

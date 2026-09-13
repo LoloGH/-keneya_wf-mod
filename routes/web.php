@@ -152,7 +152,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 |
 | Chaque PDF genere par le module porte un QR code qui pointe ici (voir
-| PdfGenerator::payload() dans keneya-dme_mod). Volontairement hors des
+| PdfGenerator::payload() du module, dans modules/dme). Volontairement hors des
 | routes du module : celles-ci sont chargees sous le prefixe `dme` et
 | derriere une session authentifiee (`dme.access`), alors que ce lien doit
 | rester vrai sans connexion et a l'adresse exacte imprimee sur le document,
