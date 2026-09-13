@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Verification d'un deploiement KEneYa WorkFlow, a lancer sur le serveur cible.
+# Verification d'un deploiement KEneYa WorkFlow, sur une base jetable.
 #
 #   ./scripts/verify-deploy.sh [url-de-base]
 #
@@ -9,11 +9,40 @@
 # v1 -> visits, suite de tests, cloisonnement des roles, plafonds d'envoi.
 #
 # Sort en code 1 au premier controle rouge, et affiche un verdict final.
+#
+# ---------------------------------------------------------------------------
+# CE SCRIPT DETRUIT LA BASE QU'IL VERIFIE
+# ---------------------------------------------------------------------------
+#
+# Son controle n° 2 lance `migrate:fresh --seed`, puis un rollback complet
+# suivi d'une re-migration. C'est le seul moyen de verifier que les migrations
+# tiennent dans les deux sens contre le moteur reel — et cela vide toutes les
+# tables et reinsere les donnees de demonstration.
+#
+# Il s'adresse donc a une pile montee pour la verification, jamais a celle qui
+# porte les dossiers d'un etablissement. Son en-tete disait « a lancer sur le
+# serveur cible », ce qui invitait exactement au geste qu'il ne faut pas
+# faire : le lancer apres une mise a jour, pour verifier qu'elle s'est bien
+# passee, et perdre la base au moment ou l'on croyait la controler.
+#
+# D'ou le garde-fou ci-dessous : le script compte les patients avant de
+# commencer et refuse de continuer s'il en trouve. `--base-jetable` passe
+# outre, et il faut le taper.
 
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-BASE_URL="${1:-http://localhost:${APP_HTTP_PORT:-8080}}"
+BASE_URL=""
+JETABLE=0
+
+for argument in "$@"; do
+    case "$argument" in
+        --base-jetable) JETABLE=1 ;;
+        *) BASE_URL="$argument" ;;
+    esac
+done
+
+BASE_URL="${BASE_URL:-http://localhost:${APP_HTTP_PORT:-8080}}"
 ROUGE=0
 
 compose() {
@@ -40,6 +69,37 @@ printf '  moteur : '
 app php -r 'echo DB::connection()->getDriverName();' 2>/dev/null \
     || app php artisan tinker --execute='echo DB::selectOne("select version() v")->v;' 2>/dev/null
 echo
+
+# ------------------------------------- Garde-fou : la base doit etre jetable
+#
+# Le compte des patients plutot qu'un reglage d'environnement : `APP_ENV` se
+# copie d'un serveur a l'autre avec le reste du `.env`, et se trompe donc en
+# silence. Un dossier patient, lui, ne ment pas sur ce que contient la base.
+#
+# La requete passe par le modele et non par un `select` direct : elle doit
+# echouer franchement si la base est injoignable, plutot que de rendre zero et
+# de laisser croire que le terrain est libre.
+PATIENTS="$(app php artisan tinker --execute='echo \App\Models\Patient::count();' 2>/dev/null | tr -dc '0-9')"
+
+if [ -n "$PATIENTS" ] && [ "$PATIENTS" -gt 0 ] 2>/dev/null && [ "$JETABLE" != 1 ]; then
+    printf '\n\033[31mArret.\033[0m Cette base contient %s dossier(s) patient.\n' "$PATIENTS" >&2
+    cat >&2 <<'FIN'
+
+  Ce script vide la base : son controle des migrations lance `migrate:fresh`
+  puis un rollback complet. Il verifie une pile montee pour la verification,
+  pas une installation en service.
+
+  Pour verifier qu'une mise a jour s'est bien passee sans rien detruire :
+
+      docker compose ps
+      docker compose exec -T app php artisan migrate:status | tail -5
+      curl -so /dev/null -w '%{http_code}\n' http://localhost:8080
+
+  Si cette base est bien jetable, relancez avec --base-jetable.
+
+FIN
+    exit 1
+fi
 
 # ------------------------------------------------------- 2. Aller et retour
 titre "2. Migrations dans les deux sens"
