@@ -10,8 +10,11 @@ use App\Models\Service;
 use App\Support\Dme\PatientProjection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Keneya\Dme\Models\ImagingOrder;
+use Keneya\Dme\Models\LabOrder;
 use Keneya\Dme\Models\LabResult;
 use Keneya\Dme\Models\MedicalDocument;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -221,7 +224,7 @@ class PortalMedicalRecordTest extends TestCase
      * Une demande d'analyses posee depuis /service, comme en vrai : c'est
      * l'action de WorkFlow qui cree le dossier medical au passage.
      *
-     * @return array{0: Patient, 1: \Keneya\Dme\Models\LabOrder}
+     * @return array{0: Patient, 1: LabOrder}
      */
     private function analyse(): array
     {
@@ -240,7 +243,7 @@ class PortalMedicalRecordTest extends TestCase
     }
 
     /**
-     * @return array{0: Patient, 1: \Keneya\Dme\Models\ImagingOrder}
+     * @return array{0: Patient, 1: ImagingOrder}
      */
     private function imagerie(): array
     {
@@ -259,7 +262,7 @@ class PortalMedicalRecordTest extends TestCase
         return [$visit->patient, $demande->fresh()];
     }
 
-    private function mesurer(mixed $demande, string $parametre, string $valeur, bool $validee): LabResult
+    private function mesurer(LabOrder $demande, string $parametre, string $valeur, bool $validee): LabResult
     {
         return LabResult::create([
             'lab_order_item_id' => $demande->items()->value('id'),
@@ -295,7 +298,7 @@ class PortalMedicalRecordTest extends TestCase
     }
 
     /** Le portail ouvert avec le bon code, pret a etre lu. */
-    private function ouvrir(Patient $patient): \Livewire\Features\SupportTesting\Testable
+    private function ouvrir(Patient $patient): Testable
     {
         return Livewire::test(PatientPortal::class, ['token' => $patient->portal_token])
             ->set('code', $patient->access_code)

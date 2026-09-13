@@ -1,11 +1,35 @@
+# Fins de ligne : LF partout, y compris dans la copie de travail.
+#
+# Sans ce fichier, Git normalise bien en LF ce qu'il enregistre, mais rend des
+# CRLF a la copie de travail sous Windows. Les deux ne se voient pas — jusqu'a
+# ce qu'on lance `vendor/bin/pint --test` en local : il lit la copie de
+# travail, y trouve dix-huit fichiers en `line_ending`, et rend un verdict
+# rouge qui n'a aucun rapport avec ce que la CI verra, elle qui travaille sur
+# des fichiers en LF.
+#
+# Le cout n'est pas le faux positif, c'est ce qu'il fait a l'outil : un Pint
+# qui est rouge de toute facon cesse d'etre lu. Une vraie infraction de style
+# est passee ainsi jusqu'a la CI, noyee parmi les phantomes. Avec `eol=lf`, la
+# copie de travail est identique a ce que la CI decoupe, et `pint --test` dit
+# localement exactement ce qu'il dira la-bas.
+#
+# LF convient aux deux mondes de ce projet : les scripts partent tels quels
+# dans les conteneurs Linux, ou un CRLF rendrait le shebang illisible, et
+# PowerShell lit le LF sans broncher.
 * text=auto eol=lf
 
-*.blade.php diff=html
-*.css diff=css
-*.html diff=html
-*.md diff=markdown
-*.php diff=php
-
-/.github export-ignore
-CHANGELOG.md export-ignore
-.styleci.yml export-ignore
+# Fichiers binaires : jamais touches, quelle que soit la regle ci-dessus. Une
+# conversion de fin de ligne dans une image ou une police la corrompt.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.woff  binary
+*.woff2 binary
+*.ttf  binary
+*.eot  binary
+*.wav  binary
+*.mp3  binary
+*.ogg  binary
