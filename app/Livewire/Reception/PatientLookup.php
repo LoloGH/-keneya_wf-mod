@@ -34,13 +34,15 @@ class PatientLookup extends Component
     public string $reason = '';
 
     /**
-     * Correction en cours, et les cinq champs qu'elle porte. Cinq seulement :
+     * Correction en cours, et les six champs qu'elle porte. Six seulement :
      * ce sont ceux que WorkFlow possede et que l'accueil peut constater. Le
      * `patient_code`, lui, ne change jamais.
      */
     public ?int $correctingPatientId = null;
 
-    public string $correctionName = '';
+    public string $correctionLastName = '';
+
+    public string $correctionFirstName = '';
 
     public string $correctionMobile = '';
 
@@ -83,7 +85,8 @@ class PatientLookup extends Component
         $patient = Patient::findOrFail($patientId);
 
         $this->correctingPatientId = $patient->getKey();
-        $this->correctionName = (string) $patient->name;
+        $this->correctionLastName = (string) $patient->last_name;
+        $this->correctionFirstName = (string) $patient->first_name;
         $this->correctionMobile = (string) $patient->mobile;
         $this->correctionProfession = (string) $patient->profession;
         $this->correctionGender = (string) $patient->gender;
@@ -94,8 +97,9 @@ class PatientLookup extends Component
     public function cancelCorrection(): void
     {
         $this->reset([
-            'correctingPatientId', 'correctionName', 'correctionMobile',
-            'correctionProfession', 'correctionGender', 'correctionIdCardNumber',
+            'correctingPatientId', 'correctionLastName', 'correctionFirstName',
+            'correctionMobile', 'correctionProfession', 'correctionGender',
+            'correctionIdCardNumber',
         ]);
         $this->resetValidation();
     }
@@ -106,13 +110,15 @@ class PatientLookup extends Component
 
         $this->validate([
             'correctingPatientId' => ['required', 'integer', 'exists:patients,id'],
-            'correctionName' => ['required', 'string', 'max:255'],
+            'correctionLastName' => ['required', 'string', 'max:120'],
+            'correctionFirstName' => ['nullable', 'string', 'max:120'],
             'correctionMobile' => ['required', 'string', 'max:30'],
             'correctionProfession' => ['nullable', 'string', 'max:120'],
             'correctionGender' => ['required', 'in:Homme,Femme'],
             'correctionIdCardNumber' => ['nullable', 'string', 'max:60'],
         ], attributes: [
-            'correctionName' => 'nom',
+            'correctionLastName' => 'nom',
+            'correctionFirstName' => 'prenom',
             'correctionMobile' => 'telephone',
             'correctionProfession' => 'profession',
             'correctionGender' => 'sexe',
@@ -120,7 +126,8 @@ class PatientLookup extends Component
         ]);
 
         $patient = $action->execute(Patient::findOrFail($this->correctingPatientId), [
-            'name' => $this->correctionName,
+            'last_name' => $this->correctionLastName,
+            'first_name' => $this->correctionFirstName,
             'mobile' => $this->correctionMobile,
             'profession' => $this->correctionProfession,
             'gender' => $this->correctionGender,

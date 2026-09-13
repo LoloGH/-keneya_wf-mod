@@ -64,10 +64,21 @@
         <fieldset class="formset">
             <legend>Identite du patient</legend>
 
-            <div class="field">
-                <label for="patient-name">Nom complet</label>
-                <input id="patient-name" type="text" wire:model="name" autocomplete="off">
-                @error('name') <p class="field__error">{{ $message }}</p> @enderror
+            {{-- Nom et prenom separes, dans le meme ordre qu'au dossier
+                 medical : les deux formulaires demandent la meme chose, et le
+                 nom imprime sur une ordonnance se lit comme a l'accueil. --}}
+            <div class="field-row">
+                <div class="field">
+                    <label for="patient-last-name">Nom</label>
+                    <input id="patient-last-name" type="text" wire:model="lastName" autocomplete="off">
+                    @error('lastName') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="field">
+                    <label for="patient-first-name">Prenom</label>
+                    <input id="patient-first-name" type="text" wire:model="firstName" autocomplete="off">
+                    @error('firstName') <p class="field__error">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             <div class="field-row">

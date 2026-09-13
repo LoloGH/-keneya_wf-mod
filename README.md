@@ -517,9 +517,9 @@ docker compose exec -T db mariadb --user=keneya --password=<mot-de-passe> \
 | `doctors` | Rattachement d'un compte à un service, réaffectable à tout moment. Un médecin multi-services a plusieurs lignes. |
 | `receptionists` | Rattachement d'un compte au rôle d'accueil. |
 | `cashiers` | Rattachement d'un compte au rôle de caissier, sur le modèle de `receptionists`. |
-| **`patients`** | **Identité permanente et rien d'autre** : `patient_code` (`HFD-00001`) à vie, `crno` (dossier papier), profession, note libre de l'accueil, plus `access_code` (4 chiffres) et `portal_token` (UUID) pour le portail. |
+| **`patients`** | **Identité permanente et rien d'autre** : `patient_code` (`HFD-00001`) à vie, `last_name` / `first_name` saisis séparément (`name` reste le nom complet, composé), `id_card_number`, `crno` (dossier papier), profession, note libre de l'accueil, plus `access_code` (4 chiffres) et `portal_token` (UUID) pour le portail. |
 | **`visits`** | **Un passage / épisode de soins** : service courant, ticket, statut (`waiting`, `called`, `closed`), ouverture et clôture, plus `pending_next_service_id` - la destination qui attend le paiement. |
-| `companions` | Accompagnateurs d'un patient. Information non médicale, sans ticket propre. |
+| `companions` | Accompagnateurs d'un patient. Information non médicale, sans ticket propre. Projetés au dossier médical comme **personnes à prévenir**. |
 | `visitors` | Fiche visiteur (`HFD-V-00001`), avec ticket dans la file du service visité et **le patient visité** (`patient_id`, facultatif hors service clinique). |
 | `portal_access_attempts` | Tentatives de code du portail par dossier, avec verrouillage temporaire. |
 | `referrals` | Renvoi d'un service à un autre : instructions, résultat, puis clôture par le prescripteur. Auteur, exécutant et clôturant sont chacun un médecin **ou** un membre du personnel générique. |

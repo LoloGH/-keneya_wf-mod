@@ -54,7 +54,7 @@
                  serait d'ouvrir un second dossier pour la meme personne, ce
                  que tout le reste du produit s'emploie a empecher.
 
-                 Cinq champs, et l'identifiant du patient n'en fait pas partie. --}}
+                 Six champs, et l'identifiant du patient n'en fait pas partie. --}}
             @if ($correctingPatientId === $selected->id)
                 <form wire:submit="saveCorrection" class="form lookup__correction">
                     <p class="hint">
@@ -64,9 +64,15 @@
 
                     <div class="field-row">
                         <div class="field">
-                            <label for="correction-name">Nom complet</label>
-                            <input id="correction-name" type="text" wire:model="correctionName">
-                            @error('correctionName') <p class="field__error">{{ $message }}</p> @enderror
+                            <label for="correction-last-name">Nom</label>
+                            <input id="correction-last-name" type="text" wire:model="correctionLastName">
+                            @error('correctionLastName') <p class="field__error">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="field">
+                            <label for="correction-first-name">Prenom</label>
+                            <input id="correction-first-name" type="text" wire:model="correctionFirstName">
+                            @error('correctionFirstName') <p class="field__error">{{ $message }}</p> @enderror
                         </div>
 
                         <div class="field">

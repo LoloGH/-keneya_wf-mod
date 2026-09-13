@@ -306,10 +306,12 @@ class MedicalConsultationTest extends TestCase
 
         $dossier = DossierMedical::firstOrFail();
 
-        // Le nom de WorkFlow part entier (v3.3.1) : le laisser couper au
-        // premier espace reordonnerait le patient en « Traore Aminata » sur
-        // l'ordonnance imprimee et sur chaque document du dossier.
-        $this->assertSame('Aminata Traore', $dossier->last_name);
+        // Nom et prenom partent separement (v3.3.2) : l'accueil les saisit en
+        // deux champs, comme le dossier medical les tient. Le nom affiche reste
+        // celui de l'accueil, dans le meme ordre, sur l'ordonnance imprimee
+        // comme sur chaque document du dossier.
+        $this->assertSame('Traore', $dossier->last_name);
+        $this->assertSame('Aminata', $dossier->first_name);
         $this->assertSame('Aminata Traore', $dossier->fullName());
         $this->assertSame('female', $dossier->sex);
         $this->assertSame('76000000', $dossier->phone);

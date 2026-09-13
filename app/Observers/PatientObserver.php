@@ -33,4 +33,46 @@ class PatientObserver
             $patient->portal_token = (string) Str::uuid();
         }
     }
+
+    /**
+     * Nom, prenom et nom complet ne divergent jamais.
+     *
+     * L'accueil saisit deux champs depuis la v3.3.2, mais `name` reste ce que
+     * lisent le ticket, le SMS, la recherche et le journal d'audit. Le
+     * composer ici, plutot que dans le formulaire, garantit qu'un patient cree
+     * par un seeder, un import ou tinker porte la meme identite qu'un patient
+     * cree a l'accueil.
+     *
+     * L'inverse tient aussi : un appelant qui ne connait que le nom complet
+     * (une fabrique de test, une reprise de donnees) obtient un decoupage par
+     * defaut plutot que deux colonnes vides. Le premier mot est le prenom, le
+     * reste le nom de famille — l'ordre dans lequel une identite s'ecrit ici.
+     */
+    public function saving(Patient $patient): void
+    {
+        $prenom = trim((string) $patient->first_name);
+        $nom = trim((string) $patient->last_name);
+
+        if ($prenom === '' && $nom === '') {
+            [$prenom, $nom] = self::decouper((string) $patient->name);
+        }
+
+        $patient->first_name = $prenom;
+        $patient->last_name = $nom;
+        $patient->name = trim($prenom.' '.$nom);
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private static function decouper(string $complet): array
+    {
+        $morceaux = preg_split('/\s+/', trim($complet), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        if (count($morceaux) <= 1) {
+            return ['', implode(' ', $morceaux)];
+        }
+
+        return [(string) array_shift($morceaux), implode(' ', $morceaux)];
+    }
 }

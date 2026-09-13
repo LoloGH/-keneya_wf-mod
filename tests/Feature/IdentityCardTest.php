@@ -63,7 +63,7 @@ class IdentityCardTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Fode Drame')
+            ->set('lastName', 'Drame')->set('firstName', 'Fode')
             ->set('age', 33)
             ->set('gender', 'Homme')
             ->set('mobile', '76445566')
@@ -88,7 +88,7 @@ class IdentityCardTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Aminata Traore')
+            ->set('lastName', 'Traore')->set('firstName', 'Aminata')
             ->set('age', 41)
             ->set('gender', 'Femme')
             ->set('mobile', '76998877')
@@ -155,7 +155,7 @@ class IdentityCardTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Fode Drame')
+            ->set('lastName', 'Drame')->set('firstName', 'Fode')
             ->set('age', 33)
             ->set('gender', 'Homme')
             ->set('mobile', '76112233')
@@ -201,7 +201,8 @@ class IdentityCardTest extends TestCase
         $code = $patient->patient_code;
 
         app(CorrectPatientIdentity::class)->execute($patient, [
-            'name' => 'Fode Drame Junior',
+            'last_name' => 'Drame Junior',
+            'first_name' => 'Fode',
             'mobile' => '76998877',
             'profession' => 'Informaticien',
             'gender' => 'Homme',
@@ -215,6 +216,8 @@ class IdentityCardTest extends TestCase
 
         $this->assertSame($code, $patient->patient_code);
         $this->assertSame('Fode Drame Junior', $patient->name);
+        $this->assertSame('Fode', $patient->first_name);
+        $this->assertSame('Drame Junior', $patient->last_name);
         $this->assertSame('AB123456', $patient->id_card_number);
         $this->assertNotSame(99, $patient->age);
     }
@@ -231,7 +234,8 @@ class IdentityCardTest extends TestCase
             ->test(PatientLookup::class)
             ->call('select', $patient->getKey())
             ->call('startCorrection', $patient->getKey())
-            ->assertSet('correctionName', 'Fode Drame')
+            ->assertSet('correctionLastName', 'Drame')
+            ->assertSet('correctionFirstName', 'Fode')
             ->set('correctionIdCardNumber', 'AB123456')
             ->call('saveCorrection')
             ->assertHasNoErrors();
@@ -248,7 +252,8 @@ class IdentityCardTest extends TestCase
         $patient = Patient::factory()->create(['id_card_number' => 'AB123456']);
 
         app(CorrectPatientIdentity::class)->execute($patient, [
-            'name' => $patient->name,
+            'last_name' => $patient->last_name,
+            'first_name' => $patient->first_name,
             'mobile' => $patient->mobile,
             'gender' => $patient->gender,
             'id_card_number' => '',
@@ -283,7 +288,8 @@ class IdentityCardTest extends TestCase
         $dossier = PatientProjection::resolve($patient);
 
         app(CorrectPatientIdentity::class)->execute($patient, [
-            'name' => $patient->name,
+            'last_name' => $patient->last_name,
+            'first_name' => $patient->first_name,
             'mobile' => $patient->mobile,
             'gender' => $patient->gender,
             'id_card_number' => '',

@@ -102,7 +102,7 @@ class AcceptanceScenarioTest extends TestCase
 
         Livewire::actingAs($receptionist)
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Sekou Diarra')
+            ->set('lastName', 'Diarra')->set('firstName', 'Sekou')
             ->set('age', 41)
             ->set('gender', 'Homme')
             ->set('mobile', '76445566')

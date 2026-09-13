@@ -29,14 +29,20 @@ class RegisterPatient
     ) {}
 
     /**
-     * @param  array{name: string, age: int, gender: string, mobile: string, crno?: ?string, service_id: int, reason?: ?string}  $data
+     * @param  array{lastName?: ?string, firstName?: ?string, name?: ?string, age: int, gender: string, mobile: string, crno?: ?string, service_id: int, reason?: ?string}  $data
      * @param  array<int, array{name: string, phone?: ?string, relation?: ?string}>  $companions
      */
     public function execute(array $data, array $companions = []): Visit
     {
         $visit = DB::transaction(function () use ($data, $companions): Visit {
             $patient = Patient::create([
-                'name' => $data['name'],
+                // Deux champs, comme au dossier medical, et le nom complet
+                // pour un appelant qui n'en tient qu'un — un import, une
+                // reprise. PatientObserver tranche : il compose le nom complet
+                // a partir des deux champs, ou les deduit du nom complet.
+                'last_name' => $data['lastName'] ?? '',
+                'first_name' => $data['firstName'] ?? '',
+                'name' => $data['name'] ?? '',
                 'age' => $data['age'],
                 'gender' => $data['gender'],
                 // Un champ facultatif laisse vide vaut « non renseigne », pas

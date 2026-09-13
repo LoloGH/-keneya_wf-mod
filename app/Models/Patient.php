@@ -26,7 +26,11 @@ class Patient extends Model
 
     protected $fillable = [
         'patient_code',
+        // `name` reste le nom complet affiche partout ; il est compose par
+        // PatientObserver a partir des deux champs saisis, jamais l'inverse.
         'name',
+        'first_name',
+        'last_name',
         'age',
         'gender',
         'profession',
@@ -169,7 +173,7 @@ class Patient extends Model
      */
     protected function auditedAttributes(): array
     {
-        return ['patient_code', 'name', 'age', 'gender', 'mobile', 'crno'];
+        return ['patient_code', 'name', 'first_name', 'last_name', 'age', 'gender', 'mobile', 'crno'];
     }
 
     public static function auditLabel(): string

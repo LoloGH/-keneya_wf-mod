@@ -51,7 +51,7 @@ class DuplicatePatientTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Fatoumata Diarra')
+            ->set('lastName', 'Diarra')->set('firstName', 'Fatoumata')
             ->set('age', 29)
             ->set('gender', 'Femme')
             ->set('profession', 'Commercante')
@@ -79,7 +79,7 @@ class DuplicatePatientTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Oumar Sissoko')
+            ->set('lastName', 'Sissoko')->set('firstName', 'Oumar')
             ->set('age', 41)
             ->set('gender', 'Homme')
             // Meme numero, saisi avec des espaces et l'indicatif pays.
@@ -105,7 +105,7 @@ class DuplicatePatientTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'aminata kone')
+            ->set('lastName', 'kone')->set('firstName', 'aminata')
             ->set('age', 36)
             ->set('gender', 'Femme')
             ->set('mobile', '70999999')
@@ -123,7 +123,7 @@ class DuplicatePatientTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Salif Traore')
+            ->set('lastName', 'Traore')->set('firstName', 'Salif')
             ->set('age', 22)
             ->set('gender', 'Homme')
             ->set('mobile', '70223344')
@@ -149,7 +149,7 @@ class DuplicatePatientTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Fatoumata Diarra')
+            ->set('lastName', 'Diarra')->set('firstName', 'Fatoumata')
             ->set('age', 29)
             ->set('gender', 'Femme')
             ->set('mobile', '76445566')
@@ -181,7 +181,7 @@ class DuplicatePatientTest extends TestCase
 
         Livewire::actingAs($receptionniste)
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Fatoumata Diarra')
+            ->set('lastName', 'Diarra')->set('firstName', 'Fatoumata')
             ->set('age', 29)
             ->set('gender', 'Femme')
             ->set('mobile', '76445566')

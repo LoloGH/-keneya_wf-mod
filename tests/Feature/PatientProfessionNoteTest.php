@@ -38,7 +38,7 @@ class PatientProfessionNoteTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Aminata Traore')
+            ->set('lastName', 'Traore')->set('firstName', 'Aminata')
             ->set('age', 34)
             ->set('gender', 'Femme')
             ->set('mobile', '76000000')
@@ -62,7 +62,7 @@ class PatientProfessionNoteTest extends TestCase
         // dire ce qu'il fait.
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Moussa Diallo')
+            ->set('lastName', 'Diallo')->set('firstName', 'Moussa')
             ->set('age', 40)
             ->set('mobile', '76000001')
             ->set('service_id', $service->getKey())
@@ -94,7 +94,7 @@ class PatientProfessionNoteTest extends TestCase
         // Sinon la profession du patient precedent serait attribuee au suivant.
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Aminata Traore')
+            ->set('lastName', 'Traore')->set('firstName', 'Aminata')
             ->set('age', 34)
             ->set('mobile', '76000000')
             ->set('profession', 'Cultivatrice')

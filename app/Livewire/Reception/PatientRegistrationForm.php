@@ -25,7 +25,15 @@ class PatientRegistrationForm extends Component
 {
     use RequiresCapability;
 
-    public string $name = '';
+    /**
+     * Nom et prenom se saisissent separement depuis la v3.3.2, comme au
+     * dossier medical. Un seul champ « nom complet » obligeait le module a
+     * deviner ou coupait au premier espace, et l'ordonnance imprimee ne
+     * portait alors plus l'identite telle qu'elle avait ete relevee.
+     */
+    public string $lastName = '';
+
+    public string $firstName = '';
 
     public ?int $age = null;
 
@@ -89,7 +97,8 @@ class PatientRegistrationForm extends Component
     protected function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'lastName' => ['required', 'string', 'max:120'],
+            'firstName' => ['nullable', 'string', 'max:120'],
             'age' => ['required', 'integer', 'min:0', 'max:130'],
             'gender' => ['required', 'in:Homme,Femme'],
             'profession' => ['nullable', 'string', 'max:120'],
@@ -112,7 +121,8 @@ class PatientRegistrationForm extends Component
     protected function validationAttributes(): array
     {
         return [
-            'name' => 'nom du patient',
+            'lastName' => 'nom du patient',
+            'firstName' => 'prenom du patient',
             'age' => 'age',
             'gender' => 'sexe',
             'profession' => 'profession',
@@ -157,7 +167,7 @@ class PatientRegistrationForm extends Component
         if (! $this->forceCreation) {
             $candidats = $finder->search(
                 mobile: $data['mobile'],
-                name: $data['name'],
+                name: trim($data['firstName'].' '.$data['lastName']),
                 age: $data['age'],
                 idCardNumber: $data['idCardNumber'] ?? null,
             );
@@ -298,7 +308,7 @@ class PatientRegistrationForm extends Component
 
     private function reinitialiserSaisie(): void
     {
-        $this->reset(['name', 'age', 'profession', 'mobile', 'idCardNumber', 'crno', 'reason', 'note', 'companions']);
+        $this->reset(['lastName', 'firstName', 'age', 'profession', 'mobile', 'idCardNumber', 'crno', 'reason', 'note', 'companions']);
         $this->gender = 'Homme';
         $this->duplicateCandidates = [];
         $this->forceCreation = false;

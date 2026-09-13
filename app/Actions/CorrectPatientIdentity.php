@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\DB;
  * dossier pour la meme personne, ce que tout le reste du produit s'emploie a
  * empecher.
  *
- * Cinq champs, et cinq seulement : nom, telephone, profession, sexe, numero de
- * carte d'identite. Ce sont ceux que WorkFlow possede et que l'accueil peut
- * constater. Tout le reste est hors de portee :
+ * Six champs, et six seulement : nom, prenom, telephone, profession, sexe,
+ * numero de carte d'identite. Ce sont ceux que WorkFlow possede et que
+ * l'accueil peut constater. Tout le reste est hors de portee :
  *
  *  - **le `patient_code` ne change jamais.** C'est la promesse centrale du
  *    produit, un identifiant unique et permanent. Corriger un dossier n'est
@@ -41,7 +41,11 @@ class CorrectPatientIdentity
      * @var array<string, string>
      */
     public const CHAMPS = [
-        'name' => 'nom',
+        // Nom et prenom separement depuis la v3.3.2 : c'est aussi par ici que
+        // se repare un dossier ancien, dont le nom complet avait ete decoupe
+        // au juge par la migration.
+        'last_name' => 'nom',
+        'first_name' => 'prenom',
         'mobile' => 'telephone',
         'profession' => 'profession',
         'gender' => 'sexe',

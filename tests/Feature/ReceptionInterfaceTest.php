@@ -33,7 +33,7 @@ class ReceptionInterfaceTest extends TestCase
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
             ->call('save')
-            ->assertHasErrors(['name', 'age', 'mobile', 'service_id']);
+            ->assertHasErrors(['lastName', 'age', 'mobile', 'service_id']);
 
         $this->assertSame(0, Patient::count());
         $this->assertSame(0, Visit::count());
@@ -50,11 +50,12 @@ class ReceptionInterfaceTest extends TestCase
         // partageant un meme telephone declenchent, a juste titre, la
         // detection de doublon, ce que ce test ne cherche pas a mesurer.
         foreach ([
-            [$urgences, 'Patient A', '76000001'],
-            [$urgences, 'Patient B', '76000002'],
-            [$maternite, 'Patient C', '76000003'],
-        ] as [$service, $name, $mobile]) {
-            $form->set('name', $name)
+            [$urgences, 'A', '76000001'],
+            [$urgences, 'B', '76000002'],
+            [$maternite, 'C', '76000003'],
+        ] as [$service, $nom, $mobile]) {
+            $form->set('lastName', $nom)
+                ->set('firstName', 'Patient')
                 ->set('age', 30)
                 ->set('gender', 'Femme')
                 ->set('mobile', $mobile)
@@ -100,7 +101,7 @@ class ReceptionInterfaceTest extends TestCase
 
         Livewire::actingAs($receptionist)
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Patient A')->set('age', 30)->set('gender', 'Homme')
+            ->set('lastName', 'A')->set('firstName', 'Patient')->set('age', 30)->set('gender', 'Homme')
             ->set('mobile', '76000000')->set('service_id', $service->getKey())
             ->call('save')->assertHasNoErrors();
 
@@ -112,7 +113,7 @@ class ReceptionInterfaceTest extends TestCase
 
         Livewire::actingAs($receptionist)
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Patient C')->set('age', 40)->set('gender', 'Femme')
+            ->set('lastName', 'C')->set('firstName', 'Patient')->set('age', 40)->set('gender', 'Femme')
             ->set('mobile', '76000001')->set('service_id', $service->getKey())
             ->call('save')->assertHasNoErrors();
 
@@ -155,7 +156,7 @@ class ReceptionInterfaceTest extends TestCase
 
         Livewire::actingAs($this->makeReceptionist())
             ->test(PatientRegistrationForm::class)
-            ->set('name', 'Patient du jour')
+            ->set('lastName', 'du jour')->set('firstName', 'Patient')
             ->set('age', 22)
             ->set('gender', 'Homme')
             ->set('mobile', '76000000')
