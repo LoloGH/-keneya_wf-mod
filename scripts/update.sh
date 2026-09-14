@@ -143,12 +143,27 @@ fi
 # pas reecrire ses propres dependances — bonne chose — et c'est l'etape de
 # deploiement qui doit avoir les droits, pas l'application.
 #
-# `dump-autoload` suffit tant que `composer.lock` n'a pas bouge : le module
-# est lie en symbolique depuis `modules/dme`, son code est donc deja a jour
-# derriere. Mais les classes nouvelles, elles, manquent a la table figee que
-# produit `--optimize-autoloader`, et restent introuvables a l'execution.
+# `install` a chaque fois, et non `dump-autoload` quand rien ne semble avoir
+# bouge. Cette optimisation a coute une panne.
+#
+# Le script decidait en comparant l'etat avant et apres **son propre**
+# `git pull`. Un depot deja tire a la main lui faisait donc conclure que rien
+# n'avait change ; il sautait l'installation, et le lien symbolique
+# `vendor/keneya/dme` restait pointe sur l'ancien emplacement du module. Toute
+# commande artisan echouait alors sur un fichier introuvable, le planificateur
+# et le worker redemarraient en boucle, et l'application rendait 502.
+#
+# Le raisonnement etait faux a la racine : ce qui compte n'est pas ce que ce
+# script vient de tirer, c'est ce que `vendor/` contient par rapport a
+# `composer.lock`. `composer install` sait repondre a cette question, et
+# repond vite quand la reponse est « rien a faire ». Une etape de deploiement
+# n'a pas a etre maligne, elle a a etre juste deux fois sur deux.
+#
+# `--no-dev` : un serveur qui recoit des patients n'a besoin ni de PHPUnit ni
+# des outils de developpement. Consequence a connaitre — la suite de tests ne
+# s'y lance plus, et un `composer install` sans ce drapeau la ramene.
 
-titre "Autoloader et dependances"
+titre "Dependances"
 
 composer_root() {
     if [ "$DOCKER" = 1 ]; then
@@ -158,12 +173,13 @@ composer_root() {
     fi
 }
 
-if [ "$AVANT_HOTE" != "$APRES_HOTE" ] \
-   && ! git -C "$RACINE" diff --quiet "$AVANT_HOTE" "$APRES_HOTE" -- composer.lock; then
-    info "composer.lock a change : installation complete des dependances."
-    composer_root install --no-interaction --no-dev --optimize-autoloader
-else
-    composer_root dump-autoload --optimize
+composer_root install --no-interaction --no-dev --optimize-autoloader
+
+# Le lien du module est refait par l'installation ci-dessus, mais un lien casse
+# ne se voit qu'a la premiere requete, sous la forme d'un 502 qui ne nomme pas
+# sa cause. On le verifie tant qu'on sait encore pourquoi.
+if [ ! -e "$RACINE/vendor/keneya/dme/src/DmeServiceProvider.php" ]; then
+    erreur "vendor/keneya/dme ne mene a rien apres l'installation. Le lien du depot \`path\` n'a pas ete refait : verifiez que modules/dme existe et relancez \`composer install\` a la main."
 fi
 
 titre "Migrations"
