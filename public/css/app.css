@@ -1845,12 +1845,34 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 /* ---------- La marque et l'accroche ---------- */
 
+/* Le bloc se pose sur une photographie, dont le contraste change d'un endroit
+   a l'autre : les classeurs derriere le logo sont clairs, la blouse est
+   blanche, la plante est sombre. Un texte pose dessus se lit donc bien par
+   endroits et mal a un centimetre pres. Le fond depoli neutralise ce fond
+   sans le masquer — la photographie reste lisible derriere, l'accroche
+   devient lisible par-dessus.
+
+   `justify-self: start` : sans lui, le bloc occuperait toute la largeur de sa
+   zone de grille et le depoli s'etendrait en bandeau jusqu'au formulaire. */
 .login-intro {
     grid-area: 1 / 1;
+    justify-self: start;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: clamp(.85rem, 1.9vh, 1.5rem);
+    padding: 1.05rem 1.35rem 1.15rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .42);
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+}
+
+/* Un navigateur sans `backdrop-filter` ne floute rien : le texte se
+   retrouverait sur la photographie nue, c'est-a-dire au point de depart. Le
+   fond devient alors franchement opaque — moins joli, toujours lisible. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .login-intro { background: rgba(255, 255, 255, .84); }
 }
 
 .login-marque {
@@ -1914,16 +1936,25 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 /* ---------- Le perimetre ---------- */
 
+/* Le fond blanc est porte par le corps, pas par la carte : une bande
+   translucide posee par-dessus un fond opaque ne laisse rien passer, et la
+   mention du bas doit justement laisser voir la photographie. La carte ne
+   garde donc que le cadre, l'ombre et les coins — `overflow: hidden` pour que
+   les deux bandes soient rognees par ces coins. */
 .login-perimetre {
     grid-area: 3 / 1;
     align-self: end;
     max-width: 52rem;
     margin: 0;
-    padding: 1.15rem 1.6rem 1rem;
-    background: var(--blanc);
     border: 1px solid var(--gris-200);
     border-radius: 16px;
     box-shadow: 0 14px 40px -22px rgba(15, 42, 92, .45);
+    overflow: hidden;
+}
+
+.login-perimetre__corps {
+    padding: 1.15rem 1.6rem 1rem;
+    background: var(--blanc);
 }
 
 .login-perimetre__titre {
@@ -1957,11 +1988,18 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     display: flex;
     align-items: center;
     gap: .5rem;
-    margin: .95rem 0 0;
-    padding-top: .8rem;
+    margin: 0;
+    padding: .75rem 1.6rem;
     border-top: 1px solid var(--gris-200);
+    background: rgba(255, 255, 255, .58);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     font-size: .76rem;
     color: var(--gris-600);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .login-perimetre__mention { background: rgba(255, 255, 255, .88); }
 }
 
 .login-perimetre__mention svg { flex: 0 0 auto; color: var(--gris-500); }
@@ -2287,23 +2325,29 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         position: absolute;
         top: 1.3rem;
         right: 1.3rem;
-        width: 9.4rem;
+        /* La largeur compense le rembourrage : le texte est reduit de 13 %,
+           mais le panneau lui prend 1,6 rem, et « Le poste de travail » se
+           cassait en deux lignes — ce qui fait trois lignes avec la seconde
+           et rompt le rythme de la phrase. */
+        width: 9.9rem;
         align-items: flex-end;
         text-align: right;
-        gap: .62rem;
+        gap: .5rem;
+        padding: .65rem .8rem .75rem;
+        border-radius: 14px;
     }
 
     /* Le fichier du logo porte du vide : 11 % de sa hauteur en haut, 20 % en
        bas. Sans ces marges negatives, l'espace sous le logo paraitrait double
        de celui du dessus, et le bloc ne serait aligne que sur le papier. */
-    .login-marque img { height: 3.15rem; margin: -.38rem 0 -.62rem; }
+    .login-marque img { height: 2.55rem; margin: -.31rem 0 -.51rem; }
     .login-marque__filet, .login-marque__mot { display: none; }
 
     .login-promesse { max-width: none; }
-    .login-promesse h1 { font-size: 1.06rem; line-height: 1.2; }
+    .login-promesse h1 { font-size: .92rem; line-height: 1.2; }
     /* Le filet suit le bloc : il se cale a droite comme le reste de
        l'accroche, alors qu'il ouvre la ligne a gauche sur un poste fixe. */
-    .login-filet { width: 2.4rem; height: 3px; margin: .62rem 0 0 auto; }
+    .login-filet { width: 2rem; height: 2px; margin: .5rem 0 0 auto; }
 
     .login-perimetre { display: none; }
 
@@ -2346,9 +2390,9 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         background-image: url('../images/login-scene-tablette.jpg');
     }
 
-    .login-intro { top: 1.9rem; right: 1.9rem; width: 12.5rem; }
-    .login-marque img { height: 4rem; margin: -.48rem 0 -.78rem; }
-    .login-promesse h1 { font-size: 1.35rem; }
+    .login-intro { top: 1.9rem; right: 1.9rem; width: 11.4rem; padding: .85rem 1rem .95rem; }
+    .login-marque img { height: 3.3rem; margin: -.4rem 0 -.64rem; }
+    .login-promesse h1 { font-size: 1.16rem; }
     .login-filet { width: 3rem; }
 
     .login-carte {

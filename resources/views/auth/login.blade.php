@@ -36,16 +36,21 @@
         </div>
     </div>
 
+    {{-- Le corps porte le fond blanc, la carte n'a que le cadre : la mention
+         du bas est une bande depolie, et une bande translucide posee sur un
+         fond opaque ne laisserait rien passer. --}}
     <section class="login-perimetre">
-        <h2 class="login-perimetre__titre">Accueil, file d'attente, caisse et dossier patient au meme endroit</h2>
-        <ul>
-            @foreach ($perimetre as $entree)
-                <li>
-                    <x-icon :name="$entree['icone']" size="19" />
-                    <span>{{ $entree['intitule'] }}</span>
-                </li>
-            @endforeach
-        </ul>
+        <div class="login-perimetre__corps">
+            <h2 class="login-perimetre__titre">Accueil, file d'attente, caisse et dossier patient au meme endroit</h2>
+            <ul>
+                @foreach ($perimetre as $entree)
+                    <li>
+                        <x-icon :name="$entree['icone']" size="19" />
+                        <span>{{ $entree['intitule'] }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
 
         <p class="login-perimetre__mention">
             <x-icon name="bouclier" size="15" />
