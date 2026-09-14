@@ -1469,6 +1469,32 @@ et l'action prend la largeur.
 restait des colonnes à droite : des ombres portées apparaissent sur les bords
 tant qu'il reste à faire défiler.
 
+### Le survol ouvre ce qui s'ouvre
+
+Depuis la v3.4.3, la cloche, la carte de profil, la barre latérale repliée,
+les groupes de sections et les replis `<details>` s'ouvrent au passage du
+curseur. Le clic, le clavier et le glissement continuent de fonctionner à
+l'identique : le survol ne remplace rien, il épargne un clic à qui tient une
+souris.
+
+Trois règles portent tout le reste, et elles valent pour tout ce qu'on
+ajoutera : **seule une souris déclenche** (sur tablette, un appui émet un
+survol synthétique qui ouvrirait puis refermerait le menu du même geste) ; **un
+panneau qui contient le clavier ou un formulaire commencé ne se referme pas
+tout seul** ; et **la barre latérale se déploie par-dessus le contenu**, jamais
+en le poussant — une page qui se réorganise parce qu'un curseur est passé trop
+près coûte plus qu'elle ne rend.
+
+Le comportement est écrit une fois, dans `public/js/survol.js`, et le module
+DME charge le même fichier. Un repli qu'il ne faut pas ouvrir au passage se
+marque `data-survol="non"` — c'est le cas de « Supprimer définitivement ce
+dossier », plié pour qu'on ait à le demander.
+
+Les listes déroulantes natives (`<select>`) font exception, et c'est une limite
+du web : leur menu est dessiné par le système d'exploitation, qu'aucune API ne
+sait ouvrir. Le détail est dans
+**[docs/v3.4.3-ouverture-au-survol.md](docs/v3.4.3-ouverture-au-survol.md)**.
+
 ### Ton des textes
 
 L'interface dit **quoi faire**, pas pourquoi le code est ainsi. Les paragraphes
