@@ -31,6 +31,25 @@
 
 set -euo pipefail
 
+# ---------------------------------------------------------------------------
+# Tout le corps du script tient dans cette fonction, et c'est un garde-fou.
+# ---------------------------------------------------------------------------
+#
+# Ce script se met a jour lui-meme : le `git pull` qu'il execute peut
+# reecrire le fichier en train d'etre lu. Bash lit un script au fil de son
+# execution, par blocs ; si le fichier change sous lui, il reprend sa lecture
+# a un decalage devenu faux et execute des fragments de lignes. La panne qui
+# en resulte ne ressemble a rien de connu, et surtout pas a une mise a jour.
+#
+# Une fonction oblige bash a lire et analyser le corps entier avant d'en
+# executer la premiere ligne. Le fichier peut alors changer sur le disque
+# sans consequence : ce qui s'execute est deja en memoire.
+#
+# C'est aussi ce qui permet de tenir la promesse d'une seule commande. La
+# parade manuelle — tirer le depot avant de lancer le script — marchait, mais
+# c'etait une astuce a retenir, donc une astuce a oublier.
+main() {
+
 cd "$(dirname "$0")/.."
 
 RACINE="$(pwd)"
@@ -228,14 +247,40 @@ PORT="$(grep -E '^APP_HTTP_PORT=' .env 2>/dev/null | cut -d= -f2 || true)"
 PORT="${PORT:-8080}"
 URL="http://localhost:${PORT}/connexion"
 
+# L'attente est longue, bavarde, et elle sait renoncer tot.
+#
+# Longue parce que le point d'entree reconstruit trois caches depuis le montage
+# avant de lancer php-fpm : moins d'une minute sur un serveur Linux, plus de
+# quatre sur un poste Docker Desktop ou chaque acces fichier traverse un pont.
+# Une fenetre fixe ne peut pas couvrir les deux, et trop courte elle annonce un
+# 502 alors que le conteneur finit simplement de demarrer — la pire des
+# sorties, celle qui fait chercher une panne qui n'existe pas.
+#
+# Bavarde parce qu'une commande muette pendant huit minutes se prend pour une
+# commande bloquee, et se fait interrompre.
+#
+# Et elle renonce tot quand il n'y a plus rien a attendre : un conteneur `app`
+# arrete ne se relevera pas de lui-meme.
 CODE=000
-for _ in $(seq 1 60); do
+ATTENTE=0
+
+while [ "$ATTENTE" -lt 480 ]; do
     CODE="$(curl -so /dev/null -w '%{http_code}' "$URL" 2>/dev/null || echo 000)"
     [ "$CODE" = 200 ] && break
-    sleep 2
+
+    if [ "$DOCKER" = 1 ] && ! compose ps --status running --services 2>/dev/null | grep -qx app; then
+        erreur "le conteneur app ne tourne pas : il ne repondra pas en attendant davantage. Journaux : docker compose logs --tail=50 app"
+    fi
+
+    if [ "$ATTENTE" -gt 0 ] && [ $((ATTENTE % 30)) -eq 0 ]; then
+        info "toujours $CODE apres ${ATTENTE} s — le point d'entree reconstruit ses caches."
+    fi
+
+    sleep 3
+    ATTENTE=$((ATTENTE + 3))
 done
 
-[ "$CODE" = 200 ] || erreur "l'application repond $CODE sur $URL. Journaux : docker compose logs --tail=50 app"
+[ "$CODE" = 200 ] || erreur "l'application repond $CODE sur $URL apres huit minutes. Journaux : docker compose logs --tail=50 app"
 
 info "l'application repond 200 sur $URL"
 
@@ -250,3 +295,6 @@ $([ "$SAUVEGARDE" = 1 ] && printf '\n  Sauvegarde  %s\n' "$DEST_SAUVEGARDE")
   il vide la base qu'il verifie. Il s'adresse a une pile jetable.
 ======================================================================
 EOF
+}
+
+main "$@"
