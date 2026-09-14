@@ -2313,12 +2313,29 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         background: var(--fond);
     }
 
+    /* L'image est agrandie, et non simplement decalee.
+
+       En `cover`, a 375 px de large, elle est rendue en 389 x 219 : il ne
+       reste que 14 px de debordement horizontal. Deplacer le cadrage ne
+       deplacait donc rien de visible, et le moniteur du bureau restait
+       derriere l'accroche, qui s'y confondait.
+
+       `auto 125%` cree la marge qui manquait — 151 px au lieu de 14 — et
+       `92%` s'en sert pour amener la fenetre et les stores derriere le bloc
+       de texte. La soignante reste lisible en haut a gauche, le moniteur
+       descend sous l'accroche.
+
+       La contrepartie est assumee : on n'affiche plus que les deux tiers
+       d'une image chargee en entier. Elle disparaitra le jour ou
+       `login-scene-mobile.jpg` portera un vrai cadrage mobile — aujourd'hui
+       il duplique octet pour octet celui du poste fixe, ce qui est la cause
+       premiere du probleme. */
     .login-scene::before {
         content: "";
         display: block;
         flex: 0 0 auto;
         height: clamp(11.5rem, 27dvh, 16rem);
-        background: url('../images/login-scene-mobile.jpg') 22% 42% / cover no-repeat;
+        background: url('../images/login-scene-mobile.jpg') 92% 18% / auto 125% no-repeat;
     }
 
     .login-intro {
@@ -2385,12 +2402,23 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 /* Tablette : meme composition, cadre plus large, et le formulaire garde une
    largeur de lecture confortable au milieu d'une carte pleine largeur. */
 @media (min-width: 48rem) and (max-width: 63.99rem) {
+    /* La tablette garde son cadrage : elle herite de la regle du telephone,
+       et l'agrandissement qui y sert n'a pas lieu d'etre ici. Son bandeau est
+       trois fois plus large que haut, la place derriere l'accroche ne manque
+       pas, et agrandir n'y couterait que de la nettete. Les deux valeurs sont
+       donc reposees explicitement plutot que laissees a l'heritage, ou elles
+       suivraient en silence le prochain reglage du telephone. */
     .login-scene::before {
         height: clamp(14rem, 30dvh, 20rem);
         background-image: url('../images/login-scene-tablette.jpg');
+        background-size: cover;
+        background-position: 22% 42%;
     }
 
-    .login-intro { top: 1.9rem; right: 1.9rem; width: 11.4rem; padding: .85rem 1rem .95rem; }
+    /* Meme compensation que sur telephone : le panneau prend 2 rem de
+       rembourrage, et sans cette largeur « Le poste de travail » se cassait
+       en deux lignes. */
+    .login-intro { top: 1.9rem; right: 1.9rem; width: 12.8rem; padding: .85rem 1rem .95rem; }
     .login-marque img { height: 3.3rem; margin: -.4rem 0 -.64rem; }
     .login-promesse h1 { font-size: 1.16rem; }
     .login-filet { width: 3rem; }
