@@ -1857,22 +1857,50 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .login-intro {
     grid-area: 1 / 1;
     justify-self: start;
+    position: relative;
+    /* Cree un contexte d'empilement, sans quoi le fond en `z-index: -1`
+       passerait derriere la photographie de `.login-scene` et ne se verrait
+       plus du tout. */
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: clamp(.85rem, 1.9vh, 1.5rem);
-    padding: 1.05rem 1.35rem 1.15rem;
+    /* Le rembourrage de droite est elargi : le degrade a besoin d'une marge a
+       lui pour s'eteindre. Sans elle il mordrait sous l'accroche, a laquelle
+       il retirerait justement la densite qui la rend lisible. */
+    padding: 1.05rem 4.9rem 1.15rem 1.35rem;
+}
+
+/* Le fond est porte par ce calque, place derriere le contenu, et c'est lui
+   seul que le degrade efface. Le poser sur le bloc lui-meme ferait disparaitre
+   le logo et le texte avec lui — ils doivent rester pleinement lisibles.
+
+   Le degrade ne descend pas sous 70 % de densite avant 80 % de la largeur,
+   c'est-a-dire au-dela de tout ce qu'il y a a lire ; il ne va au transparent
+   que dans la marge ajoutee ci-dessus. */
+.login-intro::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     border-radius: 18px;
     background: rgba(255, 255, 255, .42);
     backdrop-filter: blur(16px) saturate(1.08);
     -webkit-backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-mask-image: linear-gradient(to right, #000 0 62%, rgba(0, 0, 0, .7) 80%, transparent 100%);
+    mask-image: linear-gradient(to right, #000 0 62%, rgba(0, 0, 0, .7) 80%, transparent 100%);
 }
 
 /* Un navigateur sans `backdrop-filter` ne floute rien : le texte se
    retrouverait sur la photographie nue, c'est-a-dire au point de depart. Le
-   fond devient alors franchement opaque — moins joli, toujours lisible. */
+   fond devient alors franchement opaque — moins joli, toujours lisible.
+
+   Un navigateur sans `mask-image`, lui, rend le bord net d'avant : l'etat
+   precedent, jamais un defaut d'affichage. Le texte n'a jamais dependu du
+   masque. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .login-intro { background: rgba(255, 255, 255, .84); }
+    .login-intro::before { background: rgba(255, 255, 255, .84); }
 }
 
 .login-marque {
@@ -2351,7 +2379,17 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         text-align: right;
         gap: .5rem;
         padding: .65rem .8rem .75rem;
+    }
+
+    /* Pas de fondu ici. Le panneau fait un tiers de sa taille du poste fixe et
+       ne sert qu'a rendre le texte lisible sur les stores : un degrade y
+       mangerait une part appreciable de la densite, pour un effet que
+       personne ne verrait a cette echelle. Le rayon suit le fond, qui a
+       change d'element. */
+    .login-intro::before {
         border-radius: 14px;
+        -webkit-mask-image: none;
+        mask-image: none;
     }
 
     /* Le fichier du logo porte du vide : 11 % de sa hauteur en haut, 20 % en
