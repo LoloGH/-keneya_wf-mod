@@ -69,6 +69,28 @@ if ! docker image inspect "$image" >/dev/null 2>&1; then
   exit 1
 fi
 
+# Les dependances de developpement, remises en place quand elles manquent.
+#
+# `scripts/update.sh` installe avec `--no-dev` : un serveur qui recoit des
+# patients n'a besoin ni de PHPUnit ni de Pint. La consequence tombe sur la
+# machine de developpement, ou c'est le meme `vendor/` qui sert aux deux — une
+# mise a jour emporte le lanceur de tests avec elle.
+#
+# Et la panne ne se presente pas comme telle. `php artisan test` disparait avec
+# Collision, et Laravel repond alors « Command "test" is not defined. Did you
+# mean make:test ? » : rien, dans cette phrase, ne mene a `composer install`.
+# Le script repose donc la question lui-meme, une fois, au lieu de laisser
+# chacun la redecouvrir.
+restaure_dev() {
+  local ou="$1" dans="$2"
+
+  echo "== PHPUnit absent de $ou/vendor : restauration des dependances de developpement"
+  MSYS_NO_PATHCONV=1 docker run --rm     -v "$(chemin_docker "$ou"):/var/www/html"     -w "$dans" --user 0:0     -e COMPOSER_ALLOW_SUPERUSER=1 --entrypoint composer     "$image" install --no-interaction --prefer-dist --no-progress
+}
+
+[ -x "$principal/vendor/bin/phpunit" ] || restaure_dev "$principal" /var/www/html
+[ -x "$principal/modules/dme/vendor/bin/phpunit" ] || restaure_dev "$principal" /var/www/html/modules/dme
+
 suite="${1:-tout}"
 [ $# -gt 0 ] && shift || true
 
