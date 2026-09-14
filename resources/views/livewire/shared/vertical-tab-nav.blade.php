@@ -9,18 +9,40 @@
      Le glissement horizontal ouvre et ferme : vers la droite on deplie, vers la
      gauche on replie. Le bouton fait la meme chose pour qui prefere cliquer, et
      reste le seul chemin accessible au clavier. --}}
-<div class="workspace" :class="replie && 'workspace--replie'"
+<div class="workspace"
+     :class="{ 'workspace--replie': replie, 'workspace--survol': replie && survole }"
      x-data="{
+        ...survol({ entree: 140, sortie: 300 }),
         drawer: false,
         replie: false,
         depart: null,
+
+        // Repliee, la barre se deplie au survol — par-dessus le contenu, jamais
+        // en le poussant : une page qui se reorganise parce qu'un curseur est
+        // passe trop pres coute plus qu'elle ne rend, surtout a qui lisait un
+        // tableau. C'est un etat de passage, distinct de `replie`, qui reste la
+        // preference enregistree : survoler la barre ne decide de rien.
+        survole: false,
+
+        // Un repli demande au bouton ne doit pas etre defait dans la seconde
+        // par le curseur qui vient de cliquer, et qui se trouve encore sur la
+        // barre. Le survol reprend ses droits des qu'on en sort.
+        survolBloque: false,
+
         init() {
             try { this.replie = localStorage.getItem('keneya.nav.replie') === '1'; } catch (e) {}
         },
         basculer() {
             this.replie = ! this.replie;
+            this.survole = false;
+            this.survolBloque = true;
             try { localStorage.setItem('keneya.nav.replie', this.replie ? '1' : '0'); } catch (e) {}
         },
+
+        survolOuvre() {
+            if (this.replie && ! this.survolBloque && this.large()) this.survole = true;
+        },
+        survolFerme() { this.survole = false; },
         // Le relachement est ecoute sur la fenetre et non sur la barre : une
         // barre repliee ne fait que 66 px de large, et un geste vers la droite
         // se termine donc hors d'elle. Ecoute sur la barre seule, l'evenement
@@ -71,6 +93,17 @@
         },
      }"
      @keydown.escape.window="drawer = false"
+     {{-- Choisir une section replie la barre deployee par le survol.
+
+          Sans cela elle restait ouverte apres le clic, et jusqu'a un clic
+          ailleurs dans la page : le curseur ne quitte pas la barre au moment
+          ou l'on choisit, et le clavier reste sur l'entree cliquee, ce que le
+          garde-fou de fermeture lit — a juste titre partout ailleurs — comme
+          « on s'en sert encore ».
+
+          `survolBloque` evite qu'elle se redeploie aussitot sous le curseur
+          qui vient de cliquer ; sortir de la barre lui rend ses droits. --}}
+     @nav-choisie="survole = false; survolBloque = true"
      @pointerdown.window="prise($event)" @pointerup.window="relache($event)">
 
     <button type="button" class="workspace__toggle" @click="drawer = !drawer"
@@ -81,7 +114,15 @@
     </button>
 
     <nav id="nav-sections" class="tabnav" :class="drawer && 'tabnav--open'"
-         aria-label="Sections de cet espace">
+         aria-label="Sections de cet espace"
+         @pointerenter="survolEntre($event)"
+         @pointerleave="survolSort($event); survolBloque = false"
+         {{-- Le clavier deplie la barre comme le curseur : tabuler dans une
+              colonne d'icones sans libelle ne menerait nulle part. `focusout`
+              ne compte que s'il sort vraiment de la barre — d'une entree a la
+              suivante, il se declenche aussi. --}}
+         @focusin="survolOuvre()"
+         @focusout="if (! $el.contains($event.relatedTarget)) survole = false">
 
         {{-- Le bouton de repli n'apparait qu'a partir de la tablette en
              paysage : sur petit ecran la barre est deja un tiroir, la replier
@@ -119,11 +160,25 @@
                      ne donne plus que l'etat de depart : celui qui garantit que
                      le groupe de la section courante s'ouvre au chargement. --}}
                 <li class="tabnav__item" wire:key="sec-{{ $section['key'] }}"
-                    @if ($isGroup) x-data="{ ouvert: {{ $open ? 'true' : 'false' }} }" @endif>
                     @if ($isGroup)
+                        x-data="{
+                            ...survol({ entree: 140, sortie: 260 }),
+                            ouvert: {{ $open ? 'true' : 'false' }},
+                            survole: false,
+                            survolOuvre() { this.survole = true; },
+                            survolFerme() { this.survole = false; },
+                        }"
+                        @pointerenter="survolEntre($event)"
+                        @pointerleave="survolSort($event)"
+                    @endif>
+                    @if ($isGroup)
+                        {{-- Le clic decide, le survol ne fait que montrer. Un
+                             groupe ouvert par le survol se referme donc au clic,
+                             comme on s'y attend, au lieu de rester ouvert parce
+                             que le curseur n'a pas bouge. --}}
                         <button type="button" class="tabnav__group"
-                                @click="ouvert = ! ouvert"
-                                :aria-expanded="ouvert ? 'true' : 'false'"
+                                @click="ouvert = ! (ouvert || survole); survole = false"
+                                :aria-expanded="(ouvert || survole) ? 'true' : 'false'"
                                 aria-controls="grp-{{ $section['key'] }}">
                             <x-icon name="{{ $section['icon'] ?? 'chevron' }}" size="18" class="tabnav__icone" />
                             <span>{{ $section['label'] }}</span>
@@ -131,7 +186,7 @@
                                  le simple deux-points est une valeur PHP. Le double
                                  laisse passer la liaison Alpine telle quelle. --}}
                             <x-icon name="chevron" size="16" class="tabnav__chevron"
-                                    ::class="ouvert && 'tabnav__chevron--open'" />
+                                    ::class="(ouvert || survole) && 'tabnav__chevron--open'" />
                         </button>
 
                         {{-- Les sous-sections sont toujours rendues : c'est ce qui
@@ -139,7 +194,7 @@
                              serveur. Le `style` initial evite qu'un groupe ferme
                              clignote le temps qu'Alpine demarre. --}}
                         <ul class="tabnav__list tabnav__list--nested" id="grp-{{ $section['key'] }}"
-                            x-show="ouvert" @if (! $open) style="display: none;" @endif>
+                            x-show="ouvert || survole" @if (! $open) style="display: none;" @endif>
                             @foreach ($section['children'] as $child)
                                 <li wire:key="sec-{{ $child['key'] }}">
                                     <button type="button"
@@ -147,7 +202,16 @@
                                             wire:click="select('{{ $child['key'] }}')"
                                             wire:loading.class="tabnav__link--attente"
                                             wire:target="select('{{ $child['key'] }}')"
-                                            @click="drawer = false"
+                                            {{-- `ouvert = true` : le groupe
+                                                 n'etait peut-etre que survole,
+                                                 et il doit rester ouvert une
+                                                 fois qu'on y a choisi la
+                                                 section courante.
+                                                 `$event.detail` vaut 0 pour une
+                                                 activation au clavier : on ne
+                                                 replie alors rien sous les
+                                                 doigts de qui tabule. --}}
+                                            @click="ouvert = true; drawer = false; if ($event.detail > 0) $dispatch('nav-choisie')"
                                             @if ($active === $child['key']) aria-current="page" @endif>
                                         {{ $child['label'] }}
                                     </button>
@@ -160,7 +224,7 @@
                                 wire:click="select('{{ $section['key'] }}')"
                                 wire:loading.class="tabnav__link--attente"
                                 wire:target="select('{{ $section['key'] }}')"
-                                @click="drawer = false"
+                                @click="drawer = false; if ($event.detail > 0) $dispatch('nav-choisie')"
                                 @if ($active === $section['key']) aria-current="page" @endif>
                             <x-icon name="{{ $section['icon'] ?? 'chevron' }}" size="18" class="tabnav__icone" />
                             <span>{{ $section['label'] }}</span>

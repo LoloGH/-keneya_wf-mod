@@ -79,7 +79,18 @@
         </a>
 
         {{-- Menu profil --}}
-        <div class="relative" x-data="{ open: false }" @keydown.escape="open = false">
+        {{-- Le menu s'ouvre au survol comme ceux de WorkFlow. `?.` partout :
+             sans l'hote autour, la fonction n'est pas la et le clic suffit. --}}
+        <div class="relative"
+             x-data="{
+                 ...(window.survol?.({ entree: 0 }) ?? {}),
+                 open: false,
+                 survolOuvre() { this.open = true; },
+                 survolFerme() { this.open = false; },
+             }"
+             @pointerenter="survolEntre?.($event)"
+             @pointerleave="survolSort?.($event)"
+             @keydown.escape="open = false">
             <button type="button" @click="open = !open"
                     class="flex items-center gap-2 rounded-lg p-1.5 hover:bg-ink-100"
                     :aria-expanded="open" aria-haspopup="true">

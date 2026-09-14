@@ -89,7 +89,7 @@ class NavigationLayoutTest extends TestCase
             ->assertSet('expanded', ['groupe'])
             ->assertSee('Enfant A')
             // Deplie : le sous-menu est rendu visible, sans style de masquage.
-            ->assertDontSee('id="grp-groupe" x-show="ouvert" style="display: none;"', false);
+            ->assertDontSee('id="grp-groupe" x-show="ouvert || survole" style="display: none;"', false);
     }
 
     // ------------------------------------------------- Le fil d'Ariane
@@ -217,7 +217,11 @@ class NavigationLayoutTest extends TestCase
             // Alpine de l'afficher sans rien demander au serveur.
             ->assertSee('Enfant A')
             // Mais le groupe part ferme, et son etat initial est celui-la.
-            ->assertSee('x-data="{ ouvert: false }"', false)
+            // `survole` l'accompagne depuis que le survol ouvre les groupes :
+            // c'est un etat de passage, toujours faux au rendu, et c'est bien
+            // le serveur qui fixe le seul etat durable, `ouvert`.
+            ->assertSee('ouvert: false,', false)
+            ->assertSee('survole: false,', false)
             ->assertSee('style="display: none;"', false);
     }
 
@@ -334,8 +338,33 @@ class NavigationLayoutTest extends TestCase
             ->assertSee('data-testid="profile-card"', escape: false)
             ->assertSee('title="Mon compte"', escape: false);
 
-        // L'ancienne icone isolee a bien disparu de la barre.
-        $this->assertStringNotContainsString('aria-label="Se deconnecter"', $response->getContent());
+        $html = $response->getContent();
+
+        // Ce test verifiait l'absence pure et simple du libelle de
+        // deconnexion dans la page. C'etait un raccourci, valable tant que la
+        // carte n'etait rendue qu'une fois ouverte ; elle est desormais rendue
+        // d'avance et masquee, pour s'ouvrir sous le curseur sans attendre un
+        // aller-retour. Le libelle est donc dans la page de toute facon, et
+        // l'absence ne distingue plus rien.
+        //
+        // Ce qui compte n'a pas change et est verifie ici directement : il
+        // n'existe qu'une seule deconnexion, elle est a l'interieur de la
+        // carte, et la carte part fermee.
+        $this->assertSame(1, substr_count($html, 'data-testid="logout"'));
+
+        $carte = strpos($html, 'class="profil__panel"');
+        $deconnexion = strpos($html, 'data-testid="logout"');
+
+        $this->assertNotFalse($carte, 'La carte de profil est absente du rendu.');
+        $this->assertGreaterThan(
+            $carte,
+            $deconnexion,
+            'La deconnexion est revenue dans la barre, hors de la carte de profil.'
+        );
+
+        // Fermee au chargement : `x-show` la masque des qu'Alpine demarre, et
+        // `x-cloak` couvre l'instant qui precede.
+        $this->assertStringContainsString('x-show="ouvert" x-cloak', $html);
     }
 
     public function test_la_deconnexion_est_offerte_par_la_carte_de_profil(): void

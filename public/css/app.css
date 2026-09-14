@@ -248,39 +248,100 @@ h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -.011em; }
 
 /* ---------- Barres de defilement ----------
 
-   La barre disparait, le defilement reste. Molette, pave tactile, doigt,
-   fleches, Page haut/bas et Espace continuent d'agir : seule la poignee
-   visible s'en va. `overflow` n'est pas touche, et un test verrouille ce
-   couple — masquer n'est pas supprimer.
+   La page elle-meme n'a pas de barre : elle defile d'un bloc, sa longueur se
+   devine, et une barre pleine hauteur sur le bord de l'ecran n'apprend rien
+   qu'on ne sache deja. Le defilement, lui, n'est pas touche — molette, pave
+   tactile, doigt, fleches, Page haut/bas et Espace agissent comme avant, et un
+   test verrouille ce couple : masquer n'est pas supprimer.
 
    Les deux ecritures sont necessaires et aucune n'est de trop :
    `scrollbar-width` sert Firefox et Safari, `::-webkit-scrollbar` sert Chrome
    et Edge. En oublier une laisse la barre visible sur la moitie des
-   navigateurs.
-
-   Les tableaux larges gardent la leur, volontairement : un defilement
-   horizontal ne se devine pas, et la barre y est souvent le seul indice
-   qu'une colonne continue a droite.
-
-   Ce qui se perd, et qu'il faut assumer : la barre disait aussi « il y a
-   quelque chose dessous » et « vous en etes la ». Les moyens de defiler
-   restent tous ; l'indice visuel, lui, n'est plus. */
+   navigateurs. */
 html,
-body,
-.tabnav,
-.tabnav--open,
-.bell__panel {
+body {
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
 
 html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-.tabnav::-webkit-scrollbar,
-.tabnav--open::-webkit-scrollbar,
-.bell__panel::-webkit-scrollbar {
+body::-webkit-scrollbar {
     width: 0;
     height: 0;
+}
+
+/* Les menus et les panneaux, eux, gardent la leur.
+
+   Ils l'avaient perdue avec le reste, et c'etait une erreur d'un autre ordre :
+   une colonne de sections plus haute que l'ecran, sans barre, ne dit pas
+   qu'elle continue. Rien ne distingue « voila toutes les sections » de « la
+   derniere est sous le bord », et on ne fait pas tourner la molette dans un
+   menu qu'on croit avoir lu en entier. La meme chose vaut pour la liste des
+   notifications, qui en compte douze.
+
+   La poignee reste discrete tant qu'on ne s'occupe pas du menu, et se colore
+   au survol : presente pour reperer, effacee pour ne pas encombrer une
+   colonne de 66 px. Elle repond aussi au survol de la poignee seule, pour qui
+   vient la saisir.
+
+   Les tableaux larges, eux, gardent la leur sans condition de survol : un
+   defilement horizontal ne se devine pas, et la barre y est souvent le seul
+   indice qu'une colonne continue a droite. */
+.tabnav,
+.tabnav--open,
+.bell__panel,
+.profil__panel {
+    scrollbar-width: thin;
+    /* Pas de transition ici : `scrollbar-color` ne s'anime nulle part, et une
+       declaration de plus sur `.tabnav` entrerait en conflit avec celle qui
+       anime sa largeur au deploiement. La poignee webkit, elle, s'anime. */
+    scrollbar-color: transparent transparent;
+}
+
+.tabnav:hover,
+.tabnav--open:hover,
+.bell__panel:hover,
+.profil__panel:hover {
+    scrollbar-color: var(--gris-300) transparent;
+}
+
+.tabnav::-webkit-scrollbar,
+.tabnav--open::-webkit-scrollbar,
+.bell__panel::-webkit-scrollbar,
+.profil__panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tabnav::-webkit-scrollbar-track,
+.tabnav--open::-webkit-scrollbar-track,
+.bell__panel::-webkit-scrollbar-track,
+.profil__panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tabnav::-webkit-scrollbar-thumb,
+.tabnav--open::-webkit-scrollbar-thumb,
+.bell__panel::-webkit-scrollbar-thumb,
+.profil__panel::-webkit-scrollbar-thumb {
+    background: transparent;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+    transition: background-color var(--transition);
+}
+
+.tabnav:hover::-webkit-scrollbar-thumb,
+.tabnav--open:hover::-webkit-scrollbar-thumb,
+.bell__panel:hover::-webkit-scrollbar-thumb,
+.profil__panel:hover::-webkit-scrollbar-thumb {
+    background-color: var(--gris-300);
+}
+
+.tabnav::-webkit-scrollbar-thumb:hover,
+.tabnav--open::-webkit-scrollbar-thumb:hover,
+.bell__panel::-webkit-scrollbar-thumb:hover,
+.profil__panel::-webkit-scrollbar-thumb:hover {
+    background-color: var(--gris-400);
 }
 
 /* ---------- En-tete ---------- */
@@ -1540,6 +1601,8 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         max-height: calc(100dvh - 64px - var(--e8));
         overflow-y: auto;
         overscroll-behavior: contain;
+        transition: width var(--duree-lente) var(--courbe),
+                    box-shadow var(--duree-lente) var(--courbe);
     }
 
     /* Repliee, la barre garde ses icones : masquee, elle obligerait a la
@@ -1547,17 +1610,36 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
        panneau a cacher. */
     .workspace--replie { grid-template-columns: 66px minmax(0, 1fr); }
 
-    .workspace--replie .tabnav__link span,
-    .workspace--replie .tabnav__group span,
-    .workspace--replie .tabnav__chevron,
-    .workspace--replie .tabnav__famille { display: none; }
+    /* Deploiement au survol : la barre s'elargit, la colonne ne bouge pas.
 
-    .workspace--replie .tabnav__link,
-    .workspace--replie .tabnav__group { justify-content: center; padding-inline: 0; }
+       C'est le point important. Elargir la colonne repousserait le contenu de
+       166 px a chaque fois qu'un curseur passe pres du bord gauche — un
+       tableau qu'on lisait se reorganise, la ligne qu'on suivait se deplace,
+       et le geste qui n'etait qu'un passage coute une relecture. La barre se
+       pose donc par-dessus, comme une carte, et se retire de meme.
+
+       `width` explicite dans les deux etats : une largeur heritee de la
+       colonne ne s'anime pas, et le deploiement serait un saut. */
+    .workspace--replie .tabnav { width: 66px; }
+
+    .workspace--survol .tabnav {
+        width: 232px;
+        z-index: 30;
+        box-shadow: var(--ombre-3);
+    }
+
+    .workspace--replie:not(.workspace--survol) .tabnav__link span,
+    .workspace--replie:not(.workspace--survol) .tabnav__group span,
+    .workspace--replie:not(.workspace--survol) .tabnav__chevron,
+    .workspace--replie:not(.workspace--survol) .tabnav__famille { display: none; }
+
+    .workspace--replie:not(.workspace--survol) .tabnav__link,
+    .workspace--replie:not(.workspace--survol) .tabnav__group { justify-content: center; padding-inline: 0; }
 
     /* Les sous-sections n'ont pas d'icone : repliees, elles ne seraient que des
-       lignes vides. Le groupe reste cliquable et les rouvre en depliant. */
-    .workspace--replie .tabnav__list--nested { display: none; }
+       lignes vides. Deployee par le survol, la barre les montre de nouveau,
+       et le survol d'un groupe suffit alors a l'ouvrir. */
+    .workspace--replie:not(.workspace--survol) .tabnav__list--nested { display: none; }
 
     .workspace--replie .tabnav__icone { opacity: 1; }
 }
@@ -1578,7 +1660,11 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 }
 .tabnav__replier:hover { background: var(--gris-100); color: var(--gris-900); }
 .tabnav__replier-icone { transform: rotate(180deg); transition: transform var(--duree-lente) var(--courbe); }
-.workspace--replie .tabnav__replier { margin-inline: auto; }
+.workspace--replie:not(.workspace--survol) .tabnav__replier { margin-inline: auto; }
+
+/* L'icone, elle, reste tournee selon `replie` et non selon ce que le survol
+   montre : elle annonce ce que le clic fera — fixer le depliage — et non
+   l'etat de passage sous le curseur. */
 .workspace--replie .tabnav__replier-icone { transform: rotate(0deg); }
 
 @media (min-width: 900px) {
@@ -2676,6 +2762,13 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     right: 0;
     z-index: 40;
     width: min(23rem, calc(100vw - 2rem));
+    /* Comme le panneau de la cloche. Le formulaire de mot de passe, ou celui
+       de la signature, allongent la carte au-dela du bas de l'ecran sur un
+       portable : elle defile pour son compte plutot que de pousser le bouton
+       « Enregistrer » hors de portee. */
+    max-height: 70vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background: var(--blanc);
     color: var(--gris-900);
     border: 1px solid var(--gris-200);

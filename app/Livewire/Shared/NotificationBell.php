@@ -109,11 +109,24 @@ class NotificationBell extends Component
             ->get();
     }
 
+    /**
+     * La liste est desormais rendue a chaque fois, ouverte ou non.
+     *
+     * Elle ne l'etait qu'a l'ouverture, pour ne pas lire douze lignes a chaque
+     * sondage. Mais un panneau qui n'existe pas dans la page ne peut pas
+     * paraitre sous le curseur : il fallait attendre un aller-retour, et cette
+     * attente etait precisement ce qu'on reprochait a la cloche.
+     *
+     * Ce que cela coute : une lecture indexee de douze lignes toutes les cinq
+     * secondes par poste connecte, a cote du comptage qui s'y faisait deja.
+     * Ce que cela rend : l'ouverture immediate, et une liste deja a jour quand
+     * le panneau est ouvert pendant qu'une notification arrive.
+     */
     public function render(): View
     {
         return view('livewire.shared.notification-bell', [
             'unread' => $this->unreadCount(),
-            'notifications' => $this->open ? $this->recent() : collect(),
+            'notifications' => $this->recent(),
         ]);
     }
 }

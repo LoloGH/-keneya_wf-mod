@@ -16,6 +16,11 @@
     <link rel="preload" as="image" href="{{ asset('images/login-scene.jpg') }}"
           media="(min-width: 64rem)">
     <link rel="stylesheet" href="{{ asset_date('css/app.css') }}">
+
+    {{-- L'ecran de connexion n'a qu'un menu, le choix de langue, mais il s'ouvre
+         comme les autres : c'est la premiere page que voit le personnel, et
+         elle ne doit pas se comporter autrement que le reste. --}}
+    <script src="{{ asset_date('js/survol.js') }}" defer></script>
     @livewireStyles
 </head>
 <body class="login-page">

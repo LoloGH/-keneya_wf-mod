@@ -33,6 +33,11 @@
     </script>
 
     <link rel="stylesheet" href="{{ asset_date('css/app.css') }}">
+
+    {{-- L'ouverture au survol des panneaux et des menus. `defer` place son
+         execution avant celle de Livewire, donc avant le demarrage d'Alpine :
+         la fonction est en place quand les premiers `x-data` sont evalues. --}}
+    <script src="{{ asset_date('js/survol.js') }}" defer></script>
     @livewireStyles
 </head>
 <body class="app-body">

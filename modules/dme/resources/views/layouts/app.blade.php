@@ -37,6 +37,15 @@
 
     <link rel="stylesheet" href="{{ \Keneya\Dme\Dme::asset('build/app.css') }}">
     <script src="{{ \Keneya\Dme\Dme::asset('build/app.js') }}" defer></script>
+
+    {{-- L'ouverture au survol, prise chez l'hote : c'est le meme geste dans les
+         deux interfaces, et le module n'en garde pas une seconde copie qui
+         divergerait au premier reglage de delai.
+
+         En mode autonome de developpement, ou le module tourne sans WorkFlow
+         autour, ce fichier n'existe pas : les appels sont donc tous ecrits en
+         chainage optionnel, et les menus retombent simplement sur le clic. --}}
+    <script src="{{ asset('js/survol.js') }}" defer></script>
 </head>
 <body class="h-full">
 <div class="min-h-full lg:flex" x-data="{ sidebarOpen: false }">

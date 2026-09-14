@@ -86,7 +86,12 @@
                  l'application hôte : cocher une case ne suffit pas à détruire
                  un dossier médical. --}}
             @can('purge', $patient)
-                <details class="mt-4 rounded-lg border border-red-300 bg-red-50 p-3">
+                {{-- `data-survol="non"` : seul repli du depot que le survol
+                     n'ouvre pas. Il n'est pas plie pour gagner de la place,
+                     mais pour qu'on ait a demander ce qu'il contient — un
+                     curseur qui passe n'est pas une demande. --}}
+                <details class="mt-4 rounded-lg border border-red-300 bg-red-50 p-3"
+                         data-survol="non">
                     <summary class="cursor-pointer text-sm font-medium text-red-800">
                         Supprimer définitivement ce dossier
                     </summary>

@@ -122,10 +122,19 @@
                             shadow-[0_24px_60px_-24px_rgb(15_23_42/0.55)] sm:max-w-[24.5rem] sm:p-7
                             [@media(max-height:820px)]:p-5 [@media(max-height:820px)]:sm:p-5"
                      x-data="{
+                         ...(window.survol?.() ?? {}),
                          showPassword: false,
                          submitting: false,
                          langOpen: false,
                          lang: 'fr',
+
+                         // Le choix de langue s'ouvre au survol comme les menus
+                         // du reste de l'application. L'etat vit ici, avec le
+                         // formulaire, plutot que dans une portee imbriquee :
+                         // `@click.outside` du selecteur le remet a faux, et il
+                         // doit designer la meme variable.
+                         survolOuvre() { this.langOpen = true; },
+                         survolFerme() { this.langOpen = false; },
                          fillRole(email) {
                              $refs.email.value = email;
                              $refs.password.focus();
@@ -133,7 +142,9 @@
                      }">
 
                     {{-- Sélecteur de langue : discret, aligné à droite --}}
-                    <div class="relative -mt-1 flex justify-end" @click.outside="langOpen = false">
+                    <div class="relative -mt-1 flex justify-end" @click.outside="langOpen = false"
+                         @pointerenter="survolEntre?.($event)"
+                         @pointerleave="survolSort?.($event)">
                         <button type="button"
                                 class="flex items-center gap-1 rounded-md px-1 py-0.5 text-xs font-medium text-ink-500
                                        transition hover:text-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2
