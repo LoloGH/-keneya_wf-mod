@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Policies;
 
-use Keneya\Dme\Contracts\DmeUser;
 use Illuminate\Database\Eloquent\Model;
+use Keneya\Dme\Contracts\DmeUser;
 
 /**
  * Socle commun des policies du DME.

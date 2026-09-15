@@ -24,8 +24,7 @@ final class QueuedSmsDispatcher implements SimulatesSmsDelivery, SmsDispatcherCo
     public function __construct(
         private readonly SmsService $sms,
         private readonly SmsGatewayManager $gateways,
-    ) {
-    }
+    ) {}
 
     /**
      * Les passerelles « log » et « array » n'émettent rien : l'interface

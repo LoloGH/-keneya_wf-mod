@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Standalone;
 
-use Keneya\Dme\Dme;
 use Closure;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Http\Request;
+use Keneya\Dme\Dme;
 use Keneya\Dme\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -27,8 +27,7 @@ class StartDevSession
     public function __construct(
         private readonly StandaloneMode $standalone,
         private readonly AuthFactory $auth,
-    ) {
-    }
+    ) {}
 
     public function handle(Request $request, Closure $next): Response
     {

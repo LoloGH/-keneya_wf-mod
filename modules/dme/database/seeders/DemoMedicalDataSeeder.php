@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Database\Seeders;
 
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Keneya\Dme\Models\Allergy;
 use Keneya\Dme\Models\Appointment;
 use Keneya\Dme\Models\ChronicCondition;
@@ -20,11 +25,6 @@ use Keneya\Dme\Models\Prescription;
 use Keneya\Dme\Models\Service;
 use Keneya\Dme\Models\SmsMessage;
 use Keneya\Dme\Models\User;
-use Keneya\Dme\Support\Rbac;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 /**
  * Données médicales de démonstration (§54).
@@ -221,11 +221,11 @@ class DemoMedicalDataSeeder extends Seeder
 
         foreach ([
             ['medication_name' => 'Metformine', 'dosage' => '500 mg', 'form' => 'Comprimé', 'route' => 'Orale',
-             'frequency' => '2 fois par jour', 'duration' => '90 jours', 'quantity' => '180 comprimés',
-             'instructions' => 'À prendre au milieu des repas.'],
+                'frequency' => '2 fois par jour', 'duration' => '90 jours', 'quantity' => '180 comprimés',
+                'instructions' => 'À prendre au milieu des repas.'],
             ['medication_name' => 'Amlodipine', 'dosage' => '5 mg', 'form' => 'Comprimé', 'route' => 'Orale',
-             'frequency' => '1 fois par jour', 'duration' => '90 jours', 'quantity' => '90 comprimés',
-             'instructions' => 'Le matin, à heure fixe.'],
+                'frequency' => '1 fois par jour', 'duration' => '90 jours', 'quantity' => '90 comprimés',
+                'instructions' => 'Le matin, à heure fixe.'],
         ] as $position => $item) {
             $prescription->items()->create($item + ['position' => $position + 1]);
         }
@@ -244,13 +244,13 @@ class DemoMedicalDataSeeder extends Seeder
 
         $labExams = [
             ['exam' => 'Hémoglobine glyquée (HbA1c)', 'category' => 'Biochimie', 'parameter' => 'HbA1c',
-             'value' => '6.8', 'unit' => '%', 'range' => '4.0 - 6.0', 'flag' => 'high'],
+                'value' => '6.8', 'unit' => '%', 'range' => '4.0 - 6.0', 'flag' => 'high'],
             ['exam' => 'Glycémie à jeun', 'category' => 'Biochimie', 'parameter' => 'Glycémie',
-             'value' => '1.14', 'unit' => 'g/L', 'range' => '0.70 - 1.10', 'flag' => 'high'],
+                'value' => '1.14', 'unit' => 'g/L', 'range' => '0.70 - 1.10', 'flag' => 'high'],
             ['exam' => 'Créatininémie', 'category' => 'Biochimie', 'parameter' => 'Créatinine',
-             'value' => '9.8', 'unit' => 'mg/L', 'range' => '7.0 - 13.0', 'flag' => 'normal'],
+                'value' => '9.8', 'unit' => 'mg/L', 'range' => '7.0 - 13.0', 'flag' => 'normal'],
             ['exam' => 'Bilan lipidique', 'category' => 'Biochimie', 'parameter' => 'Cholestérol total',
-             'value' => '2.05', 'unit' => 'g/L', 'range' => '< 2.00', 'flag' => 'high'],
+                'value' => '2.05', 'unit' => 'g/L', 'range' => '< 2.00', 'flag' => 'high'],
         ];
 
         foreach ($labExams as $exam) {
@@ -294,9 +294,9 @@ class DemoMedicalDataSeeder extends Seeder
             'patient_id' => $patient->id,
             'radiologist_id' => $this->radiologist->id,
             'technique' => 'Échographie abdominale par sonde convexe 3,5 MHz, patient à jeun.',
-            'findings' => "Foie de taille normale, échostructure hyperéchogène homogène évoquant une stéatose de grade 1. "
-                ."Vésicule biliaire alithiasique, parois fines. Voies biliaires non dilatées. "
-                ."Reins de taille et de différenciation normales, sans dilatation des cavités pyélocalicielles.",
+            'findings' => 'Foie de taille normale, échostructure hyperéchogène homogène évoquant une stéatose de grade 1. '
+                .'Vésicule biliaire alithiasique, parois fines. Voies biliaires non dilatées. '
+                .'Reins de taille et de différenciation normales, sans dilatation des cavités pyélocalicielles.',
             'conclusion' => 'Stéatose hépatique de grade 1. Absence de lithiase vésiculaire. Reins sans anomalie.',
             'is_abnormal' => true,
             'reported_at' => Carbon::now()->subDays(18)->setTime(15, 40),
@@ -350,7 +350,7 @@ class DemoMedicalDataSeeder extends Seeder
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<string, int>  $services
+     * @param  Collection<string, int>  $services
      */
     private function seedFollowUpConsultation(
         Patient $patient,
@@ -370,12 +370,12 @@ class DemoMedicalDataSeeder extends Seeder
                 ? 'Céphalées récurrentes et fatigue à l\'effort'
                 : 'Consultation de suivi trimestriel, diabète et hypertension',
             'history_of_illness' => $variant === 'first'
-                ? "Patient de 42 ans suivi pour hypertension artérielle depuis 5 ans. Décrit depuis trois semaines "
+                ? 'Patient de 42 ans suivi pour hypertension artérielle depuis 5 ans. Décrit depuis trois semaines '
                     ."des céphalées occipitales matinales et une fatigue à l'effort modéré. Observance thérapeutique "
-                    ."déclarée irrégulière."
-                : "Patient revu à trois mois. Bonne observance rapportée depuis la dernière consultation. "
-                    ."Perte pondérale de 2 kg. Plus de céphalées. Autocontrôles tensionnels à domicile "
-                    ."globalement satisfaisants.",
+                    .'déclarée irrégulière.'
+                : 'Patient revu à trois mois. Bonne observance rapportée depuis la dernière consultation. '
+                    .'Perte pondérale de 2 kg. Plus de céphalées. Autocontrôles tensionnels à domicile '
+                    .'globalement satisfaisants.',
             'treatment_plan' => 'Poursuite de la metformine et de l\'amlodipine aux mêmes posologies.',
             'follow_up' => 'Contrôle clinique et biologique dans trois mois.',
             'recommendations' => 'Réduction de l\'apport sodé, marche quotidienne de 30 minutes, arrêt du tabac maintenu.',
@@ -415,7 +415,7 @@ class DemoMedicalDataSeeder extends Seeder
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<string, int>  $services
+     * @param  Collection<string, int>  $services
      */
     private function seedHospitalization(Patient $patient, $services): void
     {
@@ -434,26 +434,26 @@ class DemoMedicalDataSeeder extends Seeder
             'discharge_diagnosis' => 'Poussée hypertensive contrôlée sur hypertension artérielle essentielle',
             'discharge_treatment' => 'Amlodipine 5 mg le matin. Metformine 500 mg matin et soir.',
             'discharge_recommendations' => 'Régime hyposodé. Autocontrôle tensionnel. Consultation de suivi à un mois.',
-            'discharge_summary' => "Patient admis pour poussée hypertensive à 195/115 mmHg. Mise sous traitement "
-                ."antihypertenseur avec normalisation progressive des chiffres tensionnels. Bilan de retentissement "
-                ."sans anomalie. Évolution favorable, sortie au troisième jour.",
+            'discharge_summary' => 'Patient admis pour poussée hypertensive à 195/115 mmHg. Mise sous traitement '
+                .'antihypertenseur avec normalisation progressive des chiffres tensionnels. Bilan de retentissement '
+                .'sans anomalie. Évolution favorable, sortie au troisième jour.',
             'discharge_type' => 'home',
             'status' => 'discharged',
         ]);
 
         foreach ([
             ['type' => 'admission', 'hours' => 0, 'title' => 'Admission en médecine interne',
-             'content' => 'TA à l\'entrée 195/115 mmHg. Patient conscient, céphalées cotées 7/10.'],
+                'content' => 'TA à l\'entrée 195/115 mmHg. Patient conscient, céphalées cotées 7/10.'],
             ['type' => 'observation', 'hours' => 4, 'title' => 'Surveillance tensionnelle rapprochée',
-             'content' => 'TA 178/104 mmHg après première prise. Céphalées en régression.'],
+                'content' => 'TA 178/104 mmHg après première prise. Céphalées en régression.'],
             ['type' => 'exam', 'hours' => 24, 'title' => 'Bilan de retentissement',
-             'content' => 'ECG, fond d\'œil et bilan rénal réalisés : sans anomalie significative.'],
+                'content' => 'ECG, fond d\'œil et bilan rénal réalisés : sans anomalie significative.'],
             ['type' => 'treatment', 'hours' => 26, 'title' => 'Adaptation thérapeutique',
-             'content' => 'Introduction de l\'amlodipine 5 mg par jour.'],
+                'content' => 'Introduction de l\'amlodipine 5 mg par jour.'],
             ['type' => 'evolution', 'hours' => 48, 'title' => 'Évolution favorable',
-             'content' => 'TA 142/88 mmHg. Disparition des céphalées. Patient à nouveau autonome.'],
+                'content' => 'TA 142/88 mmHg. Disparition des céphalées. Patient à nouveau autonome.'],
             ['type' => 'discharge', 'hours' => 74, 'title' => 'Sortie à domicile',
-             'content' => 'TA 134/84 mmHg. Ordonnance de sortie remise et expliquée au patient.'],
+                'content' => 'TA 134/84 mmHg. Ordonnance de sortie remise et expliquée au patient.'],
         ] as $event) {
             $stay->events()->create([
                 'type' => $event['type'],
@@ -466,15 +466,15 @@ class DemoMedicalDataSeeder extends Seeder
 
         foreach ([
             ['type' => 'care', 'hours' => 1, 'title' => 'Pose d\'une voie veineuse périphérique',
-             'content' => 'Cathéter 20G au pli du coude droit. Pansement propre et sec.', 'severity' => 'info'],
+                'content' => 'Cathéter 20G au pli du coude droit. Pansement propre et sec.', 'severity' => 'info'],
             ['type' => 'medication_administration', 'hours' => 2, 'title' => 'Administration d\'amlodipine',
-             'content' => 'Prise vérifiée, bien tolérée.', 'medication' => 'Amlodipine', 'dose' => '5 mg',
-             'route' => 'Orale', 'severity' => 'info'],
+                'content' => 'Prise vérifiée, bien tolérée.', 'medication' => 'Amlodipine', 'dose' => '5 mg',
+                'route' => 'Orale', 'severity' => 'info'],
             ['type' => 'observation', 'hours' => 12, 'title' => 'Constantes de nuit',
-             'content' => 'TA 168/98 mmHg, pouls 82/min, patient calme, sommeil conservé.', 'severity' => 'warning'],
+                'content' => 'TA 168/98 mmHg, pouls 82/min, patient calme, sommeil conservé.', 'severity' => 'warning'],
             ['type' => 'handover', 'hours' => 36, 'title' => 'Transmission équipe de jour',
-             'content' => 'Patient stable, tension en amélioration, autonomie complète pour la toilette.',
-             'severity' => 'info'],
+                'content' => 'Patient stable, tension en amélioration, autonomie complète pour la toilette.',
+                'severity' => 'info'],
         ] as $note) {
             NursingNote::create([
                 'patient_id' => $patient->id,

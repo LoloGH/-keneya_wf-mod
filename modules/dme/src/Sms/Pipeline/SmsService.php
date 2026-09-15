@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Sms\Pipeline;
 
-use Keneya\Dme\Models\SmsMessage;
-use Keneya\Dme\Models\SmsTemplate;
-use Keneya\Dme\Support\PhoneNumber;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Keneya\Dme\Models\SmsMessage;
+use Keneya\Dme\Models\SmsTemplate;
+use Keneya\Dme\Support\PhoneNumber;
 use RuntimeException;
 
 /**
@@ -31,9 +31,7 @@ use RuntimeException;
  */
 class SmsService
 {
-    public function __construct(private readonly SmsGatewayManager $gateways)
-    {
-    }
+    public function __construct(private readonly SmsGatewayManager $gateways) {}
 
     /**
      * Prépare et met en file un message libre.

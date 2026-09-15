@@ -6,11 +6,12 @@ namespace Keneya\Dme\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Keneya\Dme\Models\Diagnosis;
 
 /**
  * Correspondance FHIR visée : Condition (§44).
  *
- * @mixin \Keneya\Dme\Models\Diagnosis
+ * @mixin Diagnosis
  */
 class DiagnosisResource extends JsonResource
 {

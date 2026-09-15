@@ -7,9 +7,9 @@ namespace Keneya\Dme\Patients;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\PatientIdentifier;
-use InvalidArgumentException;
 
 /**
  * Liaison entre un patient de l'application hôte et le patient du DME.

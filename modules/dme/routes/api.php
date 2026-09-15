@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Route;
 use Keneya\Dme\Http\Controllers\Api\AuthApiController;
 use Keneya\Dme\Http\Controllers\Api\PatientApiController;
 use Keneya\Dme\Http\Controllers\Api\PatientRecordApiController;
-use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------

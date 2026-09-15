@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Services\Prescriptions;
 
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Keneya\Dme\Models\Allergy;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Prescription;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 /**
  * Contrôle d'allergie avant validation d'une ordonnance (§22).

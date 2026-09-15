@@ -26,8 +26,7 @@ final class LogSmsDispatcher implements SimulatesSmsDelivery, SmsDispatcherContr
     public function __construct(
         private readonly LogManager $log,
         private readonly Config $config,
-    ) {
-    }
+    ) {}
 
     public function dispatch(string $to, string $message, ?string $context = null): void
     {

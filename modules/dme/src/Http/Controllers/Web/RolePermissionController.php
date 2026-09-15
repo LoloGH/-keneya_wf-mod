@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Models\AuditLog;
-use Keneya\Dme\Support\Rbac;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Models\AuditLog;
+use Keneya\Dme\Support\Rbac;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 

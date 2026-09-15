@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
-use Keneya\Dme\Sms\Pipeline\SendSmsMessage;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\SmsMessage;
-use Keneya\Dme\Support\PhoneNumber;
+use Keneya\Dme\Sms\Pipeline\SendSmsMessage;
 use Keneya\Dme\Sms\Pipeline\SmsGateway;
 use Keneya\Dme\Sms\Pipeline\SmsGatewayManager;
 use Keneya\Dme\Sms\Pipeline\SmsResult;
 use Keneya\Dme\Sms\Pipeline\SmsService;
+use Keneya\Dme\Support\PhoneNumber;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Queue;
-use RuntimeException;
 use Keneya\Dme\Tests\TestCase;
+use RuntimeException;
 
 /**
  * Service SMS transversal (§35, §53).

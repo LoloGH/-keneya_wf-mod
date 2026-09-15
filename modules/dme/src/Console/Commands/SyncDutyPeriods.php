@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Console\Commands;
 
+use Illuminate\Console\Command;
 use Keneya\Dme\Models\AuditLog;
 use Keneya\Dme\Models\UserDutyPeriod;
-use Illuminate\Console\Command;
 
 /**
  * Bascule is_on_duty selon les gardes planifiées à l'avance par

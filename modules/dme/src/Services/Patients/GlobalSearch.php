@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Services\Patients;
 
+use Illuminate\Support\Collection;
 use Keneya\Dme\Contracts\DmeUser;
 use Keneya\Dme\Models\Appointment;
 use Keneya\Dme\Models\Consultation;
@@ -12,7 +13,6 @@ use Keneya\Dme\Models\LabOrder;
 use Keneya\Dme\Models\MedicalDocument;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Prescription;
-use Illuminate\Support\Collection;
 
 /**
  * Recherche globale depuis la barre supérieure (§34).

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Models;
 
-use Keneya\Dme\Dme;
-use Keneya\Dme\Models\Concerns\HasBusinessIdentifier;
-use Keneya\Dme\Models\Concerns\RecordsMedicalActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Keneya\Dme\Dme;
+use Keneya\Dme\Models\Concerns\HasBusinessIdentifier;
+use Keneya\Dme\Models\Concerns\RecordsMedicalActivity;
 
 /**
  * Document médical (§28). Correspondance FHIR : DocumentReference (§44).

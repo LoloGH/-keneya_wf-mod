@@ -23,7 +23,7 @@ class QrCodeGenerator
     {
         $writer = new Writer(new ImageRenderer(
             new RendererStyle($size, 1),
-            new SvgImageBackEnd(),
+            new SvgImageBackEnd,
         ));
 
         return $writer->writeString($content);

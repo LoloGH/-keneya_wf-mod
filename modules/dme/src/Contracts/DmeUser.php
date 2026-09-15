@@ -6,6 +6,7 @@ namespace Keneya\Dme\Contracts;
 
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Keneya\Dme\Models\Concerns\IsDmePractitioner;
 
 /**
  * Ce que le module attend du compte connecté.
@@ -16,7 +17,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
  * ils typent ce contrat, que les deux modèles satisfont.
  *
  * Le plus court chemin pour le remplir, côté hôte, est d'ajouter le trait
- * {@see \Keneya\Dme\Models\Concerns\IsDmePractitioner} au modèle `User` de
+ * {@see IsDmePractitioner} au modèle `User` de
  * l'application : il fournit l'intégralité des méthodes déclarées ici,
  * ainsi que les relations du dossier médical.
  *

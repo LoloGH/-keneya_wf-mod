@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Sms\Pipeline;
 
+use InvalidArgumentException;
 use Keneya\Dme\Sms\Pipeline\Gateways\ArrayGateway;
 use Keneya\Dme\Sms\Pipeline\Gateways\LogGateway;
 use Keneya\Dme\Sms\Pipeline\Gateways\SmsGateGateway;
-use InvalidArgumentException;
 
 /**
  * Résout la passerelle SMS active à partir de config/sms.php.
@@ -52,7 +52,7 @@ class SmsGatewayManager
         return match ($config['driver'] ?? $name) {
             'smsgate' => new SmsGateGateway($config),
             'log' => new LogGateway($config),
-            'array' => new ArrayGateway(),
+            'array' => new ArrayGateway,
             default => throw new InvalidArgumentException(
                 "Pilote de passerelle SMS « {$config['driver']} » inconnu."
             ),

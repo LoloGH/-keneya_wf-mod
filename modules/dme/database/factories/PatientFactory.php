@@ -10,7 +10,7 @@ use Keneya\Dme\Models\Patient;
 /**
  * Patients fictifs pour les tests (§55 : aucune donnée réelle).
  *
- * @extends Factory<\Keneya\Dme\Models\Patient>
+ * @extends Factory<Patient>
  */
 class PatientFactory extends Factory
 {

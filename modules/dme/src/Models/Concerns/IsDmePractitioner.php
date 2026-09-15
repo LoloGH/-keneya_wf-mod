@@ -12,6 +12,7 @@ use Keneya\Dme\Models\Consultation;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Prescription;
 use Keneya\Dme\Models\Service;
+use Keneya\Dme\Models\User;
 use Keneya\Dme\Models\UserDutyPeriod;
 use Keneya\Dme\Models\UserWeeklySchedule;
 
@@ -25,7 +26,7 @@ use Keneya\Dme\Models\UserWeeklySchedule;
  * service la personne est rattachée, son horaire, ses gardes, son nom
  * d'affichage, et si son compte est encore actif.
  *
- * Ce trait porte exactement cela, et rien d'autre. {@see \Keneya\Dme\Models\User}
+ * Ce trait porte exactement cela, et rien d'autre. {@see User}
  * l'utilise quand le module tourne seul ; l'application hôte l'ajoute à son
  * propre modèle `User` quand elle le monte. Les deux chemins donnent alors
  * le même comportement, sans duplication.

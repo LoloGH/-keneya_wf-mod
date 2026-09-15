@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\View\View;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\Appointment;
 use Keneya\Dme\Models\AuditLog;
@@ -13,9 +16,6 @@ use Keneya\Dme\Models\ImagingOrder;
 use Keneya\Dme\Models\LabOrder;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Prescription;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\View\View;
 
 /**
  * Tableau de bord médical (§10).

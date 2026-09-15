@@ -10,6 +10,7 @@ use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Keneya\Dme\Dme;
 use Keneya\Dme\Standalone\StandaloneMode;
+use Keneya\Dme\Support\Rbac;
 
 /**
  * Autorisation d'accès de haut niveau au module.
@@ -31,7 +32,7 @@ use Keneya\Dme\Standalone\StandaloneMode;
  *
  * Les permissions internes au DME (qui peut créer une ordonnance, voir le
  * laboratoire...) ne sont pas concernées : elles restent portées par
- * {@see \Keneya\Dme\Support\Rbac} et par les policies.
+ * {@see Rbac} et par les policies.
  */
 final class HostAccessGate
 {
@@ -39,8 +40,7 @@ final class HostAccessGate
         private readonly Config $config,
         private readonly Gate $gate,
         private readonly StandaloneMode $standalone,
-    ) {
-    }
+    ) {}
 
     /**
      * L'hôte a-t-il accordé l'accès au module à cet utilisateur ?

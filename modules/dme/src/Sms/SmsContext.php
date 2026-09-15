@@ -6,11 +6,12 @@ namespace Keneya\Dme\Sms;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Keneya\Dme\Contracts\SmsDispatcherContract;
 
 /**
  * Contexte d'un SMS, encodé sous forme de chaîne.
  *
- * Le contrat d'envoi ({@see \Keneya\Dme\Contracts\SmsDispatcherContract})
+ * Le contrat d'envoi ({@see SmsDispatcherContract})
  * ne transporte qu'un destinataire, un texte et une chaîne de contexte
  * optionnelle. Cette classe fixe le format de cette chaîne, afin que le
  * module puisse continuer à relier un message à son patient, à l'acte qui
@@ -34,8 +35,7 @@ final class SmsContext
         public readonly ?int $subjectId = null,
         public readonly ?string $templateKey = null,
         public readonly ?Carbon $sendAt = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Construit un contexte à partir des objets du domaine.

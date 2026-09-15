@@ -6,11 +6,12 @@ namespace Keneya\Dme\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Keneya\Dme\Models\VitalSign;
 
 /**
  * Correspondance FHIR visée : Observation (§44).
  *
- * @mixin \Keneya\Dme\Models\VitalSign
+ * @mixin VitalSign
  */
 class VitalSignResource extends JsonResource
 {

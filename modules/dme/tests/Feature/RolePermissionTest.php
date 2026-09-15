@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Keneya\Dme\Database\Seeders\RoleAndPermissionSeeder;
 use Keneya\Dme\Models\AuditLog;
 use Keneya\Dme\Support\Rbac;
-use Keneya\Dme\Database\Seeders\RoleAndPermissionSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Keneya\Dme\Tests\TestCase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Keneya\Dme\Tests\TestCase;
 
 /**
  * Matrice rôles / permissions modifiable, et écran Paramètres différencié.
@@ -239,7 +240,7 @@ class RolePermissionTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $this->assertTrue(
-            \Illuminate\Support\Facades\Hash::check('NouveauMotDePasse2026!', $user->fresh()->password),
+            Hash::check('NouveauMotDePasse2026!', $user->fresh()->password),
         );
     }
 

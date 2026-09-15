@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Services\Notifications;
 
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Keneya\Dme\Contracts\DmeUser;
+use Keneya\Dme\Contracts\SmsDispatcherContract;
 use Keneya\Dme\Dme;
 use Keneya\Dme\Models\Appointment;
 use Keneya\Dme\Models\LabOrder;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Prescription;
-use Keneya\Dme\Contracts\SmsDispatcherContract;
 use Keneya\Dme\Models\SmsTemplate;
 use Keneya\Dme\Sms\SmsContext;
 use Keneya\Dme\Support\PhoneNumber;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 /**
  * Centre de notifications (§33) et déclenchement des SMS métier (§53).
@@ -36,9 +36,7 @@ use Illuminate\Support\Str;
  */
 class NotificationService
 {
-    public function __construct(private readonly SmsDispatcherContract $sms)
-    {
-    }
+    public function __construct(private readonly SmsDispatcherContract $sms) {}
 
     /**
      * Notifie les utilisateurs disposant d'une permission donnée.
@@ -224,7 +222,7 @@ class NotificationService
      * déjà eu lieu, seul le SMS est omis.
      *
      * @param  array<string, string|int|null>  $variables
-     * @return bool  Le message a-t-il été remis à l'infrastructure d'envoi ?
+     * @return bool Le message a-t-il été remis à l'infrastructure d'envoi ?
      */
     private function sendPatientSms(
         Patient $patient,

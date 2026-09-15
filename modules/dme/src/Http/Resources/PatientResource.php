@@ -6,6 +6,7 @@ namespace Keneya\Dme\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Keneya\Dme\Models\Patient;
 
 /**
  * Représentation API d'un patient (§43).
@@ -15,7 +16,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * `telecom`, `address`. La première version ne produit pas du FHIR
  * conforme, mais la correspondance est immédiate et sans perte.
  *
- * @mixin \Keneya\Dme\Models\Patient
+ * @mixin Patient
  */
 class PatientResource extends JsonResource
 {

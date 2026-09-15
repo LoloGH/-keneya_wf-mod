@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Models\Concerns;
 
-use Keneya\Dme\Models\AuditLog;
 use Illuminate\Database\Eloquent\Model;
+use Keneya\Dme\Models\AuditLog;
 
 /**
  * Journalise dans le registre d'audit la création, la modification et la

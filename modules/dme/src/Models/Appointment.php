@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Models;
 
-use Keneya\Dme\Dme;
-use Keneya\Dme\Models\Concerns\HasBusinessIdentifier;
-use Keneya\Dme\Models\Concerns\RecordsMedicalActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Keneya\Dme\Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+use Keneya\Dme\Database\Factories\AppointmentFactory;
+use Keneya\Dme\Dme;
+use Keneya\Dme\Models\Concerns\HasBusinessIdentifier;
+use Keneya\Dme\Models\Concerns\RecordsMedicalActivity;
 
 /** Rendez-vous (§27). Correspondance FHIR : Appointment (§44). */
 class Appointment extends Model
@@ -100,7 +101,7 @@ class Appointment extends Model
         return self::STATUSES[$this->status] ?? $this->status;
     }
 
-    public function endsAt(): \Illuminate\Support\Carbon
+    public function endsAt(): Carbon
     {
         return $this->scheduled_for->copy()->addMinutes($this->duration_minutes);
     }

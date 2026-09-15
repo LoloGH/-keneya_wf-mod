@@ -6,8 +6,10 @@ namespace Keneya\Dme\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
 use Keneya\Dme\Dme;
 use Keneya\Dme\Models\AuditLog;
+use Keneya\Dme\Standalone\StandaloneMode;
 use Keneya\Dme\Support\Rbac;
 use Keneya\Dme\Tests\TestCase;
 
@@ -115,9 +117,9 @@ class HostAccessTest extends TestCase
     {
         // Aucune route de connexion propre au module, et l'accès reste
         // suspendu à la décision de l'hôte : c'est l'état normal.
-        $this->assertFalse(app(\Keneya\Dme\Standalone\StandaloneMode::class)->enabled());
-        $this->assertFalse(\Illuminate\Support\Facades\Route::has('dme.login'));
-        $this->assertFalse(\Illuminate\Support\Facades\Route::has('dme.logout'));
+        $this->assertFalse(app(StandaloneMode::class)->enabled());
+        $this->assertFalse(Route::has('dme.login'));
+        $this->assertFalse(Route::has('dme.logout'));
     }
 
     public function test_un_visiteur_anonyme_est_renvoye_vers_l_authentification_de_l_hote(): void

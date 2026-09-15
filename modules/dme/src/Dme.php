@@ -6,6 +6,7 @@ namespace Keneya\Dme;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Keneya\Dme\Models\User;
 use Keneya\Dme\Support\Rbac;
 
@@ -257,7 +258,7 @@ final class Dme
      * À défaut, le module retombe sur son propre modèle, qui suffit quand
      * il tourne seul.
      *
-     * @return class-string<\Illuminate\Database\Eloquent\Model>
+     * @return class-string<Model>
      */
     public static function userModel(): string
     {

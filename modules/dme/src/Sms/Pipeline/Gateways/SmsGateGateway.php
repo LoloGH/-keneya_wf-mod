@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Sms\Pipeline\Gateways;
 
-use Keneya\Dme\Sms\Pipeline\SmsGateway;
-use Keneya\Dme\Sms\Pipeline\SmsResult;
-use Keneya\Dme\Sms\Pipeline\TracksDeliveryStatus;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Keneya\Dme\Sms\Pipeline\SmsGateway;
+use Keneya\Dme\Sms\Pipeline\SmsResult;
+use Keneya\Dme\Sms\Pipeline\TracksDeliveryStatus;
 use Throwable;
 
 /**
@@ -54,9 +54,7 @@ class SmsGateGateway implements SmsGateway, TracksDeliveryStatus
     /**
      * @param  array<string, mixed>  $config
      */
-    public function __construct(private readonly array $config = [])
-    {
-    }
+    public function __construct(private readonly array $config = []) {}
 
     public function name(): string
     {

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Sms\Pipeline;
 
-use Keneya\Dme\Models\SmsMessage;
-use Keneya\Dme\Sms\Pipeline\SmsService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use Keneya\Dme\Models\SmsMessage;
 use Throwable;
 
 /**
@@ -24,9 +23,7 @@ class SendSmsMessage implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public readonly int $smsMessageId)
-    {
-    }
+    public function __construct(public readonly int $smsMessageId) {}
 
     public function tries(): int
     {

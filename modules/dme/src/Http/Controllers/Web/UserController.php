@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 use Keneya\Dme\Contracts\DmeUser;
 use Keneya\Dme\Dme;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\Service;
-use Keneya\Dme\Models\UserDutyPeriod;
 use Keneya\Dme\Models\UserWeeklySchedule;
-use Keneya\Dme\Support\Rbac;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Keneya\Dme\Support\PasswordPolicy;
-use Illuminate\View\View;
+use Keneya\Dme\Support\Rbac;
 use Spatie\Permission\Models\Role;
 
 /**
@@ -225,7 +225,7 @@ class UserController extends Controller
 
                 if ($period['starts_at'] >= $period['ends_at']) {
                     $validator->errors()->add("duty_periods.$index.ends_at", 'La fin doit suivre le début.');
-                } elseif (\Illuminate\Support\Carbon::parse($period['ends_at'])->isPast()) {
+                } elseif (Carbon::parse($period['ends_at'])->isPast()) {
                     $validator->errors()->add("duty_periods.$index.ends_at", 'Une garde planifiée ne peut pas déjà être terminée.');
                 }
             }

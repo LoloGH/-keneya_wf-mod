@@ -21,9 +21,7 @@ use InvalidArgumentException;
  */
 class IdentifierGenerator
 {
-    public function __construct(private readonly ConnectionInterface $connection)
-    {
-    }
+    public function __construct(private readonly ConnectionInterface $connection) {}
 
     /**
      * Retourne le prochain identifiant pour une clé de préfixe configurée.

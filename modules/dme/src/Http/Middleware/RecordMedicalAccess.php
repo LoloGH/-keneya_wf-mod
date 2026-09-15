@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Middleware;
 
-use Keneya\Dme\Models\AuditLog;
-use Keneya\Dme\Models\Patient;
 use Closure;
 use Illuminate\Http\Request;
+use Keneya\Dme\Models\AuditLog;
+use Keneya\Dme\Models\Patient;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

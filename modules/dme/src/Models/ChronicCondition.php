@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Models;
 
-use Keneya\Dme\Models\Concerns\RecordsMedicalActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Keneya\Dme\Models\Concerns\RecordsMedicalActivity;
 
 /** Pathologie chronique. Correspondance FHIR : Condition (§44). */
 class ChronicCondition extends Model

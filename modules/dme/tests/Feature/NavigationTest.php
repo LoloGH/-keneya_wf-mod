@@ -7,6 +7,7 @@ namespace Keneya\Dme\Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Keneya\Dme\Support\Rbac;
 use Keneya\Dme\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Barre de navigation latérale.
@@ -53,7 +54,7 @@ class NavigationTest extends TestCase
         ];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('ecrans')]
+    #[DataProvider('ecrans')]
     public function test_une_seule_entree_du_menu_est_marquee_comme_courante(string $route): void
     {
         $reponse = $this->actingAs($this->userWithRole(Rbac::ROLE_ADMIN))

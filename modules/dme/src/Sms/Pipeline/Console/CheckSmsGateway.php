@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Sms\Pipeline\Console;
 
+use Illuminate\Console\Command;
 use Keneya\Dme\Sms\Pipeline\Gateways\SmsGateGateway;
 use Keneya\Dme\Sms\Pipeline\SmsGatewayManager;
-use Illuminate\Console\Command;
 
 /**
  * Diagnostic de la passerelle SMS.

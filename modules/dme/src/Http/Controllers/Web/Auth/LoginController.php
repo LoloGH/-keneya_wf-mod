@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web\Auth;
 
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Models\AuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Models\AuditLog;
 
 /**
  * Authentification par session (§41).

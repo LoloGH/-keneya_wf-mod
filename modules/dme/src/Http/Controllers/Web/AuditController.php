@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Keneya\Dme\Dme;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\AuditLog;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 /**
  * Journal d'audit (§30).

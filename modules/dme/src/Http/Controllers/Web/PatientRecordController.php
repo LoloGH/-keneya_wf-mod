@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Models\Allergy;
-use Keneya\Dme\Models\ChronicCondition;
-use Keneya\Dme\Models\Medication;
-use Keneya\Dme\Models\MedicalHistory;
-use Keneya\Dme\Models\Patient;
-use Keneya\Dme\Models\VitalSign;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Models\Allergy;
+use Keneya\Dme\Models\MedicalHistory;
+use Keneya\Dme\Models\Medication;
+use Keneya\Dme\Models\Patient;
+use Keneya\Dme\Models\VitalSign;
 
 /**
  * Saisie des éléments du dossier depuis les onglets du DME

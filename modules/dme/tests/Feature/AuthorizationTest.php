@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Keneya\Dme\Models\LabOrder;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Prescription;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Keneya\Dme\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Tests d'autorisation par rôle (§56).

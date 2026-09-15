@@ -6,11 +6,12 @@ namespace Keneya\Dme\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Keneya\Dme\Models\Prescription;
 
 /**
  * Correspondance FHIR visée : MedicationRequest (§44).
  *
- * @mixin \Keneya\Dme\Models\Prescription
+ * @mixin Prescription
  */
 class PrescriptionResource extends JsonResource
 {

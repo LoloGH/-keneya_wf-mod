@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Keneya\Dme\Dme;
 use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Http\Controllers\Web\CareOrderController;
 use Keneya\Dme\Http\Requests\StorePatientRequest;
 use Keneya\Dme\Models\Allergy;
 use Keneya\Dme\Models\ChronicCondition;
@@ -17,11 +21,6 @@ use Keneya\Dme\Services\Documents\PdfGenerator;
 use Keneya\Dme\Services\Patients\MedicalTimeline;
 use Keneya\Dme\Services\Patients\PurgePatient;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**

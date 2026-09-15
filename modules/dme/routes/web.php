@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Route;
+use Keneya\Dme\Contracts\SmsDispatcherContract;
 use Keneya\Dme\Http\Controllers\Web\AppointmentController;
 use Keneya\Dme\Http\Controllers\Web\AuditController;
 use Keneya\Dme\Http\Controllers\Web\Auth\LoginController;
+use Keneya\Dme\Http\Controllers\Web\CareOrderController;
 use Keneya\Dme\Http\Controllers\Web\ConsultationController;
 use Keneya\Dme\Http\Controllers\Web\DashboardController;
 use Keneya\Dme\Http\Controllers\Web\DocumentController;
@@ -12,21 +15,18 @@ use Keneya\Dme\Http\Controllers\Web\HospitalizationController;
 use Keneya\Dme\Http\Controllers\Web\ImagingController;
 use Keneya\Dme\Http\Controllers\Web\LaboratoryController;
 use Keneya\Dme\Http\Controllers\Web\NotificationController;
-use Keneya\Dme\Http\Controllers\Web\CareOrderController;
 use Keneya\Dme\Http\Controllers\Web\NursingController;
 use Keneya\Dme\Http\Controllers\Web\PatientController;
 use Keneya\Dme\Http\Controllers\Web\PatientRecordController;
 use Keneya\Dme\Http\Controllers\Web\PrescriptionController;
-use Keneya\Dme\Http\Controllers\Web\SearchController;
 use Keneya\Dme\Http\Controllers\Web\RolePermissionController;
+use Keneya\Dme\Http\Controllers\Web\SearchController;
 use Keneya\Dme\Http\Controllers\Web\ServiceController;
 use Keneya\Dme\Http\Controllers\Web\SettingsController;
-use Keneya\Dme\Contracts\SmsDispatcherContract;
+use Keneya\Dme\Http\Controllers\Web\UserController;
 use Keneya\Dme\Sms\Pipeline\Http\SmsPipelineController;
 use Keneya\Dme\Sms\Pipeline\QueuedSmsDispatcher;
-use Keneya\Dme\Http\Controllers\Web\UserController;
 use Keneya\Dme\Standalone\StandaloneMode;
-use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------

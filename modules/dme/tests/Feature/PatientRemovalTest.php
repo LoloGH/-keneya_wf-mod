@@ -8,12 +8,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Keneya\Dme\Models\AuditLog;
 use Keneya\Dme\Models\Consultation;
 use Keneya\Dme\Models\MedicalDocument;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\PatientIdentifier;
 use Keneya\Dme\Models\Prescription;
 use Keneya\Dme\Models\SmsMessage;
+use Keneya\Dme\Services\Patients\PurgePatient;
 use Keneya\Dme\Support\Rbac;
 use Keneya\Dme\Tests\TestCase;
 
@@ -210,7 +212,7 @@ class PatientRemovalTest extends TestCase
             'patient_id' => $patient->getKey(),
         ]);
 
-        $trace = \Keneya\Dme\Models\AuditLog::where('action', 'purged')->firstOrFail();
+        $trace = AuditLog::where('action', 'purged')->firstOrFail();
 
         $this->assertStringContainsString($numero, $trace->description);
         $this->assertStringContainsString('Dossier cree par erreur.', $trace->description);
@@ -359,6 +361,6 @@ class PatientRemovalTest extends TestCase
         // supprime le dossier medical avec le dossier patient.
         $this->expectException(\InvalidArgumentException::class);
 
-        app(\Keneya\Dme\Services\Patients\PurgePatient::class)->purge($patient, '   ');
+        app(PurgePatient::class)->purge($patient, '   ');
     }
 }

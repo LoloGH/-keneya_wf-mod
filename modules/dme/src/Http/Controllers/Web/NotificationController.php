@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
-use Keneya\Dme\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Keneya\Dme\Http\Controllers\Controller;
 
 /**
  * Centre de notifications (§33).

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Unit;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Keneya\Dme\Models\Allergy;
 use Keneya\Dme\Models\ChronicCondition;
 use Keneya\Dme\Models\Patient;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Keneya\Dme\Tests\TestCase;
 
 /**

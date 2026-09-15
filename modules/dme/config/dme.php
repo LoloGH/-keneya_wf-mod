@@ -18,7 +18,6 @@ declare(strict_types=1);
 
 return [
 
-
     /*
     | Version fonctionnelle du module (§63). Affichée dans l'interface, dans
     | les documents générés, et ajoutée aux URL des ressources statiques
@@ -262,8 +261,6 @@ return [
     'sms' => [
 
         'dispatcher' => env('DME_SMS_DISPATCHER', 'queued'),
-
-
 
         /*
         | Passerelle active.

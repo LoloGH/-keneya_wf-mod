@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
+use Keneya\Dme\Contracts\SimulatesSmsDelivery;
+use Keneya\Dme\Contracts\SmsDispatcherContract;
+use Keneya\Dme\Dme;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\AppSetting;
 use Keneya\Dme\Models\AuditLog;
 use Keneya\Dme\Models\Service;
-use Keneya\Dme\Contracts\SimulatesSmsDelivery;
-use Keneya\Dme\Contracts\SmsDispatcherContract;
 use Keneya\Dme\Models\SmsTemplate;
-use Keneya\Dme\Dme;
-use Keneya\Dme\Support\Rbac;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Keneya\Dme\Support\PasswordPolicy;
-use Illuminate\View\View;
+use Keneya\Dme\Support\Rbac;
 use Spatie\Permission\Models\Role;
 
 /**

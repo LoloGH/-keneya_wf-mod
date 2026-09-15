@@ -28,8 +28,7 @@ class PdfGenerator
     public function __construct(
         private readonly DocumentStorage $storage,
         private readonly QrCodeGenerator $qrCodes,
-    ) {
-    }
+    ) {}
 
     public function prescription(Prescription $prescription): string
     {

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Services\Patients;
 
-use Keneya\Dme\Models\AuditLog;
-use Keneya\Dme\Models\Patient;
-use Keneya\Dme\Models\SmsMessage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
+use Keneya\Dme\Models\AuditLog;
+use Keneya\Dme\Models\Patient;
+use Keneya\Dme\Models\SmsMessage;
 
 /**
  * Suppression définitive d'un dossier médical, contenu clinique compris (§40).

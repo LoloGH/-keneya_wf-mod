@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Database\Seeders;
 
+use Illuminate\Database\Seeder;
 use Keneya\Dme\Models\Service;
 use Keneya\Dme\Models\User;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Database\Seeder;
 use RuntimeException;
 
 /**

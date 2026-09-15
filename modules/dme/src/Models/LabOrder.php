@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Models;
 
-use Keneya\Dme\Dme;
-use Keneya\Dme\Models\Concerns\HasBusinessIdentifier;
-use Keneya\Dme\Models\Concerns\RecordsMedicalActivity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Keneya\Dme\Database\Factories\LabOrderFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Keneya\Dme\Database\Factories\LabOrderFactory;
+use Keneya\Dme\Dme;
+use Keneya\Dme\Models\Concerns\HasBusinessIdentifier;
+use Keneya\Dme\Models\Concerns\RecordsMedicalActivity;
 
 /** Demande d'examens de laboratoire (§23). FHIR : ServiceRequest (§44). */
 class LabOrder extends Model

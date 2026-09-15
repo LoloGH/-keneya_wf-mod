@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Models;
 
-use Keneya\Dme\Dme;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Keneya\Dme\Dme;
 
 /** Événement de la timeline d'un séjour hospitalier (§25). */
 class HospitalizationEvent extends Model

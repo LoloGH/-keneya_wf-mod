@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Sms\Pipeline\Console;
 
+use Illuminate\Console\Command;
 use Keneya\Dme\Models\SmsMessage;
 use Keneya\Dme\Sms\Pipeline\SmsGatewayManager;
 use Keneya\Dme\Sms\Pipeline\SmsService;
 use Keneya\Dme\Sms\Pipeline\TracksDeliveryStatus;
-use Illuminate\Console\Command;
 
 /**
  * Rafraîchit l'état des SMS encore en transit.

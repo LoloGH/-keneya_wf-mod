@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 use Keneya\Dme\Dme;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\Appointment;
@@ -11,11 +16,6 @@ use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Service;
 use Keneya\Dme\Services\Notifications\NotificationService;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 /**
  * Rendez-vous (§27) : vues jour, semaine et mois.

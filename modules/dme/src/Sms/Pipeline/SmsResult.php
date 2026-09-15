@@ -44,8 +44,7 @@ final readonly class SmsResult
         public ?string $messageId = null,
         public ?string $error = null,
         public array $response = [],
-    ) {
-    }
+    ) {}
 
     /**
      * Le fournisseur a pris en charge le message sans l'avoir encore émis.

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Api;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Http\Resources\ConsultationResource;
 use Keneya\Dme\Http\Resources\LabOrderResource;
@@ -14,12 +19,8 @@ use Keneya\Dme\Models\LabOrder;
 use Keneya\Dme\Models\MedicalDocument;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Prescription;
+use Keneya\Dme\Services\Documents\DocumentStorage;
 use Keneya\Dme\Services\Prescriptions\AllergyChecker;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 /**
  * API REST : sous-ressources du dossier patient (§43).
@@ -194,7 +195,7 @@ class PatientRecordApiController extends Controller
 
     public function storeDocument(
         Request $request,
-        \Keneya\Dme\Services\Documents\DocumentStorage $storage,
+        DocumentStorage $storage,
     ): JsonResponse {
         $this->authorize('create', MedicalDocument::class);
 

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Keneya\Dme\Contracts\DmeUser;
 use Keneya\Dme\Dme;
 use Keneya\Dme\Http\Controllers\Controller;
@@ -12,10 +17,6 @@ use Keneya\Dme\Models\CareOrder;
 use Keneya\Dme\Models\NursingNote;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 /**
  * Soins programmés : prescription, attribution, réalisation, annulation.
@@ -209,9 +210,9 @@ class CareOrderController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     * @return Collection<int, User>
      */
-    public static function assignableNurses(DmeUser $user): \Illuminate\Database\Eloquent\Collection
+    public static function assignableNurses(DmeUser $user): Collection
     {
         if ($user->service_id === null) {
             return Dme::userQuery()->whereRaw('1 = 0')->get();

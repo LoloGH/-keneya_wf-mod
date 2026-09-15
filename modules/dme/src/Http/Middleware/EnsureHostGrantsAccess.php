@@ -25,9 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class EnsureHostGrantsAccess
 {
-    public function __construct(private readonly HostAccessGate $access)
-    {
-    }
+    public function __construct(private readonly HostAccessGate $access) {}
 
     public function handle(Request $request, Closure $next): Response
     {

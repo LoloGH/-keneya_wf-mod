@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\AuditLog;
 use Keneya\Dme\Models\Service;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 /**
  * Services / unités fonctionnelles de l'établissement, gérés depuis

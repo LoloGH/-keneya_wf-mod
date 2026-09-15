@@ -6,6 +6,7 @@ namespace Keneya\Dme\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Keneya\Dme\Models\MedicalDocument;
 
 /**
  * Correspondance FHIR visée : DocumentReference (§44).
@@ -13,7 +14,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * Le chemin de stockage n'est jamais exposé (§42) : seule l'URL de la
  * route de téléchargement contrôlée est renvoyée.
  *
- * @mixin \Keneya\Dme\Models\MedicalDocument
+ * @mixin MedicalDocument
  */
 class MedicalDocumentResource extends JsonResource
 {

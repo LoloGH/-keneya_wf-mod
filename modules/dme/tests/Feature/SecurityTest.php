@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Keneya\Dme\Models\AuditLog;
 use Keneya\Dme\Models\LabOrder;
 use Keneya\Dme\Models\MedicalDocument;
 use Keneya\Dme\Models\Patient;
+use Keneya\Dme\Models\User;
+use Keneya\Dme\Services\Notifications\NotificationService;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Keneya\Dme\Tests\TestCase;
 
 /**
@@ -70,7 +75,7 @@ class SecurityTest extends TestCase
             ->assertOk();
 
         // Un utilisateur sans aucun rôle n'a aucune permission.
-        $this->actingAs(\Keneya\Dme\Models\User::factory()->create())
+        $this->actingAs(User::factory()->create())
             ->get(route('dme.patients.show', $patient))
             ->assertForbidden();
     }
@@ -78,7 +83,7 @@ class SecurityTest extends TestCase
     public function test_un_acces_refuse_est_inscrit_au_journal_d_audit(): void
     {
         $patient = Patient::factory()->create();
-        $intrus = \Keneya\Dme\Models\User::factory()->create();
+        $intrus = User::factory()->create();
 
         $this->actingAs($intrus)->get(route('dme.patients.show', $patient))->assertForbidden();
 
@@ -121,14 +126,14 @@ class SecurityTest extends TestCase
         $proprietaire = $this->userWithRole(Rbac::ROLE_DOCTOR);
         $intrus = $this->userWithRole(Rbac::ROLE_DOCTOR);
 
-        app(\Keneya\Dme\Services\Notifications\NotificationService::class)->store(
+        app(NotificationService::class)->store(
             user: $proprietaire,
             category: 'alert',
             title: 'Résultat critique',
             message: 'Message confidentiel',
         );
 
-        $notification = \Illuminate\Support\Facades\DB::table('dme_notifications')->first();
+        $notification = DB::table('dme_notifications')->first();
 
         $this->actingAs($intrus)
             ->post(route('dme.notifications.read', $notification->id))
@@ -136,7 +141,7 @@ class SecurityTest extends TestCase
 
         // La notification de l'autre utilisateur reste non lue.
         $this->assertNull(
-            \Illuminate\Support\Facades\DB::table('dme_notifications')->where('id', $notification->id)->value('read_at')
+            DB::table('dme_notifications')->where('id', $notification->id)->value('read_at')
         );
     }
 
@@ -256,11 +261,11 @@ class SecurityTest extends TestCase
      */
     public function test_la_protection_csrf_est_active_sur_le_groupe_web(): void
     {
-        $middleware = app(\Illuminate\Contracts\Http\Kernel::class)
+        $middleware = app(Kernel::class)
             ->getMiddlewareGroups()['web'] ?? [];
 
         $this->assertContains(
-            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            ValidateCsrfToken::class,
             $middleware,
             'Le middleware CSRF n\'est pas appliqué aux routes web.',
         );

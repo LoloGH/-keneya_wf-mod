@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Models\ImagingOrder;
-use Keneya\Dme\Models\Patient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Models\ImagingOrder;
+use Keneya\Dme\Models\Patient;
 
 /**
  * Imagerie médicale (§24).

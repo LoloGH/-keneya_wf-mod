@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Keneya\Dme\Models\CareOrder;
 use Keneya\Dme\Models\NursingNote;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Service;
 use Keneya\Dme\Models\User;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Keneya\Dme\Tests\TestCase;
 
 /**

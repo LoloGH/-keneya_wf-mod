@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\AuditLog;
 use Keneya\Dme\Models\MedicalDocument;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Services\Documents\DocumentStorage;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\View\View;
 
 /**
  * Documents médicaux (§28) et téléchargement contrôlé (§42).
@@ -25,9 +25,7 @@ use Illuminate\View\View;
  */
 class DocumentController extends Controller
 {
-    public function __construct(private readonly DocumentStorage $storage)
-    {
-    }
+    public function __construct(private readonly DocumentStorage $storage) {}
 
     public function index(Request $request): View
     {

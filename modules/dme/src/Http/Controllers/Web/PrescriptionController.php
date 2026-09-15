@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\Consultation;
 use Keneya\Dme\Models\Patient;
@@ -11,11 +16,6 @@ use Keneya\Dme\Models\Prescription;
 use Keneya\Dme\Services\Documents\PdfGenerator;
 use Keneya\Dme\Services\Notifications\NotificationService;
 use Keneya\Dme\Services\Prescriptions\AllergyChecker;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
 
 /**
  * Ordonnances (§22).
@@ -27,9 +27,7 @@ use Illuminate\View\View;
  */
 class PrescriptionController extends Controller
 {
-    public function __construct(private readonly AllergyChecker $allergyChecker)
-    {
-    }
+    public function __construct(private readonly AllergyChecker $allergyChecker) {}
 
     public function index(Request $request): View
     {

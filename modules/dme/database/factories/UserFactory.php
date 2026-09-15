@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Database\Factories;
 
-use Keneya\Dme\Models\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Keneya\Dme\Models\User;
 use Illuminate\Support\Str;
+use Keneya\Dme\Models\Service;
+use Keneya\Dme\Models\User;
 
 /**
- * @extends Factory<\Keneya\Dme\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {

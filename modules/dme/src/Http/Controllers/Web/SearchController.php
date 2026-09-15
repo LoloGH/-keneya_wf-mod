@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Services\Patients\GlobalSearch;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Services\Patients\GlobalSearch;
 
 /**
  * Recherche globale depuis la barre supérieure (§34).

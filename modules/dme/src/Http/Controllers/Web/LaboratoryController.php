@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Models\LabOrder;
-use Keneya\Dme\Models\LabResult;
-use Keneya\Dme\Models\Patient;
-use Keneya\Dme\Services\Documents\PdfGenerator;
-use Keneya\Dme\Services\Notifications\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Models\LabOrder;
+use Keneya\Dme\Models\LabResult;
+use Keneya\Dme\Models\Patient;
+use Keneya\Dme\Services\Documents\PdfGenerator;
+use Keneya\Dme\Services\Notifications\NotificationService;
 
 /**
  * Laboratoire (§23) : demandes d'analyse et saisie des résultats.

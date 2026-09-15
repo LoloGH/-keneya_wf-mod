@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Unit;
 
-use Keneya\Dme\Services\Identifiers\IdentifierGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use InvalidArgumentException;
+use Keneya\Dme\Services\Identifiers\IdentifierGenerator;
 use Keneya\Dme\Tests\TestCase;
 
 /**

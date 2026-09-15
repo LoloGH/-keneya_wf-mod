@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Unit;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\VitalSign;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Keneya\Dme\Tests\TestCase;
 
 /**

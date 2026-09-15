@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Services\Patients;
 
-use Keneya\Dme\Models\Patient;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Keneya\Dme\Models\Patient;
 
 /**
  * Construit l'historique médical chronologique du patient (§29).
@@ -42,7 +43,7 @@ class MedicalTimeline
      * Événements bruts triés par date décroissante.
      *
      * @param  list<string>  $filters  types à inclure ; vide = tous
-     * @return Collection<int, array{type: string, label: string, date: \Illuminate\Support\Carbon, title: string, detail: string, status: string|null, url: string|null}>
+     * @return Collection<int, array{type: string, label: string, date: Carbon, title: string, detail: string, status: string|null, url: string|null}>
      */
     public function build(Patient $patient, array $filters = [], int $limit = 40): Collection
     {

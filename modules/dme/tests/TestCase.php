@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests;
 
+use Barryvdh\DomPDF\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Application;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
 use Keneya\Dme\Database\Seeders\RoleAndPermissionSeeder;
 use Keneya\Dme\Database\Seeders\ServiceSeeder;
@@ -13,7 +16,10 @@ use Keneya\Dme\Dme;
 use Keneya\Dme\DmeServiceProvider;
 use Keneya\Dme\Models\User;
 use Keneya\Dme\Support\Rbac;
+use Laravel\Sanctum\SanctumServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use Spatie\Activitylog\ActivitylogServiceProvider;
+use Spatie\Permission\PermissionServiceProvider;
 
 /**
  * Socle des tests du module.
@@ -30,16 +36,16 @@ use Orchestra\Testbench\TestCase as BaseTestCase;
 abstract class TestCase extends BaseTestCase
 {
     /**
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      * @return list<class-string>
      */
     protected function getPackageProviders($app): array
     {
         return [
-            \Spatie\Permission\PermissionServiceProvider::class,
-            \Spatie\Activitylog\ActivitylogServiceProvider::class,
-            \Barryvdh\DomPDF\ServiceProvider::class,
-            \Laravel\Sanctum\SanctumServiceProvider::class,
+            PermissionServiceProvider::class,
+            ActivitylogServiceProvider::class,
+            ServiceProvider::class,
+            SanctumServiceProvider::class,
             DmeServiceProvider::class,
         ];
     }
@@ -47,7 +53,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Configuration de l'application hôte de test.
      *
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      */
     protected function defineEnvironment($app): void
     {
@@ -78,7 +84,7 @@ abstract class TestCase extends BaseTestCase
      * réelle, et vérifier qu'un visiteur non authentifié y est bien
      * renvoyé plutôt que dans le module.
      *
-     * @param  \Illuminate\Routing\Router  $router
+     * @param  Router  $router
      */
     protected function defineRoutes($router): void
     {

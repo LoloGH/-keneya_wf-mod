@@ -6,11 +6,12 @@ namespace Keneya\Dme\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Keneya\Dme\Models\Allergy;
 
 /**
  * Correspondance FHIR visée : AllergyIntolerance (§44).
  *
- * @mixin \Keneya\Dme\Models\Allergy
+ * @mixin Allergy
  */
 class AllergyResource extends JsonResource
 {

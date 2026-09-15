@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Api;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Http\Requests\StorePatientRequest;
 use Keneya\Dme\Http\Resources\PatientResource;
 use Keneya\Dme\Models\Patient;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 /**
  * API REST : patients (§43).

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Requests;
 
-use Keneya\Dme\Models\Patient;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Keneya\Dme\Models\Patient;
 
 /**
  * Validation de la création et de la modification d'un patient (§12).

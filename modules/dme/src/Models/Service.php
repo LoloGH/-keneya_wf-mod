@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Models;
 
-use Keneya\Dme\Dme;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Keneya\Dme\Dme;
 
 /**
  * Service / unité fonctionnelle. Correspondance FHIR : Organization (§44).

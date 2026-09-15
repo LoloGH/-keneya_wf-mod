@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Models\NursingNote;
-use Keneya\Dme\Models\Patient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Models\NursingNote;
+use Keneya\Dme\Models\Patient;
 
 /**
  * Soins infirmiers (§26) : soins, administrations, observations,

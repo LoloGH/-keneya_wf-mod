@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Database\Seeders;
 
-use Keneya\Dme\Models\SmsTemplate;
 use Illuminate\Database\Seeder;
+use Keneya\Dme\Models\SmsTemplate;
 
 /**
  * Modèles de SMS (§36).

@@ -28,8 +28,7 @@ final class StandaloneMode
     public function __construct(
         private readonly Application $app,
         private readonly Config $config,
-    ) {
-    }
+    ) {}
 
     /**
      * Le mode autonome est-il réellement actif ?

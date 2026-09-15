@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
-use Keneya\Dme\Models\Allergy;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Keneya\Dme\Models\Appointment;
 use Keneya\Dme\Models\Consultation;
 use Keneya\Dme\Models\Hospitalization;
@@ -17,10 +19,8 @@ use Keneya\Dme\Models\Prescription;
 use Keneya\Dme\Models\Service;
 use Keneya\Dme\Models\SmsMessage;
 use Keneya\Dme\Models\User;
+use Keneya\Dme\Services\Patients\MedicalTimeline;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Keneya\Dme\Tests\TestCase;
 
 /**
@@ -141,7 +141,7 @@ class PatientJourneyTest extends TestCase
                 ],
                 'diagnoses' => [
                     ['label' => 'Hypertension artérielle essentielle', 'code' => 'I10',
-                     'type' => 'primary', 'status' => 'confirmed'],
+                        'type' => 'primary', 'status' => 'confirmed'],
                 ],
                 'treatment_plan' => 'Introduction d\'un antihypertenseur.',
                 'action' => 'save',
@@ -169,10 +169,10 @@ class PatientJourneyTest extends TestCase
                 'issued_on' => now()->toDateString(),
                 'items' => [
                     ['medication_name' => 'Amlodipine', 'dosage' => '5 mg', 'form' => 'Comprimé',
-                     'route' => 'Orale', 'frequency' => '1 fois par jour', 'duration' => '90 jours'],
+                        'route' => 'Orale', 'frequency' => '1 fois par jour', 'duration' => '90 jours'],
                     // Molécule de la famille des pénicillines : doit déclencher l'alerte.
                     ['medication_name' => 'Amoxicilline', 'dosage' => '500 mg', 'form' => 'Comprimé',
-                     'route' => 'Orale', 'frequency' => '3 fois par jour', 'duration' => '7 jours'],
+                        'route' => 'Orale', 'frequency' => '3 fois par jour', 'duration' => '7 jours'],
                 ],
             ])
             ->assertRedirect();
@@ -226,9 +226,9 @@ class PatientJourneyTest extends TestCase
             ->post(route('dme.laboratory.results.store', $labOrder), [
                 'results' => [
                     ['lab_order_item_id' => $items[0]->id, 'parameter' => 'Glycémie',
-                     'value' => '1.42', 'unit' => 'g/L', 'reference_range' => '0.70 - 1.10', 'flag' => 'high'],
+                        'value' => '1.42', 'unit' => 'g/L', 'reference_range' => '0.70 - 1.10', 'flag' => 'high'],
                     ['lab_order_item_id' => $items[1]->id, 'parameter' => 'Créatinine',
-                     'value' => '9.8', 'unit' => 'mg/L', 'reference_range' => '7.0 - 13.0', 'flag' => 'normal'],
+                        'value' => '9.8', 'unit' => 'mg/L', 'reference_range' => '7.0 - 13.0', 'flag' => 'normal'],
                 ],
             ])
             ->assertRedirect();
@@ -355,7 +355,7 @@ class PatientJourneyTest extends TestCase
         // ---------------------------------------------------------
         // 15. Historique : tous les actes remontent dans la timeline (§29)
         // ---------------------------------------------------------
-        $timeline = app(\Keneya\Dme\Services\Patients\MedicalTimeline::class)->build($patient->fresh());
+        $timeline = app(MedicalTimeline::class)->build($patient->fresh());
         $types = $timeline->pluck('type')->unique();
 
         foreach (['consultations', 'diagnoses', 'prescriptions', 'laboratory', 'imaging', 'hospitalizations', 'documents'] as $type) {

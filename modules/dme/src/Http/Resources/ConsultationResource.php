@@ -6,11 +6,12 @@ namespace Keneya\Dme\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Keneya\Dme\Models\Consultation;
 
 /**
  * Correspondance FHIR visée : Encounter (§44).
  *
- * @mixin \Keneya\Dme\Models\Consultation
+ * @mixin Consultation
  */
 class ConsultationResource extends JsonResource
 {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Keneya\Dme\Standalone\StandaloneMode;
@@ -23,7 +24,7 @@ class StandaloneModeTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * @param  \Illuminate\Foundation\Application  $app
+     * @param  Application  $app
      */
     protected function defineEnvironment($app): void
     {

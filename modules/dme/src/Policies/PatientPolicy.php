@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Policies;
 
+use Illuminate\Database\Eloquent\Model;
 use Keneya\Dme\Contracts\DmeUser;
 use Keneya\Dme\Models\Patient;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Accès au dossier patient.

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Database\Seeders;
 
-use Keneya\Dme\Models\Service;
 use Illuminate\Database\Seeder;
+use Keneya\Dme\Models\Service;
 
 /** Services de l'établissement de démonstration. */
 class ServiceSeeder extends Seeder

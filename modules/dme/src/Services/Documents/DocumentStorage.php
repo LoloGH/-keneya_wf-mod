@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Services\Documents;
 
-use Keneya\Dme\Models\MedicalDocument;
-use Keneya\Dme\Models\Patient;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Keneya\Dme\Models\MedicalDocument;
+use Keneya\Dme\Models\Patient;
 use RuntimeException;
 
 /**

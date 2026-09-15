@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Database\Seeders;
 
-use Keneya\Dme\Support\Rbac;
 use Illuminate\Database\Seeder;
+use Keneya\Dme\Support\Rbac;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;

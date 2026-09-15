@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Web;
 
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 use Keneya\Dme\Http\Controllers\Controller;
 use Keneya\Dme\Models\ClinicalNote;
 use Keneya\Dme\Models\Consultation;
@@ -11,12 +17,6 @@ use Keneya\Dme\Models\Diagnosis;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Models\Service;
 use Keneya\Dme\Services\Documents\PdfGenerator;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 /**
  * Consultation médicale (§19).

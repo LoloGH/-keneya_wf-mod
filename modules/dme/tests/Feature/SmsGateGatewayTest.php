@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Keneya\Dme\Models\SmsMessage;
 use Keneya\Dme\Sms\Pipeline\Gateways\SmsGateGateway;
 use Keneya\Dme\Sms\Pipeline\SmsGatewayManager;
 use Keneya\Dme\Sms\Pipeline\SmsResult;
 use Keneya\Dme\Sms\Pipeline\SmsService;
 use Keneya\Dme\Sms\Pipeline\TracksDeliveryStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Queue;
 use Keneya\Dme\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Passerelle SMSGate : passerelle de production du projet.
@@ -136,7 +138,7 @@ class SmsGateGatewayTest extends TestCase
         ];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('etatsSmsGate')]
+    #[DataProvider('etatsSmsGate')]
     public function test_les_etats_smsgate_sont_traduits_fidelement(string $smsgate, string $attendu): void
     {
         Http::fake([
@@ -246,7 +248,7 @@ class SmsGateGatewayTest extends TestCase
         ]);
 
         // La passerelle est injoignable : on n'a rien appris du sort du message.
-        Http::fake(fn () => throw new \Illuminate\Http\Client\ConnectionException('Connexion refusée'));
+        Http::fake(fn () => throw new ConnectionException('Connexion refusée'));
 
         app(SmsService::class)->refreshStatus($message);
 
@@ -282,7 +284,7 @@ class SmsGateGatewayTest extends TestCase
 
     public function test_aucun_secret_ne_fuite_dans_les_messages_d_erreur(): void
     {
-        Http::fake(fn () => throw new \Illuminate\Http\Client\ConnectionException(
+        Http::fake(fn () => throw new ConnectionException(
             'Échec vers https://utilisateur-test:secret-tres-confidentiel@sms.example.test'
         ));
 

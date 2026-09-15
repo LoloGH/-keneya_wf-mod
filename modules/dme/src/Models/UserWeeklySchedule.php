@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Models;
 
-use Keneya\Dme\Dme;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Keneya\Dme\Dme;
 
 /**
  * Créneau habituel d'un compte pour un jour de la semaine donné (§60).

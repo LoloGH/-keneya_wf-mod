@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
-use Keneya\Dme\Support\Rbac;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Keneya\Dme\Database\Seeders\DemoMedicalDataSeeder;
+use Keneya\Dme\Database\Seeders\DemoUserSeeder;
+use Keneya\Dme\Models\Patient;
+use Keneya\Dme\Support\Rbac;
 use Keneya\Dme\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Vérifie que chaque écran du module se rend réellement, monté dans une
@@ -51,7 +55,7 @@ class SmokeTest extends TestCase
         ];
     }
 
-    #[\PHPUnit\Framework\Attributes\DataProvider('ecransPrincipaux')]
+    #[DataProvider('ecransPrincipaux')]
     public function test_les_ecrans_principaux_se_rendent_pour_un_administrateur(string $route): void
     {
         $admin = $this->userWithRole(Rbac::ROLE_ADMIN);
@@ -77,16 +81,16 @@ class SmokeTest extends TestCase
      * Chaque onglet du DME doit se rendre sur un dossier réellement
      * peuplé : c'est là que se révèlent les relations manquantes.
      */
-    #[\PHPUnit\Framework\Attributes\DataProvider('ongletsDuDossier')]
+    #[DataProvider('ongletsDuDossier')]
     public function test_chaque_onglet_du_dossier_se_rend(string $tab): void
     {
         $this->seed([
-            \Keneya\Dme\Database\Seeders\DemoUserSeeder::class,
-            \Keneya\Dme\Database\Seeders\DemoMedicalDataSeeder::class,
+            DemoUserSeeder::class,
+            DemoMedicalDataSeeder::class,
         ]);
 
         $admin = $this->userWithRole(Rbac::ROLE_ADMIN);
-        $patient = \Keneya\Dme\Models\Patient::where('last_name', 'Traoré')->firstOrFail();
+        $patient = Patient::where('last_name', 'Traoré')->firstOrFail();
 
         $this->actingAs($admin)
             ->get(route('dme.patients.show', ['patient' => $patient, 'tab' => $tab]))

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Support;
 
+use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
+
 /**
  * Référentiel unique des rôles et permissions (§31-32).
  *
@@ -20,11 +23,17 @@ final class Rbac
 {
     // Rôles (§31)
     public const ROLE_ADMIN = 'administrateur';
+
     public const ROLE_DOCTOR = 'medecin';
+
     public const ROLE_NURSE = 'infirmier';
+
     public const ROLE_LAB = 'laboratoire';
+
     public const ROLE_RADIOLOGY = 'radiologie';
+
     public const ROLE_PHARMACIST = 'pharmacien';
+
     public const ROLE_RECEPTION = 'reception';
 
     /**
@@ -62,7 +71,7 @@ final class Rbac
             return [];
         }
 
-        return \Spatie\Permission\Models\Role::query()
+        return Role::query()
             ->whereIn('name', $noms)
             ->pluck('name')
             ->all();
@@ -295,11 +304,11 @@ final class Rbac
 
         $builtin = self::roleLabels();
 
-        $custom = \Spatie\Permission\Models\Role::query()
+        $custom = Role::query()
             ->whereNotIn('name', array_keys($builtin))
             ->get(['name', 'label'])
             ->mapWithKeys(static fn ($role) => [
-                $role->name => $role->label ?: \Illuminate\Support\Str::headline($role->name),
+                $role->name => $role->label ?: Str::headline($role->name),
             ])
             ->all();
 
@@ -317,7 +326,7 @@ final class Rbac
      */
     public static function persistedRolePermissions(): array
     {
-        return \Spatie\Permission\Models\Role::with('permissions:id,name')
+        return Role::with('permissions:id,name')
             ->get()
             ->mapWithKeys(static fn ($role) => [
                 $role->name => $role->permissions->pluck('name')->sort()->values()->all(),

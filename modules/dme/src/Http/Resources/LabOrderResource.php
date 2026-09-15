@@ -6,11 +6,12 @@ namespace Keneya\Dme\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Keneya\Dme\Models\LabOrder;
 
 /**
  * Correspondance FHIR visée : ServiceRequest / DiagnosticReport (§44).
  *
- * @mixin \Keneya\Dme\Models\LabOrder
+ * @mixin LabOrder
  */
 class LabOrderResource extends JsonResource
 {

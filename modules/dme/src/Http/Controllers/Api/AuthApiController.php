@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Http\Controllers\Api;
 
-use Keneya\Dme\Dme;
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Models\AuditLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Keneya\Dme\Dme;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Models\AuditLog;
 
 /**
  * Authentification de l'API par jeton (§43).

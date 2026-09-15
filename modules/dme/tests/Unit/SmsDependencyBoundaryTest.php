@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Unit;
 
+use Keneya\Dme\Contracts\SmsDispatcherContract;
+use Keneya\Dme\Sms\LogSmsDispatcher;
+use Keneya\Dme\Sms\Pipeline\QueuedSmsDispatcher;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -116,15 +119,15 @@ class SmsDependencyBoundaryTest extends TestCase
     {
         $this->assertTrue(
             is_subclass_of(
-                \Keneya\Dme\Sms\Pipeline\QueuedSmsDispatcher::class,
-                \Keneya\Dme\Contracts\SmsDispatcherContract::class
+                QueuedSmsDispatcher::class,
+                SmsDispatcherContract::class
             )
         );
 
         $this->assertTrue(
             is_subclass_of(
-                \Keneya\Dme\Sms\LogSmsDispatcher::class,
-                \Keneya\Dme\Contracts\SmsDispatcherContract::class
+                LogSmsDispatcher::class,
+                SmsDispatcherContract::class
             )
         );
     }

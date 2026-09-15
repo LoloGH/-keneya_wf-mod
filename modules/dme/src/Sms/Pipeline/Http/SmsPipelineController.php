@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Sms\Pipeline\Http;
 
-use Keneya\Dme\Http\Controllers\Controller;
-use Keneya\Dme\Models\Patient;
-use Keneya\Dme\Models\SmsMessage;
-use Keneya\Dme\Models\SmsTemplate;
-use Keneya\Dme\Contracts\SmsDispatcherContract;
-use Keneya\Dme\Sms\SmsContext;
-use Keneya\Dme\Sms\Pipeline\SmsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Keneya\Dme\Contracts\SmsDispatcherContract;
+use Keneya\Dme\Http\Controllers\Controller;
+use Keneya\Dme\Models\SmsMessage;
+use Keneya\Dme\Models\SmsTemplate;
+use Keneya\Dme\Sms\Pipeline\SmsGatewayManager;
+use Keneya\Dme\Sms\Pipeline\SmsService;
+use Keneya\Dme\Sms\SmsContext;
 use Throwable;
 
 /**
@@ -25,7 +25,7 @@ use Throwable;
  */
 class SmsPipelineController extends Controller
 {
-    public function index(Request $request, \Keneya\Dme\Sms\Pipeline\SmsGatewayManager $gateways): View
+    public function index(Request $request, SmsGatewayManager $gateways): View
     {
         $this->authorize('viewAny', SmsMessage::class);
 

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Keneya\Dme\Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Keneya\Dme\Models\Allergy;
 use Keneya\Dme\Models\Patient;
 use Keneya\Dme\Support\Rbac;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 use Keneya\Dme\Tests\TestCase;
+use Laravel\Sanctum\Sanctum;
 
 /**
  * API REST (§43).
@@ -129,7 +132,7 @@ class ApiTest extends TestCase
     {
         $patient = Patient::factory()->create();
 
-        \Keneya\Dme\Models\Allergy::create([
+        Allergy::create([
             'patient_id' => $patient->id,
             'allergen' => 'Pénicilline',
             'severity' => 'severe',
@@ -160,7 +163,7 @@ class ApiTest extends TestCase
 
     public function test_le_chemin_de_stockage_n_apparait_pas_dans_l_api_documents(): void
     {
-        \Illuminate\Support\Facades\Storage::fake('local');
+        Storage::fake('local');
 
         $patient = Patient::factory()->create();
         $user = $this->userWithRole(Rbac::ROLE_DOCTOR);
@@ -171,7 +174,7 @@ class ApiTest extends TestCase
             'patient_id' => $patient->id,
             'title' => 'Compte rendu',
             'type' => 'imported',
-            'file' => \Illuminate\Http\UploadedFile::fake()->create('cr.pdf', 20, 'application/pdf'),
+            'file' => UploadedFile::fake()->create('cr.pdf', 20, 'application/pdf'),
         ])->assertCreated();
 
         $response = $this->getJson(route('dme.api.patients.documents', $patient))->assertOk();

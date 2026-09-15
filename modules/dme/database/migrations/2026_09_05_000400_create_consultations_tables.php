@@ -83,7 +83,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('consultation_id')->constrained('dme_consultations')->cascadeOnDelete();
             $table->string('system'); // general, cardiovascular, respiratory, abdominal,
-                                      // neurological, ent, dermatological, other
+            // neurological, ent, dermatological, other
             $table->longText('content');
             $table->boolean('is_abnormal')->default(false);
             $table->timestamps();
