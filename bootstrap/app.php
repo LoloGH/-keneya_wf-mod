@@ -32,6 +32,27 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->redirectGuestsTo(fn () => route('login'));
 
+        // Derriere un proxy — Apache qui termine le TLS d'un domaine et
+        // transmet a la pile Docker — Laravel ne voit qu'une requete HTTP
+        // ordinaire. Sans ces en-tetes il fabrique des URL en `http://` dans
+        // une page servie en `https://`, et le navigateur bloque la feuille
+        // de style, les images et les appels Livewire : la page s'affiche
+        // cassee sans que rien n'en dise la cause. Les redirections de
+        // connexion repartent elles aussi en clair.
+        //
+        // Les plages privees et la boucle locale, jamais `*` : un en-tete
+        // `X-Forwarded-Proto` se falsifie, et le croire sur parole de
+        // n'importe quelle source laisserait un visiteur faire passer sa
+        // requete pour chiffree. La pile est jointe par le proxy depuis la
+        // passerelle du pont Docker, qui vit dans 172.16/12.
+        $middleware->trustProxies(at: [
+            '127.0.0.1',
+            '::1',
+            '10.0.0.0/8',
+            '172.16.0.0/12',
+            '192.168.0.0/16',
+        ]);
+
         // Sans ce middleware, `Auth::logoutOtherDevices()` ne ferme rien : il
         // se contente de reecrire le hash dans la session courante, et les
         // sessions ouvertes ailleurs continuent de fonctionner. C'est lui qui

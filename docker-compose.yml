@@ -52,7 +52,18 @@ services:
     image: nginx:1.27-alpine
     restart: unless-stopped
     ports:
-      - "${APP_HTTP_PORT:-8083}:80"
+      # L'adresse d'ecoute est reglable, et le defaut est la boucle locale.
+      #
+      # Derriere un proxy qui termine le TLS, la pile ne doit plus etre
+      # joignable en direct : sinon le site reste accessible en clair a cote du
+      # domaine chiffre, et surtout n'importe qui peut lui envoyer un faux
+      # en-tete `X-Forwarded-Proto` pour faire passer sa requete pour chiffree.
+      # La confiance accordee au proxy dans `bootstrap/app.php` n'a de sens que
+      # si le proxy est le seul a pouvoir parler a la pile.
+      #
+      # `APP_HTTP_BIND=0.0.0.0` dans le `.env` reouvre l'acces direct, pour une
+      # machine de developpement ou une pile sans proxy devant.
+      - "${APP_HTTP_BIND:-127.0.0.1}:${APP_HTTP_PORT:-8083}:80"
     volumes:
       - ./:/var/www/html:ro
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
