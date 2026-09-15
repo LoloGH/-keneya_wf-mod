@@ -139,6 +139,19 @@ jobs:
       - name: Installer PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
+          # Cette ligne manquait, et c'est ce qui a rendu la CI rouge depuis
+          # l'entree du module dans le depot. Sans `php-version`, l'action ne
+          # choisit rien : le job prend le PHP de l'image du runner, 8.3.
+          # `modules/dme/composer.lock` verrouille cinq paquets Symfony 8.1
+          # qui exigent php >= 8.4.1 — clock, css-selector, event-dispatcher,
+          # string, translation — et `composer install` echouait donc avant
+          # d'avoir lance le moindre test.
+          #
+          # Le job de l'hote portait deja ce reglage, pose apres exactement la
+          # meme panne ; le second l'a simplement oublie. Le nom de l'etape
+          # annoncait pourtant 8.4, ce qui rendait l'absence d'autant plus
+          # difficile a voir en relecture.
+          php-version: '8.4'
           extensions: bcmath, gd, intl, pcntl, pdo_mysql, zip, mbstring
           coverage: none
           tools: composer:v2
