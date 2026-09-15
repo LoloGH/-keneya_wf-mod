@@ -2,6 +2,26 @@ name: CI
 
 # Chaque push et chaque pull request : c'est la premiere validation
 # automatique du projet, et elle doit se declencher sans qu'on y pense.
+#
+# ---------------------------------------------------------------------------
+# Reproduire cette CI en local, sans se tromper de reponse
+# ---------------------------------------------------------------------------
+#
+# Lancer les suites depuis sa copie de travail ne reproduit pas ce job, et
+# deux ecarts ont deja produit des diagnostics faux :
+#
+#   - **Ne pas reproduire avec `git archive`.** `modules/dme/.gitattributes`
+#     porte `/tests export-ignore` : l'archive sort donc sans les tests du
+#     module, et PHPUnit s'arrete sur « Test directory not found ». La CI, qui
+#     clone, les a. Utiliser `git clone --no-hardlinks` d'une copie propre.
+#
+#   - **Ne pas lancer la suite du module depuis le conteneur `app`.** Il porte
+#     le `.env` du projet en variables d'environnement reelles, et le
+#     `phpunit.xml` du module declare les siennes sans `force` : elles ne
+#     s'imposent donc pas. La suite part alors sur le cache en base au lieu du
+#     cache en memoire, et rend 249 erreurs « no such table: cache » qui
+#     n'existent pas en CI. Passer par `docker compose run --rm dme`, qui n'a
+#     pas de `env_file`.
 on:
   push:
   pull_request:
