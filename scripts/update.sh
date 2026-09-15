@@ -214,10 +214,21 @@ artisan migrate --force
 titre "Redemarrage des processus"
 
 if [ "$DOCKER" = 1 ]; then
-    # `app` d'abord : l'image regle opcache.validate_timestamps = 0, PHP-FPM ne
+    # `up -d` avant les redemarrages, et ce n'est pas un doublon.
+    #
+    # `restart` relance un conteneur avec la configuration qu'il avait au
+    # demarrage : il relit le code monte, jamais `docker-compose.yml`. Un port
+    # republie sur une autre adresse, un montage retire, une variable ajoutee
+    # ne s'appliquent qu'en recreant le conteneur — et sans cela la
+    # modification passe inapercue jusqu'au jour ou elle manque.
+    #
+    # `up -d` ne recree que ce qui a change, et ne touche a rien sinon.
+    compose up -d
+
+    # `app` ensuite : l'image regle opcache.validate_timestamps = 0, PHP-FPM ne
     # relit donc jamais un fichier deja compile. Sans ce redemarrage,
     # l'application continue de servir l'ancien code par-dessus la base
-    # migree.
+    # migree — et `up -d` ne redemarre pas un conteneur qu'il juge a jour.
     compose restart app scheduler queue-worker
     # `web` ensuite, et pas avant : Nginx resout l'adresse d'`app` une fois
     # pour toutes, et repond 502 tant qu'il pointe sur l'ancien conteneur.
