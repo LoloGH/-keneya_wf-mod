@@ -1,0 +1,20 @@
+# Commits a ignorer dans `git blame`.
+#
+# Un reformatage mecanique fait porter a son auteur la paternite de chaque
+# ligne qu'il a touchee. Sur 133 fichiers, cela revient a effacer l'histoire
+# reelle du code au profit d'une date sans interet : « qui a ecrit cette
+# condition, et pourquoi » devient « qui a passe le formateur ».
+#
+# GitHub lit ce fichier tout seul et masque ces commits dans la vue blame.
+# En local, il faut le lui dire une fois par depot :
+#
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# N'y ajouter qu'un commit dont on peut affirmer qu'il ne change aucun
+# comportement. Un commit mixte — du formatage et une correction — n'a rien a
+# faire ici : ce serait cacher la correction.
+
+# Le module DME passe au format de l'hote (v3.4.3). 133 fichiers, preset
+# `laravel`, aucun changement de comportement : les 257 tests du module
+# passent avant comme apres.
+f9b23b6
